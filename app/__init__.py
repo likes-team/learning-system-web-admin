@@ -68,26 +68,26 @@ def create_app(config_name):
         from app.core import bp_core
         from app.auth import bp_auth
         from app.admin import bp_admin
-        # -Add here-
+        from learning_management import bp_lms
         #                   -END-
 
         # DEVELOPERS-NOTE: -REGISTER HERE THE MODULE BLUEPRINTS-
         app.register_blueprint(bp_core, url_prefix='/')
         app.register_blueprint(bp_auth, url_prefix='/auth')
         app.register_blueprint(bp_admin, url_prefix='/admin')
-        # -Add here-
+        app.register_blueprint(bp_lms, url_prefix='/learning-management')
         #               -END-
 
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
         from app.admin.admin import AdminModule
         from app.auth.auth import AuthModule
-        # -Add here-
+        from learning_management.learning_center import LearningManagementModule
         #                  -END-
         
         # DEVELOPERS-NOTE: -APPEND YOUR MODULE HERE-
         MODULES.append(AdminModule)
         MODULES.append(AuthModule)
-        # -Add here-
+        MODULES.append(LearningManagementModule)
         #                  -END-
 
         # Load CONTEXT data
