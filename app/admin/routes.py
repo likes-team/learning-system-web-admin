@@ -3,12 +3,12 @@ from flask import flash, redirect, url_for, request, jsonify
 from flask_login import login_required
 from flask_cors import cross_origin
 from sqlalchemy import text
-from app import db
+from app import db, mongo
 from app.admin import bp_admin
 
 
 
-@bp_admin.route('/delete/<string:table_name>/<int:oid>',methods=['POST'])
+@bp_admin.route('/delete/<string:table_name>/<string:oid>',methods=['POST'])
 @login_required
 def delete(table_name,oid):
     try:
@@ -59,8 +59,14 @@ def delete_data():
 @cross_origin()
 def get_view_modal_data():
     try:
+
         table,column,id = request.args.get('table'),request.args.get('column'), request.args.get('id')
-        query = "select {} from {} where id = {} limit 1".format(column,table,id)
+        print(table, column, id)
+        # query = "select {} from {} where id = {} limit 1".format(column,table,id)
+        query = mongo.db[table].find_one({'id': id}, {column: True})
+
+        print(query)
+
         sql = text(query)
         row = db.engine.execute(sql)
         res = [x[0] if x[0] is not None else '' for x in row]

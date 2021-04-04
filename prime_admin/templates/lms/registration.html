@@ -1,0 +1,325 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="app-main__inner">
+    <form action="" id="register_form" class="needs-validation" method="POST" novalidate>
+        {{ form.csrf_token }}
+        <div class="app-page-title">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="text-success pe-7s-tools">
+                        </i>
+                    </div>
+                    <div id="registration_generated_number">{{ data['registration_generated_number'] }}
+                        <div class="page-title-subheading">Registration Number
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">General Information</h5>
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="batch_no" class="">Batch No.</label>
+                            <select name="batch_no" id="batch_no" class="form-control" required>
+                                <option value="">Choose...</option>
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a batch no.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="schedule" class="">Schedule</label>
+                            <select name="schedule" id="schedule" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for key,value,checked in form.schedule.iter_choices() %}
+                                <option value="{{ key }}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a schedule
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="branch" class="">Branch</label>
+                            <select name="branch" id="branch" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for key,value,checked in form.branch.iter_choices() %}
+                                <option value="{{ key }}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a branch
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="contact_person" class="">Contact Person</label>
+                            <select name="contact_person" id="contact_person" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for key,value,checked in form.contact_person.iter_choices() %}
+                                <option value="{{ key }}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a contact person
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">Member Information</h5>
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="lname" class="">Last Name</label>
+                            <input name="lname" id="lname" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid last name
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="fname" class="">First Name</label>
+                            <input name="fname" id="fname" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid first name
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="mname" class="">Middle Name</label>
+                            <input name="mname" id="mname" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid middle name
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="suffix" class="">Suffix</label>
+                            <input name="suffix" id="suffix" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid suffix
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="birth_date" class="">Date of Birth</label>
+                            <input name="birth_date" id="birth_date" type="date" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid date of birth
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="passport" class="">Passport</label>
+                            <input name="passport" id="passport" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid passport
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="contact_number" class="">Contact No.</label>
+                            <input name="contact_number" id="contact_number" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid contact no.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="email_address" class="">Gmail</label>
+                            <input name="email_address" id="email_address" type="email" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid email
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="position-relative form-group">
+                            <label for="address" class="">Address</label>
+                            <input name="address" id="address" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid date of birth
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">Payment Information</h5>
+              
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="address" class="">Mode of Payment</label>
+                            <div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio" name="mode_of_payment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio">
+                                    Full Payment (7000)
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio2" name="mode_of_payment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio2">
+                                    Installment (7800)
+                                </label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="address" class="">Select Book</label>
+                            <div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="book1" name="book" class="custom-control-input"><label class="custom-control-label" for="book1">
+                                    Book 1
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="book2" name="book" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                    Book 2
+                                </label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="amount" class="">Enter Amount</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                                <input placeholder="Amount" step="1" type="number" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            </div>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid amount
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="balance" class="">Balance</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                                <input readonly placeholder="Balance" step="1" type="number" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName('needs-validation');
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
+        </script>
+    </form>
+</div>
+{% endblock %}
+
+
+{% block inner_footer %}
+<div class="app-footer-right">
+    <button type="button" class="btn btn-secondary" onclick="history.back(-1)"
+        style="margin-right: 10px;">Cancel</button>
+    <input form="register_form" type="submit" class="btn btn-primary" name='btn_submit' value="Confirm">
+    <!-- <input form="register_form" type="submit" style="margin-right: 10px;" name='btn_submit' 
+    class="btn btn-primary" value="Save and Print" style="margin-right: 10px;"> -->
+</div>
+{% endblock %}
+
+
+{% block extra_head %}
+<style>
+    .myHiddenColumn {
+        display: none;
+    }
+</style>
+{% endblock %}

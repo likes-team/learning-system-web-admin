@@ -9,13 +9,16 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from flask_cors import CORS
+from flask_mongoengine import MongoEngine
+from flask_pymongo import PyMongo
 from config import app_config
 
 # DEVELOPERS-NOTE: -INCLUDE YOUR IMPORTS HERE-
 
 #                  -END-
 
-db = SQLAlchemy()
+db = MongoEngine()
+mongo = PyMongo()
 migrate = Migrate()
 csrf = CSRFProtect()
 cors = CORS()
@@ -50,6 +53,7 @@ def create_app(config_name):
     app.register_error_handler(500, internal_server_error)
 
     db.init_app(app)
+    mongo.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     cors.init_app(app)
@@ -68,7 +72,7 @@ def create_app(config_name):
         from app.core import bp_core
         from app.auth import bp_auth
         from app.admin import bp_admin
-        from learning_management import bp_lms
+        from prime_admin import bp_lms
         #                   -END-
 
         # DEVELOPERS-NOTE: -REGISTER HERE THE MODULE BLUEPRINTS-
@@ -81,7 +85,7 @@ def create_app(config_name):
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
         from app.admin.admin import AdminModule
         from app.auth.auth import AuthModule
-        from learning_management.learning_center import LearningManagementModule
+        from prime_admin.learning_center import LearningManagementModule
         #                  -END-
         
         # DEVELOPERS-NOTE: -APPEND YOUR MODULE HERE-
