@@ -17,7 +17,7 @@ from app.auth.permissions import load_permissions
 def roles(**options):
     fields = ['id', 'name', 'created_at', 'updated_at']
     form = RoleCreateForm()
-    form.inline.data = CoreModel.objects
+    # form.inline.data = CoreModel.objects
 
     _roles = Role.objects
 
@@ -59,28 +59,28 @@ def create_role():
     if form.validate_on_submit():
         role = Role()
         role.name = form.name.data
-        models = CoreModel.query.all()
-        r = request.form
-        for model in models:
-            mid = model.id
-            has_model = False
-            read,create,write,delete = 0,0,0,0
-            read_string = 'chk_read_{}'.format(mid)
-            create_string = 'chk_create_{}'.format(mid)
-            write_string = 'chk_write_{}'.format(mid)
-            delete_string = 'chk_delete_{}'.format(mid)
+        # models = CoreModel.objects.all()
+        # r = request.form
+        # for model in models:
+        #     mid = model.id
+        #     has_model = False
+        #     read,create,write,delete = 0,0,0,0
+        #     read_string = 'chk_read_{}'.format(mid)
+        #     create_string = 'chk_create_{}'.format(mid)
+        #     write_string = 'chk_write_{}'.format(mid)
+        #     delete_string = 'chk_delete_{}'.format(mid)
 
-            if r.get(read_string) == 'on': read,has_model = 1,True
-            if r.get(create_string) == 'on': create,has_model = 1,True
-            if r.get(write_string) == 'on': write,has_model = 1, True
-            if r.get(delete_string) == 'on': delete,has_model = 1,True
+        #     if r.get(read_string) == 'on': read,has_model = 1,True
+        #     if r.get(create_string) == 'on': create,has_model = 1,True
+        #     if r.get(write_string) == 'on': write,has_model = 1, True
+        #     if r.get(delete_string) == 'on': delete,has_model = 1,True
 
-            if has_model:
-                permission = RolePermission(model=model,read=read,create=create,write=write,delete=delete)
-                role.role_permissions.append(permission)
+        #     if has_model:
+        #         permission = RolePermission(model=model,read=read,create=create,write=write,delete=delete)
+        #         role.role_permissions.append(permission)
         
-        db.session.add(role)
-        db.session.commit()
+        role.save()
+
         flash('Role added successfully!','success')
         return redirect(url_for('bp_auth.roles'))
 
@@ -88,12 +88,12 @@ def create_role():
 @bp_auth.route('/roles/<string:oid>/edit',methods=['GET','POST'])
 @login_required
 def edit_role(oid,**options):
-    role = Role.query.get_or_404(oid)
+    role = Role.objects.get_or_404(id=oid)
     form = RoleEditForm(obj=role)
 
     if request.method == "GET":
-        role_permissions = RolePermission.query.filter_by(role_id=oid).all()
-        form.permission_inline.data = role_permissions
+        # role_permissions = RolePermission.objects(role_id=oid)
+        # form.permission_inline.data = role_permissions
         
         _scripts = [
             {'bp_auth.static': 'js/role.js'},
@@ -110,8 +110,11 @@ def edit_role(oid,**options):
 
     try:
         role.name = form.name.data
+        role.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         role.updated_at = datetime.now()
-        db.session.commit()
+        
+        role.user()
+
         flash('Role update Successfully!','success')
     except Exception as e:
         flash(str(e),'error')

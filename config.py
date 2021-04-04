@@ -28,7 +28,7 @@ class Config(object):
 
     # DEVELOPERS-NOTE: AUTH CONFIGURATIONS HERE
     AUTH = {
-        'LOGIN_REDIRECT_URL': 'bp_admin.dashboard',
+        'LOGIN_REDIRECT_URL': 'lms.dashboard',
     }
     #                 -END-
 

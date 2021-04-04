@@ -67,15 +67,15 @@ class RoleCreateForm(AdminTableForm):
 
     name = AdminField(label="Name",validators=[DataRequired()])
 
-    inline = RoleModelInlineForm()
+    # inline = RoleModelInlineForm()
 
     @property
     def fields(self):
         return [[self.name]]
 
-    @property
-    def inlines(self):
-        return [self.inline]
+    # @property
+    # def inlines(self):
+    #     return [self.inline]
 
 
 class RoleEditForm(AdminEditForm):
@@ -83,16 +83,16 @@ class RoleEditForm(AdminEditForm):
 
     name = AdminField(label="Name",validators=[DataRequired()])
 
-    permission_inline = PermissionInlineForm()
-    permission_inline.__html__ = "auth/role_permission_inline.html"
+    # permission_inline = PermissionInlineForm()
+    # permission_inline.__html__ = "auth/role_permission_inline.html"
 
     @property
     def fields(self):
         return [[self.name]]
 
-    @property
-    def inlines(self):
-        return [self.permission_inline]
+    # @property
+    # def inlines(self):
+    #     return [self.permission_inline]
 
 
 class LoginForm(FlaskForm):

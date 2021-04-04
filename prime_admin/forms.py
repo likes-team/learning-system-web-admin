@@ -1,7 +1,9 @@
+from flask.app import Flask
 from flask_wtf import FlaskForm
-from wtforms import validators
+from wtforms.widgets.core import Select
 from app.admin.forms import AdminTableForm, AdminEditForm, AdminInlineForm, AdminField
 from wtforms.validators import DataRequired
+from wtforms import StringField, SelectField
 
 
 
@@ -74,3 +76,50 @@ class StudentEditForm(AdminEditForm):
     @property
     def fields(self):
         return [[self.fname, self.mname, self.lname]]
+
+
+class RegistrationForm(FlaskForm):
+    po_number = StringField()
+    
+    status = StringField()
+    
+    supplier_id = StringField()
+    
+    schedule = SelectField('Schedule',choices=[
+        ('WDC','WDC'), ('SDC', 'SDC')
+    ])
+
+    branch = SelectField('Branch', choices=[
+        ('cebu', 'Cebu'),
+        ('tacloban', 'Tacloban'),
+        ('bohol', 'Bohol'),
+        ('palawan', 'Palawan')
+    ])
+
+    contact_person = SelectField('Contact Person', choices=[
+        ('Gerson', 'Gerson'),
+        ('Carlo', 'Carlo'),
+        ('Dhan', 'Dhan'),
+        ('Hairel', 'Hairel'),
+        ('Aim', 'Aim'),
+        ('Russel', 'Russel'),
+        ('Ace', 'Ace'),
+        ('Vincent', 'Vincent'),
+        ('Jay-r', 'Jay-r'),
+        ('Maevellyn', 'Maevellyn'),
+        ('Greggy', 'Greggy'),
+        ('Rowee', 'Rowee'),
+        ('Jhie', 'Jhie')
+    ])
+
+    warehouse_id = StringField()
+    
+    address = StringField()
+    
+    ordered_date = StringField()
+    
+    delivery_date = StringField()
+    
+    approved_by = StringField()
+    
+    remarks = StringField()

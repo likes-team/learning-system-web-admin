@@ -72,7 +72,7 @@ def create_app(config_name):
         from app.core import bp_core
         from app.auth import bp_auth
         from app.admin import bp_admin
-        from learning_management import bp_lms
+        from prime_admin import bp_lms
         #                   -END-
 
         # DEVELOPERS-NOTE: -REGISTER HERE THE MODULE BLUEPRINTS-
@@ -85,7 +85,7 @@ def create_app(config_name):
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
         from app.admin.admin import AdminModule
         from app.auth.auth import AuthModule
-        from learning_management.learning_center import LearningManagementModule
+        from prime_admin.learning_center import LearningManagementModule
         #                  -END-
         
         # DEVELOPERS-NOTE: -APPEND YOUR MODULE HERE-
