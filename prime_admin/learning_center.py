@@ -1,5 +1,5 @@
 from app.core import CoreModule
-from .models import Dashboard, Earning, Inventory, Member, OrientationAttendance, Partner, Registration, Secretary, Teacher, Student, TrainingCenter
+from .models import Dashboard, Earning, Expenses, Inventory, Member, OrientationAttendance, Partner, Registration, Secretary, Teacher, Student, TrainingCenter
 
 
 
@@ -18,6 +18,7 @@ class LearningManagementModule(CoreModule):
         Partner, 
         Secretary, 
         OrientationAttendance,
+        Expenses,
         Inventory,
         Dashboard
     ]
@@ -33,6 +34,7 @@ class LearningManagementModule(CoreModule):
             Partner,
             Secretary,
             OrientationAttendance,
+            Expenses,
             Inventory,
         ]
     }

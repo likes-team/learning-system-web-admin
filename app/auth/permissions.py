@@ -6,7 +6,7 @@ from app.core.models import CoreModel
 
 
 def load_permissions(user_id):
-    from app.auth.models import User, UserPermission, RolePermission
+    from app.auth.models import User, Role
     user = User.objects.get_or_404(id=user_id)
 
     if not user and not current_user.is_authenticated:
@@ -19,24 +19,21 @@ def load_permissions(user_id):
 
     print(user.role)
 
-    if user.is_superuser:
+    if user.is_superuser or user.role.name == "Admin":
         all_permissions = CoreModel.objects
 
         for permission in all_permissions:
             session['permissions'][permission.name] = {"read": True, "create": True, \
                 "write": True, "delete": True}  
     
-    elif user.role.name == "Individual" or user.role_id == 1:
-        # TODO: GAMITIN ANG user.permissions kaysa mag query pa ulit
-        user_permissions = UserPermission.query.filter_by(user_id=user_id)
-        for user_permission in user_permissions:
-            session['permissions'][user_permission.model.name] = {"read": user_permission.read, "create": user_permission.create, \
-                "write": user_permission.write, "delete": user_permission.delete}
     else:
-        role_permissions = RolePermission.query.filter_by(role_id=user.role_id)
+        role_permissions = Role.objects(id=user.role.id).get().permissions
+        print(role_permissions)
         for role_permission in role_permissions:
-            session['permissions'][role_permission.model.name] = {"read": role_permission.read, "create": role_permission.create, \
-                "write": role_permission.write, "delete": role_permission.delete}
+            session['permissions'][role_permission['model_name']] = {"read": role_permission['read'], "create": role_permission['create'], \
+                "write": role_permission['write'], "delete": role_permission['delete']}
+    
+    print(session['permissions'])
     return True
 
 
@@ -46,7 +43,7 @@ def check_create(model_name):
     if current_user.is_superuser:
         return True
         
-    user = User.query.get(current_user.id)
+    user = User.objects(id=current_user.id)
     
     for perm in user.permissions:
     
@@ -61,18 +58,18 @@ def check_create(model_name):
 
 
 def check_read(model_name):
-    from app.auth.models import User
+    from app.auth.models import User, Role
 
     if current_user.is_superuser:
         return True
     
-    user = User.query.get(current_user.id)
+    role = Role.objects(id=current_user.role.id).get()
     
-    for perm in user.permissions:
+    for permission in role.permissions:
         
-        if model_name == perm.model.name:
+        if model_name == permission['model_name']:
         
-            if perm.read:
+            if permission['read']:
                 return True
             else:
                 return False

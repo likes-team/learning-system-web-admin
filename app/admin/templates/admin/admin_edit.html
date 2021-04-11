@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="app-main__inner">
-    <div class="app-page-title">
+    <div class="app-page-title" style="background-color: skyblue">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
                 <div class="page-title-icon">
@@ -156,7 +156,6 @@
                 </script>
             </div>
         </div>
-    </form>
 
     {% if FORM.inlines %}
 
@@ -206,8 +205,9 @@
 
             </div>
         {% endfor %}
-
     {% endif %}
+</form>
+
 </div>
 {% endblock %}
 

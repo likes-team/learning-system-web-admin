@@ -120,10 +120,10 @@
                                     {% for model in inline.data %}
                                     <tr>
                                     <td scope="row"><strong>{{ model.name }}</strong></td>
-                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_read_{{model.id}}" name="chk_read_{{model.id}}" class="form-check-input"/></label></div></td>
-                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_create_{{model.id}}" name="chk_create_{{model.id}}" class="form-check-input"/></label></div></td>
-                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_write_{{model.id}}" name="chk_write_{{model.id}}" class="form-check-input"/></label></div></td>
-                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_delete_{{model.id}}" name="chk_delete_{{model.id}}" class="form-check-input"/></label></div></td>
+                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_read_{{model.id}}" name="read_{{model.name}}" class="permission-read form-check-input"/></label></div></td>
+                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_create_{{model.id}}" name="create_{{model.name}}" class="permission-create form-check-input"/></label></div></td>
+                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_write_{{model.id}}" name="write_{{model.name}}" class="permission-write form-check-input"/></label></div></td>
+                                    <td><div class="position-relative form-check form-check-inline"><label class="form-check-label"><input type="checkbox" id="chk_delete_{{model.id}}" name="delete_{{model.name}}" class="permission-delete form-check-input"/></label></div></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

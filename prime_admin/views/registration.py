@@ -22,7 +22,7 @@ def register():
     if last_registration_number:
         registration_generated_number = generate_number(date_now, last_registration_number)
     else:
-        registration_generated_number = str(date_now.year) + str(date_now.month) + "0001"
+        registration_generated_number = str(date_now.year) + '%02d' % date_now.month + "0001"
 
     form = RegistrationForm()
 
