@@ -129,10 +129,10 @@ def core_install():
             print("Role already inserted!")
         else:
             Role(
-                name="Individual",
+                name="Admin",
             ).save()
             
-            print("Individual role inserted!")
+            print("Admin role inserted!")
 
         if not User.objects.count() > 0:
             print("Creating a SuperUser/owner...")
@@ -200,7 +200,7 @@ def install():
 
 def _create_superuser():
     try:
-        role = Role.objects(name="Individual").first()
+        role = Role.objects(name="Admin").first()
 
         user = User(
             fname="Administrator",

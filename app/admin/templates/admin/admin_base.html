@@ -58,11 +58,13 @@
         {% include 'admin/admin_sidebar.html' %}
         {% endblock %}
 
-            <div class="app-main__outer">
+            <div class="app-main__outer" style="background-color: skyblue;">
                 <!-- CONTENT BLOCK -->
                 {% block content %}
                 {% endblock %}
+                
                 <!-- INCLUDE FOOTER HERE -->
+                {% block outer_footer %}
                 <div class="app-wrapper-footer">
                     <div class="app-footer">
                         <div class="app-footer__inner">
@@ -71,6 +73,7 @@
                         </div>
                     </div>
                 </div>
+                {% endblock %}
             </div>
         </div>
     </div>
@@ -84,13 +87,13 @@
 <script type="text/javascript" src="{{ url_for('bp_admin.static', filename='js/sidebar.js') }}"></script>
 <script>
     (function() {
-      var header_color = document.getElementById("{{ CONTEXT['header_color'] }}");
-      var sidebar_color = document.getElementById("{{ CONTEXT['sidebar_color'] }}");
+      var header_color = document.getElementById("header_color29");
+      var sidebar_color = document.getElementById("sidebar_color29");
       var fixed_footer = document.getElementById("chkbox_fixed_footer");
-      //setTimeout(function() {
-        //header_color.click();
-        //sidebar_color.click();
-      //}, 100);
+      setTimeout(function() {
+        header_color.click();
+        sidebar_color.click();
+      }, 50);
     })();
 </script>
 {% endblock %}

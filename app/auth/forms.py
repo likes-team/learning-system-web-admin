@@ -22,9 +22,9 @@ class UserForm(AdminTableForm):
 
 
 class PermissionInlineForm(AdminInlineForm):
-    __table_columns__ = 'tbl_inline_permissions'
+    __table_id__ = 'tbl_inline_permissions'
     __table_columns__ =['Model','Read','create','write','delete']
-    __title__ = "Access Rights"
+    __title__ = "Permissions"
     __html__ = 'auth/permission_inline.html'
 
 
@@ -67,15 +67,15 @@ class RoleCreateForm(AdminTableForm):
 
     name = AdminField(label="Name",validators=[DataRequired()])
 
-    # inline = RoleModelInlineForm()
+    inline = RoleModelInlineForm()
 
     @property
     def fields(self):
         return [[self.name]]
 
-    # @property
-    # def inlines(self):
-    #     return [self.inline]
+    @property
+    def inlines(self):
+        return [self.inline]
 
 
 class RoleEditForm(AdminEditForm):
@@ -83,16 +83,16 @@ class RoleEditForm(AdminEditForm):
 
     name = AdminField(label="Name",validators=[DataRequired()])
 
-    # permission_inline = PermissionInlineForm()
-    # permission_inline.__html__ = "auth/role_permission_inline.html"
+    permission_inline = PermissionInlineForm()
+    permission_inline.__html__ = "auth/role_permission_inline.html"
 
     @property
     def fields(self):
         return [[self.name]]
 
-    # @property
-    # def inlines(self):
-    #     return [self.permission_inline]
+    @property
+    def inlines(self):
+        return [self.permission_inline]
 
 
 class LoginForm(FlaskForm):

@@ -7,6 +7,28 @@ from wtforms import StringField, SelectField
 
 
 
+class SecretaryForm(AdminTableForm):
+    __table_columns__ = ['Name', 'created by','Created at', 'updated by','updated at']
+    __heading__ = "Secretaries"
+
+    name = AdminField(label="Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.name]]
+
+
+class PartnerForm(AdminTableForm):
+    __table_columns__ = ['Name', 'created by','Created at', 'updated by','updated at']
+    __heading__ = "Partners"
+
+    name = AdminField(label="Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.name]]
+
+
 class TrainingCenterForm(AdminTableForm):
     __table_columns__ = ['Name', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Training Centers"

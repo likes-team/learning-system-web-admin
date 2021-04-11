@@ -81,38 +81,51 @@ class Registration(Base, Admin):
 
 
 class Member(Admin):
+    __tablename__ = 'lms_members'
     __amname__ = 'member'
     __amdescription__ = 'Members'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
+    __view_url__ = 'lms.members'
 
 
 class Earning(Admin):
+    __tablename__ = 'lms_earnings'
     __amname__ = 'earning'
     __amdescription__ = 'Earnings'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
+    __view_url__ = 'lms.earnings'
 
 
 class Partner(Admin):
+    __tablename__ = 'lms_partners'
     __amname__ = 'partner'
     __amdescription__ = 'Partners'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
+    __view_url__ = 'lms.partners'
 
 
 class Secretary(Admin):
-    __amname__ = 'partner'
+    __tablename__ = 'lms_secretaries'
+    __amname__ = 'secretary'
     __amdescription__ = 'Secretary'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
+    __view_url__ = 'lms.secretaries'
 
 
 class OrientationAttendance(Admin):
+    __tablename__ = 'lms_orientation_attendance'
     __amname__ = 'orientation_attendance'
     __amdescription__ = 'Orientation Attendance'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
+    __view_url__ = 'lms.orientation_attendance'
+
+
+class Expenses(Admin):
+    __tablename__ = 'lms_expenses'
+    __amname__ = 'expenses'
+    __amdescription__ = 'Expenses'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.expenses'
 
 
 class Inventory(Admin):

@@ -22,7 +22,8 @@ from mongoengine.document import Document
 # AUTH.MODEL.USER
 class User(UserMixin, Base, Admin):
     meta = {
-        'collection': 'auth_users'
+        'collection': 'auth_users',
+        'strict': False
     }
     __tablename__ = 'auth_users'
     __amname__ = 'user'	
@@ -66,7 +67,8 @@ class UserPermission(db.Document):
 
 class Role(Base, Admin):
     meta = {
-        'collection': 'auth_user_roles'
+        'collection': 'auth_user_roles',
+        'strict': False,
     }
 
     __tablename__ = 'auth_user_roles'
@@ -77,7 +79,7 @@ class Role(Base, Admin):
 
     """ COLUMNS """
     name = db.StringField()
-    # permissions = db.ListField()
+    permissions = db.ListField()
 
 
 class RolePermission(db.Document):
