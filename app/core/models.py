@@ -14,9 +14,9 @@ class Base(db.Document):
     }
 
     active = db.BooleanField(default=True)
-    created_at = db.DateTimeField(default=datetime.utcnow)
+    created_at = db.DateTimeField(default=datetime.now)
     # TODO: updated_at = db.DateTimeField(default=datetime.utcnow, onupdate=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.utcnow)
+    updated_at = db.DateTimeField(default=datetime.now)
 
     # TODO: I relate na to sa users table 
     # Sa ngayon i store nalang muna yung names kasi andaming error kapag foreign key

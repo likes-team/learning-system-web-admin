@@ -1,9 +1,8 @@
 from flask.app import Flask
 from flask_wtf import FlaskForm
-from wtforms.widgets.core import Select
 from app.admin.forms import AdminTableForm, AdminEditForm, AdminInlineForm, AdminField
 from wtforms.validators import DataRequired
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, DecimalField, DateField
 
 
 
@@ -16,6 +15,51 @@ class SecretaryForm(AdminTableForm):
     @property
     def fields(self):
         return [[self.name]]
+
+
+class BranchForm(AdminTableForm):
+    __table_columns__ = ['Name', 'created by','Created at', 'updated by','updated at']
+    __heading__ = "Branches"
+
+    name = AdminField(label="Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.name]]
+
+
+
+class ContactPersonForm(AdminTableForm):
+    __table_columns__ = ['First Name', 'Last Name', 'created by','Created at', 'updated by','updated at']
+    __heading__ = "Contact Persons"
+
+    fname = AdminField(label="First Name", validators=[DataRequired()])
+    lname = AdminField(label="Last Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.fname, self.lname]]
+
+
+class BranchEditForm(AdminEditForm):
+    __heading__ = "Edit Branch"
+
+    name = AdminField(label="Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.name]]
+
+
+class ContactPersonEditForm(AdminEditForm):
+    __heading__ = "Edit Contact Person"
+
+    fname = AdminField(label="First Name", validators=[DataRequired()])
+    lname = AdminField(label="Last Name", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [[self.fname, self.lname]]
 
 
 class PartnerForm(AdminTableForm):
@@ -101,12 +145,15 @@ class StudentEditForm(AdminEditForm):
 
 
 class RegistrationForm(FlaskForm):
-    po_number = StringField()
+    batches = []
+
+    for x in range(1,31):
+        batches.append(
+            (str(x), str(x))
+        )
     
-    status = StringField()
-    
-    supplier_id = StringField()
-    
+    batch_number = SelectField('Batch No.', choices=batches)
+
     schedule = SelectField('Schedule',choices=[
         ('WDC','WDC'), ('SDC', 'SDC')
     ])
@@ -118,30 +165,17 @@ class RegistrationForm(FlaskForm):
         ('palawan', 'Palawan')
     ])
 
-    contact_person = SelectField('Contact Person', choices=[
-        ('Gerson', 'Gerson'),
-        ('Carlo', 'Carlo'),
-        ('Dhan', 'Dhan'),
-        ('Hairel', 'Hairel'),
-        ('Aim', 'Aim'),
-        ('Russel', 'Russel'),
-        ('Ace', 'Ace'),
-        ('Vincent', 'Vincent'),
-        ('Jay-r', 'Jay-r'),
-        ('Maevellyn', 'Maevellyn'),
-        ('Greggy', 'Greggy'),
-        ('Rowee', 'Rowee'),
-        ('Jhie', 'Jhie')
-    ])
-
-    warehouse_id = StringField()
-    
+    amount = DecimalField()
+    contact_person = StringField()
+    fname = StringField()
+    mname = StringField()
+    lname = StringField()
+    suffix = StringField()
     address = StringField()
-    
-    ordered_date = StringField()
-    
-    delivery_date = StringField()
-    
-    approved_by = StringField()
-    
-    remarks = StringField()
+    passport = StringField()
+    contact_number = StringField()
+    email = StringField()
+    birth_date = DateField()
+    book = StringField()
+    payment_mode = StringField()
+

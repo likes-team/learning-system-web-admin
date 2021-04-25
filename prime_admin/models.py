@@ -70,14 +70,53 @@ class Registration(Base, Admin):
     branch = db.StringField()
     batch_number = db.IntField()
     amount = db.DecimalField()
+    balance = db.DecimalField()
     contact_person = db.StringField()
     fname = db.StringField()
     mname = db.StringField()
     lname = db.StringField()
+    suffix = db.StringField()
+    address = db.StringField()
+    passport = db.StringField()
+    contact_number = db.StringField()
+    email = db.StringField()
+    birth_date = db.DateField()
+    book = db.StringField()
+    payment_mode = db.StringField()
+
 
     @property
     def full_name(self):
         return self.fname + " " + self.mname + " " + self.lname
+
+
+class Branch(Base, Admin):
+    meta = {
+        'collection': 'lms_branches'
+    }
+
+    __tablename__ = 'lms_branches'
+    __amname__ = 'branch'
+    __amdescription__ = 'Branches'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.branches'
+
+    name = db.StringField()
+
+
+class ContactPerson(Base, Admin):
+    meta = {
+        'collection': 'lms_contact_persons'
+    }
+
+    __tablename__ = 'lms_contact_persons'
+    __amname__ = 'contact_person'
+    __amdescription__ = 'Contact Persons'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.contact_persons'
+
+    fname = db.StringField()
+    lname = db.StringField()
 
 
 class Member(Admin):

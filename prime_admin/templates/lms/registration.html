@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="app-main__inner">
-    <form action="" id="register_form" class="needs-validation" method="POST" novalidate>
+    <form action="{{url_for('lms.register')}}" id="register_form" class="needs-validation" method="POST" novalidate>
         {{ form.csrf_token }}
         <div class="app-page-title" style="background-color: skyblue">
             <div class="page-title-wrapper">
@@ -25,9 +25,14 @@
                 <div class="form-row">
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="batch_no" class="">Batch No.</label>
-                            <select name="batch_no" id="batch_no" class="form-control" required>
+                            <label for="batch_number" class="">Batch No.</label>
+                            <select name="batch_number" id="batch_number" class="form-control" required>
                                 <option value="">Choose...</option>
+                                {% for key,value,checked in form.batch_number.iter_choices() %}
+                                <option value="{{ key }}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
                             </select>
                             <div class="valid-feedback">
                                 Looks good!
@@ -61,9 +66,9 @@
                             <label for="branch" class="">Branch</label>
                             <select name="branch" id="branch" class="form-control" required>
                                 <option value="">Choose...</option>
-                                {% for key,value,checked in form.branch.iter_choices() %}
-                                <option value="{{ key }}">
-                                    {{ value }}
+                                {% for branch in data['branches'] %}
+                                <option value="{{ branch.id }}">
+                                    {{ branch.name }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -80,9 +85,9 @@
                             <label for="contact_person" class="">Contact Person</label>
                             <select name="contact_person" id="contact_person" class="form-control" required>
                                 <option value="">Choose...</option>
-                                {% for key,value,checked in form.contact_person.iter_choices() %}
-                                <option value="{{ key }}">
-                                    {{ value }}
+                                {% for contact_person in data['contact_persons'] %}
+                                <option value="{{ contact_person.id }}">
+                                    {{contact_person.fname}}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -105,7 +110,7 @@
                     <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="lname" class="">Last Name</label>
-                            <input name="lname" id="lname" type="text" class="form-control">
+                            <input required name="lname" id="lname" type="text" class="form-control">
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -117,7 +122,7 @@
                     <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="fname" class="">First Name</label>
-                            <input name="fname" id="fname" type="text" class="form-control">
+                            <input required name="fname" id="fname" type="text" class="form-control">
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -191,8 +196,8 @@
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="email_address" class="">Gmail</label>
-                            <input name="email_address" id="email_address" type="email" class="form-control">
+                            <label for="email" class="">Gmail</label>
+                            <input name="email" id="email" type="email" class="form-control">
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -226,12 +231,12 @@
                 <div class="form-row">
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="address" class="">Mode of Payment</label>
+                            <label for="payment_modes" class="">Mode of Payment</label>
                             <div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio" name="mode_of_payment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio">
+                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio" name="payment_modes" value="full_payment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio">
                                     Full Payment (7000)
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio2" name="mode_of_payment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio2">
+                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio2" name="payment_modes" value="installment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio2">
                                     Installment (7800)
                                 </label></div>
                             </div>
@@ -239,12 +244,12 @@
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="address" class="">Select Book</label>
+                            <label for="books" class="">Select Book</label>
                             <div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="book1" name="book" class="custom-control-input"><label class="custom-control-label" for="book1">
+                                <div class="custom-radio custom-control"><input required type="radio" id="book1" name="books" value="book_1 "class="custom-control-input"><label class="custom-control-label" for="book1">
                                     Book 1
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="book2" name="book" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                <div class="custom-radio custom-control"><input required type="radio" id="book2" name="books" value="book_2" class="custom-control-input"><label class="custom-control-label" for="book2">
                                     Book 2
                                 </label></div>
                             </div>
@@ -255,7 +260,7 @@
                             <label for="amount" class="">Enter Amount</label>
                             <div class="input-group">
                                 <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                                <input placeholder="Amount" step="1" type="number" class="form-control">
+                                <input required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
                                 <div class="input-group-append"><span class="input-group-text">.00</span></div>
                             </div>
                             <div class="valid-feedback">
@@ -271,7 +276,7 @@
                             <label for="balance" class="">Balance</label>
                             <div class="input-group">
                                 <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                                <input readonly placeholder="Balance" step="1" type="number" class="form-control">
+                                <input readonly id="balance" placeholder="Balance" step="1" type="number" class="form-control">
                                 <div class="input-group-append"><span class="input-group-text">.00</span></div>
                             </div>
                         </div>
