@@ -6,3 +6,5 @@ from .expenses import expenses
 from .partner import partners
 from .secretary import secretaries
 from .orientation_attendance import orientation_attendance
+from .branches import *
+from .contact_person import *

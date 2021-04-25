@@ -3,7 +3,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Registration, TrainingCenter, Teacher, Student
+from prime_admin.models import Branch, ContactPerson, Registration, TrainingCenter, Teacher, Student
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -15,7 +15,7 @@ from datetime import datetime
 def register():
     registration_generated_number = ""
     
-    last_registration_number = Registration.objects().order_by('-registration_number').first()
+    last_registration_number = Registration.objects().order_by('-registration_number').first().registration_number
 
     date_now = datetime.now()
 
@@ -27,15 +27,61 @@ def register():
     form = RegistrationForm()
 
     if request.method == "GET":
+        
+        contact_persons = ContactPerson.objects
+        branches = Branch.objects
 
         data = {
             'registration_generated_number': registration_generated_number,
+            'contact_persons': contact_persons,
+            'branches': branches
         }
+
+        _scripts = [
+            {'lms.static': 'js/registration.js'}
+        ]
 
         return admin_render_template(
             Registration,
             'lms/registration.html',
             'learning_management',
             form=form,
-            data=data
+            data=data,
+            scripts=_scripts
             )
+
+    try:
+        new = Registration()
+        new.registration_number = last_registration_number + 1 if last_registration_number is not None else 1
+        new.full_registration_number = registration_generated_number
+        new.schedule = form.schedule.data
+        new.branch = form.branch.data
+        new.batch_number = form.batch_number.data
+        new.contact_person = form.contact_person.data
+        new.fname = form.fname.data
+        new.mname = form.mname.data
+        new.lname = form.lname.data
+        new.suffix = form.suffix.data
+        new.address = form.address.data
+        new.passport = form.passport.data
+        new.contact_number = form.contact_number.data
+        new.email = form.email.data
+        new.birth_date = form.birth_date.data
+
+        new.amount = form.amount.data
+        new.payment_mode = request.form['payment_modes']
+        if new.payment_mode == "full_payment":
+            new.balance = 7000 - new.amount
+        else:
+            new.balance = 7800 - new.amount
+
+        new.book = request.form['books']
+        new.created_by = "{} {}".format(current_user.fname,current_user.lname)
+
+        new.save()
+
+        flash("Registered added successfully!", 'success')
+    except Exception as e:
+        flash(str(e), 'error')
+
+    return redirect(url_for('lms.members'))

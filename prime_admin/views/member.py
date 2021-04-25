@@ -3,14 +3,14 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Registration, Member
-from flask import redirect, url_for, request, current_app, flash
+from prime_admin.models import Branch, ContactPerson, Registration, Member
+from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import db
 from datetime import datetime
 
 
 
-@bp_lms.route('/members', methods=['GET', 'POST'])
+@bp_lms.route('/members', methods=['GET'])
 @login_required
 def members():
     _table_columns = [
@@ -20,33 +20,95 @@ def members():
 
     fields = []
 
-    _registrations = Registration.objects
+    scripts = [
+        {'lms.static': 'js/members.js'}
+    ]
 
-    _table_data = []
-
-    for registration in _registrations:
-        _table_data.append((
-            registration.id,
-            registration.created_at,
-            registration.registration_number,
-            registration.full_name,
-            registration.batch_number,
-            registration.branch,
-            registration.schedule,
-            "",
-            registration.amount,
-            registration.amount,
-            
-        ))
-
+    batch_numbers = [i for i in range(1,31)]
+    
     return admin_table(
         Member,
         fields=fields,
-        table_data=_table_data,
+        table_data=[],
         table_columns=_table_columns,
         heading='Members',
         subheading="",
         title='Members',
-        table_template="lms/members_table.html"
+        scripts=scripts,
+        table_template="lms/members_table.html",
+        branches=Branch.objects,
+        batch_numbers=batch_numbers,
+        schedules=['WDC', 'SDC']
         )
 
+
+@bp_lms.route('/dtbl/members')
+def get_dtbl_members():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    # search_value = "%" + request.args.get("search[value]") + "%"
+    # column_order = request.args.get('column_order')
+    branch_id = request.args.get('branch')
+    batch_no = request.args.get('batch_no')
+    schedule = request.args.get('schedule')
+
+    if branch_id != 'all':
+        registrations = Registration.objects(branch=branch_id)[start:length]
+    else:
+        registrations = Registration.objects[start:length]
+
+    if batch_no != 'all':
+        registrations = registrations.filter(batch_number=batch_no)
+
+    if schedule != 'all':
+        registrations = registrations.filter(schedule=schedule)
+
+
+    print(registrations)
+
+    _table_data = []
+
+    for registration in registrations:
+        paid = 'NOT PAID'
+
+        if registration.balance <= 0.00:
+            paid = 'PAID'
+
+        branch = Branch.objects.get(id=registration.branch).name
+        contact_person = ContactPerson.objects.get(id=registration.contact_person).fname
+
+        _table_data.append([
+            # str(registration.id),
+            registration.created_at,
+            registration.full_registration_number,
+            registration.full_name,
+            registration.batch_number,
+            branch,
+            registration.schedule,
+            "",
+            str(registration.amount),
+            str(registration.balance),
+            paid,
+            contact_person,
+            '',
+            '',
+            registration.created_by
+        ])
+
+    total_installment = registrations.filter(payment_mode='installment').sum('amount')
+    total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
+    total_payment = registrations.sum('amount')
+    sales_today = Registration.objects(created_at__gte=datetime.now().date()).sum('amount')
+
+    response = {
+        'draw': draw,
+        'recordsTotal': registrations.count(),
+        'recordsFiltered': registrations.count(),
+        'data': _table_data,
+        'totalInstallment': total_installment,
+        'totalFullPayment': total_full_payment,
+        'totalPayment': total_payment,
+        'salesToday': sales_today
+    }
+
+    return jsonify(response)

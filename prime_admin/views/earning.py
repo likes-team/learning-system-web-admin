@@ -3,7 +3,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Earning, Registration, Member
+from prime_admin.models import Earning, Registration, ContactPerson
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -16,6 +16,10 @@ def earnings():
         'Branch', 'Full Name', 'batch no.', 'schedule', 'remark'
     ]
 
+    _scripts = [
+        {'lms.static': 'js/earnings.js'}
+    ]
+
     return admin_table(
         Earning,
         fields=[],
@@ -24,5 +28,7 @@ def earnings():
         heading="",
         subheading='',
         title='Earnings',
-        table_template='lms/earnings.html'
+        table_template='lms/earnings.html',
+        scripts=_scripts,
+        marketers=ContactPerson.objects
     )

@@ -67,7 +67,7 @@
                 {% block outer_footer %}
                 <div class="app-wrapper-footer">
                     <div class="app-footer">
-                        <div class="app-footer__inner">
+                        <div class="app-footer__inner bg-happy-fisher">
                             {% block inner_footer %}
                             {% endblock %}
                         </div>
@@ -85,7 +85,7 @@
 <script type="text/javascript" src="{{ url_for('bp_admin.static', filename='DataTables/datatables.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('bp_admin.static', filename='DataTables/dataTables.checkboxes.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('bp_admin.static', filename='js/sidebar.js') }}"></script>
-<script>
+<!-- <script>
     (function() {
       var header_color = document.getElementById("header_color29");
       var sidebar_color = document.getElementById("sidebar_color29");
@@ -95,7 +95,7 @@
         sidebar_color.click();
       }, 50);
     })();
-</script>
+</script> -->
 {% endblock %}
 
 
