@@ -1,5 +1,5 @@
 from app.core import CoreModule
-from .models import Dashboard, Earning, Expenses, Inventory, Member, OrientationAttendance, Partner, Registration, Secretary, Teacher, Student, TrainingCenter
+from .models import ContactPerson, Dashboard, Earning, Expenses, Inventory, Member, OrientationAttendance, Registration, Secretary
 
 
 
@@ -10,17 +10,15 @@ class LearningManagementModule(CoreModule):
     module_short_description = "Learning Management"
     module_long_description = "Learning Management System"
     models = [
-        TrainingCenter, 
-        Teacher, 
-        Student, 
-        Registration, 
-        Member, Earning, 
-        Partner, 
-        Secretary, 
+        Registration,
+        Member,
+        Earning,
+        Secretary,
         OrientationAttendance,
         Expenses,
         Inventory,
-        Dashboard
+        Dashboard,
+        ContactPerson
     ]
     version = '1.0'
     sidebar = {
@@ -31,7 +29,7 @@ class LearningManagementModule(CoreModule):
             Registration,
             Member,
             Earning,
-            Partner,
+            ContactPerson,
             Secretary,
             OrientationAttendance,
             Expenses,

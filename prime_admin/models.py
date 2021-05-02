@@ -4,55 +4,6 @@ from app.core.models import Base
 
 
 
-class Teacher(Base, Admin):
-    meta = {
-        'collection': 'lms_teachers'
-    }
-
-    __tablename__ = 'lms_teachers'
-    __amname__ = 'teacher'
-    __amdescription__ = 'Teachers'
-    __amicon__ = 'pe-7s-users'
-    __view_url__ = 'lms.teachers'
-    
-    """ COLUMNS """
-    fname = db.StringField()
-    mname = db.StringField()
-    lname = db.StringField()
-
-
-class Student(Base, Admin):
-    meta = {
-        'collection': 'lms_students'
-    }
-
-    __tablename__ = 'lms_students'
-    __amname__ = 'student'
-    __amdescription__ = 'Students'
-    __amicon__ = 'pe-7s-users'
-    __view_url__ = 'lms.students'
-
-    """ COLUMNS """
-    fname = db.StringField()
-    mname = db.StringField()
-    lname = db.StringField()
-
-
-class TrainingCenter(Base, Admin):
-    meta = {
-        'collection': 'lms_training_centers'
-    }
-
-    __tablename__ = 'lms_training_centers'
-    __amname__ = 'training_center'
-    __amdescription__ = 'Training Centers'
-    __amicon__ = 'pe-7s-users'
-    __view_url__ = 'lms.training_centers'
-
-    """ COLUMNS """
-    name = db.StringField()
-
-
 class Registration(Base, Admin):
     meta = {
         'collection': 'lms_registrations'
@@ -111,13 +62,18 @@ class ContactPerson(Base, Admin):
 
     __tablename__ = 'lms_contact_persons'
     __amname__ = 'contact_person'
-    __amdescription__ = 'Contact Persons'
+    __amdescription__ = 'Partners'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.contact_persons'
 
     fname = db.StringField()
     lname = db.StringField()
+    branches = db.ListField()
+    earnings = db.ListField()
 
+    @property
+    def name(self):
+        return self.fname
 
 class Member(Admin):
     __tablename__ = 'lms_members'
@@ -135,16 +91,8 @@ class Earning(Admin):
     __view_url__ = 'lms.earnings'
 
 
-class Partner(Admin):
-    __tablename__ = 'lms_partners'
-    __amname__ = 'partner'
-    __amdescription__ = 'Partners'
-    __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'lms.partners'
-
-
 class Secretary(Admin):
-    __tablename__ = 'lms_secretaries'
+    __tablename__ = 'auth_users'
     __amname__ = 'secretary'
     __amdescription__ = 'Secretary'
     __amicon__ = 'pe-7s-tools'

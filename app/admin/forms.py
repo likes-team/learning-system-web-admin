@@ -90,7 +90,11 @@ class AdminField(Field):
             self.placeholder = placeholder
 
         if self.model:
-            self.type = 'select'
+            if type == 'multiple_select':
+                self.type = 'multiple_select'
+            else:
+                self.type = 'select'
+
             self.select_data = model.objects
         else:
             self.type = type

@@ -1,13 +1,14 @@
+import decimal
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, Registration, TrainingCenter, Teacher, Student
+from prime_admin.models import Branch, ContactPerson, Registration
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
-
+from bson.decimal128 import Decimal128
 
 
 @bp_lms.route('/register', methods=['GET', 'POST'])
@@ -79,6 +80,27 @@ def register():
         new.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
         new.save()
+
+        contact_person = ContactPerson.objects.get(id=new.contact_person)
+
+        earnings = 0
+        savings = 0
+        if new.payment_mode == "full_payment":
+            earnings = 7000 * decimal.Decimal(0.14286)
+        elif new.payment_mode == "installment":
+            earnings = new.amount * decimal.Decimal(0.125)
+            savings = 25.00
+
+        contact_person.earnings.append(
+            {
+                'payment_mode': new.payment_mode,
+                'savings': Decimal128(str(savings)),
+                'earnings': Decimal128(str(earnings)),
+                'branch': new.branch
+            }
+        )
+        
+        contact_person.save()
 
         flash("Registered added successfully!", 'success')
     except Exception as e:

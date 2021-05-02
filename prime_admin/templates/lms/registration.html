@@ -229,7 +229,7 @@
                 <h5 class="card-title">Payment Information</h5>
               
                 <div class="form-row">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="payment_modes" class="">Mode of Payment</label>
                             <div>
@@ -242,20 +242,59 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="books" class="">Select Book</label>
                             <div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="book1" name="books" value="book_1 "class="custom-control-input"><label class="custom-control-label" for="book1">
-                                    Book 1
+                                <div class="custom-radio custom-control"><input type="checkbox" id="book_none" name="books" value="book_none "class="custom-control-input"><label class="custom-control-label" for="book_none">
+                                    No book
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="book2" name="books" value="book_2" class="custom-control-input"><label class="custom-control-label" for="book2">
-                                    Book 2
+                                <div class="custom-radio custom-control"><input type="checkbox" id="book1" name="books" value="book_1 "class="custom-control-input"><label class="custom-control-label" for="book1">
+                                    Volume 1
+                                </label></div>
+                                <div class="custom-radio custom-control"><input type="checkbox" id="book2" name="books" value="book_2" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                    Volume 2
                                 </label></div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-1">
+                        <div class="position-relative form-group">
+                            <label for="uniforms" class="">Select Uniform</label>
+                            <div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_none" name="uniforms" value="uniform_none "class="custom-control-input"><label class="custom-control-label" for="uniform_none">
+                                    No Uniform
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xs" name="uniforms" value="uniform_xs "class="custom-control-input"><label class="custom-control-label" for="uniform_xs">
+                                    XS
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_s" name="uniforms" value="uniform_s" class="custom-control-input"><label class="custom-control-label" for="uniform_s">
+                                    S
+                                </label></div>
+                            </div>
+                        </div>
+                        
+                    </div>
                     <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="uniforms" class="">&nbsp</label>
+                            <div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_m" name="uniforms" value="uniform_m "class="custom-control-input"><label class="custom-control-label" for="uniform_m">
+                                    M
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_l" name="uniforms" value="uniform_l "class="custom-control-input"><label class="custom-control-label" for="uniform_l">
+                                    L
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xl" name="uniforms" value="uniform_xl" class="custom-control-input"><label class="custom-control-label" for="uniform_xl">
+                                    XL
+                                </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xxl" name="uniforms" value="uniform_xxl" class="custom-control-input"><label class="custom-control-label" for="uniform_xxl">
+                                    XXL
+                                </label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="amount" class="">Enter Amount</label>
                             <div class="input-group">
@@ -271,7 +310,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="balance" class="">Balance</label>
                             <div class="input-group">

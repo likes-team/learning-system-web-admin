@@ -54,17 +54,17 @@ def get_dtbl_members():
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id)[start:length]
+        sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(branch=branch_id).sum('amount')
+
     else:
         registrations = Registration.objects[start:length]
+        sales_today = Registration.objects(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
 
     if schedule != 'all':
         registrations = registrations.filter(schedule=schedule)
-
-
-    print(registrations)
 
     _table_data = []
 
@@ -78,14 +78,13 @@ def get_dtbl_members():
         contact_person = ContactPerson.objects.get(id=registration.contact_person).fname
 
         _table_data.append([
-            # str(registration.id),
             registration.created_at,
             registration.full_registration_number,
             registration.full_name,
             registration.batch_number,
             branch,
             registration.schedule,
-            "",
+            "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
             str(registration.amount),
             str(registration.balance),
             paid,
@@ -98,7 +97,8 @@ def get_dtbl_members():
     total_installment = registrations.filter(payment_mode='installment').sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
     total_payment = registrations.sum('amount')
-    sales_today = Registration.objects(created_at__gte=datetime.now().date()).sum('amount')
+
+    print(sales_today)
 
     response = {
         'draw': draw,

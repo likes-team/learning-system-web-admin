@@ -78,31 +78,12 @@ def create_user(**kwargs):
 
     try:
         user = User()
-        # models = CoreModel.objects
-
-        # for model in models:
-        #     permission = UserPermission(
-        #         model=model, 
-        #         read=True,
-        #         create=False,
-        #         write=False,
-        #         doc_delete=False
-        #         )
-        #     user.permissions.append(permission)
-
+        
         user.username = form.username.data
         user.fname = form.fname.data
         user.lname = form.lname.data
-
-        if form.email.data == '':
-            user.email = None
-        else:
-            user.email = form.email.data
-        
-        print(form.role.data)
+        user.email = form.email.data if form.email.data != '' else None
         user.role = Role.objects.get(id=form.role.data)
-
-        #TODO: add default password in settings
         user.set_password("password")
         user.is_superuser = False
         user.created_by = "{} {}".format(current_user.fname,current_user.lname)
@@ -152,7 +133,7 @@ def edit_user(oid,**kwargs):
         user.role = Role.objects.get(id=form.role.data)
         user.updated_at = datetime.now()
         user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
-        
+
         user.save()
         flash('User update Successfully!','success')
         create_log('User update',"UserID={}".format(oid))

@@ -12,7 +12,7 @@ class AdminModule(CoreModule):
     module_link = current_app.config['ADMIN']['HOME_URL']
     module_short_description = 'Administration'
     module_long_description = "Administration Dashboard and pages"
-    models = [AdminDashboard, AdminApp, User, Role, Branch, ContactPerson]
+    models = [AdminDashboard, AdminApp, User, Role, Branch]
     version = '1.0'
     sidebar = {
         'DASHBOARDS': [
@@ -22,6 +22,6 @@ class AdminModule(CoreModule):
             User, Role
         ],
         'CONFIGURATION':[
-            Branch, ContactPerson
+            Branch
         ]
     }

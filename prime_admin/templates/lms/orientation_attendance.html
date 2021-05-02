@@ -62,8 +62,13 @@
                     <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="contact_person" class="">Contact Person</label>
-                            <select name="contact_person" id="contact_person" class="form-control" required>
+                            <select name="contact_person" id="" class="form-control" required>
                                 <option value="">Choose...</option>
+                                {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
+                                <option value="{{ contact_person.id }}">
+                                    {{contact_person.fname}}
+                                </option>
+                                {% endfor %}
                             </select>
                             <div class="valid-feedback">
                                 Looks good!
@@ -96,7 +101,7 @@
         </div>
     </div>
 
-    <div class="main-card mb-3 card">
+    <div class="main-card mb-3 card"><h5 class="card-header">Members</h5>
         <div class="card-body">
             <div class="form-row">
           
@@ -104,7 +109,12 @@
                     <div class="position-relative form-group">
                         <label for="schedule" class="">Branch</label>
                         <select name="schedule" id="schedule" class="form-control" required>
-                            <option value="">All</option>
+                            <option value="all">All</option>
+                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            <option value="{{ branch.id }}">
+                                {{ branch.name }}
+                            </option>
+                            {% endfor %}
                         </select>
                         <div class="valid-feedback">
                             Looks good!
@@ -118,9 +128,14 @@
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
-                        <label for="schedule" class="">Contact Person</label>
-                        <select name="schedule" id="schedule" class="form-control" required>
-                            <option value="">All</option>
+                        <label for="contact_person" class="">Contact Person</label>
+                        <select name="contact_person" id="" class="form-control" required>
+                            <option value="all">All</option>
+                            {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
+                            <option value="{{ contact_person.id }}">
+                                {{contact_person.fname}}
+                            </option>
+                            {% endfor %}
                         </select>
                         <div class="valid-feedback">
                             Looks good!
