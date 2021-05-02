@@ -1,0 +1,10 @@
+{% for data in inline.data %}
+<tr>
+    <td scope="row" style="display:none;"><input name="branches[]" type="hidden" value="{{data.id}}"></td> 
+    <td><strong>{{ data.name }}</strong></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><button type="button" class="mb-2 mr-2 btn-transition btn btn-outline-danger btn-remove">Remove</button></td>
+</tr>
+{% endfor %}

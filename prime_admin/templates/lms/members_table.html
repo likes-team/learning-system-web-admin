@@ -40,56 +40,71 @@
     </div>
 
     <div>
-        <div class="row">
-            <div class="col-lg-2 col-xl-3">
-                <div class="card mb-3 widget-content">
-                    <div class="widget-content-wrapper">
-                        <div class="widget-content-left">
-                            <div class="widget-heading">SALES TODAY</div>
-                            <div class="widget-subheading"></div>
-                        </div>
-                        <div class="widget-content-right">
-                            <div class="widget-numbers text-primary"><span id="sales_today">₱ 0.00</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="main-card mb-3 card">
+            <h5 class="card-header">Sales</h5>
 
-            <div class="col-lg-2 col-xl-3">
-                <div class="card mb-3 widget-content">
-                    <div class="widget-content-wrapper">
-                        <div class="widget-content-left">
-                            <div class="widget-heading">TOTAL OF INSTALLMENT</div>
-                            <div class="widget-subheading"></div>
-                        </div>
-                        <div class="widget-content-right">
-                            <div class="widget-numbers text-success"><span id="total_installment">₱ 0.00</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-2 col-xl-3">
-                <div class="card mb-3 widget-content">
-                    <div class="widget-content-wrapper">
-                        <div class="widget-content-left">
-                            <div class="widget-heading">TOTAL OF FULL PAYMENT</div>
-                            <div class="widget-subheading"></div>
-                        </div>
-                        <div class="widget-content-right">
-                            <div class="widget-numbers text-primary"><span id="total_full_payment">₱ 0.00</span></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6 col-xl-4"></div>
+
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">SALES TODAY</div>
+                                    <div class="widget-subheading"></div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-success"><span id="sales_today">₱ 0.00</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="col-lg-6 col-xl-4"></div>
+
                 </div>
-            </div>
-            <div class="col-lg-2 col-xl-3">
-                <div class="card mb-3 widget-content">
-                    <div class="widget-content-wrapper">
-                        <div class="widget-content-left">
-                            <div class="widget-heading">TOTAL</div>
-                            <div class="widget-subheading"></div>
+                <div class="row">
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL OF INSTALLMENT</div>
+                                    <div class="widget-subheading"></div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-primary"><span id="total_installment">₱ 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="widget-content-right">
-                            <div class="widget-numbers text-warning"><span id="total_payment">₱ 0.00</span></div>
+                    </div>
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL OF FULL PAYMENT</div>
+                                    <div class="widget-subheading"></div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-primary"><span id="total_full_payment">₱ 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL</div>
+                                    <div class="widget-subheading"></div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-primary"><span id="total_payment">₱ 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,12 +137,6 @@
                                 </option>
                                 {% endfor %}
                             </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a schedule
-                            </div>
                         </div>
                     </div>
                     <div class="col-md-2">

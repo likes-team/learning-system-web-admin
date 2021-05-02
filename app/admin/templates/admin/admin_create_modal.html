@@ -60,6 +60,24 @@
                                             <label class="custom-control-label" for="{{ field.name }}">{{ field.label }}</label></div>
                                     </div>
                                 </div>
+                                {% elif field.type == 'multiple_select' %}
+                                <div class="col-md-{{ MODAL_DATA['fields_sizes'][row_counter.index-1] }} mb-3">
+                                    <div class="position-relative form-group"><label for="exampleCustomMutlipleSelect" class="">{{ field.label }}</label>
+                                        <select multiple="" type="select" id="{{ field.name }}" name="{{ field.name }}" class="custom-select"
+                                        {% if field.required %}required{% endif %}
+                                        {% if field.readonly %}readonly{% endif %}>
+                                            {% for odata in field.select_data %}
+                                            <option value="{{ odata.id }}">{{ odata.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div id="{{ field.name }}-valid-feedback" class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div id="{{ field.name }}-invalid-feedback" class="invalid-feedback">
+                                            Please provide a valid {{ field.label }}
+                                        </div>
+                                    </div>
+                                </div>
                                 {% else %}
                                 <div class="col-md-{{ MODAL_DATA['fields_sizes'][row_counter.index-1] }} mb-3">
                                     <label for="{{ field.name }}">{{ field.label.upper() }}</label>

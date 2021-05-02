@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 
-@bp_lms.route('/contact-persons')
+@bp_lms.route('/partners')
 @login_required
 def contact_persons():
     form = ContactPersonForm()
@@ -55,17 +55,24 @@ def create_contact_person():
         contact_person.fname = form.fname.data
         contact_person.lname = form.lname.data
 
+        branches_ids = request.form.getlist('branches')
+        if branches_ids:
+            branches = []
+            for branch_id in branches_ids:
+                branches.append(branch_id)
+        
+        contact_person.branches = branches
+
         contact_person.created_by = "{} {}".format(current_user.fname,current_user.lname)
         
         contact_person.save()
 
         flash('New Contact Person Added Successfully!','success')
 
-        return redirect(url_for('lms.contact_persons'))
-
     except Exception as e:
         flash(str(e),'error')
-        return redirect(url_for('lms.contact_persons'))
+    
+    return redirect(url_for('lms.contact_persons'))
 
 
 @bp_lms.route('/get-view-contact-person-data', methods=['GET'])
@@ -84,18 +91,40 @@ def get_view_contact_person_data():
 
 @bp_lms.route('/contact-persons/<string:oid>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_contact_person(oid,**kwargs):
+def edit_contact_person(oid):
     contact_person = ContactPerson.objects.get_or_404(id=oid)
     form = ContactPersonEditForm(obj=contact_person)
 
     if request.method == "GET":
+        current_branches_list = ContactPerson.objects.get(id=oid).branches
+        current_branches = []
+        
+        add_branches_list = Branch.objects
+        add_branches = []
+
+        for branch in current_branches_list:
+            current_branches.append(Branch.objects.get(id=branch))
+
+        for branch in add_branches_list:
+            if str(branch.id) not in current_branches_list:
+                add_branches.append(branch)
+
+        form.branches_inline.data = current_branches
+        form.add_branches_inline.data = add_branches
+
+        _scripts = [
+            {'lms.static': 'js/partners.js'}
+        ]
 
         return admin_edit(
             ContactPerson,
             form,
             'lms.edit_contact_person',
             oid,
-            'lms.contact_persons')
+            'lms.contact_persons',
+            scripts=_scripts,
+            edit_template="lms/partner_edit.html"
+            )
     
     if not form.validate_on_submit():
         for key, value in form.errors.items():
@@ -105,6 +134,16 @@ def edit_contact_person(oid,**kwargs):
     try:
         contact_person.fname = form.fname.data
         contact_person.lname = form.lname.data
+        
+        branches = []
+        branch_ids = request.form.getlist('branches[]')
+
+        if branch_ids:
+            for b_id in branch_ids:
+                branches.append(b_id)
+
+        contact_person.branches = branches
+
         contact_person.updated_at = datetime.now()
         contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         

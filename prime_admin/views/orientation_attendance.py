@@ -3,7 +3,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import OrientationAttendance
+from prime_admin.models import Branch, ContactPerson, OrientationAttendance
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -22,6 +22,9 @@ def orientation_attendance():
         'orientator'
     ]
 
+    contact_persons = ContactPerson.objects
+    branches = Branch.objects
+
     return admin_table(
         OrientationAttendance,
         fields=[],
@@ -29,5 +32,7 @@ def orientation_attendance():
         table_columns=_table_columns,
         heading="Orientation Attendance",
         title="Orientation attendance",
-        table_template="lms/orientation_attendance.html"
+        table_template="lms/orientation_attendance.html",
+        contact_persons=contact_persons,
+        branches=branches
         )

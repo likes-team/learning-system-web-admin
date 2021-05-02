@@ -37,6 +37,14 @@
                                                 <label class="custom-control-label" for="view_{{ field.name }}">{{ field.label }}</label></div>
                                         </div>
                                     </div>
+                                {% elif field.type == 'multiple_select' %}
+                                    <div class="position-relative form-group"><label for="exampleCustomMutlipleSelect" class="">{{field.label}}</label>
+                                        <select disabled multiple="" type="select" id="exampleCustomMutlipleSelect" name="customSelect" class="custom-select">
+                                            {% for odata in field.select_data %}
+                                            <option value="{{ odata.id }}">{{ odata.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 {% else %}
                                 <div class="col-md-{{ MODAL_DATA['fields_sizes'][row_count.index-1] }} mb-3">
                                     <label for="view_{{ field.name }}">{{ field.label.upper() }}</label>
