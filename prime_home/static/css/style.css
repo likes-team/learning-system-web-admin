@@ -1,0 +1,52 @@
+.nav-background{
+   background-color:rgb(0, 97, 168);
+}
+
+.header-background{
+  min-height: 40em;
+  background-position: 10% 30%;
+  background-size:cover;
+  background-repeat: no-repeat;
+  background-image: url(/admin/admin/static/img/student_photo_1.jpg), linear-gradient(to bottom, rgba(0, 97, 168, 1), rgba(41, 120, 181,1), rgba(138, 182, 214,1));
+  background-blend-mode: screen;
+  padding: 4em 3em;
+}
+
+.title{
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 5em;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.sub-title{
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: lighter;
+    font-size: 1.2em;
+}
+
+.svg-head{
+    fill: rgb(6, 137, 206);
+    opacity: 50%;
+}
+
+.about h1{   
+   color: rgb(0, 97, 168);
+}
+
+.testimony h2{
+    color: rgb(0, 97, 168);
+}
+
+.message{
+    color: black;
+    text-align: left;
+    font-size: 1.2em;
+    
+}
+
+.about-section{
+    margin: 5em 0em; 
+}
