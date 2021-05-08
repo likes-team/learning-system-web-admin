@@ -73,6 +73,7 @@ def create_app(config_name):
         from app.auth import bp_auth
         from app.admin import bp_admin
         from prime_admin import bp_lms
+        from prime_home import bp_prime_home
         #                   -END-
 
         # DEVELOPERS-NOTE: -REGISTER HERE THE MODULE BLUEPRINTS-
@@ -80,18 +81,21 @@ def create_app(config_name):
         app.register_blueprint(bp_auth, url_prefix='/auth')
         app.register_blueprint(bp_admin, url_prefix='/admin')
         app.register_blueprint(bp_lms, url_prefix='/learning-management')
+        app.register_blueprint(bp_prime_home, url_prefix='/prime')
         #               -END-
 
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
         from app.admin.admin import AdminModule
         from app.auth.auth import AuthModule
         from prime_admin.learning_center import LearningManagementModule
+        from prime_home.prime_home import PrimeHomeModule
         #                  -END-
         
         # DEVELOPERS-NOTE: -APPEND YOUR MODULE HERE-
         MODULES.append(AdminModule)
         MODULES.append(AuthModule)
         MODULES.append(LearningManagementModule)
+        MODULES.append(PrimeHomeModule)
         #                  -END-
 
         # Load CONTEXT data
