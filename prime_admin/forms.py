@@ -6,6 +6,51 @@ from wtforms import StringField, SelectField, DecimalField, DateField
 
 
 
+class InventoryForm(AdminTableForm):
+    __table_columns__ = ['Maintaining Materials', 'Description', 'Released Materials', 'Remaining Materials','Total of replacement Materials']
+    __heading__ = "Inventories"
+
+    description = AdminField(label="Description", validators=[DataRequired()])
+    maintaining = AdminField(label="Maintaining Materials", validators=[DataRequired()], type='number')
+    remaining = AdminField(label="Remaining Materials", validators=[DataRequired()], type='number')
+    price = AdminField(label="Price", validators=[DataRequired()], type='decimal')
+
+    @property
+    def fields(self):
+        return [
+            [self.description, self.price],
+            [self.maintaining, self.remaining]
+            ]
+
+
+
+class BatchForm(AdminTableForm):
+
+    __table_columns__ = ['Status', 'Number', 'created by','Created at', 'updated by','updated at']
+    __heading__ = "Batches"
+
+    number = AdminField(label="Number", validators=[DataRequired()], type="number")
+
+    @property
+    def fields(self):
+        return [
+            [self.number]
+            ]
+
+
+class BatchEditForm(AdminEditForm):
+
+    __heading__ = "Update existing data"
+
+    number = AdminField(label="Number", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [
+            [self.number]
+            ]
+
+
 class SecretaryForm(AdminTableForm):
     from prime_admin.models import Branch
 
@@ -200,14 +245,9 @@ class StudentEditForm(AdminEditForm):
 
 
 class RegistrationForm(FlaskForm):
-    batches = []
-
-    for x in range(1,31):
-        batches.append(
-            (str(x), str(x))
-        )
+    from .models import Batch
     
-    batch_number = SelectField('Batch No.', choices=batches)
+    batch_number = AdminField(label='Batch Number', validators=[DataRequired()], model=Batch)
 
     schedule = SelectField('Schedule',choices=[
         ('WDC','WDC'), ('SDC', 'SDC')
