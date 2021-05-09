@@ -1,5 +1,5 @@
 from app.core import CoreModule
-from .models import ContactPerson, Dashboard, Earning, Expenses, Inventory, Member, OrientationAttendance, Registration, Secretary
+from .models import ContactPerson, Dashboard, Earning, Equipment, Expenses, Inventory, Member, OrientationAttendance, Registration, Secretary, Supplies
 
 
 
@@ -18,7 +18,9 @@ class LearningManagementModule(CoreModule):
         Expenses,
         Inventory,
         Dashboard,
-        ContactPerson
+        ContactPerson,
+        Equipment,
+        Supplies
     ]
     version = '1.0'
     sidebar = {
@@ -33,6 +35,9 @@ class LearningManagementModule(CoreModule):
             Secretary,
             OrientationAttendance,
             Expenses,
-            Inventory,
+        ],
+        'Inventory': [
+            Equipment,
+            Supplies
         ]
     }

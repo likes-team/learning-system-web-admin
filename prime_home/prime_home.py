@@ -9,3 +9,4 @@ class PrimeHomeModule(CoreModule):
     module_short_description = "Prime Home"
     module_long_description = "Prime Home"
     version = '1.0'
+    models = []

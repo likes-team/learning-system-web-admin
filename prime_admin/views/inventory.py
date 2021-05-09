@@ -1,0 +1,224 @@
+from flask.json import jsonify
+from app.auth.models import Role, User
+from prime_admin.forms import InventoryForm, PartnerForm, SecretaryEditForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
+from flask_login import login_required, current_user
+from app.admin.templating import admin_render_template, admin_table, admin_edit
+from prime_admin import bp_lms
+from prime_admin.models import Branch, Equipment, Inventory, Secretary, Supplies
+from flask import redirect, url_for, request, current_app, flash
+from app import db
+from datetime import datetime
+
+
+
+@bp_lms.route('/equipments')
+@login_required
+def equipments():
+    form = InventoryForm()
+    form.__heading__ = "Equipments"
+
+    _table_data = []
+
+    _equipments = Inventory.objects(type="equipment")
+
+    for equipment in _equipments:
+        _table_data.append((
+            equipment.id,
+            equipment.maintaining,
+            equipment.description,
+            equipment.released,
+            equipment.remaining,
+            equipment.total_replacement,
+        ))
+
+    return admin_table(
+        Equipment,
+        fields=[],
+        form=form,
+        table_data=_table_data,
+        create_url='lms.create_equipment',
+        edit_url='lms.edit_secretary',
+        view_modal_url='/learning-management/get-view-secretary-data'
+        )
+
+
+@bp_lms.route('/equipments/create',methods=['GET','POST'])
+@login_required
+def create_equipment():
+    form = InventoryForm()
+
+    if not form.validate_on_submit():
+        for key, value in form.errors.items():
+            flash(str(key) + str(value), 'error')
+        return redirect(url_for('lms.equipments'))
+
+    try:
+        equipment = Inventory()
+
+        equipment.description = form.description.data
+        equipment.maintaining = form.maintaining.data
+        equipment.remaining = form.remaining.data
+        equipment.type = "equipment"
+
+        equipment.created_by = "{} {}".format(current_user.fname,current_user.lname)
+
+        equipment.save()
+
+        flash('New Equipment Added Successfully!','success')
+
+    except Exception as e:
+        flash(str(e),'error')
+    
+    return redirect(url_for('lms.equipments'))
+
+
+
+@bp_lms.route('/supplies')
+@login_required
+def supplies():
+    form = InventoryForm()
+    form.__heading__ = "Supplies"
+
+    _table_data = []
+
+    _equipments = Inventory.objects(type="supplies")
+
+    for equipment in _equipments:
+        _table_data.append((
+            equipment.id,
+            equipment.maintaining,
+            equipment.description,
+            equipment.released,
+            equipment.remaining,
+            equipment.total_replacement,
+        ))
+
+    return admin_table(
+        Supplies,
+        fields=[],
+        form=form,
+        table_data=_table_data,
+        create_url='lms.create_supplies',
+        edit_url='lms.edit_secretary',
+        view_modal_url='/learning-management/get-view-secretary-data'
+        )
+
+
+@bp_lms.route('/supplies/create',methods=['GET','POST'])
+@login_required
+def create_supplies():
+    form = InventoryForm()
+
+    if not form.validate_on_submit():
+        for key, value in form.errors.items():
+            flash(str(key) + str(value), 'error')
+        return redirect(url_for('lms.supplies'))
+
+    try:
+        equipment = Inventory()
+
+        equipment.description = form.description.data
+        equipment.maintaining = form.maintaining.data
+        equipment.remaining = form.remaining.data
+        equipment.type = "supplies"
+
+        equipment.created_by = "{} {}".format(current_user.fname,current_user.lname)
+
+        equipment.save()
+
+        flash('New Supplies Added Successfully!','success')
+
+    except Exception as e:
+        flash(str(e),'error')
+    
+    return redirect(url_for('lms.supplies'))
+
+# @bp_lms.route('/get-view-secretary-data', methods=['GET'])
+# @login_required
+# def get_view_user_data():
+#     _column, _id = request.args.get('column'), request.args.get('id')
+
+#     _data = User.objects(id=_id).values_list(_column)
+
+#     response = jsonify(result=str(_data[0]),column=_column)
+
+#     if _column == "branch" and _data[0] is not None:
+#         response = jsonify(result=str(_data[0].id),column=_column)
+
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.status_code = 200
+#     return response
+
+
+# @bp_lms.route('/secretaries/create',methods=['GET','POST'])
+# @login_required
+# def create_secretary():
+#     form = SecretaryForm()
+
+#     if not form.validate_on_submit():
+#         for key, value in form.errors.items():
+#             flash(str(key) + str(value), 'error')
+#         return redirect(url_for('lms.secretaries'))
+
+#     try:
+#         secretary = User()
+
+#         secretary.fname = form.fname.data
+#         secretary.lname = form.lname.data
+#         secretary.branch = Branch.objects.get(id=form.branch.data)
+#         secretary.role = Role.objects(name="Secretary").first()
+#         secretary.username = form.username.data
+#         secretary.email = form.email.data if form.email.data != '' else None
+#         secretary.set_password("password")
+#         secretary.is_superuser = False
+
+#         secretary.created_by = "{} {}".format(current_user.fname,current_user.lname)
+
+#         secretary.save()
+
+#         flash('New Secretary Added Successfully!','success')
+
+#     except Exception as e:
+#         flash(str(e),'error')
+    
+#     return redirect(url_for('lms.secretaries'))
+
+
+# @bp_lms.route('/secretaries/<string:oid>/edit', methods=['GET', 'POST'])
+# @login_required
+# def edit_secretary(oid):
+#     secretary = User.objects.get_or_404(id=oid)
+#     form = SecretaryEditForm(obj=secretary)
+
+#     if request.method == "GET":
+
+#         return admin_edit(
+#             Secretary,
+#             form,
+#             'lms.edit_secretary',
+#             oid,
+#             'lms.secretaries',
+#             )
+    
+#     if not form.validate_on_submit():
+#         for key, value in form.errors.items():
+#             flash(str(key) + str(value), 'error')
+#         return redirect(url_for('lms.secretaries'))
+        
+#     try:
+#         secretary.fname = form.fname.data
+#         secretary.lname = form.lname.data
+#         secretary.branch = Branch.objects.get(id=form.branch.data)
+#         secretary.role = Role.objects(name="Secretary").first()
+#         secretary.username = form.username.data
+#         secretary.email = form.email.data if form.email.data != '' else None
+#         secretary.updated_at = datetime.now()
+#         secretary.updated_by = "{} {}".format(current_user.fname,current_user.lname)
+        
+#         secretary.save()
+#         flash('Secretary Updated Successfully!','success')
+
+#     except Exception as e:
+#         flash(str(e),'error')
+
+#     return redirect(url_for('lms.secretaries'))

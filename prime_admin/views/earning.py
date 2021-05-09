@@ -3,7 +3,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, Registration, ContactPerson
+from prime_admin.models import Branch, Earning, Registration, ContactPerson, Batch
 from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import db
 from datetime import datetime
@@ -26,7 +26,7 @@ def earnings():
         {'lms.static': 'js/earnings.js'}
     ]
 
-    batch_numbers = [i for i in range(1,31)]
+    batch_numbers = Batch.objects()
 
     return admin_table(
         Earning,
@@ -104,9 +104,9 @@ def get_dtbl_earnings_members():
         _table_data.append([
             branch,
             registration.full_name,
-            registration.batch_number,
+            registration.batch_number.number,
             registration.schedule,
-            "",
+            "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
         ])
 
     print(branches_total_earnings)

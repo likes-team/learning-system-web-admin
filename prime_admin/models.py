@@ -1,3 +1,4 @@
+from enum import unique
 from app import db
 from app.admin.models import Admin
 from app.core.models import Base
@@ -19,7 +20,7 @@ class Registration(Base, Admin):
     full_registration_number = db.StringField()
     schedule = db.StringField()
     branch = db.StringField()
-    batch_number = db.IntField()
+    batch_number = db.ReferenceField('Batch')
     amount = db.DecimalField()
     balance = db.DecimalField()
     contact_person = db.StringField()
@@ -55,6 +56,20 @@ class Branch(Base, Admin):
     name = db.StringField()
 
 
+class Batch(Base, Admin):
+    meta = {
+        'collection': 'lms_batches'
+    }
+
+    __tablename__ = 'lms_batches'
+    __amname__ = 'batch'
+    __amdescription__ = 'Batch Numbers'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.batches'
+
+    number = db.IntField(unique=True)
+
+
 class ContactPerson(Base, Admin):
     meta = {
         'collection': 'lms_contact_persons'
@@ -75,10 +90,28 @@ class ContactPerson(Base, Admin):
     def name(self):
         return self.fname
 
+
+class Inventory(Base, Admin):
+    meta = {
+        'collection': 'lms_inventories'
+    }
+    __amname__ = 'inventory'
+    __amdescription__ = 'Inventory'
+    __amicon__ = 'pe-7s-tools'
+
+    price = db.DecimalField()
+    description = db.StringField()
+    maintaining = db.IntField()
+    released = db.IntField()
+    remaining = db.IntField()
+    total_replacement = db.IntField()
+    type = db.StringField()
+
+
 class Member(Admin):
     __tablename__ = 'lms_members'
     __amname__ = 'member'
-    __amdescription__ = 'Members'
+    __amdescription__ = 'Clients'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.members'
 
@@ -108,6 +141,9 @@ class OrientationAttendance(Admin):
 
 
 class Expenses(Admin):
+    meta = {
+        'collection': 'lms_inventories'
+    }
     __tablename__ = 'lms_expenses'
     __amname__ = 'expenses'
     __amdescription__ = 'Expenses'
@@ -115,15 +151,24 @@ class Expenses(Admin):
     __view_url__ = 'lms.expenses'
 
 
-class Inventory(Admin):
-    __amname__ = 'inventory'
-    __amdescription__ = 'Inventory'
-    __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'bp_admin.under_construction'
-
-
 class Dashboard(Admin):
     __amname__ = 'dashboard'
     __amdescription__ = 'Dashboard'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.dashboard'
+
+
+class Equipment(Admin):
+    __tablename__ = 'lms_inventories'
+    __amname__ = 'equipment'
+    __amdescription__ = 'Equipments'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.equipments'
+
+
+class Supplies(Admin):
+    __tablename__ = 'lms_inventories'
+    __amname__ = 'supplies'
+    __amdescription__ = 'Supplies'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.supplies'

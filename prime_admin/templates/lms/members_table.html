@@ -144,9 +144,9 @@
                             <label for="batch_no" class="">Batch No.</label>
                             <select name="batch_no" id="batch_no" class="form-control" required>
                                 <option value="all">All</option>
-                                {% for no in TABLE_OPTIONS['batch_numbers'] %}
-                                <option value="{{ no }}">
-                                    {{ no }}
+                                {% for batch in TABLE_OPTIONS['batch_numbers'] %}
+                                <option value="{{ batch.id }}">
+                                    {{ batch.number }}
                                 </option>
                                 {% endfor %}
                             </select>

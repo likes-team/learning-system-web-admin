@@ -4,7 +4,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, Registration
+from prime_admin.models import Batch, Branch, ContactPerson, Registration
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -32,6 +32,8 @@ def register():
         contact_persons = ContactPerson.objects
         branches = Branch.objects
 
+        form.batch_number.data = Batch.objects(active=True)
+
         data = {
             'registration_generated_number': registration_generated_number,
             'contact_persons': contact_persons,
@@ -48,16 +50,17 @@ def register():
             'learning_management',
             form=form,
             data=data,
-            scripts=_scripts
+            scripts=_scripts,
+            title="Registration"
             )
 
     try:
         new = Registration()
-        new.registration_number = last_registration_number + 1 if last_registration_number is not None else 1
+        new.registration_number = last_registration_number.registration_number + 1 if last_registration_number is not None else 1
         new.full_registration_number = registration_generated_number
         new.schedule = form.schedule.data
         new.branch = form.branch.data
-        new.batch_number = form.batch_number.data
+        new.batch_number = Batch.objects.get(id=form.batch_number.data)
         new.contact_person = form.contact_person.data
         new.fname = form.fname.data
         new.mname = form.mname.data

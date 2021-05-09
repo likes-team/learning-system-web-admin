@@ -3,7 +3,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, Registration, Member
+from prime_admin.models import Batch, Branch, ContactPerson, Registration, Member
 from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import db
 from datetime import datetime
@@ -24,7 +24,7 @@ def members():
         {'lms.static': 'js/members.js'}
     ]
 
-    batch_numbers = [i for i in range(1,31)]
+    batch_numbers = Batch.objects()
     
     return admin_table(
         Member,
@@ -76,12 +76,12 @@ def get_dtbl_members():
 
         branch = Branch.objects.get(id=registration.branch).name
         contact_person = ContactPerson.objects.get(id=registration.contact_person).fname
-
+        
         _table_data.append([
             registration.created_at,
             registration.full_registration_number,
             registration.full_name,
-            registration.batch_number,
+            registration.batch_number.number if registration.batch_number is not None else "",
             branch,
             registration.schedule,
             "Full Payment" if registration.payment_mode == "full_payment" else "Installment",

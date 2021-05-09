@@ -28,9 +28,9 @@
                             <label for="batch_number" class="">Batch No.</label>
                             <select name="batch_number" id="batch_number" class="form-control" required>
                                 <option value="">Choose...</option>
-                                {% for key,value,checked in form.batch_number.iter_choices() %}
-                                <option value="{{ key }}">
-                                    {{ value }}
+                                {% for batch_number in form.batch_number.data %}
+                                <option value="{{ batch_number.id }}">
+                                    {{ batch_number.number }}
                                 </option>
                                 {% endfor %}
                             </select>

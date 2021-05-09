@@ -19,11 +19,10 @@ $(document).ready(function(){
                 $("#total_earnings").html("₱" + totalEarnings);
                 $("#total_savings").html("₱" + json.totalSavings);
                 
+                $("#list_branches_total_earnings").children().remove();
 
                 if (json.branchesTotalEarnings.length > 0){
                     var newBranchesTotalEarningsList = '';
-
-                    $("#list_branches_total_earnings").children().remove();
                     
                     for (i=0; i < json.branchesTotalEarnings.length; i++){
                         var totalEarnings = parseFloat(json.branchesTotalEarnings[i]['totalEarnings']).toFixed(2);
