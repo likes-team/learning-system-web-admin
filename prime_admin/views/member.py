@@ -53,12 +53,12 @@ def get_dtbl_members():
     schedule = request.args.get('schedule')
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id)[start:length]
-        sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(branch=branch_id).sum('amount')
+        registrations = Registration.objects(branch=branch_id).filter(status='registered')[start:length]
+        sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(status='registered').filter(branch=branch_id).sum('amount')
 
     else:
-        registrations = Registration.objects[start:length]
-        sales_today = Registration.objects(created_at__gte=datetime.now().date()).sum('amount')
+        registrations = Registration.objects(status='registered')[start:length]
+        sales_today = Registration.objects(status='registered').filter(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -74,21 +74,21 @@ def get_dtbl_members():
         if registration.balance <= 0.00:
             paid = 'PAID'
 
-        branch = Branch.objects.get(id=registration.branch).name
-        contact_person = ContactPerson.objects.get(id=registration.contact_person).fname
+        branch = registration.branch
+        contact_person = registration.contact_person
         
         _table_data.append([
             registration.created_at,
             registration.full_registration_number,
             registration.full_name,
             registration.batch_number.number if registration.batch_number is not None else "",
-            branch,
+            branch.name if branch is not None else '',
             registration.schedule,
             "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
             str(registration.amount),
             str(registration.balance),
             paid,
-            contact_person,
+            contact_person.fname if contact_person is not None else '',
             '',
             '',
             registration.created_by

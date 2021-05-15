@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import unique
 from app import db
 from app.admin.models import Admin
@@ -19,14 +20,15 @@ class Registration(Base, Admin):
     registration_number = db.IntField()
     full_registration_number = db.StringField()
     schedule = db.StringField()
-    branch = db.StringField()
+    branch = db.ReferenceField('Branch')
     batch_number = db.ReferenceField('Batch')
     amount = db.DecimalField()
     balance = db.DecimalField()
-    contact_person = db.StringField()
+    contact_person = db.ReferenceField('ContactPerson')
     fname = db.StringField()
     mname = db.StringField()
     lname = db.StringField()
+    gender = db.StringField()
     suffix = db.StringField()
     address = db.StringField()
     passport = db.StringField()
@@ -35,11 +37,17 @@ class Registration(Base, Admin):
     birth_date = db.DateField()
     book = db.StringField()
     payment_mode = db.StringField()
-
+    status = db.StringField()
+    is_oriented = db.BooleanField()
+    date_oriented = db.DateTimeField()
+    orientator = db.StringField()
 
     @property
     def full_name(self):
-        return self.fname + " " + self.mname + " " + self.lname
+        if self.mname:
+            return self.fname + " " + self.mname + " " + self.lname
+        
+        return self.fname + " " + self.lname
 
 
 class Branch(Base, Admin):
@@ -146,7 +154,7 @@ class Expenses(Admin):
     }
     __tablename__ = 'lms_expenses'
     __amname__ = 'expenses'
-    __amdescription__ = 'Expenses'
+    __amdescription__ = 'Operating Expenses'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.expenses'
 
