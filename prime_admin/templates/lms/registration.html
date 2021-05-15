@@ -4,6 +4,7 @@
 <div class="app-main__inner">
     <form action="{{url_for('lms.register')}}" id="register_form" class="needs-validation" method="POST" novalidate>
         {{ form.csrf_token }}
+        <input id="client_id" name="client_id" type="hidden" class="form-control">
         <div class="app-page-title" style="background-color: skyblue">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
@@ -110,7 +111,18 @@
                     <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="lname" class="">Last Name</label>
-                            <input required name="lname" id="lname" type="text" class="form-control">
+                            <div class="input-group"><input id="lname" name="lname" type="text"
+                                    class="form-control" required>
+                                <div class="input-group-append">
+                                    <button
+                                        type="button" 
+                                        data-toggle="modal"
+                                        data-target="#mdl_search_client_last_name"
+                                        data-placement="bottom"
+                                        class="btn btn-primary pe-7s-search">
+                                    </button>
+                                </div>
+                            </div>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -353,6 +365,7 @@
 <div class="app-footer-right">
     <button type="button" class="btn btn-secondary" onclick="history.back(-1)"
         style="margin-right: 10px;">Cancel</button>
+    <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry" style="margin-right: 10px;">Clear Entries</button>
     <input form="register_form" type="submit" class="btn btn-primary" name='btn_submit' value="Confirm">
     <!-- <input form="register_form" type="submit" style="margin-right: 10px;" name='btn_submit' 
     class="btn btn-primary" value="Save and Print" style="margin-right: 10px;"> -->

@@ -6,6 +6,25 @@ from wtforms import StringField, SelectField, DecimalField, DateField
 
 
 
+class OrientationAttendanceForm(AdminTableForm):
+    __table_columns__ = [
+        'Branch',
+        'full name',
+        'contact no',
+        'contact person',
+        'orientator'
+    ]
+
+    __heading__ = "Orientation Attendance"
+
+    contact_person = StringField()
+
+    @property
+    def fields(self):
+        return []
+
+
+
 class InventoryForm(AdminTableForm):
     __table_columns__ = ['Maintaining Materials', 'Description', 'Released Materials', 'Remaining Materials','Total of replacement Materials']
     __heading__ = "Inventories"

@@ -42,27 +42,47 @@
     <div class="main-card mb-3 card">
         <div class="card-body">
             <h5 class="card-title">Encode</h5>
-            <form class="">
+            <form onsubmit="document.getElementById('contact_person').disabled = false;" id="orientation_form" action="{{url_for('lms.orient')}}" method="POST" class="needs-validation" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input id="client_id" name="client_id" type="hidden" class="form-control">
                 <div class="form-row">
                     <div class="col-md-3">
-                        <div class="position-relative form-group"><label for="exampleEmail11"
-                                class="">Last Name</label><input name="email" id="exampleEmail11"
-                                type="email" class="form-control"></div>
+                        <div class="position-relative form-group">
+                            <label for="lname" class="">Last Name</label>
+                            <div class="input-group"><input id="lname" name="lname" type="text"
+                                    class="form-control" required>
+                                <div class="input-group-append">
+                                    <button
+                                        type="button" 
+                                        data-toggle="modal"
+                                        data-target="#mdl_search_client_last_name"
+                                        data-placement="bottom"
+                                        class="btn btn-primary pe-7s-search">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid last name
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="position-relative form-group"><label for="exampleEmail11"
-                                class="">First Name</label><input name="email" id="exampleEmail11"
-                                type="email" class="form-control"></div>
+                        <div class="position-relative form-group"><label for="fname"
+                                class="">First Name</label><input name="fname" id="fname"
+                                type="text" class="form-control" required></div>
                     </div>
                     <div class="col-md-2">
-                        <div class="position-relative form-group"><label for="exampleEmail11"
-                                class="">Contact No.</label><input name="email" id="exampleEmail11"
-                                type="email" class="form-control"></div>
+                        <div class="position-relative form-group"><label for="contact_no"
+                                class="">Contact No.</label><input name="contact_no" id="contact_no"
+                                type="text" class="form-control" required></div>
                     </div>
                     <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="contact_person" class="">Contact Person</label>
-                            <select name="contact_person" id="" class="form-control" required>
+                            <select name="contact_person" id="contact_person" class="form-control" required>
                                 <option value="">Choose...</option>
                                 {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
                                 <option value="{{ contact_person.id }}">
@@ -81,7 +101,7 @@
                     <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="batch_no" class="">Orientator</label>
-                            <select name="batch_no" id="batch_no" class="form-control" required>
+                            <select name="batch_no" id="batch_no" class="form-control">
                                 <option value="">Choose...</option>
                             </select>
                             <div class="valid-feedback">
@@ -93,11 +113,32 @@
                         </div>
                     </div>
                 </div>
+                <script>
+                    // Example starter JavaScript for disabling form submissions if there are invalid fields
+                    (function () {
+                        'use strict';
+                        window.addEventListener('load', function () {
+                            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                            var forms = document.getElementsByClassName('needs-validation');
+                            // Loop over them and prevent submission
+                            var validation = Array.prototype.filter.call(forms, function (form) {
+                                form.addEventListener('submit', function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add('was-validated');
+                                }, false);
+                            });
+                        }, false);
+                    })();
+                </script>
             </form>
         </div>
 
         <div class="d-block text-right card-footer">
-            <a href="javascript:void(0);" class="btn-wide btn btn-success">Save</a>
+            <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry">Clear Entries</button>
+            <input form="orientation_form" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="Save">
         </div>
     </div>
 
@@ -128,8 +169,8 @@
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
-                        <label for="contact_person" class="">Contact Person</label>
-                        <select name="contact_person" id="" class="form-control" required>
+                        <label for="" class="">Contact Person</label>
+                        <select name="" id="" class="form-control" required>
                             <option value="all">All</option>
                             {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
                             <option value="{{ contact_person.id }}">
@@ -201,6 +242,8 @@
 {% endblock %}
 
 {% block modals %}
+
+{% include "lms/search_client_last_name_modal.html" %}
 
 {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
 {% include TABLE_OPTIONS['create_modal_template'] %}
