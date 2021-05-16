@@ -85,7 +85,7 @@ $(document).ready(function(){
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function(response) {
-                if(response.data.status == "pre_registered"){
+                if(response.data.status == "pre_registered" && response.data.is_oriented == false){
                     console.log(response.data);
 
                     $("#client_id").val(response.data.id);
@@ -113,7 +113,35 @@ $(document).ready(function(){
                     $("#address").prop('readonly', true);
                     $("#email").prop('readonly', true);
 
-                } else if(response.data.status == "oriented"){
+                } else if ((response.data.status == "pre_registered") && (response.data.is_oriented == true)){
+                    $("#client_id").val(response.data.id);
+                    $("#lname").val(response.data.lname);
+                    $("#fname").val(response.data.fname);
+                    $("#mname").val(response.data.mname);
+                    $("#suffix").val(response.data.suffix);
+                    $("#contact_number").val(response.data.contact_number);
+                    $("#email").val(response.data.email);
+                    $("#address").val(response.data.address);
+                    $("#contact_person").val(response.data.contact_person);
+
+                    var formattedDate = new Date(response.data.birth_date);
+                    var d = ('0' + formattedDate.getDate()).slice(-2);
+                    var m =  ('0' + (formattedDate.getMonth()+1)).slice(-2);
+                    var y = formattedDate.getFullYear();
+
+                    $("#birth_date").val(y + "-" + m + "-" + d);
+            
+                    $("#lname").prop('readonly', true);
+                    $("#fname").prop('readonly', true);
+                    $("#mname").prop('readonly', true);
+                    $("#suffix").prop('readonly', true);
+                    $("#contact_number").prop('readonly', true);
+                    $("#birth_date").prop('readonly', true);
+                    $("#address").prop('readonly', true);
+                    $("#email").prop('readonly', true);
+                    // $("#contact_person").prop('disabled', true);
+
+                } else if((response.data.status == "oriented") && (response.data.is_oriented == true)){
                     $("#client_id").val(response.data.id);
                     $("#lname").val(response.data.lname);
                     $("#fname").val(response.data.fname);
@@ -123,7 +151,7 @@ $(document).ready(function(){
                     $("#lname").prop('readonly', true);
                     $("#fname").prop('readonly', true);
                     $("#contact_number").prop('readonly', true);
-                    $("#contact_person").prop('disabled', true);
+                    // $("#contact_person").prop('disabled', true);
                 }
             }
         });

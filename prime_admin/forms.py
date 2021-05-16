@@ -6,6 +6,28 @@ from wtforms import StringField, SelectField, DecimalField, DateField
 
 
 
+class ExpensesForm(AdminTableForm):
+    from .models import Inventory
+
+    __table_columns__ = [
+        'date', 'description', 'price', 'quantity', 'subtotal'
+    ]
+
+    __heading__ = "Operating Expenses"
+
+    inventory = AdminField(label="Description", validators=[DataRequired()], model=Inventory)
+    quantity = AdminField(label='Quantity', validators=[DataRequired()], type='number')
+    price = AdminField(label='Price', validators=[DataRequired()], type='numeric')
+    uom = AdminField(label='Unit of Measurement', required=False)
+
+    @property
+    def fields(self):
+        return [
+            [self.inventory, self.price],
+            [self.quantity, self.uom]
+            ]
+
+
 class OrientationAttendanceForm(AdminTableForm):
     __table_columns__ = [
         'Branch',
@@ -22,7 +44,6 @@ class OrientationAttendanceForm(AdminTableForm):
     @property
     def fields(self):
         return []
-
 
 
 class InventoryForm(AdminTableForm):

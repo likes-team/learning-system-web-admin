@@ -115,6 +115,10 @@ class Inventory(Base, Admin):
     total_replacement = db.IntField()
     type = db.StringField()
 
+    @property
+    def name(self):
+        return self.description
+
 
 class Member(Admin):
     __tablename__ = 'lms_members'
@@ -148,15 +152,22 @@ class OrientationAttendance(Admin):
     __view_url__ = 'lms.orientation_attendance'
 
 
-class Expenses(Admin):
+class Expenses(Base, Admin):
     meta = {
-        'collection': 'lms_inventories'
+        'collection': 'lms_expenses'
     }
+    
     __tablename__ = 'lms_expenses'
     __amname__ = 'expenses'
     __amdescription__ = 'Operating Expenses'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.expenses'
+
+    quantity = db.IntField()
+    inventory = db.ReferenceField('Inventory')
+    uom = db.StringField()
+    price = db.DecimalField()
+    total = db.DecimalField()
 
 
 class Dashboard(Admin):
