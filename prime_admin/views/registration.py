@@ -127,7 +127,7 @@ def register():
         client.branch = Branch.objects.get(id=form.branch.data)
         client.batch_number = Batch.objects.get(id=form.batch_number.data)
         
-        if client.status == "pre_registered":
+        if client.status == "pre_registered" and client.is_oriented is False :
             client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
 
         elif client.status == "oriented":
@@ -152,7 +152,7 @@ def register():
         client.book = request.form['books']
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
-        contact_person = ContactPerson.objects.get(id=client.contact_person)
+        contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
 
         earnings = 0
         savings = 0
@@ -212,7 +212,7 @@ def get_client(client_id):
 
     client = Registration.objects.get(id=client_id)
 
-    if client.status == "pre_registered":
+    if client.status == "pre_registered" and client.is_oriented is False:
         _data = {
             'id': str(client.id),
             'fname': client.fname,
@@ -224,16 +224,35 @@ def get_client(client_id):
             'email': client.email,
             'address': client.address,
             'branch': client.branch,
-            'status': client.status
+            'status': client.status,
+            'is_oriented': client.is_oriented
+        }
+    elif client.status == "pre_registered" and client.is_oriented is True:
+        _data = {
+            'id': str(client.id),
+            'fname': client.fname,
+            'lname': client.lname,
+            'mname': client.mname,
+            'suffix': client.suffix,
+            'birth_date': client.birth_date,
+            'contact_number': client.contact_number,
+            'email': client.email,
+            'address': client.address,
+            'branch': client.branch,
+            'status': client.status,
+            'contact_person': str(client.contact_person.id),
+            'is_oriented': client.is_oriented
         }
     else:
         _data = {
             'id': str(client.id),
             'fname': client.fname,
             'lname': client.lname,
+            'mname': client.mname if client.mname is not None else '',
             'contact_number': client.contact_number,
             'status': client.status,
             'contact_person': str(client.contact_person.id),
+            'is_oriented': client.is_oriented
         }
 
     response = {

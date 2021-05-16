@@ -43,7 +43,10 @@ $(document).ready(function(){
                 $("#lname").prop('readonly', true);
                 $("#fname").prop('readonly', true);
                 $("#contact_no").prop('readonly', true);
-                $("#contact_person").prop('disabled', true);
+                
+                if(response.data.status != "pre_registered"){
+                    $("#contact_person").prop('disabled', true);
+                }
             }
         });
 
