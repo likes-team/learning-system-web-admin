@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
 from flask_cors import cross_origin
+from flask_mongoengine import json
 from app import db
 from app.core.models import CoreModel
 from app.core.logging import create_log
@@ -84,6 +85,7 @@ def create_user(**kwargs):
         user.lname = form.lname.data
         user.email = form.email.data if form.email.data != '' else None
         user.role = Role.objects.get(id=form.role.data)
+        user.role = user.role.name
         user.set_password("password")
         user.is_superuser = False
         user.created_by = "{} {}".format(current_user.fname,current_user.lname)
@@ -131,6 +133,7 @@ def edit_user(oid,**kwargs):
         user.lname = form.lname.data
         user.email = form.email.data if not form.email.data == '' else None
         user.role = Role.objects.get(id=form.role.data)
+        user.role = user.role.name
         user.updated_at = datetime.now()
         user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
 
@@ -231,3 +234,16 @@ def edit_permission(oid1, oid2):
     resp.status_code = 200
 
     return resp
+
+
+@bp_auth.route('/users/get-role-name', methods=['GET'])
+@cross_origin()
+def get_role_name():
+    response = jsonify({
+        'roleName': current_user.role_name
+    })
+
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.status_code = 200
+
+    return response

@@ -47,48 +47,56 @@ class OrientationAttendanceForm(AdminTableForm):
 
 
 class InventoryForm(AdminTableForm):
+    from prime_admin.models import Branch
+
     __table_columns__ = ['Maintaining Materials', 'Description', 'Released Materials', 'Remaining Materials','Total of replacement Materials']
     __heading__ = "Inventories"
 
     description = AdminField(label="Description", validators=[DataRequired()])
-    maintaining = AdminField(label="Maintaining Materials", validators=[DataRequired()], type='number')
-    remaining = AdminField(label="Remaining Materials", validators=[DataRequired()], type='number')
+    maintaining = AdminField(label="Maintaining Materials", required=False, type='number')
+    remaining = AdminField(label="Stocks", required=False, type='number')
     price = AdminField(label="Price", validators=[DataRequired()], type='decimal')
+    branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
 
     @property
     def fields(self):
         return [
-            [self.description, self.price],
-            [self.maintaining, self.remaining]
+            [self.branch, self.description],
+            [self.price, self.maintaining, self.remaining]
             ]
 
 
 
 class BatchForm(AdminTableForm):
+    from prime_admin.models import Branch
 
-    __table_columns__ = ['Status', 'Number', 'created by','Created at', 'updated by','updated at']
+    __table_columns__ = ['Status', 'Number', 'Branch', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Batches"
 
     number = AdminField(label="Number", validators=[DataRequired()], type="number")
+    branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
 
     @property
     def fields(self):
         return [
-            [self.number]
+            [self.number, self.branch]
             ]
 
 
 class BatchEditForm(AdminEditForm):
+    from prime_admin.models import Branch
 
     __heading__ = "Update existing data"
 
     number = AdminField(label="Number", validators=[DataRequired()])
+    branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
 
     @property
     def fields(self):
         return [
-            [self.number]
+            [self.number, self.branch]
             ]
+
 
 
 class SecretaryForm(AdminTableForm):

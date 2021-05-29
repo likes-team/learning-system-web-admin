@@ -99,12 +99,10 @@ def get_dtbl_earnings_members():
 
     for registration in registrations:
 
-        branch = Branch.objects.get(id=registration.branch).name
-
         _table_data.append([
-            branch,
+            registration.branch.name if registration.branch is not None else '',
             registration.full_name,
-            registration.batch_number.number,
+            registration.batch_number.number if registration.batch_number is not None else '',
             registration.schedule,
             "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
         ])
