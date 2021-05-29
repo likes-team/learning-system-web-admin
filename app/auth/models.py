@@ -43,6 +43,7 @@ class User(UserMixin, Base, Admin):
     role = db.ReferenceField('Role')
     is_admin = db.BooleanField(default=False)
     branch = db.ReferenceField('Branch')
+    role_name = db.StringField()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

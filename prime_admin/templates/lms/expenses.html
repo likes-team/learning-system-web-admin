@@ -20,7 +20,7 @@
                     <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    Expenses
+                    Operating Expenses
                     <div class="page-title-subheading">
                     </div>
                 </div>
@@ -38,18 +38,23 @@
     </div>
 
     <div class="main-card mb-3 card">
-        <div class="card-header"><i class="header-icon lnr-gift icon-gradient bg-grow-early">
-        </i>Branch Name
+        <div class="card-header">
+        <div id="card_header_label">ALL BRANCHES</div>
+
         <div class="btn-actions-pane-right">
             <div class="nav">
 
                 <div class="dropleft btn-group">
-                    <button id="btnMunicipalityLabel" type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
-                        Select Branch
+                    <button value="all" id="btn_branch_label" type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                        ALL BRANCHES
                     </button>
-                    <div id="divMunicipalityButtons" tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu" x-placement="left-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
-                        <button type="button" tabindex="0" class="dropdown-item btn-municipality">CEBU</button>
-                    </div>
+                    <div id="div_branches_buttons" tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu" x-placement="left-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
+                        <button value="all" type="button" tabindex="0"
+                        class="dropdown-item btn-branch">All Branches</button>
+                        {% for branch in TABLE_OPTIONS['branches'] %}
+                        <button value="{{branch.id}}" type="button" tabindex="0"
+                            class="dropdown-item btn-branch">{{branch.name}}</button>
+                        {% endfor %}                    </div>
                 </div>
             </div>
         </div>
@@ -67,7 +72,7 @@
                                 <div class="widget-subheading"></div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span>₱ 0.00</span></div>
+                                <div class="widget-numbers text-success"><span id="expenses_today">₱ 0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -83,7 +88,7 @@
                 <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="address" class="">Date From</label>
-                        <input name="address" id="address" type="date" class="form-control">
+                        <input disabled name="address" id="address" type="date" class="form-control">
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -96,7 +101,7 @@
                 <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="address" class="">Date From</label>
-                        <input name="address" id="address" type="date" class="form-control">
+                        <input disabled name="address" id="address" type="date" class="form-control">
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -126,11 +131,16 @@
         <div class="card-body">
             <div class="form-row">
              
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="position-relative form-group">
                         <label for="description" class="">Description</label>
                         <select name="description" id="description" class="form-control" required>
                             <option value="all">All</option>
+                            {% for util in TABLE_OPTIONS['utilities'] %}
+                            <option value="{{ util.id }}">
+                                {{util.description}}
+                            </option>
+                            {% endfor %}
                         </select>
                         <div class="valid-feedback">
                             Looks good!
@@ -141,14 +151,14 @@
                     </div>
                 </div>
 
-                <div class="col-md-8"></div>
+                <div class="col-md-6"></div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="position-relative form-group">
-                        <label for="balance" class="">Total</label>
+                        <label for="total" class="">Total</label>
                         <div class="input-group">
                             <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                            <input readonly="" placeholder="Php" step="1" type="number" class="form-control">
+                            <input id="total" readonly="" placeholder="Php" step="1" type="number" class="form-control">
                             <div class="input-group-append"><span class="input-group-text">.00</span></div>
                         </div>
                     </div>

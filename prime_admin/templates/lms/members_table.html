@@ -130,7 +130,13 @@
                         <div class="position-relative form-group">
                             <label for="branch" class="">Branch</label>
                             <select name="branch" id="branch" class="form-control" required>
-                                <option value="all">All</option>
+                                
+                                {% if current_user.role_name == "Secretary" %}
+                                    <!-- Pass -->
+                                {% else %}
+                                    <option value="all">All</option>
+                                {% endif %}
+
                                 {% for branch in TABLE_OPTIONS['branches'] %}
                                 <option value="{{ branch.id }}">
                                     {{ branch.name }}

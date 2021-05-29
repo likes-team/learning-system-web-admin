@@ -6,7 +6,7 @@ from prime_admin.forms import ExpensesForm, RegistrationForm, StudentForm, Teach
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Expenses, Inventory
+from prime_admin.models import Branch, Expenses, Inventory
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -21,6 +21,10 @@ def expenses():
         {'lms.static': 'js/expenses.js'}
     ]
 
+    utilities = Inventory.objects
+    
+    branches = Branch.objects
+
     return admin_table(
         Expenses,
         fields=[],
@@ -32,6 +36,8 @@ def expenses():
         scripts=scripts,
         table_template='lms/expenses.html',
         create_url='lms.create_expenses',
+        utilities=utilities,
+        branches=branches
     )
 
 
@@ -52,7 +58,7 @@ def create_expenses():
         _expenses.quantity = decimal.Decimal(form.quantity.data)
         _expenses.price = decimal.Decimal(form.price.data)
         _expenses.total = _expenses.quantity * _expenses.price
-
+        _expenses.branch = _expenses.inventory.branch
         _expenses.created_by = "{} {}".format(current_user.fname,current_user.lname)
         
         _expenses.save()
@@ -75,37 +81,35 @@ def get_dtbl_expenses():
     description_id = request.args.get('description')
     # schedule = request.args.get('schedule')
 
-    if branch_id != '':
-        # _expenses = Expenses.objects(branch=branch_id)[start:length]
-        # sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(status='registered').filter(branch=branch_id).sum('amount')
-        _expenses = Expenses.objects[start:length]
+    if branch_id != 'all':
+        _expenses = Expenses.objects(branch=branch_id)[start:length]
+        expenses_today = Expenses.objects(branch=branch_id).filter(created_at__gte=datetime.now().date()).sum('total')
     else:
         _expenses = Expenses.objects[start:length]
-        # sales_today = Registration.objects(status='registered').filter(created_at__gte=datetime.now().date()).sum('amount')
+        expenses_today = Expenses.objects(created_at__gte=datetime.now().date()).sum('total')
 
     if description_id != 'all':
-        print("TESTSET")
         _expenses = _expenses.filter(inventory=description_id)
     # if schedule != 'all':
     #     registrations = registrations.filter(schedule=schedule)
-    print(_expenses)
 
     _table_data = []
-
-    for exp in _expenses:
-        _table_data.append([
-            exp.created_at,
-            exp.inventory.description,
-            str(exp.price),
-            exp.quantity,
-            str(exp.total),
-        ])
+    
+    try:
+        for exp in _expenses:
+            _table_data.append([
+                exp.created_at,
+                exp.inventory.description if exp.inventory is not None else '',
+                str(exp.price),
+                exp.quantity,
+                str(exp.total),
+            ])
+    except Exception:
+        pass
 
     # total_installment = registrations.filter(payment_mode='installment').sum('amount')
     # total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
-    # total_payment = registrations.sum('amount')
-
-    # print(sales_today)
+    total = _expenses.sum('total')
 
     response = {
         'draw': draw,
@@ -113,9 +117,8 @@ def get_dtbl_expenses():
         'recordsFiltered': _expenses.count(),
         'data': _table_data,
         # 'totalInstallment': total_installment,
-        # 'totalFullPayment': total_full_payment,
-        # 'totalPayment': total_payment,
-        # 'salesToday': sales_today
+        'expensesToday': expenses_today,
+        'total': total,
     }
 
     return jsonify(response)

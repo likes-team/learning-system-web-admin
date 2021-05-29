@@ -1,14 +1,12 @@
 import decimal
-
-from flask.json import jsonify
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, ContactPerson, Registration
-from flask import redirect, url_for, request, current_app, flash
-from app import db
+from flask import redirect, url_for, request, current_app, flash, jsonify, abort
+from app import db, mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128
 
@@ -16,6 +14,7 @@ from bson.decimal128 import Decimal128
 @bp_lms.route('/register', methods=['GET', 'POST'])
 @login_required
 def register():
+
     registration_generated_number = ""
     
     last_registration_number = Registration.objects().order_by('-registration_number').first()
@@ -31,11 +30,15 @@ def register():
     form = RegistrationForm()
 
     if request.method == "GET":
-        
-        contact_persons = ContactPerson.objects
-        branches = Branch.objects
+        if current_user.role_name == "Secretary":
+            branches = Branch.objects(id=current_user.branch.id)
+            contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+            form.batch_number.data = Batch.objects(active=True).filter(branch=current_user.branch).all()
 
-        form.batch_number.data = Batch.objects(active=True)
+        else:
+            branches = Branch.objects
+            contact_persons = ContactPerson.objects
+            form.batch_number.data = Batch.objects(active=True)
 
         data = {
             'registration_generated_number': registration_generated_number,
@@ -91,14 +94,32 @@ def register():
                 client.balance = 7000 - client.amount
             else:
                 client.balance = 7800 - client.amount
-
-            client.book = request.form['books']
+            
             client.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
-            # contact_person = ContactPerson.objects.get(id=)
+            books = request.form.getlist('books')
+            
+            client.books = {
+                'book_none': True if 'book_none' in books else False,
+                'volume1': True if 'volume1' in books else False,
+                'volume2': True if 'volume2' in books else False,
+            }
+
+            uniforms = request.form.getlist('uniforms')
+            
+            client.uniforms = {
+                'uniform_none': True if 'uniform_none' in uniforms else False,
+                'uniform_xs': True if 'uniform_xs' in uniforms else False,
+                'uniform_s': True if 'uniform_s' in uniforms else False,
+                'uniform_m': True if 'uniform_m' in uniforms else False,
+                'uniform_l': True if 'uniform_l' in uniforms else False,
+                'uniform_xl': True if 'uniform_xl' in uniforms else False,
+                'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+            }
 
             earnings = 0
             savings = 0
+            
             if client.payment_mode == "full_payment":
                 earnings = 7000 * decimal.Decimal(0.14286)
             elif client.payment_mode == "installment":
@@ -149,13 +170,33 @@ def register():
         else:
             client.balance = 7800 - client.amount
 
-        client.book = request.form['books']
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
         contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
 
+        books = request.form.getlist('books')
+        
+        client.books = {
+            'book_none': True if 'book_none' in books else False,
+            'volume1': True if 'volume1' in books else False,
+            'volume2': True if 'volume2' in books else False,
+        }
+
+        uniforms = request.form.getlist('uniforms')
+        
+        client.uniforms = {
+            'uniform_none': True if 'uniform_none' in uniforms else False,
+            'uniform_xs': True if 'uniform_xs' in uniforms else False,
+            'uniform_s': True if 'uniform_s' in uniforms else False,
+            'uniform_m': True if 'uniform_m' in uniforms else False,
+            'uniform_l': True if 'uniform_l' in uniforms else False,
+            'uniform_xl': True if 'uniform_xl' in uniforms else False,
+            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+        }
+
         earnings = 0
         savings = 0
+
         if client.payment_mode == "full_payment":
             earnings = 7000 * decimal.Decimal(0.14286)
         elif client.payment_mode == "installment":
@@ -185,7 +226,14 @@ def register():
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients-registration', methods=['GET'])
 def get_pre_registered_clients_registration():
 
-    clients = Registration.objects(status__ne="registered")
+    if current_user.role_name == "Secretary":
+        clients = Registration.objects(status__ne="registered").filter(branch=current_user.branch)
+
+    elif current_user.role_name == "Admin":
+        clients = Registration.objects(status__ne="registered")
+
+    else:
+        return abort(404)
 
     _data = []
 
@@ -209,7 +257,7 @@ def get_pre_registered_clients_registration():
 
 @bp_lms.route('/api/clients/<string:client_id>', methods=['GET'])
 def get_client(client_id):
-
+    
     client = Registration.objects.get(id=client_id)
 
     if client.status == "pre_registered" and client.is_oriented is False:

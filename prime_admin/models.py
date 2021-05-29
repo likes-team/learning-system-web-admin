@@ -35,7 +35,8 @@ class Registration(Base, Admin):
     contact_number = db.StringField()
     email = db.StringField()
     birth_date = db.DateField()
-    book = db.StringField()
+    books = db.DictField()
+    uniforms = db.DictField()
     payment_mode = db.StringField()
     status = db.StringField()
     is_oriented = db.BooleanField()
@@ -75,7 +76,8 @@ class Batch(Base, Admin):
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.batches'
 
-    number = db.IntField(unique=True)
+    number = db.StringField(unique=True)
+    branch = db.ReferenceField('Branch')
 
 
 class ContactPerson(Base, Admin):
@@ -114,6 +116,7 @@ class Inventory(Base, Admin):
     remaining = db.IntField()
     total_replacement = db.IntField()
     type = db.StringField()
+    branch = db.ReferenceField('Branch')
 
     @property
     def name(self):
@@ -168,6 +171,7 @@ class Expenses(Base, Admin):
     uom = db.StringField()
     price = db.DecimalField()
     total = db.DecimalField()
+    branch = db.ReferenceField('Branch')
 
 
 class Dashboard(Admin):
@@ -191,3 +195,11 @@ class Supplies(Admin):
     __amdescription__ = 'Supplies'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.supplies'
+
+
+class Utilities(Admin):
+    __tablename__ = 'lms_inventories'
+    __amname__ = 'utilities'
+    __amdescription__ = 'Utilities'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.utilities'

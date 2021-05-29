@@ -1,10 +1,11 @@
+from prime_admin.views.branches import branches
 from flask.json import jsonify
 from app.auth.models import Role, User
 from prime_admin.forms import BatchEditForm, BatchForm, PartnerForm, SecretaryEditForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch
+from prime_admin.models import Batch, Branch
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -23,6 +24,7 @@ def batches():
             batch.id,
             batch.active,
             batch.number,
+            batch.branch.name if batch.branch is not None else '',
             batch.created_by,
             batch.created_at,
             batch.updated_by,
@@ -56,7 +58,10 @@ def get_view_batch_data():
 
     _data = Batch.objects(id=_id).values_list(_column)
 
-    response = jsonify(result=str(_data[0]),column=_column)
+    if _column == "branch":
+        response = jsonify(result=str(_data[0].id),column=_column)
+    else:
+        response = jsonify(result=str(_data[0]),column=_column)
 
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.status_code = 200
@@ -77,6 +82,7 @@ def create_batch():
         batch = Batch()
 
         batch.number = form.number.data
+        batch.branch = Branch.objects.get_or_404(id=form.branch.data)
         batch.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
         batch.save()
@@ -112,6 +118,7 @@ def edit_batch(oid):
         
     try:
         batch.number = form.number.data
+        batch.branch = Branch.objects.get_or_404(id=form.branch.data)
         batch.updated_at = datetime.now()
         batch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         

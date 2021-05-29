@@ -44,7 +44,7 @@
             <ul class="header-menu nav">
             {% for module in MODULES %}
                 {% if not module.background_app %}
-                <li class="nav-item">
+                <li id="module_header_{{module.module_name}}" class="nav-item">
                     <a href="{{ url_for(module.module_link) }}" class="nav-link">
                         <i class="nav-link-icon fa {{ module.module_icon }} {% if module.module_name == VDATA['module'].module_name %}icon-gradient bg-malibu-beach{% endif %}"> </i>
                         {{ module.module_short_description }}
