@@ -241,7 +241,7 @@
                 <h5 class="card-title">Payment Information</h5>
               
                 <div class="form-row">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="payment_modes" class="">Mode of Payment</label>
                             <div>
@@ -251,20 +251,61 @@
                                 <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio2" name="payment_modes" value="installment" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio2">
                                     Installment (7800)
                                 </label></div>
+                                <div class="custom-radio custom-control"><input required type="radio" id="exampleCustomRadio3" name="payment_modes" value="premium" class="custom-control-input"><label class="custom-control-label" for="exampleCustomRadio3">
+                                    Premium Payment (8500)
+                                </label></div>
                             </div>
                         </div>
                     </div>
+     
+                    <div class="col-md-3">
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="amount" class="">Enter Amount</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                                <input required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            </div>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid amount
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="balance" class="">Balance</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                                <input readonly id="balance" placeholder="Balance" step="1" type="number" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">Other Information</h5>
+                <div class="form-row">
                     <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="books" class="">Select Book</label>
                             <div>
-                                <div class="custom-radio custom-control"><input type="checkbox" id="book_none" name="books" value="book_none "class="custom-control-input"><label class="custom-control-label" for="book_none">
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book_none" name="books" value="book_none "class="custom-control-input"><label class="custom-control-label" for="book_none">
                                     No book
                                 </label></div>
-                                <div class="custom-radio custom-control"><input type="checkbox" id="book1" name="books" value="volume1" class="custom-control-input"><label class="custom-control-label" for="book1">
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book1" name="books" value="volume1" class="custom-control-input"><label class="custom-control-label" for="book1">
                                     Volume 1
                                 </label></div>
-                                <div class="custom-radio custom-control"><input type="checkbox" id="book2" name="books" value="volume2" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book2" name="books" value="volume2" class="custom-control-input"><label class="custom-control-label" for="book2">
                                     Volume 2
                                 </label></div>
                             </div>
@@ -287,7 +328,7 @@
                         </div>
                         
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="uniforms" class="">&nbsp</label>
                             <div>
@@ -306,29 +347,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="amount" class="">Enter Amount</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                                <input required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
-                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
-                            </div>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a valid amount
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="balance" class="">Balance</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                                <input readonly id="balance" placeholder="Balance" step="1" type="number" class="form-control">
-                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            <label for="others" class="">Others</label>
+                            <div>
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_card" name="others" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
+                                    ID Card
+                                </label></div>
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_lace" name="others" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
+                                    ID Lace
+                                </label></div>
                             </div>
                         </div>
                     </div>

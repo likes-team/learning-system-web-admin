@@ -26,7 +26,12 @@ def earnings():
         {'lms.static': 'js/earnings.js'}
     ]
 
-    batch_numbers = Batch.objects()
+    if current_user.role_name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+        batch_numbers = Batch.objects(branch=current_user.branch.id)
+    else:
+        branches = Branch.objects()
+        batch_numbers = Batch.objects()
 
     return admin_table(
         Earning,
@@ -39,7 +44,7 @@ def earnings():
         table_template='lms/earnings.html',
         scripts=_scripts,
         marketers=ContactPerson.objects,
-        branches=Branch.objects,
+        branches=branches,
         batch_numbers=batch_numbers,
     )
 
@@ -58,7 +63,7 @@ def get_dtbl_earnings_members():
     total_savings = 0
     branches_total_earnings = []
 
-    if contact_person_id == '':
+    if contact_person_id == 'all':
        registrations = Registration.objects[start:length]
     else:
         registrations = Registration.objects(contact_person=contact_person_id)[start:length]
@@ -73,9 +78,9 @@ def get_dtbl_earnings_members():
                 total_earnings = Decimal128(total_earnings.to_decimal() + earning['earnings'].to_decimal())
                 total_savings = Decimal128(total_savings.to_decimal() + earning['savings'].to_decimal())
                 
-                if not any(d['id'] == earning['branch'] for d in branches_total_earnings):
+                if not any(d['id'] == earning['branch'].id for d in branches_total_earnings):
 
-                    branch = Branch.objects.get(id=earning['branch'])
+                    branch = Branch.objects.get(id=earning['branch'].id)
 
                     branches_total_earnings.append(
                         {

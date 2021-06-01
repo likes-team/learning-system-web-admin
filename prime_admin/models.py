@@ -126,7 +126,7 @@ class Inventory(Base, Admin):
 class Member(Admin):
     __tablename__ = 'lms_members'
     __amname__ = 'member'
-    __amdescription__ = 'Clients'
+    __amdescription__ = 'Student Records'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.members'
 

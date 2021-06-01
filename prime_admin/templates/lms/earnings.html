@@ -46,13 +46,15 @@
                 <div class="nav">
 
                     <div class="dropleft btn-group">
-                        <button id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
+                        <button value="all" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
                             data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
-                            Select Markerter
+                            ALL MARKETERS
                         </button>
                         <div id="div_marketer_buttons" tabindex="-1" role="menu" aria-hidden="true"
                             class="dropdown-menu" x-placement="left-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
+                            <button value="all" type="button" tabindex="0"
+                            class="dropdown-item btn-marketer">All Marketers</button>
                             {% for marketer in TABLE_OPTIONS['marketers'] %}
                             <button value="{{marketer.id}}" type="button" tabindex="0"
                                 class="dropdown-item btn-marketer">{{marketer.fname}}</button>
@@ -125,7 +127,12 @@
                     <div class="position-relative form-group">
                         <label for="branch" class="">Branch</label>
                         <select name="branch" id="branch" class="form-control" required>
-                            <option value="all">All</option>
+                            {% if current_user.role_name == "Secretary" %}
+                            <!-- Pass -->
+                            {% else %}
+                                <option value="all">All</option>
+                            {% endif %}
+
                             {% for branch in TABLE_OPTIONS['branches'] %}
                             <option value="{{ branch.id }}">
                                 {{ branch.name }}

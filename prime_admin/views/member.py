@@ -43,9 +43,9 @@ def members():
         fields=fields,
         table_data=[],
         table_columns=_table_columns,
-        heading='Members',
+        heading='Student Records',
         subheading="",
-        title='Members',
+        title='Student Records',
         scripts=scripts,
         modals=modals,
         table_template="lms/members_table.html",
@@ -66,11 +66,10 @@ def get_dtbl_members():
     schedule = request.args.get('schedule')
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered')[start:length]
+        registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
         sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(status='registered').filter(branch=branch_id).sum('amount')
-
     else:
-        registrations = Registration.objects(status='registered')[start:length]
+        registrations = Registration.objects(status='registered').skip(start).limit(length)
         sales_today = Registration.objects(status='registered').filter(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
@@ -127,6 +126,15 @@ def get_dtbl_members():
                 uniforms = "XXL"
         else:
             uniforms = "None"
+        
+        payment_mode = ""
+        if registration.payment_mode == 'full_payment':
+            payment_mode = "Full Payment"
+        elif registration.payment_mode == 'installment':
+            payment_mode = "Installment"
+        elif registration.payment_mode == 'premium':
+            payment_mode = "Premium Payment"
+
 
         _table_data.append([
             str(registration.id),
@@ -136,7 +144,7 @@ def get_dtbl_members():
             registration.batch_number.number if registration.batch_number is not None else "",
             branch.name if branch is not None else '',
             registration.schedule,
-            "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
+            payment_mode,
             str(registration.amount),
             str(registration.balance),
             paid,
@@ -150,8 +158,6 @@ def get_dtbl_members():
     total_installment = registrations.filter(payment_mode='installment').sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
     total_payment = registrations.sum('amount')
-
-    print(sales_today)
 
     response = {
         'draw': draw,

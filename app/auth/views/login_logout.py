@@ -38,8 +38,12 @@ def login():
     
     next_page = request.args.get('next')
     
+    if current_user.role_name == "Secretary":
+        return redirect(url_for('lms.members'))
+
     if not next_page or url_parse(next_page).netloc != '':
         next_page = url_for(current_app.config['AUTH']['LOGIN_REDIRECT_URL'])
+    
     return redirect(next_page)
 
 
