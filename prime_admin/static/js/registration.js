@@ -42,12 +42,44 @@ $(document).ready(function(){
             $("#amount").prop('readonly', true);
 
             balance = 7000 - $("#amount").val();
+
+            $('#book_none').prop('checked', false);
+            $('#book1').prop('checked', true);
+            $('#book2').prop('checked', true);
+
+            $("#uniform_m").prop("checked", true);
+
+            $('#id_card').prop('checked', false);
+            $('#id_lace').prop('checked', false);
         }
         else if (this.value == 'installment') {
             $("#amount").val(0);
             $("#amount").prop('readonly', false);
 
             balance = 7800 - $("#amount").val();
+
+            $('#book_none').prop('checked', true);
+            $('#book1').prop('checked', false);
+            $('#book2').prop('checked', false);
+
+            $("#uniform_none").prop("checked", true);
+
+            $('#id_card').prop('checked', false);
+            $('#id_lace').prop('checked', false);
+        } else if(this.value == 'premium'){
+            $("#amount").val(8500);
+            $("#amount").prop('readonly', true);
+
+            balance = 8500 - $("#amount").val();
+
+            $('#book_none').prop('checked', false);
+            $('#book1').prop('checked', true);
+            $('#book2').prop('checked', true);
+
+            $("#uniform_m").prop("checked", true);
+
+            $('#id_card').prop('checked', true);
+            $('#id_lace').prop('checked', true);
         }
 
         $("#balance").val(balance);
