@@ -45,7 +45,7 @@ $(document).ready(function(){
 
             $('#book_none').prop('checked', false);
             $('#book1').prop('checked', true);
-            $('#book2').prop('checked', true);
+            $('#book2').prop('checked', false);
 
             $("#uniform_m").prop("checked", true);
 
