@@ -92,6 +92,8 @@ def register():
 
             if client.payment_mode == "full_payment":
                 client.balance = 7000 - client.amount
+            elif client.payment_mode == "premium":
+                client.balance = 8500 - client.amount
             else:
                 client.balance = 7800 - client.amount
             
@@ -167,6 +169,8 @@ def register():
 
         if client.payment_mode == "full_payment":
             client.balance = 7000 - client.amount
+        elif client.payment_mode == "premium":
+            client.balance = 8500 - client.amount
         else:
             client.balance = 7800 - client.amount
 
