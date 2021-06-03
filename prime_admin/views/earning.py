@@ -29,9 +29,11 @@ def earnings():
     if current_user.role_name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
+        marketers = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
+        marketers = ContactPerson.objects()
 
     return admin_table(
         Earning,
@@ -43,7 +45,7 @@ def earnings():
         title='Earnings',
         table_template='lms/earnings.html',
         scripts=_scripts,
-        marketers=ContactPerson.objects,
+        marketers=marketers,
         branches=branches,
         batch_numbers=batch_numbers,
     )
@@ -64,9 +66,36 @@ def get_dtbl_earnings_members():
     branches_total_earnings = []
 
     if contact_person_id == 'all':
-       registrations = Registration.objects[start:length]
+        registrations = Registration.objects.skip(start).limit(length)
+
+        contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+
+        with decimal.localcontext(D128_CTX):
+            for contact_person in contact_persons:
+                total_earnings = Decimal128('0.00')
+                total_savings = Decimal128('0.00')
+
+                for earning in contact_person.earnings:
+                    total_earnings = Decimal128(total_earnings.to_decimal() + earning['earnings'].to_decimal())
+                    total_savings = Decimal128(total_savings.to_decimal() + earning['savings'].to_decimal())
+                    
+                    if not any(d['id'] == str(earning['branch'].id) for d in branches_total_earnings):
+                        branch = Branch.objects.get(id=earning['branch'].id)
+
+                        branches_total_earnings.append(
+                            {
+                                'id': str(earning['branch'].id),
+                                'name': branch.name,
+                                'totalEarnings': earning['earnings']
+                            }
+                        )
+                    else:
+                        for x in branches_total_earnings:
+                            if x['id'] == earning['branch']:
+                                x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning['earnings'].to_decimal())
+
     else:
-        registrations = Registration.objects(contact_person=contact_person_id)[start:length]
+        registrations = Registration.objects(contact_person=contact_person_id).skip(start).limit(length)
 
         contact_person = ContactPerson.objects.get(id=contact_person_id)
 
@@ -78,13 +107,12 @@ def get_dtbl_earnings_members():
                 total_earnings = Decimal128(total_earnings.to_decimal() + earning['earnings'].to_decimal())
                 total_savings = Decimal128(total_savings.to_decimal() + earning['savings'].to_decimal())
                 
-                if not any(d['id'] == earning['branch'].id for d in branches_total_earnings):
-
+                if not any(d['id'] == str(earning['branch'].id) for d in branches_total_earnings):
                     branch = Branch.objects.get(id=earning['branch'].id)
 
                     branches_total_earnings.append(
                         {
-                            'id': earning['branch'],
+                            'id': str(earning['branch'].id),
                             'name': branch.name,
                             'totalEarnings': earning['earnings']
                         }
@@ -103,7 +131,6 @@ def get_dtbl_earnings_members():
     _table_data = []
 
     for registration in registrations:
-
         _table_data.append([
             registration.branch.name if registration.branch is not None else '',
             registration.full_name,
@@ -117,7 +144,6 @@ def get_dtbl_earnings_members():
     for branch in branches_total_earnings:
         branch['totalEarnings'] = str(branch['totalEarnings'])
 
-    
     response = {
         'draw': draw,
         'recordsTotal': registrations.count(),
