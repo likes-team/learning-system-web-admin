@@ -21,7 +21,7 @@ def register():
 
     date_now = datetime.now()
 
-    if last_registration_number.registration_number:
+    if last_registration_number:
         
         registration_generated_number = generate_number(date_now, last_registration_number.registration_number)
     else:

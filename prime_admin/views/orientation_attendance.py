@@ -34,7 +34,9 @@ def orientation_attendance():
             client.contact_person.name,
             ""
         ))
+    
     print(_table_data)
+
     contact_persons = ContactPerson.objects
     branches = Branch.objects
 
