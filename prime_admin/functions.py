@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 
-def generate_number(date_now,lID):
+def generate_number(date_now, lID):
     generated_number = ""
 
     if 1 <= lID < 9:
