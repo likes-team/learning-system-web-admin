@@ -17,12 +17,12 @@ def register():
 
     registration_generated_number = ""
     
-    last_registration_number = Registration.objects().order_by('-registration_number').first()
+    last_registration_number = Registration.objects(status="registered").order_by('-registration_number').first()
 
     date_now = datetime.now()
 
     if last_registration_number:
-        
+        print(last_registration_number)
         registration_generated_number = generate_number(date_now, last_registration_number.registration_number)
     else:
         registration_generated_number = str(date_now.year) + '%02d' % date_now.month + "0001"
