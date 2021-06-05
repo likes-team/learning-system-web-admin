@@ -73,7 +73,7 @@ class BatchForm(AdminTableForm):
     __table_columns__ = ['Status', 'Number', 'Branch', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Batches"
 
-    number = AdminField(label="Number", validators=[DataRequired()], type="number")
+    number = AdminField(label="Number", validators=[DataRequired()])
     branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
 
     @property

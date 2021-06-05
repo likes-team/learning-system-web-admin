@@ -1,11 +1,11 @@
 from prime_admin.forms import OrientationAttendanceForm
 from flask.globals import request
 from flask.helpers import flash, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, OrientationAttendance, Registration
+from prime_admin.models import Branch, ContactPerson, OrientationAttendance, Registration, Batch
 from flask import jsonify
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
@@ -35,10 +35,15 @@ def orientation_attendance():
             ""
         ))
     
-    print(_table_data)
-
     contact_persons = ContactPerson.objects
     branches = Branch.objects
+
+    if current_user.role_name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+        contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+    else:
+        branches = Branch.objects
+        contact_persons = ContactPerson.objects
 
     scripts = [
         {'lms.static': 'js/orientation_attendance.js'},
@@ -92,7 +97,6 @@ def orient():
     print(form.contact_person.data)
     client_id = request.form['client_id']
     try:
-
         if client_id != '':
             client = Registration.objects.get(id=client_id)
 
@@ -101,21 +105,17 @@ def orient():
             client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
             client.orientator = None
             client.save()
-
-            flash("Added successfully!", 'success')
-            return redirect(url_for('lms.orientation_attendance'))
-
-        new_client = Registration()
-        new_client.fname = request.form['fname']
-        new_client.lname = request.form['lname']
-        new_client.contact_number = request.form['contact_no']
-        new_client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
-        new_client.date_oriented = datetime.now()
-        new_client.orientator = None
-        new_client.is_oriented = True
-        new_client.status = "oriented"
-        
-        new_client.save()
+        else:
+            new_client = Registration()
+            new_client.fname = request.form['fname']
+            new_client.lname = request.form['lname']
+            new_client.contact_number = request.form['contact_no']
+            new_client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
+            new_client.date_oriented = datetime.now()
+            new_client.orientator = None
+            new_client.is_oriented = True
+            new_client.status = "oriented"
+            new_client.save()
 
         flash("Added successfully!", 'success')
 

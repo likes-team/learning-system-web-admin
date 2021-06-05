@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, ContactPerson, Registration
+from app.auth.models import User
 from flask import redirect, url_for, request, current_app, flash, jsonify, abort
 from app import db, mongo
 from datetime import datetime
@@ -65,121 +66,50 @@ def register():
             title="Registration"
             )
 
+    # SAVE STUDENT DATA
     try:
         client_id = request.form['client_id']
+        earnings = 0
+        savings = 0
 
-        if client_id == '':
+        if client_id == '': # NO SELECTED CLIENT
             client = Registration()
-            client.registration_number = last_registration_number.registration_number + 1 if last_registration_number.registration_number is not None else 1
-            client.full_registration_number = registration_generated_number
-            client.schedule = form.schedule.data
-            client.branch = Branch.objects.get(id=form.branch.data)
-            client.batch_number = Batch.objects.get(id=form.batch_number.data)
             client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
             client.fname = form.fname.data
             client.mname = form.mname.data
             client.lname = form.lname.data
             client.suffix = form.suffix.data
             client.address = form.address.data
-            client.passport = form.passport.data
             client.contact_number = form.contact_number.data
             client.email = form.email.data
             client.birth_date = form.birth_date.data
-            client.status = "registered"
+        else: # HAS SELECTED CLIENT
+            client = Registration.objects.get(id=client_id)
 
-            client.amount = form.amount.data
-            client.payment_mode = request.form['payment_modes']
+            if client.status == "pre_registered" and client.is_oriented is False :
+                client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
 
-            if client.payment_mode == "full_payment":
-                client.balance = 7000 - client.amount
-            elif client.payment_mode == "premium":
-                client.balance = 8500 - client.amount
-            else:
-                client.balance = 7800 - client.amount
-            
-            client.created_by = "{} {}".format(current_user.fname,current_user.lname)
+            elif client.status == "oriented":
+                client.mname = form.mname.data
+                client.suffix = form.suffix.data
+                client.address = form.address.data
+                client.contact_number = form.contact_number.data
+                client.email = form.email.data
+                client.birth_date = form.birth_date.data
 
-            books = request.form.getlist('books')
-            
-            client.books = {
-                'book_none': True if 'book_none' in books else False,
-                'volume1': True if 'volume1' in books else False,
-                'volume2': True if 'volume2' in books else False,
-            }
-
-            uniforms = request.form.getlist('uniforms')
-            
-            client.uniforms = {
-                'uniform_none': True if 'uniform_none' in uniforms else False,
-                'uniform_xs': True if 'uniform_xs' in uniforms else False,
-                'uniform_s': True if 'uniform_s' in uniforms else False,
-                'uniform_m': True if 'uniform_m' in uniforms else False,
-                'uniform_l': True if 'uniform_l' in uniforms else False,
-                'uniform_xl': True if 'uniform_xl' in uniforms else False,
-                'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-            }
-
-            earnings = 0
-            savings = 0
-            
-            if client.payment_mode == "full_payment":
-                earnings = 7000 * decimal.Decimal(0.14286)
-            elif client.payment_mode == "installment":
-                earnings = client.amount * decimal.Decimal(0.125)
-                savings = 25.00
-
-            client.contact_person.earnings.append(
-                {
-                    'payment_mode': client.payment_mode,
-                    'savings': Decimal128(str(savings)),
-                    'earnings': Decimal128(str(earnings)),
-                    'branch': client.branch
-                }
-            )
-
-            client.save()
-            client.contact_person.save()
-
-            flash("Registered added successfully!", 'success')
-            return redirect(url_for('lms.members'))
-
-        client = Registration.objects.get(id=client_id)
-        client.registration_number = last_registration_number.registration_number + 1 if last_registration_number.registration_number is not None else 1
+        client.registration_number = last_registration_number.registration_number + 1 if last_registration_number is not None else 1
         client.full_registration_number = registration_generated_number
         client.schedule = form.schedule.data
         client.branch = Branch.objects.get(id=form.branch.data)
-        client.batch_number = Batch.objects.get(id=form.batch_number.data)
-        
-        if client.status == "pre_registered" and client.is_oriented is False :
-            client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
-
-        elif client.status == "oriented":
-            client.mname = form.mname.data
-            client.suffix = form.suffix.data
-            client.address = form.address.data
-            client.contact_number = form.contact_number.data
-            client.email = form.email.data
-            client.birth_date = form.birth_date.data
-        
+        client.batch_number = Batch.objects.get(id=form.batch_number.data) 
         client.passport = form.passport.data
         client.status = "registered"
-
         client.amount = form.amount.data
         client.payment_mode = request.form['payment_modes']
-
-        if client.payment_mode == "full_payment":
-            client.balance = 7000 - client.amount
-        elif client.payment_mode == "premium":
-            client.balance = 8500 - client.amount
-        else:
-            client.balance = 7800 - client.amount
-
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
-        contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
-
         books = request.form.getlist('books')
-        
+            
         client.books = {
             'book_none': True if 'book_none' in books else False,
             'volume1': True if 'volume1' in books else False,
@@ -187,7 +117,7 @@ def register():
         }
 
         uniforms = request.form.getlist('uniforms')
-        
+            
         client.uniforms = {
             'uniform_none': True if 'uniform_none' in uniforms else False,
             'uniform_xs': True if 'uniform_xs' in uniforms else False,
@@ -198,26 +128,50 @@ def register():
             'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
         }
 
-        earnings = 0
-        savings = 0
-
         if client.payment_mode == "full_payment":
+            client.balance = 7000 - client.amount
             earnings = 7000 * decimal.Decimal(0.14286)
         elif client.payment_mode == "installment":
+            client.balance = 7800 - client.amount
             earnings = client.amount * decimal.Decimal(0.125)
             savings = 25.00
+        elif client.payment_mode == 'premium':
+            client.balance = 8500 - client.amount
+            earnings = 8500 * decimal.Decimal(0.11765)
+            savings = 85.00
 
-        contact_person.earnings.append(
-            {
-                'payment_mode': client.payment_mode,
-                'savings': Decimal128(str(savings)),
-                'earnings': Decimal128(str(earnings)),
-                'branch': client.branch
-            }
-        )
+        if client_id == '': # NO SELECTED CLIENT
+            client.contact_person.earnings.append(
+                {
+                    'payment_mode': client.payment_mode,
+                    'savings': Decimal128(str(savings)),
+                    'earnings': Decimal128(str(earnings)),
+                    'branch': client.branch,
+                    'client': client,
+                    'date': datetime.now(),
+                    'registered_by': User.objects.get(id=str(current_user.id))
+                }
+            )
 
-        client.save()
-        contact_person.save()
+            client.save()
+            client.contact_person.save()
+            print("TESTTT!!!", earnings) # TO BE CONTINUED
+        else:
+            contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
+            contact_person.earnings.append(
+                {
+                    'payment_mode': client.payment_mode,
+                    'savings': Decimal128(str(savings)),
+                    'earnings': Decimal128(str(earnings)),
+                    'branch': client.branch,
+                    'client': client,
+                    'date': datetime.now(),
+                    'registered_by': User.objects.get(id=str(current_user.id))
+                }
+            )
+
+            client.save()
+            contact_person.save()
 
         flash("Registered added successfully!", 'success')
 
@@ -230,10 +184,10 @@ def register():
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients-registration', methods=['GET'])
 def get_pre_registered_clients_registration():
 
-    if current_user.role_name == "Secretary":
+    if current_user.role.name == "Secretary":
         clients = Registration.objects(status__ne="registered").filter(branch=current_user.branch)
 
-    elif current_user.role_name == "Admin":
+    elif current_user.role.name == "Admin":
         clients = Registration.objects(status__ne="registered")
 
     else:

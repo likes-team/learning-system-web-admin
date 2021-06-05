@@ -43,7 +43,7 @@ def batches():
         form=form,
         table_data=_table_data,
         create_url='lms.create_batch',
-        edit_url='lms.edit_batch',
+        edit_url=False,
         table_template='lms/branch_table.html',
         view_modal_url='/learning-management/get-view-batch-data',
         view_modal_template="lms/batch_view_modal.html",

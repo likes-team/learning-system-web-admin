@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, ContactPerson, Registration, Member
-from flask import redirect, url_for, request, current_app, flash, jsonify
+from flask import json, redirect, url_for, request, current_app, flash, jsonify
 from app import db
 from datetime import datetime
 
@@ -67,10 +67,10 @@ def get_dtbl_members():
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
-        sales_today = Registration.objects(created_at__gte=datetime.now().date()).filter(status='registered').filter(branch=branch_id).sum('amount')
+        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
     else:
         registrations = Registration.objects(status='registered').skip(start).limit(length)
-        sales_today = Registration.objects(status='registered').filter(created_at__gte=datetime.now().date()).sum('amount')
+        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -157,6 +157,7 @@ def get_dtbl_members():
 
     total_installment = registrations.filter(payment_mode='installment').sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
+    total_premium_payment = registrations.filter(payment_mode='premium').sum('amount')
     total_payment = registrations.sum('amount')
 
     response = {
@@ -166,8 +167,42 @@ def get_dtbl_members():
         'data': _table_data,
         'totalInstallment': total_installment,
         'totalFullPayment': total_full_payment,
+        'totalPremiumPayment': total_premium_payment,
         'totalPayment': total_payment,
         'salesToday': sales_today
+    }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/members/<string:client_id>/edit', methods=['POST'])
+@login_required
+def edit_member(client_id):
+    lname = request.json['lname']
+    fname = request.json['fname']
+    mname = request.json['mname']
+    suffix = request.json['suffix']
+    birth_date = request.json['birth_date']
+    passport = request.json['passport']
+    contact_no = request.json['contact_no']
+    email = request.json['email']
+    address = request.json['address']
+    print("TEST!")
+    client = Registration.objects.get_or_404(id=client_id)
+    client.lname = lname
+    client.fname = fname
+    client.mname = mname
+    client.suffix = suffix
+    # client.birth_date = birth_date
+    client.passport = passport
+    client.contact_number = contact_no
+    client.email = email
+    client.address = address
+    
+    client.save()
+
+    response = {
+        'result': True
     }
 
     return jsonify(response)

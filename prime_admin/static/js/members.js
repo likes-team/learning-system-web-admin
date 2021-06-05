@@ -21,6 +21,7 @@ $(document).ready(function(){
             "dataSrc": function(json){
                 $("#total_installment").html("₱" + json.totalInstallment + ".00");
                 $("#total_full_payment").html("₱" + json.totalFullPayment + ".00");
+                $("#total_premium_payment").html("₱" + json.totalPremiumPayment + ".00");
                 $("#total_payment").html("₱" + json.totalPayment + ".00");
                 $("#sales_today").html("₱" + json.salesToday + ".00");
 
@@ -69,9 +70,8 @@ $(document).ready(function(){
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function(response) {
-                console.log(response.data);
                 
-                // $("#client_id").val(selected[0]);
+                $("#client_id").val(response.data.id);
                 $("#view_last_name").val(response.data.lname);
                 $("#view_first_name").val(response.data.fname);
                 $("#view_middle_name").val(response.data.mname);
@@ -94,6 +94,70 @@ $(document).ready(function(){
         });
 
     } );
+
+    $("#btn_edit").click(function(){
+        if($(this).html() == "Edit"){
+            $(this).html("Save");
+            $("#view_last_name").prop('disabled', false);
+            $("#view_first_name").prop('disabled', false);
+            $("#view_middle_name").prop('disabled', false);
+            $("#view_suffix").prop('disabled', false);
+            // $("#view_schedule").prop('disabled', false);
+            // $("#view_date_of_birth").prop('disabled', false);
+            $("#view_passport").prop('disabled', false);
+            $("#view_contact_no").prop('disabled', false);
+            $("#view_email").prop('disabled', false);
+            $("#view_address").prop('disabled', false);
+        }else if ($(this).html() == "Save"){
+            $(this).html("Edit");
+            $("#view_last_name").prop('disabled', true);
+            $("#view_first_name").prop('disabled', true);
+            $("#view_middle_name").prop('disabled', true);
+            $("#view_suffix").prop('disabled', true);
+            // $("#view_schedule").prop('disabled', true);
+            // $("#view_date_of_birth").prop('disabled', true);
+            $("#view_passport").prop('disabled', true);
+            $("#view_contact_no").prop('disabled', true);
+            $("#view_email").prop('disabled', true);
+            $("#view_address").prop('disabled', true);
+
+            var lname = $("#view_last_name").val();
+            var fname = $("#view_first_name").val();
+            var mname = $("#view_middle_name").val();
+            var suffix = $("#view_suffix").val();
+            var birth_date = $("#view_date_of_birth").val();
+            var passport = $("#view_passport").val();
+            var contact_no = $("#view_contact_no").val();
+            var email = $("#view_email").val();
+            var address = $("#view_address").val();
+
+            $.ajax({
+                url: "/learning-management/api/members/" + $("#client_id").val() + "/edit",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify({
+                    "lname": lname,
+                    "fname": fname,
+                    "mname": mname,
+                    "suffix": suffix,
+                    "birth_date": birth_date,
+                    "passport": passport,
+                    "contact_no": contact_no,
+                    "email": email,
+                    "address": address
+                }),
+                contentType: "application/json; charset=utf-8",
+                success: function(response){
+                    if(response.result){
+                        console.log("Saved!");
+                    }else{
+                        console.log("Not saved!");
+                    }
+                }
+            });
+        }
+    });
+
 
     $("#branch").change(function(){
         table.ajax.reload();

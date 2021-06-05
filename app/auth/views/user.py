@@ -85,7 +85,6 @@ def create_user(**kwargs):
         user.lname = form.lname.data
         user.email = form.email.data if form.email.data != '' else None
         user.role = Role.objects.get(id=form.role.data)
-        user.role = user.role.name
         user.set_password("password")
         user.is_superuser = False
         user.created_by = "{} {}".format(current_user.fname,current_user.lname)
@@ -133,7 +132,6 @@ def edit_user(oid,**kwargs):
         user.lname = form.lname.data
         user.email = form.email.data if not form.email.data == '' else None
         user.role = Role.objects.get(id=form.role.data)
-        user.role = user.role.name
         user.updated_at = datetime.now()
         user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
 
@@ -240,7 +238,7 @@ def edit_permission(oid1, oid2):
 @cross_origin()
 def get_role_name():
     response = jsonify({
-        'roleName': current_user.role_name
+        'roleName': current_user.role.name
     })
 
     response.headers.add('Access-Control-Allow-Origin', '*')
