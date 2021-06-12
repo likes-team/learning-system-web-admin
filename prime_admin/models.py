@@ -41,7 +41,8 @@ class Registration(Base, Admin):
     status = db.StringField()
     is_oriented = db.BooleanField()
     date_oriented = db.DateTimeField()
-    orientator = db.StringField()
+    orientator = db.ReferenceField('Orientator')
+    payments = db.ListField()
 
     @property
     def full_name(self):
@@ -95,6 +96,24 @@ class ContactPerson(Base, Admin):
     lname = db.StringField()
     branches = db.ListField()
     earnings = db.ListField()
+
+    @property
+    def name(self):
+        return self.fname
+
+class Orientator(Base, Admin):
+    meta = {
+        'collection': 'lms_orientators'
+    }
+
+    __tablename__ = 'lms_orientators'
+    __amname__ = 'orientator'
+    __amdescription__ = 'Orientators'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.contact_persons'
+
+    fname = db.StringField()
+    lname = db.StringField()
 
     @property
     def name(self):

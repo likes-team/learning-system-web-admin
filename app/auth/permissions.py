@@ -17,8 +17,6 @@ def load_permissions(user_id):
     if "permissions" not in session:
         session['permissions'] = {}
 
-    print(user.role)
-
     if user.is_superuser or user.role.name == "Admin":
         all_permissions = CoreModel.objects
 

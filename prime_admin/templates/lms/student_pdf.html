@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+</head>
+<body>
+
+<h2>Students List</h2>
+
+<table>
+  <tr>
+    <th>Registration No.</th>
+    <th>Name</th>
+    <th>Batch No.</th>
+    <th>Branch</th>
+    <th>Schedule</th>
+  </tr>
+
+  {% for student in students %}
+    <tr>
+      <td>
+        {{student[2]}}
+      </td>
+      <td>
+        {{student[3]}}
+      </td>
+      <td>
+        {{student[4]}}
+      </td>
+      <td>
+        {{student[5]}}
+      </td>
+      <td>
+        {{student[6]}}
+      </td>
+    </tr>  
+  {% endfor %}
+</table>
+
+</body>
+</html>

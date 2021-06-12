@@ -1,6 +1,6 @@
 <div id="viewModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
      aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">View Client</h5>
@@ -11,6 +11,7 @@
             <div class="modal-body">
                 <div class="main-card mb-3 card">
                     <div class="card-body">
+                        <h5 class="card-title">Student Information</h5>
                         <div class="form-row">
                             <input type="hidden" class="form-control" id="client_id" value="">
                             
@@ -95,6 +96,7 @@
 
                 <div class="main-card mb-3 card">
                     <div class="card-body">
+                        <h5 class="card-title">Payment Information</h5>
                         <div class="form-row">
                             <div class="col-md-4 mb-3">
                                 <label for="view_mode_of_payment">Mode of Payment</label>
@@ -128,10 +130,26 @@
                     </div>
                     
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <!-- <button id="btn_edit" type="button" class="btn btn-primary">Edit</button> -->
+
+                <div class="main-card mb-3 card">
+                    <div class="card-body"><h5 class="card-title">Payment History</h5>
+                        <table id="tbl_payment_history" class="mb-0 table">
+                            <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Current Balance</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_edit" type="button" class="btn btn-primary">Edit</button>
             </div>
         </div>
     </div>
