@@ -10,7 +10,6 @@
 </script>
 {% endblock %}
 
-
 {% block content %}
 <div class="app-main__inner">
 
@@ -100,15 +99,20 @@
                     </div>
                     <div class="col-md-2">
                         <div class="position-relative form-group">
-                            <label for="batch_no" class="">Orientator</label>
-                            <select name="batch_no" id="batch_no" class="form-control">
+                            <label for="orientator" class="">Orientator</label>
+                            <select name="orientator" id="orientator" class="form-control" required>
                                 <option value="">Choose...</option>
+                                {% for orientator in TABLE_OPTIONS['orientators'] %}
+                                <option value="{{ orientator.id }}">
+                                    {{orientator.fname}}
+                                </option>
+                                {% endfor %}
                             </select>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
                             <div class="invalid-feedback">
-                                Please provide a batch no.
+                                Please provide a orientator
                             </div>
                         </div>
                     </div>

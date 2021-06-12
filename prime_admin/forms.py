@@ -40,6 +40,7 @@ class OrientationAttendanceForm(AdminTableForm):
     __heading__ = "Orientation Attendance"
 
     contact_person = StringField()
+    orientator = StringField()
 
     @property
     def fields(self):

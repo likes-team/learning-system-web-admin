@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, OrientationAttendance, Registration, Batch
+from prime_admin.models import Branch, ContactPerson, OrientationAttendance, Registration, Batch, Orientator
 from flask import jsonify
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
@@ -14,7 +14,6 @@ from mongoengine.queryset.visitor import Q
 @bp_lms.route('/orientation-attendance')
 @login_required
 def orientation_attendance():
-
     _table_columns = [
         'Branch',
         'full name',
@@ -32,18 +31,17 @@ def orientation_attendance():
             client.full_name,
             client.contact_number,
             client.contact_person.name,
-            ""
+            client.orientator.fname
         ))
     
-    contact_persons = ContactPerson.objects
-    branches = Branch.objects
-
     if current_user.role_name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
     else:
         branches = Branch.objects
         contact_persons = ContactPerson.objects
+
+    orientators = Orientator.objects()
 
     scripts = [
         {'lms.static': 'js/orientation_attendance.js'},
@@ -61,7 +59,8 @@ def orientation_attendance():
         table_template="lms/orientation_attendance.html",
         scripts=scripts,
         contact_persons=contact_persons,
-        branches=branches
+        branches=branches,
+        orientators=orientators
         )
 
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients', methods=['GET'])
@@ -103,7 +102,7 @@ def orient():
             client.is_oriented = True
             client.date_oriented = datetime.now()
             client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
-            client.orientator = None
+            client.orientator = Orientator.objects.get(id=form.orientator.data)
             client.save()
         else:
             new_client = Registration()
@@ -112,7 +111,7 @@ def orient():
             new_client.contact_number = request.form['contact_no']
             new_client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
             new_client.date_oriented = datetime.now()
-            new_client.orientator = None
+            new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True
             new_client.status = "oriented"
             new_client.save()

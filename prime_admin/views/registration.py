@@ -109,7 +109,7 @@ def register():
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
         books = request.form.getlist('books')
-            
+        
         client.books = {
             'book_none': True if 'book_none' in books else False,
             'volume1': True if 'volume1' in books else False,
@@ -117,7 +117,7 @@ def register():
         }
 
         uniforms = request.form.getlist('uniforms')
-            
+
         client.uniforms = {
             'uniform_none': True if 'uniform_none' in uniforms else False,
             'uniform_xs': True if 'uniform_xs' in uniforms else False,
@@ -140,6 +140,16 @@ def register():
             earnings = 8500 * decimal.Decimal(0.11765)
             savings = 85.00
 
+        client.payments.append(
+            {
+                'payment_mode': client.payment_mode,
+                'amount': Decimal128(str(client.amount)),
+                'current_balance': Decimal128(str(client.balance)),
+                'confirm_by': User.objects.get(id=str(current_user.id)),
+                'date': datetime.now()
+            }
+        )
+
         if client_id == '': # NO SELECTED CLIENT
             client.contact_person.earnings.append(
                 {
@@ -155,7 +165,6 @@ def register():
 
             client.save()
             client.contact_person.save()
-            print("TESTTT!!!", earnings) # TO BE CONTINUED
         else:
             contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
             contact_person.earnings.append(

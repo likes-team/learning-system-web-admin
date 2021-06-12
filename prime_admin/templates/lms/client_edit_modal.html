@@ -12,8 +12,10 @@
                 <form action="{{url_for('lms.new_payment')}}" method="POST">
                     <div class="main-card mb-3 card">
                         <div class="card-body">
+                        <h5 class="card-title">Student Information</h5>
+
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" class="form-control" id="client_id" name="client_id"
+                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id"
                             value="">
                             <div class="form-row">
                         
@@ -44,6 +46,8 @@
 
                     <div class="main-card mb-3 card">
                         <div class="card-body">
+                        <h5 class="card-title">Payment Information</h5>
+
                             <div class="form-row">
                                 <div class="col-md-4 mb-3">
                                     <label for="edit_mode_of_payment">Mode of Payment</label>
@@ -65,12 +69,102 @@
                     </div>
 
                     <div class="main-card mb-3 card">
+                        <div class="card-body"><h5 class="card-title">Payment History</h5>
+                            <table id="tbl_edit_payment_history" class="mb-0 table">
+                                <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Current Balance</th>
+                                    <th>Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="main-card mb-3 card">
                         <div class="card-body">
+                            <h5 class="card-title">Update Payment & Materials</h5>
                             <div class="form-row">
                                 <div class="col-md-6 mb-3">
                                     <label for="new_amount">New Payment</label>
                                     <input style="font-weight: bold;" type="number" step="1" class="form-control" id="" name="new_amount"
-                                        value="">
+                                        value="" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="date">Date of Payment</label>
+                                    <input style="font-weight: bold;" type="date" step="1" class="form-control" id="" name="date"
+                                        value="" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="position-relative form-group">
+                                        <label for="books" class="">Select Book</label>
+                                        <div>
+                                            <div class="custom-radio custom-control"><input type="checkbox" id="book_none" name="books" value="book_none" class="custom-control-input"><label class="custom-control-label" for="book_none">
+                                                No book
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input type="checkbox" id="book1" name="books" value="volume1" class="custom-control-input"><label class="custom-control-label" for="book1">
+                                                Volume 1
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input type="checkbox" id="book2" name="books" value="volume2" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                                Volume 2
+                                            </label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <div class="position-relative form-group">
+                                        <label for="uniforms" class="">Select Uniform</label>
+                                        <div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_none" name="uniforms" value="uniform_none" class="custom-control-input"><label class="custom-control-label" for="uniform_none">
+                                                No Uniform
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_xs" name="uniforms" value="uniform_xs" class="custom-control-input"><label class="custom-control-label" for="uniform_xs">
+                                                XS
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_s" name="uniforms" value="uniform_s" class="custom-control-input"><label class="custom-control-label" for="uniform_s">
+                                                S
+                                            </label></div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <div class="position-relative form-group">
+                                        <label for="uniforms" class="">&nbsp</label>
+                                        <div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_m" name="uniforms" value="uniform_m" class="custom-control-input"><label class="custom-control-label" for="uniform_m">
+                                                M
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_l" name="uniforms" value="uniform_l" class="custom-control-input"><label class="custom-control-label" for="uniform_l">
+                                                L
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_xl" name="uniforms" value="uniform_xl" class="custom-control-input"><label class="custom-control-label" for="uniform_xl">
+                                                XL
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input required type="radio" id="uniform_xxl" name="uniforms" value="uniform_xxl" class="custom-control-input"><label class="custom-control-label" for="uniform_xxl">
+                                                XXL
+                                            </label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <div class="position-relative form-group">
+                                        <label for="others" class="">Others</label>
+                                        <div>
+                                            <div class="custom-radio custom-control"><input type="checkbox" id="id_card" name="others" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
+                                                ID Card
+                                            </label></div>
+                                            <div class="custom-radio custom-control"><input type="checkbox" id="id_lace" name="others" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
+                                                ID Lace
+                                            </label></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

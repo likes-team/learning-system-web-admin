@@ -7,7 +7,17 @@
     VIEW_MODAL = "{{TABLE_OPTIONS['view_modal']}}";
     JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
     VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
+    PDF_URL = "{{url_for('lms.print_students_pdf')}}";
 </script>
+<style>
+  .modal-dialog{
+        overflow-y: initial !important
+  }
+  .modal-body{
+    height: 800px;
+    overflow-y: auto;
+  }
+</style>
 {% endblock %}
 
 
@@ -30,9 +40,53 @@
 
             {% block actions %}
 
-            {% if TABLE_OPTIONS['actions'] %}
-            {% include TABLE_OPTIONS['action_template'] %}
-            {% endif %}
+            <div class="page-title-actions">
+
+                <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
+                    <i class="fa fa-print"></i>
+                </button>
+                
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
             {% endblock %}
 
