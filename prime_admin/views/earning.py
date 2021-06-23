@@ -1,14 +1,17 @@
+from prime_admin.globals import SECRETARYREFERENCE
+from app.auth.models import User
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, Registration, ContactPerson, Batch
+from prime_admin.models import Branch, Earning, Registration, Batch
 from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import db
 from datetime import datetime
 from bson.decimal128 import Decimal128, create_decimal128_context
 import decimal
+from mongoengine.queryset.visitor import Q
 
 
 
@@ -26,14 +29,14 @@ def earnings():
         {'lms.static': 'js/earnings.js'}
     ]
 
-    if current_user.role_name == "Secretary":
+    if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
-        marketers = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+        marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) | Q(role__ne=SECRETARYREFERENCE))
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
-        marketers = ContactPerson.objects()
+        marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
 
     return admin_table(
         Earning,
@@ -67,10 +70,10 @@ def get_dtbl_earnings_members():
 
     if contact_person_id == 'all':
         registrations = Registration.objects.skip(start).limit(length)
-        if current_user.role_name == "Secretary":
-            contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+        if current_user.role.name == "Secretary":
+            contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
         else:
-            contact_persons = ContactPerson.objects()
+            contact_persons = User.objects()
 
         with decimal.localcontext(D128_CTX):
             total_earnings = Decimal128('0.00')
@@ -78,46 +81,46 @@ def get_dtbl_earnings_members():
             
             for contact_person in contact_persons:
                 for earning in contact_person.earnings:
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning['earnings'].to_decimal())
-                    total_savings = Decimal128(total_savings.to_decimal() + earning['savings'].to_decimal())
+                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                     
                     print(total_earnings)
-                    if not any(d['id'] == str(earning['branch'].id) for d in branches_total_earnings):
+                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
                         branches_total_earnings.append(
                             {
-                                'id': str(earning['branch'].id),
-                                'name': earning['branch'].name,
-                                'totalEarnings': earning['earnings']
+                                'id': str(earning.branch.id),
+                                'name': earning.branch.name,
+                                'totalEarnings': earning.earnings
                             }
                         )
                     else:
                         for x in branches_total_earnings:
                             if x['id'] == str(earning['branch'].id):
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning['earnings'].to_decimal())
+                                x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
     else:
         registrations = Registration.objects(contact_person=contact_person_id).skip(start).limit(length)
-        contact_person = ContactPerson.objects.get(id=contact_person_id)
+        contact_person = User.objects.get(id=contact_person_id)
 
         with decimal.localcontext(D128_CTX):
             total_earnings = Decimal128('0.00')
             total_savings = Decimal128('0.00')
 
             for earning in contact_person.earnings:
-                total_earnings = Decimal128(total_earnings.to_decimal() + earning['earnings'].to_decimal())
-                total_savings = Decimal128(total_savings.to_decimal() + earning['savings'].to_decimal())
+                total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                 
-                if not any(d['id'] == str(earning['branch'].id) for d in branches_total_earnings):
+                if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
                     branches_total_earnings.append(
                         {
-                            'id': str(earning['branch'].id),
-                            'name': earning['branch'].name,
-                            'totalEarnings': earning['earnings']
+                            'id': str(earning.branch.id),
+                            'name': earning.branch.name,
+                            'totalEarnings': earning.earnings
                         }
                     )
                 else:
                     for x in branches_total_earnings:
                         if x['id'] == str(earning['branch'].id):
-                            x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning['earnings'].to_decimal())
+                            x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
 
     if branch_id != 'all':
         registrations = registrations.filter(branch=branch_id)

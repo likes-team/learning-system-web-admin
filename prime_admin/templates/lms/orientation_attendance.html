@@ -45,7 +45,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input id="client_id" name="client_id" type="hidden" class="form-control">
                 <div class="form-row">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="lname" class="">Last Name</label>
                             <div class="input-group"><input id="lname" name="lname" type="text"
@@ -68,7 +68,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group"><label for="fname"
                                 class="">First Name</label><input name="fname" id="fname"
                                 type="text" class="form-control" required></div>
@@ -77,6 +77,30 @@
                         <div class="position-relative form-group"><label for="contact_no"
                                 class="">Contact No.</label><input name="contact_no" id="contact_no"
                                 type="text" class="form-control" required></div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="branch" class="">Branch</label>
+                            <select name="branch" id="branch" class="form-control" required>
+                                {% if current_user.role_name == "Secretary" %}
+                                <!-- Pass -->
+                                {% else %}
+                                    <option value="">Choose...</option>
+                                {% endif %}
+                                
+                                {% for branch in TABLE_OPTIONS['branches'] %}
+                                <option value="{{ branch.id }}">
+                                    {{branch.name}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a branch
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <div class="position-relative form-group">

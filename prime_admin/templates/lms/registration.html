@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="app-main__inner">
-    <form action="{{url_for('lms.register')}}" id="register_form" class="needs-validation" method="POST" novalidate>
+    <form onsubmit="document.getElementById('contact_person').disabled = false; document.getElementById('branch').disabled = false;" action="{{url_for('lms.register')}}" id="register_form" class="needs-validation" method="POST" novalidate>
         {{ form.csrf_token }}
         <input id="client_id" name="client_id" type="hidden" class="form-control">
         <div class="app-page-title" style="background-color: skyblue">
@@ -208,7 +208,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="email" class="">Gmail</label>
+                            <label for="email" class="">Email Address</label>
                             <input name="email" id="email" type="email" class="form-control">
                             <div class="valid-feedback">
                                 Looks good!
@@ -220,7 +220,19 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col-md-12">
+                    <div class="col-md-4">
+                        <div class="position-relative form-group">
+                            <label for="e_registration" class="">E-Registration</label>
+                            <input name="e_registration" id="e_registration" type="text" class="form-control">
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid date of birth
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
                         <div class="position-relative form-group">
                             <label for="address" class="">Address</label>
                             <input name="address" id="address" type="text" class="form-control">

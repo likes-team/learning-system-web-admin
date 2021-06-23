@@ -1,15 +1,18 @@
 import decimal
+from prime_admin.globals import SECRETARYREFERENCE
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, ContactPerson, Registration
-from app.auth.models import User
+from prime_admin.models import Batch, Branch, Registration
+from app.auth.models import Earning, Role, User
 from flask import redirect, url_for, request, current_app, flash, jsonify, abort
 from app import db, mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128
+from mongoengine.queryset.visitor import Q
+
 
 
 @bp_lms.route('/register', methods=['GET', 'POST'])
@@ -31,14 +34,17 @@ def register():
     form = RegistrationForm()
 
     if request.method == "GET":
-        if current_user.role_name == "Secretary":
+        if current_user.role.name == "Secretary":
             branches = Branch.objects(id=current_user.branch.id)
-            contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+            contact_persons = User.objects(Q(branches__in=[str(current_user.branch.id)]) | Q(role__ne=SECRETARYREFERENCE))
             form.batch_number.data = Batch.objects(active=True).filter(branch=current_user.branch).all()
-
+        if current_user.role.name == "Partner":
+            branches = Branch.objects(id__in=current_user.branches)
+            contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(id__ne=current_user.id) & Q(is_superuser=False))
+            form.batch_number.data = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         else:
             branches = Branch.objects
-            contact_persons = ContactPerson.objects
+            contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
             form.batch_number.data = Batch.objects(active=True)
 
         data = {
@@ -74,7 +80,7 @@ def register():
 
         if client_id == '': # NO SELECTED CLIENT
             client = Registration()
-            client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
+            client.contact_person = User.objects.get(id=form.contact_person.data)
             client.fname = form.fname.data
             client.mname = form.mname.data
             client.lname = form.lname.data
@@ -87,7 +93,7 @@ def register():
             client = Registration.objects.get(id=client_id)
 
             if client.status == "pre_registered" and client.is_oriented is False :
-                client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
+                client.contact_person = User.objects.get(id=form.contact_person.data)
 
             elif client.status == "oriented":
                 client.mname = form.mname.data
@@ -152,31 +158,33 @@ def register():
 
         if client_id == '': # NO SELECTED CLIENT
             client.contact_person.earnings.append(
-                {
-                    'payment_mode': client.payment_mode,
-                    'savings': Decimal128(str(savings)),
-                    'earnings': Decimal128(str(earnings)),
-                    'branch': client.branch,
-                    'client': client,
-                    'date': datetime.now(),
-                    'registered_by': User.objects.get(id=str(current_user.id))
-                }
+                Earning(
+                    custom_id=client.full_registration_number,
+                    payment_mode=client.payment_mode,
+                    savings=Decimal128(str(savings)),
+                    earnings=Decimal128(str(earnings)),
+                    branch=client.branch,
+                    client=client,
+                    date=datetime.now(),
+                    registered_by=User.objects.get(id=str(current_user.id))
+                )
             )
 
             client.save()
             client.contact_person.save()
         else:
-            contact_person = ContactPerson.objects.get(id=str(client.contact_person.id))
+            contact_person = User.objects.get(id=str(client.contact_person.id))
             contact_person.earnings.append(
-                {
-                    'payment_mode': client.payment_mode,
-                    'savings': Decimal128(str(savings)),
-                    'earnings': Decimal128(str(earnings)),
-                    'branch': client.branch,
-                    'client': client,
-                    'date': datetime.now(),
-                    'registered_by': User.objects.get(id=str(current_user.id))
-                }
+                Earning(
+                    custom_id=client.full_registration_number,
+                    payment_mode=client.payment_mode,
+                    savings=Decimal128(str(savings)),
+                    earnings=Decimal128(str(earnings)),
+                    branch=client.branch,
+                    client=client,
+                    date=datetime.now(),
+                    registered_by=User.objects.get(id=str(current_user.id))
+                )
             )
 
             client.save()
@@ -194,11 +202,11 @@ def register():
 def get_pre_registered_clients_registration():
 
     if current_user.role.name == "Secretary":
-        clients = Registration.objects(status__ne="registered").filter(branch=current_user.branch)
-
+        clients = Registration.objects(status="oriented").filter(branch=current_user.branch)
     elif current_user.role.name == "Admin":
-        clients = Registration.objects(status__ne="registered")
-
+        clients = Registration.objects(status="oriented")
+    elif current_user.role.name == "Partner":
+        clients = Registration.objects(status="oriented").filter(branch__in=current_user.branches)
     else:
         return abort(404)
 
@@ -267,7 +275,8 @@ def get_client(client_id):
             'contact_number': client.contact_number,
             'status': client.status,
             'contact_person': str(client.contact_person.id),
-            'is_oriented': client.is_oriented
+            'is_oriented': client.is_oriented,
+            'branch': str(client.branch.id) if client.branch is not None else ''
         }
 
     response = {

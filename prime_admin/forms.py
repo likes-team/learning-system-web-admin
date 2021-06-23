@@ -41,6 +41,7 @@ class OrientationAttendanceForm(AdminTableForm):
 
     contact_person = StringField()
     orientator = StringField()
+    branch = StringField()
 
     @property
     def fields(self):
@@ -146,35 +147,34 @@ class BranchForm(AdminTableForm):
     __heading__ = "Branches"
 
     name = AdminField(label="Name", validators=[DataRequired()])
+    address = AdminField(label="Address", validators=[DataRequired()])
 
     @property
     def fields(self):
-        return [[self.name]]
+        return [[self.name, self.address]]
 
 
 class ContactPersonForm(AdminTableForm):
-    from .models import Branch
-
     __table_columns__ = ['First Name', 'Last Name', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Partners"
 
     fname = AdminField(label="First Name", validators=[DataRequired()])
     lname = AdminField(label="Last Name", validators=[DataRequired()])
-    branches = AdminField(label="Branches", validators=[DataRequired()], type='multiple_select', model=Branch)
     
     @property
     def fields(self):
-        return [[self.fname, self.lname], [self.branches]]
+        return [[self.fname, self.lname]]
 
 
 class BranchEditForm(AdminEditForm):
     __heading__ = "Edit Branch"
 
     name = AdminField(label="Name", validators=[DataRequired()])
+    address = AdminField(label="Address", validators=[DataRequired()])
 
     @property
     def fields(self):
-        return [[self.name]]
+        return [[self.name, self.address]]
 
 
 class BranchesInlineForm(AdminInlineForm):

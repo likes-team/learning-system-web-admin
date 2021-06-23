@@ -1,12 +1,13 @@
+from prime_admin.globals import SECRETARYREFERENCE
+from app.auth.models import User
 from prime_admin.forms import OrientationAttendanceForm
-from flask.globals import request
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, ContactPerson, OrientationAttendance, Registration, Batch, Orientator
-from flask import jsonify
+from prime_admin.models import Branch, OrientationAttendance, Registration, Batch, Orientator
+from flask import jsonify, request
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
 
@@ -24,22 +25,23 @@ def orientation_attendance():
 
     _table_data = []
 
-    for client in Registration.objects(is_oriented=True):
+    for client in Registration.objects(Q(is_oriented=True) & Q(status__ne="registered")):
+        print(client.status)
         _table_data.append((
             client.id,
             client.branch.name if client.branch is not None else "",
             client.full_name,
             client.contact_number,
-            client.contact_person.name,
-            client.orientator.fname
+            client.contact_person.name if client.contact_person is not None else '',
+            client.orientator.fname if client.orientator is not None else ''
         ))
     
-    if current_user.role_name == "Secretary":
+    if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
-        contact_persons = ContactPerson.objects(branches__in=[str(current_user.branch.id)])
+        contact_persons = User.objects(branches__in=[str(current_user.branch.id)] | Q(role__ne=SECRETARYREFERENCE) | Q(is_superuser=False))
     else:
         branches = Branch.objects
-        contact_persons = ContactPerson.objects
+        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
 
     orientators = Orientator.objects()
 
@@ -66,7 +68,7 @@ def orientation_attendance():
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients', methods=['GET'])
 def get_pre_registered_clients():
 
-    clients = Registration.objects(Q(is_oriented=False) | Q(is_oriented__exists=False))
+    clients = Registration.objects(Q(is_oriented=False) | Q(is_oriented__exists=False) & Q(status="pre_registered"))
 
     _data = []
 
@@ -101,7 +103,7 @@ def orient():
 
             client.is_oriented = True
             client.date_oriented = datetime.now()
-            client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
+            client.contact_person = User.objects.get(id=form.contact_person.data)
             client.orientator = Orientator.objects.get(id=form.orientator.data)
             client.save()
         else:
@@ -109,7 +111,8 @@ def orient():
             new_client.fname = request.form['fname']
             new_client.lname = request.form['lname']
             new_client.contact_number = request.form['contact_no']
-            new_client.contact_person = ContactPerson.objects.get(id=form.contact_person.data)
+            new_client.contact_person = User.objects.get(id=form.contact_person.data)
+            new_client.branch = Branch.objects.get(id=form.branch.data)
             new_client.date_oriented = datetime.now()
             new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Student Information</title>
+
+		<style>
+			.invoice-box {
+				max-width: 800px;
+				margin: auto;
+				padding: 30px;
+				border: 1px solid #eee;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+				font-size: 16px;
+				line-height: 24px;
+				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+				color: #555;
+			}
+
+			.invoice-box table {
+				width: 100%;
+				line-height: inherit;
+				text-align: left;
+			}
+
+			.invoice-box table td {
+				padding: 5px;
+				vertical-align: top;
+			}
+
+			.invoice-box table tr td:nth-child(2) {
+				text-align: right;
+			}
+
+			.invoice-box table tr.top table td {
+				padding-bottom: 20px;
+			}
+
+			.invoice-box table tr.top table td.title {
+				font-size: 45px;
+				line-height: 45px;
+				color: #333;
+			}
+
+			.invoice-box table tr.information table td {
+				padding-bottom: 40px;
+			}
+
+			.invoice-box table tr.heading td {
+				background: #eee;
+				border-bottom: 1px solid #ddd;
+				font-weight: bold;
+			}
+
+			.invoice-box table tr.details td {
+				padding-bottom: 20px;
+			}
+
+			.invoice-box table tr.item td {
+				border-bottom: 1px solid #eee;
+			}
+
+			.invoice-box table tr.item.last td {
+				border-bottom: none;
+			}
+
+			.invoice-box table tr.total td:nth-child(2) {
+				border-top: 2px solid #eee;
+				font-weight: bold;
+			}
+
+			@media only screen and (max-width: 600px) {
+				.invoice-box table tr.top table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+
+				.invoice-box table tr.information table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+			}
+
+			/** RTL **/
+			.invoice-box.rtl {
+				direction: rtl;
+				font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+			}
+
+			.invoice-box.rtl table {
+				text-align: right;
+			}
+
+			.invoice-box.rtl table tr td:nth-child(2) {
+				text-align: left;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="invoice-box">
+			<div style="text-align: center;">
+				<strong>CHOGI LANGUAGE AND TECHNOLOGY CENTER INCORPORATED</strong>
+			</div>
+			<div style="text-align: center;"><p style="font-size:smaller;">{{address}}</p></div>
+			<table cellpadding="0" cellspacing="0">
+				
+				<tr class="information">
+					<td colspan="2">
+						<table>
+							<tr>
+								<td>
+									<!-- First Name: <strong>{{student.fname}}</strong><br />
+									Last Name: <strong>{{student.lname}}</strong><br />
+									Middle Name: <strong>{{student.mname}}</strong><br />
+									Suffix: <strong>{{student.suffix}}</strong><br /> -->
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+
+				<tr class="heading">
+					<td>Student Information</td>
+
+					<td></td>
+				</tr>
+
+				<tr class="item">
+					<td>First Name</td>
+
+					<td>{{student.fname}}</td>
+				</tr>
+				<tr class="item">
+					<td>Last Name</td>
+
+					<td>{{student.lname}}</td>
+				</tr>
+				<tr class="item">
+					<td>Middle Name</td>
+
+					<td>{{student.mname}}</td>
+				</tr>
+				<tr class="item">
+					<td>Suffix</td>
+
+					<td>{{student.suffix}}</td>
+				</tr>
+
+
+				<tr class="heading">
+					<td>Mode of Payment</td>
+
+					<td>{{student.payment_mode.upper()}}</td>
+				</tr>
+				<tr class="item">
+					<td>Amount</td>
+
+					<td>{{student.amount}}</td>
+				</tr>
+				<tr class="item">
+					<td>Balance</td>
+
+					<td>{{student.balance}}</td>
+				</tr>
+
+
+				<tr class="heading">
+					<td>Other Information</td>
+
+					<td></td>
+				</tr>
+
+				<tr class="item">
+					<td>Book</td>
+
+					<td>
+						{% if student.books['book_none'] %}
+						No Book
+						{% elif student.books['volume1'] and student.books['volume2'] %}
+						Volume 1 & Volume 2
+						{% elif student.books['volume1'] %}
+						Volume 1
+						{% elif student.books['volume2'] %}
+						Volume 2
+						{% endif %}
+					</td>
+				</tr>
+
+				<tr class="item">
+					<td>Uniform</td>
+
+					<td>
+						{% if student.uniforms['book_none'] %}
+						No Uniform
+						{% elif student.uniforms['uniform_xs'] %}
+						Extra Small (xs)
+						{% elif student.uniforms['uniform_s'] %}
+						Small (s)
+						{% elif student.uniforms['uniform_m'] %}
+						Medium (m)
+						{% elif student.uniforms['uniform_l'] %}
+						Large (l)
+						{% elif student.uniforms['uniform_xl'] %}
+						Extra Large (xl)
+						{% elif student.uniforms['uniform_xxl'] %}
+						Double Extra Large (xxl)
+						{% endif %}						
+					</td>
+				</tr>
+
+				<tr class="item last">
+					<td>Others</td>
+
+					<td>
+					</td>
+				</tr>
+
+				<tr class="information">
+					<td colspan="2">
+						<table>
+							<tr>
+								<td>
+									<strong>INCLUSION:</strong><br />
+									- Full Assistance for EPS TOPIK REGISTRATION<br />
+									- FREE Korean language training<br />
+									- FREE Skill test training<br />
+									- FREE Passport appointment
+								</td>
+								<td style="text-align: left;">
+									<br />
+									- FINANCIAL ASSISTANCE<br />
+									- OPEN TO LOAN up to<br />
+									- Php 50,000.00<br />
+									(Note: If already have an employer)
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

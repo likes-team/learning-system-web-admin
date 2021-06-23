@@ -24,7 +24,7 @@ class Registration(Base, Admin):
     batch_number = db.ReferenceField('Batch')
     amount = db.DecimalField()
     balance = db.DecimalField()
-    contact_person = db.ReferenceField('ContactPerson')
+    contact_person = db.ReferenceField('User')
     fname = db.StringField()
     mname = db.StringField()
     lname = db.StringField()
@@ -43,6 +43,7 @@ class Registration(Base, Admin):
     date_oriented = db.DateTimeField()
     orientator = db.ReferenceField('Orientator')
     payments = db.ListField()
+    e_registration = db.StringField()
 
     @property
     def full_name(self):
@@ -64,6 +65,7 @@ class Branch(Base, Admin):
     __view_url__ = 'lms.branches'
 
     name = db.StringField()
+    address = db.StringField()
 
 
 class Batch(Base, Admin):
@@ -81,25 +83,12 @@ class Batch(Base, Admin):
     branch = db.ReferenceField('Branch')
 
 
-class ContactPerson(Base, Admin):
-    meta = {
-        'collection': 'lms_contact_persons'
-    }
-
-    __tablename__ = 'lms_contact_persons'
-    __amname__ = 'contact_person'
+class Partner(Admin):
+    __tablename__ = 'auth_user'
+    __amname__ = 'partner'
     __amdescription__ = 'Partners'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.contact_persons'
-
-    fname = db.StringField()
-    lname = db.StringField()
-    branches = db.ListField()
-    earnings = db.ListField()
-
-    @property
-    def name(self):
-        return self.fname
 
 class Orientator(Base, Admin):
     meta = {
@@ -141,6 +130,13 @@ class Inventory(Base, Admin):
     def name(self):
         return self.description
 
+
+class Marketer(Admin):
+    __tablename__ = 'auth_users'
+    __amname__ = 'marketer'
+    __amdescription__ = 'Marketers'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.marketers'
 
 class Member(Admin):
     __tablename__ = 'lms_members'

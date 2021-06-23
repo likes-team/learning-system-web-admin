@@ -1,4 +1,4 @@
-from prime_admin.globals import PARTNERREFERENCE
+from prime_admin.globals import MARKETERREFERENCE, PARTNERREFERENCE
 from app.auth.models import Role, User
 from app.auth.views.user import edit_user
 from flask.json import jsonify
@@ -6,21 +6,21 @@ from prime_admin.forms import BranchEditForm, BranchForm, ContactPersonEditForm,
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Partner
+from prime_admin.models import Branch, Marketer, Partner
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
 
 
 
-@bp_lms.route('/partners')
+@bp_lms.route('/marketers')
 @login_required
-def contact_persons():
+def marketers():
     form = ContactPersonForm()
 
     _table_data = []
 
-    for contact_person in User.objects(role=PARTNERREFERENCE):
+    for contact_person in User.objects(role=MARKETERREFERENCE):
         _table_data.append((
             contact_person.id,
             contact_person.fname,
@@ -31,88 +31,97 @@ def contact_persons():
             contact_person.updated_at,
         ))
 
+    form.__heading__ = "Marketers"
+    form.__subheading__ = "List of Marketers"
+    form.__title__ = "Marketers"
+
     return admin_table(
-        Partner,
+        Marketer,
         fields=[],
         form=form,
         table_data=_table_data,
-        create_url='lms.create_contact_person',
-        edit_url='lms.edit_contact_person',
+        create_url='lms.create_marketer',
+        edit_url='lms.edit_marketer',
         view_modal_url='/learning-management/get-view-contact-person-data',
         create_button=True,
         create_modal=False)
 
 
-@bp_lms.route('/contact-persons/create',methods=['GET','POST'])
+@bp_lms.route('/marketers/create',methods=['GET','POST'])
 @login_required
-def create_contact_person():
+def create_marketer():
     form = ContactPersonEditForm()
 
     if request.method == "GET":
-
         form.branches_inline.data = []
         form.add_branches_inline.data = Branch.objects()
 
         _scripts = [
             {'lms.static': 'js/partners.js'}
         ]
-        return admin_render_template(Partner, "lms/partner_create.html", 'learning_management', form=form,\
-            title="Create partner", scripts=_scripts)
+        return admin_render_template(Marketer, "lms/marketer_create.html", 'learning_management', form=form,\
+            title="Create marketer", scripts=_scripts)
 
     if not form.validate_on_submit():
         for key, value in form.errors.items():
             flash(str(key) + str(value), 'error')
-        return redirect(url_for('lms.contact_persons'))
+        return redirect(url_for('lms.marketers'))
 
     try:
-        contact_person = User()
+        marketer = User()
 
-        contact_person.fname = form.fname.data
-        contact_person.lname = form.lname.data
+        marketer.fname = form.fname.data
+        marketer.lname = form.lname.data
 
         branches_ids = request.form.getlist('branches[]')
+        branches = []
+        
+        print(branches_ids)
+
         if branches_ids:
-            branches = []
             for branch_id in branches_ids:
                 branches.append(branch_id)
         
-        contact_person.branches = branches
-        contact_person.role = Role.objects(name='Partner').first()
-        contact_person.username = contact_person.fname.lower() + contact_person.lname.lower()
-        contact_person.set_password('password')
-        contact_person.created_by = "{} {}".format(current_user.fname,current_user.lname)
+        marketer.branches = branches
+        marketer.role = Role.objects(name='Marketer').first()
+        marketer.username = marketer.fname.lower() + marketer.lname.lower()
+        marketer.set_password('password')
+        marketer.created_by = "{} {}".format(current_user.fname,current_user.lname)
 
-        contact_person.save()
+        marketer.save()
 
         flash('New Contact Person Added Successfully!','success')
 
     except Exception as e:
         flash(str(e),'error')
     
-    return redirect(url_for('lms.contact_persons'))
+    return redirect(url_for('lms.marketers'))
 
 
-@bp_lms.route('/get-view-contact-person-data', methods=['GET'])
+# @bp_lms.route('/get-view-contact-person-data', methods=['GET'])
+# @login_required
+# def get_view_contact_person_data():
+#     _column, _id = request.args.get('column'), request.args.get('id')
+
+#     _data = User.objects(id=_id).values_list(_column)
+
+#     response = jsonify(result=str(_data[0]),column=_column)
+
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.status_code = 200
+#     return response
+
+
+@bp_lms.route('/marketers/<string:oid>/edit', methods=['GET', 'POST'])
 @login_required
-def get_view_contact_person_data():
-    _column, _id = request.args.get('column'), request.args.get('id')
-
-    _data = User.objects(id=_id).values_list(_column)
-
-    response = jsonify(result=str(_data[0]),column=_column)
-
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.status_code = 200
-    return response
-
-
-@bp_lms.route('/contact-persons/<string:oid>/edit', methods=['GET', 'POST'])
-@login_required
-def edit_contact_person(oid):
+def edit_marketer(oid):
     contact_person = User.objects.get_or_404(id=oid)
     form = ContactPersonEditForm(obj=contact_person)
 
     if request.method == "GET":
+        form.__heading__ = "Edit Marketer"
+        form.__title__ = "Edit marketer"
+
         current_branches_list = User.objects.get(id=oid).branches
         current_branches = []
         
@@ -134,19 +143,19 @@ def edit_contact_person(oid):
         ]
 
         return admin_edit(
-            Partner,
+            Marketer,
             form,
-            'lms.edit_contact_person',
+            'lms.edit_marketer',
             oid,
-            'lms.contact_persons',
+            'lms.marketers',
             scripts=_scripts,
-            edit_template="lms/partner_edit.html"
+            edit_template="lms/marketer_edit.html"
             )
     
     if not form.validate_on_submit():
         for key, value in form.errors.items():
             flash(str(key) + str(value), 'error')
-        return redirect(url_for('lms.contact_persons'))
+        return redirect(url_for('lms.marketers'))
         
     try:
         contact_person.fname = form.fname.data
@@ -170,4 +179,4 @@ def edit_contact_person(oid):
     except Exception as e:
         flash(str(e),'error')
 
-    return redirect(url_for('lms.contact_persons'))
+    return redirect(url_for('lms.marketers'))

@@ -65,7 +65,7 @@ def create_branch():
         branch = Branch()
 
         branch.name = form.name.data
-
+        branch.address = form.address.data
         branch.created_by = "{} {}".format(current_user.fname,current_user.lname)
         
         branch.save()
@@ -102,6 +102,7 @@ def edit_branch(oid,**kwargs):
     try:
         
         branch.name = form.name.data
+        branch.address = form.address.data
         branch.updated_at = datetime.now()
         branch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         

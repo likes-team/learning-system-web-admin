@@ -179,11 +179,13 @@ $(document).ready(function(){
                     $("#fname").val(response.data.fname);
                     $("#contact_number").val(response.data.contact_number);
                     $("#contact_person").val(response.data.contact_person);
+                    $("#branch").val(response.data.branch);
 
                     $("#lname").prop('readonly', true);
                     $("#fname").prop('readonly', true);
                     $("#contact_number").prop('readonly', true);
-                    // $("#contact_person").prop('disabled', true);
+                    $("#contact_person").prop('disabled', true);
+                    $("#branch").prop('disabled', true);
                 }
             }
         });

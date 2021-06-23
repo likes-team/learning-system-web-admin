@@ -35,6 +35,8 @@ CONTEXT = {
     'system_modules': []
 }
 
+# SECRETARYREFERENCE = None
+
 
 def internal_server_error(e):
     from flask import render_template
@@ -101,5 +103,6 @@ def create_app(config_name):
         # Load CONTEXT data
         CONTEXT['header_color'] = 'header_color15' # Default color
         CONTEXT['sidebar_color'] = "sidebar_color15" # Default color
+        
 
     return app

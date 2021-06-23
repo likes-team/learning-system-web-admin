@@ -1,4 +1,8 @@
 $(document).ready(function(){
+
+    var CLIENTID;
+    var ISLOADING = false;
+
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
             if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -74,6 +78,8 @@ $(document).ready(function(){
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function(response) {
+                CLIENTID = response.data.id;
+
                 $("#edit_client_id").val(response.data.id);
                 $("#edit_last_name").val(response.data.lname);
                 $("#edit_first_name").val(response.data.fname);
@@ -135,6 +141,8 @@ $(document).ready(function(){
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function(response) {
+                CLIENTID = response.data.id;
+
                 $("#client_id").val(response.data.id);
                 $("#view_last_name").val(response.data.lname);
                 $("#view_first_name").val(response.data.fname);
@@ -256,6 +264,89 @@ $(document).ready(function(){
         location.href = PDF_URL + `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}`;
     });
 
+    $("#btn_print_student_info").click(function(){
+        window.open(STUDENT_INFO_PDF_URL + `?student_id=${CLIENTID}`,'_blank');
+    });
+
+    $("#btn_search").click(function(){
+        table.search($("#search_input").val()).draw();
+    });
+
+    $("#btn_clear_entry").click(function(){
+        table.search($("#search_input").val("")).draw();
+    });
+
+    $("#chkbox_upgrade").click(function(){
+        if(ISLOADING){
+            $("#chkbox_upgrade").attr('onclick', "return false;");
+            return;
+        }
+
+        var is_checked = $(this).is(":checked");
+
+        if(is_checked){
+            ISLOADING = true;
+
+            $.ajax({
+                url: '/learning-management/api/members/' + CLIENTID,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    var new_amount = parseInt(response.data.balance) + 700;
+
+                    $("#new_amount").val(new_amount);
+                    $("#new_amount").prop('readonly', true);
+                    $('#book_none').prop('checked', false);
+                    $('#book1').prop('checked', true);
+                    $('#book2').prop('checked', true);
+
+                    $("#uniform_m").prop("checked", true);
+
+                    $('#id_card').prop('checked', true);
+                    $('#id_lace').prop('checked', true);
+
+                    $("#id_lace").attr('onclick', "return false;");
+                    $("#id_card").attr('onclick', "return false;");
+                    $("#book_none").attr('onclick', "return false;");
+                    $("#book1").attr('onclick', "return false;");
+                    $("#book2").attr('onclick', "return false;");
+                    
+                    ISLOADING = false;
+                    $("#chkbox_upgrade").attr('onclick', "");
+                }
+            });
+
+            return;
+        }
+
+        $("#new_amount").val('');
+        $("#new_amount").prop('readonly', false);
+        $('#book_none').prop('checked', true);
+        $('#book1').prop('checked', false);
+        $('#book2').prop('checked', false);
+
+        $("#uniform_m").prop("checked", false);
+        $("#uniform_none").prop("checked", true);
+
+        $('#id_card').prop('checked', false);
+        $('#id_lace').prop('checked', false);
+
+        $("#id_lace").attr('onclick', "");
+        $("#id_card").attr('onclick', "");
+        $("#book_none").attr('onclick', "");
+        $("#book1").attr('onclick', "");
+        $("#book2").attr('onclick', "");
+    });
+
+    $("#book_none").click(function(){
+        var is_checked = $("#chkbox_upgrade").is(":checked");
+
+        if(is_checked){
+            $('#book_none').prop('checked', false);
+            $('#book1').prop('checked', true);
+            $('#book2').prop('checked', true);
+        }
+    });
 
     $("#branch").change(function(){
         BRANCH = $(this).val();
