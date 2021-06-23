@@ -19,6 +19,17 @@ from mongoengine.document import Document
 
 
 
+class Earning(db.EmbeddedDocument):
+    custom_id = db.StringField(primary_key=True)
+    payment_mode = db.StringField()
+    savings = db.DecimalField()
+    earnings = db.DecimalField()
+    branch = db.ReferenceField('Branch')
+    client = db.ReferenceField('Registration')
+    date = db.DateTimeField()
+    registered_by = db.ReferenceField('User')
+
+
 # AUTH.MODEL.USER
 class User(UserMixin, Base, Admin):
     meta = {
@@ -43,7 +54,8 @@ class User(UserMixin, Base, Admin):
     role = db.ReferenceField('Role')
     is_admin = db.BooleanField(default=False)
     branch = db.ReferenceField('Branch')
-    role_name = db.StringField()
+    branches = db.ListField()
+    earnings = db.ListField(db.EmbeddedDocumentField(Earning))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -54,6 +66,9 @@ class User(UserMixin, Base, Admin):
     def __repr__(self):
         return "<User {}>".format(self.username)
 
+    @property
+    def name(self):
+        return self.fname + self.lname
 
 class UserPermission(db.Document):
     meta = {

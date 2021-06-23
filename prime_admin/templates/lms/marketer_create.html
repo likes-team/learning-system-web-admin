@@ -1,0 +1,151 @@
+{% extends "admin/admin_base.html" %}
+
+{% block extra_head %}
+<script type="text/javascript">
+    OID = "{{OID}}";
+</script>
+
+<style>
+    .myHiddenColumn {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-tools icon-gradient bg-happy-itmeo"></i>
+                </div>
+
+                <div>
+                    Create Marketer
+                    <div class="page-title-subheading">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <form action="{{url_for('lms.create_marketer')}}" id="edit_form" class="needs-validation"
+        method="POST" novalidate>
+        {{ form.csrf_token }}
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fname">First Name</label>
+                        <input style="font-weight: bold;" type="text" class="form-control input_required" id="fname"
+                            name="fname" placeholder="FIRST NAME" required="" value="">
+                        <div id="fname-valid-feedback" class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div id="fname-invalid-feedback" class="invalid-feedback">
+                            Please provide a valid First Name
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lname">Last Name</label>
+                        <input style="font-weight: bold;" type="text" class="form-control input_required" id="lname"
+                            name="lname" placeholder="LAST NAME" required="" value="">
+                        <div id="lname-valid-feedback" class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div id="lname-invalid-feedback" class="invalid-feedback">
+                            Please provide a valid Last Name
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    // Example starter JavaScript for disabling form submissions if there are invalid fields
+                    (function () {
+                        'use strict';
+                        window.addEventListener('load', function () {
+                            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                            var forms = document.getElementsByClassName('needs-validation');
+                            // Loop over them and prevent submission
+                            var validation = Array.prototype.filter.call(forms, function (form) {
+                                form.addEventListener('submit', function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add('was-validated');
+                                }, false);
+                            });
+                        }, false);
+                    })();
+                </script>
+            </div>
+        </div>
+
+        {% if form.inlines %}
+        <div class="row">
+            {% for inline in form.inlines %}
+            <div class="col-lg-6">
+                <div class="main-card mb-3 card inlines-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ inline.__title__.upper() }}</h5>
+
+                        {% if inline.data %}
+                        <table id="{{inline.__table_id__}}" class="mb-0 table table-hover inline-table">
+                            {% else %}
+                            <table id="{{inline.__table_id__}}" class="mb-0 table table-hover">
+                                {% endif %}
+
+                                <thead>
+                                    <tr>
+                                        {% for column in inline.__table_columns__ %}
+
+                                        {% if column is not none %}
+                                        <th>{{ column.upper() }}</th>
+                                        {% else %}
+                                        <th style="display:none;"></th>
+                                        {% endif %}
+
+
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% if inline.__html__ is not none %}
+                                    {% include inline.__html__ %}
+                                    {% endif %}
+                                </tbody>
+
+                            </table>
+
+                    </div>
+
+                    {% if inline.buttons %}
+                    <div class="d-block text-center card-footer">
+                        {% for button in inline.buttons %}
+                        {{button | safe}}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+
+        {% endif %}
+    </form>
+
+</div>
+{% endblock %}
+
+
+{% block inner_footer %}
+<div class="app-footer-left">
+    <button form="edit_form" type="submit" class="btn btn-primary" style="margin-right: 10px;">Save</button>
+    <button type="button" class="btn btn-secondary" onclick="history.back(-1)">Cancel</button>
+</div>
+{% endblock %}

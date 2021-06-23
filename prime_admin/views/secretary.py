@@ -79,7 +79,6 @@ def create_secretary():
         secretary.lname = form.lname.data
         secretary.branch = Branch.objects.get(id=form.branch.data)
         secretary.role = Role.objects(name="Secretary").first()
-        secretary.role_name = secretary.role.name
         secretary.username = form.username.data
         secretary.email = form.email.data if form.email.data != '' else None
         secretary.set_password("password")

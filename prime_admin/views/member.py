@@ -1,11 +1,13 @@
 from decimal import Decimal
 from random import uniform
+
+from pymongo.common import clean_node
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, ContactPerson, Registration, Member
+from prime_admin.models import Batch, Branch, Registration, Member
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template
 from app import db, csrf
 from datetime import datetime
@@ -62,8 +64,7 @@ def members():
 def get_dtbl_members():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-    # search_value = "%" + request.args.get("search[value]") + "%"
-    # column_order = request.args.get('column_order')
+    search_value = request.args.get("search[value]")
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
     schedule = request.args.get('schedule')
@@ -80,6 +81,9 @@ def get_dtbl_members():
 
     if schedule != 'all':
         registrations = registrations.filter(schedule=schedule)
+
+    if search_value != "":
+        registrations = registrations.filter(lname__icontains=search_value)
 
     _table_data = []
 
@@ -298,8 +302,16 @@ def new_payment():
 
     client = Registration.objects.get_or_404(id=client_id)
 
+    is_premium = request.form.get('chkbox_upgrade', False)
+
+    client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
     client.amount += amount
-    client.balance = client.balance - amount
+    
+    if client.payment_mode == "premium":
+        client.balance = ((client.balance + 700) - amount)
+    else:
+        client.balance = client.balance - amount
+    
     client.payments.append(
         {
             'payment_mode': client.payment_mode,
@@ -434,4 +446,22 @@ def print_students_pdf():
         ])
 
     html = render_template('lms/student_pdf.html', students=_table_data)
+    return render_pdf(HTML(string=html))
+
+
+
+@bp_lms.route('/student_info.pdf')
+def print_student_info():
+    student_id = request.args.get('student_id', '')
+
+    student = Registration.objects.get_or_404(id=student_id)
+
+    address = student.branch.address
+
+    html = render_template(
+            'lms/student_info_pdf.html',
+            address=address,
+            student=student
+            )
+
     return render_pdf(HTML(string=html))

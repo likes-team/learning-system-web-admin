@@ -15,6 +15,8 @@ $(document).ready(function(){
                 $("#header_Dashboard").hide();
                 $("#header_Inventory").hide();
                 $("#module_header_admin").hide();
+            } else if(response.roleName == "Partner"){
+                $("#module_header_admin").hide();
             }
         }
     });

@@ -12,12 +12,13 @@
                 </div>
                 <div>Dashboard
                     <div class="page-title-subheading">
+                        Sales, Expenses, Number of Students, NET and Maintaining Sales Activity
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-md-6 col-xl-4">
             <div class="card mb-3 widget-content bg-midnight-bloom">
                 <div class="widget-content-wrapper text-white">
@@ -70,36 +71,59 @@
                 </div>
             </div>
         </div>
+    </div> -->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+                    <h5 class="card-title">SALES & EXPENSES</h5>
+                    <canvas id="chart_sales" height="400" class="chartjs-render-monitor" style="display: block; width: 378px; height: 300px;" width="378"></canvas>                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="main-card mb-3 card">
-                <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-                    <h5 class="card-title">Vertical Bars</h5>
-                    <canvas id="canvas" height="231" class="chartjs-render-monitor" width="463" style="display: block; width: 463px; height: 231px;"></canvas>
-                </div>
-            </div>
-            <div class="main-card mb-3 card">
-                <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-                    <h5 class="card-title">Horizontal Bars</h5>
-                    <canvas id="chart-horiz-bar" height="231" class="chartjs-render-monitor" width="463" style="display: block; width: 463px; height: 231px;"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-body">
-                    <h5 class="card-title">Line Chart</h5>
-                    <div style="height: 400px"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-                        <canvas id="line-chart" height="400" class="chartjs-render-monitor" width="463" style="display: block; width: 463px; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="main-card mb-3 card">
-                <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-                    <h5 class="card-title">Stacked Bars</h5>
-                    <canvas id="stacked-bars-chart" height="231" class="chartjs-render-monitor" width="463" style="display: block; width: 463px; height: 231px;"></canvas>
+                    <!-- <h5 class="card-title">Table bordered</h5> -->
+                    <table id="tbl_dashboard" class="mb-0 table table-bordered">
+                        <thead>
+                        <tr>
+                            <th style="width: 10px;"></th>
+                            <th>JAN</th>
+                            <th>FEB</th>
+                            <th>MAR</th>
+                            <th>APR</th>
+                            <th>MAY</th>
+                            <th>JUN</th>
+                            <th>JULY</th>
+                            <th>AUG</th>
+                            <th>SEP</th>
+                            <th>OCT</th>
+                            <th>NOV</th>
+                            <th>DEC</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- <tr>
+                            <th scope="row">GROSS SALES</th>
+                        </tr>
+                        <tr>
+                            <th scope="row">EXPENSES</th>
+                        </tr>
+                        <tr>
+                            <th scope="row">NET</th>
+                        </tr>
+                        <tr>
+                            <th scope="row">MAINTAINING SALE 85K</th>
+                        </tr>
+                        <tr>
+                            <th scope="row">NO. OF STUDENTS</th>
+                        </tr> -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -8,15 +8,17 @@
     JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
     VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
     PDF_URL = "{{url_for('lms.print_students_pdf')}}";
+    STUDENT_INFO_PDF_URL = "{{url_for('lms.print_student_info')}}";
 </script>
 <style>
-  .modal-dialog{
+    .modal-dialog {
         overflow-y: initial !important
-  }
-  .modal-body{
-    height: 800px;
-    overflow-y: auto;
-  }
+    }
+
+    .modal-body {
+        height: 800px;
+        overflow-y: auto;
+    }
 </style>
 {% endblock %}
 
@@ -45,22 +47,24 @@
                 <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
                     <i class="fa fa-print"></i>
                 </button>
-                
+
                 <div class="d-inline-block dropdown">
                     <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                            class="btn-shadow dropdown-toggle btn btn-info">
-                                    <span class="btn-icon-wrapper pr-2 opacity-7">
-                                        <i class="fa fa-list-alt fa-w-20"></i>
-                                    </span>
+                        class="btn-shadow dropdown-toggle btn btn-info">
+                        <span class="btn-icon-wrapper pr-2 opacity-7">
+                            <i class="fa fa-list-alt fa-w-20"></i>
+                        </span>
                         Actions
                     </button>
                     <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
                         <ul class="nav flex-column">
                             {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
+                            current_user.is_superuser %}
                             <li id="nav_action_btns" class="nav-item">
                                 {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                <button disabled id="btndelete" type="button" tabindex="0"
+                                    class="dropdown-item">Delete</button>
                                 {% endblock %}
                             </li>
                             {% else %}
@@ -93,84 +97,82 @@
         </div>
     </div>
 
-    <div>
-        <div class="main-card mb-3 card">
-            <h5 class="card-header">Sales</h5>
+    <div class="main-card mb-3 card">
+        <h5 class="card-header">Sales</h5>
 
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-6 col-xl-4"></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6 col-xl-4"></div>
 
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-3 widget-content">
-                            <div class="widget-content-wrapper">
-                                <div class="widget-content-left">
-                                    <div class="widget-heading">SALES TODAY</div>
-                                    <div class="widget-subheading"></div>
-                                </div>
-                                <div class="widget-content-right">
-                                    <div class="widget-numbers text-success"><span id="sales_today">₱ 0.00</span></div>
-                                </div>
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">SALES TODAY</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-success"><span id="sales_today">₱ 0.00</span></div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-lg-6 col-xl-4"></div>
-
                 </div>
-                <div class="row">
-                    <div class="col-lg-6 col-xl-3">
-                        <div class="card mb-3 widget-content">
-                            <div class="widget-content-wrapper">
-                                <div class="widget-content-left">
-                                    <div class="widget-heading">TOTAL OF INSTALLMENT</div>
-                                    <div class="widget-subheading"></div>
-                                </div>
-                                <div class="widget-content-right">
-                                    <div class="widget-numbers text-primary"><span id="total_installment">₱ 0.00</span>
-                                    </div>
+
+                <div class="col-lg-6 col-xl-4"></div>
+
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-xl-3">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL OF INSTALLMENT</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-primary"><span id="total_installment">₱ 0.00</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-3">
-                        <div class="card mb-3 widget-content">
-                            <div class="widget-content-wrapper">
-                                <div class="widget-content-left">
-                                    <div class="widget-heading">TOTAL OF FULL PAYMENT</div>
-                                    <div class="widget-subheading"></div>
-                                </div>
-                                <div class="widget-content-right">
-                                    <div class="widget-numbers text-primary"><span id="total_full_payment">₱ 0.00</span>
-                                    </div>
+                </div>
+                <div class="col-lg-6 col-xl-3">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL OF FULL PAYMENT</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-primary"><span id="total_full_payment">₱ 0.00</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-3">
-                        <div class="card mb-3 widget-content">
-                            <div class="widget-content-wrapper">
-                                <div class="widget-content-left">
-                                    <div class="widget-heading">TOTAL OF PREMIUM PAYMENT</div>
-                                    <div class="widget-subheading"></div>
-                                </div>
-                                <div class="widget-content-right">
-                                    <div class="widget-numbers text-primary"><span id="total_premium_payment">₱ 0.00</span>
-                                    </div>
+                </div>
+                <div class="col-lg-6 col-xl-3">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL OF PREMIUM PAYMENT</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-primary"><span id="total_premium_payment">₱ 0.00</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-3">
-                        <div class="card mb-3 widget-content">
-                            <div class="widget-content-wrapper">
-                                <div class="widget-content-left">
-                                    <div class="widget-heading">TOTAL</div>
-                                    <div class="widget-subheading"></div>
-                                </div>
-                                <div class="widget-content-right">
-                                    <div class="widget-numbers text-primary"><span id="total_payment">₱ 0.00</span>
-                                    </div>
+                </div>
+                <div class="col-lg-6 col-xl-3">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-primary"><span id="total_payment">₱ 0.00</span>
                                 </div>
                             </div>
                         </div>
@@ -178,80 +180,87 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="main-card mb-3 card">
-            <div class="card-body">
-                <div class="form-row">
-                    <div class="col-md-4">
-                        <div class="position-relative form-group">
-                            <label for="billing_no" class="">Search</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text"><i class="pe-7s-search">
-                                        </i> </span></div>
-                                <input disabled placeholder="Name" type="text" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                    </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="branch" class="">Branch</label>
-                            <select name="branch" id="branch" class="form-control" required>
-                                
-                                {% if current_user.role_name == "Secretary" %}
-                                    <!-- Pass -->
-                                {% else %}
-                                    <option value="all">All</option>
-                                {% endif %}
-
-                                {% for branch in TABLE_OPTIONS['branches'] %}
-                                <option value="{{ branch.id }}">
-                                    {{ branch.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="batch_no" class="">Batch No.</label>
-                            <select name="batch_no" id="batch_no" class="form-control" required>
-                                <option value="all">All</option>
-                                {% for batch in TABLE_OPTIONS['batch_numbers'] %}
-                                <option value="{{ batch.id }}">
-                                    {{ batch.number }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a schedule
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="schedule" class="">Schedule</label>
-                            <select name="schedule" id="schedule" class="form-control" required>
-                                <option value="all">All</option>
-                                {% for schedule in TABLE_OPTIONS['schedules'] %}
-                                <option value="{{ schedule }}">
-                                    {{ schedule }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a schedule
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="lname" class="">Search</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <input id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                    </i></button>
+                                <button id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
+                                        class="pe-7s-close">
+                                    </i></button>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="branch" class="">Branch</label>
+                        <select name="branch" id="branch" class="form-control" required>
+
+                            {% if current_user.role_name == "Secretary" %}
+                            <!-- Pass -->
+                            {% else %}
+                            <option value="all">All</option>
+                            {% endif %}
+
+                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            <option value="{{ branch.id }}">
+                                {{ branch.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="batch_no" class="">Batch No.</label>
+                        <select name="batch_no" id="batch_no" class="form-control" required>
+                            <option value="all">All</option>
+                            {% for batch in TABLE_OPTIONS['batch_numbers'] %}
+                            <option value="{{ batch.id }}">
+                                {{ batch.number }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a schedule
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="schedule" class="">Schedule</label>
+                        <select name="schedule" id="schedule" class="form-control" required>
+                            <option value="all">All</option>
+                            {% for schedule in TABLE_OPTIONS['schedules'] %}
+                            <option value="{{ schedule }}">
+                                {{ schedule }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a schedule
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
                 <div class="table-responsive">
                     <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
                         <thead>
@@ -267,8 +276,6 @@
                     </table>
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>

@@ -9,3 +9,4 @@ from .branches import *
 from .contact_person import *
 from .batches import *
 from .inventory import *
+from .marketer import *
