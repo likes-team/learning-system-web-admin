@@ -14,7 +14,7 @@
       border: 1px solid black;
       text-align: center;
       padding: 8px;
-      font-size: 12px;
+      font-size: 9px;
     }
 
     tr:nth-child(even) {
@@ -50,7 +50,7 @@
   <div style="text-align: center;">
     <h3 style="margin-bottom: 5px;">PRIME LANGUAGE AND TECH. CENTER INC.</h3>
     <h6 style="font-weight:lighter;margin-top: 5px;">SEC. REG. NO.: CS201817522</h6>
-    <h5 style="font-weight:bold;margin-top: 10px;">STUDENTS RECORD</h5>
+    <h5 style="font-weight:bold;margin-top: 10px;">AUDIT STUDENTS RECORD</h5>
   </div>
 
   <div style="text-align: center;">
@@ -75,11 +75,17 @@
     <tr>
       <th>REGISTRATION NO.</th>
       <th>FULL NAME</th>
-      <th>PASSPORT NO.</th>
       <th>CONTACT NO.</th>
+      <th>INSTALLMENT</th>
+      <th>FULL PAYMENT</th>
+      <th>PREMIUM PAYMENT</th>
       <th>BALANCE</th>
       <th>PAID/NOT PAID</th>
-      <th>REMARK</th>
+      <th>UNIFORM</th>
+      <th>ID LACE</th>
+      <th>ID CARD</th>
+      <th>BOOK V1</th>
+      <th>BOOK V2</th>
     </tr>
 
     {% for student in students %}
@@ -91,10 +97,22 @@
         {{student[3]}}
       </td>
       <td>
-        {{student[16]}}
+        {{student[17]}}
       </td>
       <td>
-        {{student[17]}}
+        {% if student[7] == "Installment" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if student[7] == "Full Payment" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if student[7] == "Premium Payment" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}
       </td>
       <td>
         {{student[9]}}
@@ -103,7 +121,22 @@
         {{student[10]}}
       </td>
       <td>
-        {{student[7]}}
+        {{student[13]}}
+      </td>
+      <td>
+        <!-- <span style="font-size: large;">&#10003;</span> -->
+      </td>
+      <td>
+        <!-- <span style="font-size: large;">&#10003;</span> -->
+      </td>
+      <td>
+        {% if student[12] == "Vol. 1" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}      </td>
+      <td>
+        {% if student[12] == "Vol. 1 Vol. 2" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}

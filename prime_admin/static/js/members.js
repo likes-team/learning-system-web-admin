@@ -261,7 +261,14 @@ $(document).ready(function(){
         var branch = $("#branch").val();
         var batch_no = $("#batch_no").val();
         var schedule = $("#schedule").val();
-        location.href = PDF_URL + `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}`;
+        window.open(PDF_URL + `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}`);
+    });
+
+    $("#btn_print_audit").click(function(){
+        var branch = $("#branch").val();
+        var batch_no = $("#batch_no").val();
+        var schedule = $("#schedule").val();
+        window.open(STUDENTS_AUDIT_PDF_URL + `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&report=audit`);
     });
 
     $("#btn_print_student_info").click(function(){

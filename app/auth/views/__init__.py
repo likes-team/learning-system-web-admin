@@ -1,5 +1,6 @@
 from . import (
     login_logout,
     role,
-    user
+    user,
+    register
 )

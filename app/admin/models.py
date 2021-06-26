@@ -45,7 +45,7 @@ class AdminUserOptions(db.Document):
 
 class AdminDashboard(Admin):
     __amname__ = 'admin_dashboard'
-    __amdescription__ = 'Admin Dashboard'
+    __amdescription__ = 'User Control Panel'
     __amicon__ = 'pe-7s-graph1'
     __view_url__ = 'bp_admin.dashboard'
 

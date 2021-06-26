@@ -204,6 +204,14 @@ class Equipment(Admin):
     __view_url__ = 'lms.equipments'
 
 
+class CashFlow(Admin):
+    __tablename__ = 'lms_inventories'
+    __amname__ = 'cash_flow'
+    __amdescription__ = 'Cash Flow'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.equipments'
+
+
 class Supplies(Admin):
     __tablename__ = 'lms_inventories'
     __amname__ = 'supplies'

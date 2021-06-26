@@ -43,6 +43,7 @@ class User(UserMixin, Base, Admin):
     __view_url__ = 'bp_auth.users'
 
     """ COLUMNS """
+    # custom_id = db.StringField(primary_key=True)
     username = db.StringField(unique=True)
     fname = db.StringField()
     lname = db.StringField()
@@ -56,6 +57,12 @@ class User(UserMixin, Base, Admin):
     branch = db.ReferenceField('Branch')
     branches = db.ListField()
     earnings = db.ListField(db.EmbeddedDocumentField(Earning))
+    father_name = db.StringField()
+    mother_name = db.StringField()
+    nickname = db.StringField()
+    date_of_birth = db.DateField()
+    contact_no = db.StringField()
+    address = db.StringField()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -69,6 +76,10 @@ class User(UserMixin, Base, Admin):
     @property
     def name(self):
         return self.fname + self.lname
+
+    @property
+    def full_name(self):
+        return self.fname + " " + self.lname
 
 class UserPermission(db.Document):
     meta = {
