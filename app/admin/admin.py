@@ -15,7 +15,7 @@ class AdminModule(CoreModule):
     models = [AdminDashboard, AdminApp, User, Role, Branch, Batch]
     version = '1.0'
     sidebar = {
-        'DASHBOARDS': [
+        'Control Panels': [
             AdminDashboard
         ],
         'SYSTEM': [

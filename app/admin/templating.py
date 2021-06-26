@@ -41,6 +41,7 @@ def admin_dashboard(model, **kwargs):
         'data': None,
         'title': 'Admin Dashboard',
         'module': 'admin',
+        'scripts': None,
     }
 
     options.update(kwargs)
@@ -48,10 +49,7 @@ def admin_dashboard(model, **kwargs):
     active_model = model.__amname__
     
     return admin_render_template(model, options['dashboard_template'], options['module'], title=options['title'], \
-        options=options, data=options['data'], active_model=active_model, UID=str(current_user.id), scripts=[
-            {'lms.static': 'js/utils.js'},
-            {'lms.static': 'js/dashboard.js'}
-            ])
+        options=options, data=options['data'], active_model=active_model, UID=str(current_user.id), scripts=options['scripts'])
 
 
 def admin_table(*models, fields, form=None, **options):

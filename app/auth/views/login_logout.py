@@ -28,8 +28,13 @@ def login():
         return redirect(url_for(current_app.config['AUTH']['LOGIN_REDIRECT_URL']))
 
     user = User.objects(username=form.username.data).first()
+
+    if not user.active:
+        flash('Your account is not approved yet!, please contact system administrator','error')
+        return redirect(url_for(auth_urls['login']))
+
     if user is None or not user.check_password(form.password.data):
-        flash('Invalid username or password','success')
+        flash('Invalid username or password','error')
         return redirect(url_for(auth_urls['login']))
 
     login_user(user, remember=form.remember_me.data)

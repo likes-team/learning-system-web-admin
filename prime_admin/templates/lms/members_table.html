@@ -9,6 +9,7 @@
     VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
     PDF_URL = "{{url_for('lms.print_students_pdf')}}";
     STUDENT_INFO_PDF_URL = "{{url_for('lms.print_student_info')}}";
+    STUDENTS_AUDIT_PDF_URL = "{{url_for('lms.print_students_pdf')}}";
 </script>
 <style>
     .modal-dialog {
@@ -45,7 +46,11 @@
             <div class="page-title-actions">
 
                 <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-print"></i>
+                    <i class="fa fa-print">   Print Student Records</i>
+                </button>
+
+                <button id="btn_print_audit" type="button" class="btn-shadow mr-3 btn btn-primary">
+                    <i class="fa fa-print">    Print Student Records Audit</i>
                 </button>
 
                 <div class="d-inline-block dropdown">
@@ -56,6 +61,7 @@
                         </span>
                         Actions
                     </button>
+                    
                     <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
                         <ul class="nav flex-column">
                             {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}

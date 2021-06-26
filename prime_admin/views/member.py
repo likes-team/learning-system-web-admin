@@ -354,13 +354,13 @@ def print_students_pdf():
     branch = request.args.get('branch', 'all')
     batch_no = request.args.get('batch_no', 'all')
     schedule = request.args.get('schedule', 'all')
+    report = request.args.get('report', 'default')
     
     if branch != 'all':
         registrations = Registration.objects(branch=branch).filter(status='registered')
-        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
+        branch = Branch.objects.get_or_404(id=branch).name
     else:
         registrations = Registration.objects(status='registered')
-        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -382,7 +382,7 @@ def print_students_pdf():
             actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
             paid = 'PAID'
 
-        branch = registration.branch
+        _branch = registration.branch
         contact_person = registration.contact_person
 
         if registration.books:
@@ -427,25 +427,51 @@ def print_students_pdf():
 
 
         _table_data.append([
-            str(registration.id),
-            registration.created_at,
-            registration.full_registration_number,
-            registration.full_name,
+            str(registration.id), # 0
+            registration.created_at, # 1
+            registration.full_registration_number, # 2
+            registration.full_name, # 3
             registration.batch_number.number if registration.batch_number is not None else "",
-            branch.name if branch is not None else '',
-            registration.schedule,
-            payment_mode,
-            str(registration.amount),
-            str(registration.balance),
-            paid,
-            contact_person.fname if contact_person is not None else '',
-            books,
-            uniforms,
-            registration.created_by,
-            actions
+            _branch.name if _branch is not None else '', # 5
+            registration.schedule, # 6
+            payment_mode, # 7
+            str(registration.amount), # 8
+            str(registration.balance), # 9
+            paid, # 10
+            contact_person.fname if contact_person is not None else '', # 11
+            books, # 12
+            uniforms, # 13
+            registration.created_by, # 14
+            actions, # 15
+            registration.passport, # 16
+            registration.contact_number # 17
         ])
 
-    html = render_template('lms/student_pdf.html', students=_table_data)
+    total_installment = registrations.filter(payment_mode='installment').sum('amount')
+    total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
+    total_premium_payment = registrations.filter(payment_mode='premium').sum('amount')
+    total_payment = registrations.sum('amount')
+    total_balance = registrations.sum('balance')
+    
+    template = ""
+    if report == 'audit':
+        template = 'lms/students_audit_pdf.html'
+    else:
+        template = 'lms/student_pdf.html'
+
+    html = render_template(
+        template,
+        students=_table_data,
+        branch=branch.upper(),
+        batch_no=batch_no.upper(),
+        schedule=schedule.upper(),
+        total_installment=total_installment,
+        total_full_payment=total_full_payment,
+        total_premium_payment=total_premium_payment,
+        total_payment=total_payment,
+        total_balance=total_balance
+        )
+
     return render_pdf(HTML(string=html))
 
 

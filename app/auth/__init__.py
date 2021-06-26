@@ -21,7 +21,8 @@ auth_urls = {
 
 # TEMPLATES DICTIONARY
 auth_templates = {
-    'login': 'auth/user_login.html',
+    'login': 'auth/new_user_login.html',
+    'register': 'auth/user_register.html',
     'edit': 'auth/user_edit.html',
     'user_permission_index': 'auth/user_permission_index.html',
     'role_index': 'auth/role_index.html',
