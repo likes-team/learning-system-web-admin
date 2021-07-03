@@ -10,3 +10,4 @@ from .contact_person import *
 from .batches import *
 from .inventory import *
 from .marketer import *
+from .cash_flow import *

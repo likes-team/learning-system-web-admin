@@ -48,6 +48,27 @@ class OrientationAttendanceForm(AdminTableForm):
         return []
 
 
+class CashFlowForm(AdminTableForm):
+    __table_columns__ = [
+        'Date',
+        'Bank name',
+        'account no.',
+        'account name',
+        'Deposit amount',
+        'from',
+        'by who'
+    ]
+
+    __heading__ = "Cash Flow"
+
+    contact_person = StringField()
+    orientator = StringField()
+    branch = StringField()
+
+    @property
+    def fields(self):
+        return []
+
 class InventoryForm(AdminTableForm):
     from prime_admin.models import Branch
 
@@ -322,4 +343,5 @@ class RegistrationForm(FlaskForm):
     birth_date = DateField()
     book = StringField()
     payment_mode = StringField()
+    e_registration = StringField()
 

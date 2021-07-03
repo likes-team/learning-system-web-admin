@@ -65,11 +65,22 @@
     <div class="Column">TOTAL OF PREMIUM PAYMENT: ₱{{total_premium_payment}}</div>
   </div>
 
-  <div class="Row" style="margin-bottom: 15px;">
+  <div class="Row">
     <div class="Column">TOTAL: ₱{{total_payment}}</div>
     <div class="Column">BALANCE: ₱{{total_balance}}</div>
   </div>
 
+  <div style="text-align: center;margin-top:10px;">
+    <h6 style="font-weight:bold;margin:0%;">TOTAL USED MATERIALS</h6>
+  </div>
+
+  <div class="Row" style="margin-bottom: 15px;">
+    <div class="Column">UNIFORMS = {{uniforms_count}}</div>
+    <div class="Column">ID LACE = {{id_lace_count}}</div>
+    <div class="Column">ID CARD = {{id_card_count}}</div>
+    <div class="Column">BOOK 1 = {{book1_count}}</div>
+    <div class="Column">BOOK 2 = {{book2_count}}</div>
+  </div>
 
   <table>
     <tr>
@@ -124,17 +135,22 @@
         {{student[13]}}
       </td>
       <td>
-        <!-- <span style="font-size: large;">&#10003;</span> -->
-      </td>
-      <td>
-        <!-- <span style="font-size: large;">&#10003;</span> -->
-      </td>
-      <td>
-        {% if student[12] == "Vol. 1" %}
+        {% if student[18]%}
             <span style="font-size: large;">&#10003;</span>
-        {% endif %}      </td>
+        {% endif %}   
+      </td>
       <td>
-        {% if student[12] == "Vol. 1 Vol. 2" %}
+        {% if student[19]%}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if student[12] == "Vol. 1" or student[12] == "Vol. 1 Vol. 2" %}
+            <span style="font-size: large;">&#10003;</span>
+        {% endif %}      
+      </td>
+      <td>
+        {% if student[12] == "None Vol. 2" or student[12] == "Vol. 1 Vol. 2" %}
             <span style="font-size: large;">&#10003;</span>
         {% endif %}
       </td>

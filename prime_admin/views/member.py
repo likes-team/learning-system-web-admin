@@ -194,6 +194,8 @@ def edit_member(client_id):
     contact_no = request.json['contact_no']
     email = request.json['email']
     address = request.json['address']
+    e_registration = request.json['e_registration']
+
     client = Registration.objects.get_or_404(id=client_id)
     client.lname = lname
     client.fname = fname
@@ -204,7 +206,8 @@ def edit_member(client_id):
     client.contact_number = contact_no
     client.email = email
     client.address = address
-    
+    client.e_registration = e_registration
+
     client.save()
 
     response = {
@@ -221,6 +224,7 @@ def get_member(client_id):
 
     books = 'None'
     uniforms = 'None'
+    id_materials = 'None'
 
     if client.books:
         if client.books['volume1']:
@@ -249,6 +253,14 @@ def get_member(client_id):
             uniforms = "XXL"
     else:
         uniforms = "None"
+
+    if client.id_materials:
+        if client.id_materials['id_card']:
+            id_materials = "ID Card"
+        if client.id_materials['id_lace']:
+            id_materials += " ID Lace"
+    else:
+        id_materials = "None"
 
     payments = []
 
@@ -279,11 +291,13 @@ def get_member(client_id):
         'uniform': uniforms,
         'books': client.books,
         'uniforms': client.uniforms,
+        'id_materials': id_materials,
         'amount': str(client.amount),
         'balance': str(client.balance),
         'status': client.status,
         'is_oriented': client.is_oriented,
-        'payments': payments
+        'payments': payments,
+        'e_registration': client.e_registration
     }
 
     response = {
@@ -370,9 +384,18 @@ def print_students_pdf():
 
     _table_data = []
 
+    uniforms_count = 0
+    id_lace_count = 0
+    id_card_count = 0
+    book1_count = 0
+    book2_count = 0
+
     for registration in registrations:
         books = ""
         uniforms = ""
+        id_lace = False
+        id_card = False
+
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
@@ -390,8 +413,10 @@ def print_students_pdf():
 
             if registration.books['volume1']:
                 books = "Vol. 1"
+                book1_count = book1_count + 1
             if registration.books['volume2']:
                 books += " Vol. 2"
+                book2_count = book2_count + 1
             if registration.books['book_none']:
                 books = "None"
         else:
@@ -404,19 +429,33 @@ def print_students_pdf():
                 uniforms = "None"
             elif registration.uniforms['uniform_xs']:
                 uniforms = "XS"
+                uniforms_count = uniforms_count + 1
             elif registration.uniforms['uniform_s']:
                 uniforms = "S"
+                uniforms_count = uniforms_count + 1
             elif registration.uniforms['uniform_m']:
                 uniforms = "M"
+                uniforms_count = uniforms_count + 1
             elif registration.uniforms['uniform_l']:
                 uniforms = "L"
+                uniforms_count = uniforms_count + 1
             elif registration.uniforms['uniform_xl']:
                 uniforms = "XL"
+                uniforms_count = uniforms_count + 1
             elif registration.uniforms['uniform_xxl']:
                 uniforms = "XXL"
+                uniforms_count = uniforms_count + 1
         else:
             uniforms = "None"
         
+        if registration.id_materials:
+            if registration.id_materials['id_card']:
+                id_card = True
+                id_card_count = id_card_count + 1
+            if registration.id_materials['id_lace']:
+                id_lace = True
+                id_lace_count = id_lace_count + 1
+
         payment_mode = ""
         if registration.payment_mode == 'full_payment':
             payment_mode = "Full Payment"
@@ -444,8 +483,11 @@ def print_students_pdf():
             registration.created_by, # 14
             actions, # 15
             registration.passport, # 16
-            registration.contact_number # 17
+            registration.contact_number, # 17
+            id_card,
+            id_lace
         ])
+        print(books)
 
     total_installment = registrations.filter(payment_mode='installment').sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
@@ -454,6 +496,7 @@ def print_students_pdf():
     total_balance = registrations.sum('balance')
     
     template = ""
+
     if report == 'audit':
         template = 'lms/students_audit_pdf.html'
     else:
@@ -469,11 +512,15 @@ def print_students_pdf():
         total_full_payment=total_full_payment,
         total_premium_payment=total_premium_payment,
         total_payment=total_payment,
-        total_balance=total_balance
+        total_balance=total_balance,
+        uniforms_count=uniforms_count,
+        book1_count=book1_count,
+        book2_count=book2_count,
+        id_card_count=id_card_count,
+        id_lace_count=id_lace_count
         )
 
     return render_pdf(HTML(string=html))
-
 
 
 @bp_lms.route('/student_info.pdf')

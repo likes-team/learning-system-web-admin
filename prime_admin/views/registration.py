@@ -103,6 +103,7 @@ def register():
                 client.email = form.email.data
                 client.birth_date = form.birth_date.data
 
+        client.e_registration = form.e_registration.data
         client.registration_number = last_registration_number.registration_number + 1 if last_registration_number is not None else 1
         client.full_registration_number = registration_generated_number
         client.schedule = form.schedule.data
@@ -132,6 +133,13 @@ def register():
             'uniform_l': True if 'uniform_l' in uniforms else False,
             'uniform_xl': True if 'uniform_xl' in uniforms else False,
             'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+        }
+
+        id_materials = request.form.getlist('id_materials')
+
+        client.id_materials = {
+            'id_card': True if 'id_card' in id_materials else False,
+            'id_lace': True if 'id_lace' in id_materials else False,
         }
 
         if client.payment_mode == "full_payment":

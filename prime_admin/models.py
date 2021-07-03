@@ -37,6 +37,7 @@ class Registration(Base, Admin):
     birth_date = db.DateField()
     books = db.DictField()
     uniforms = db.DictField()
+    id_materials = db.DictField()
     payment_mode = db.StringField()
     status = db.StringField()
     is_oriented = db.BooleanField()
@@ -209,7 +210,7 @@ class CashFlow(Admin):
     __amname__ = 'cash_flow'
     __amdescription__ = 'Cash Flow'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'lms.equipments'
+    __view_url__ = 'lms.cash_flow'
 
 
 class Supplies(Admin):
