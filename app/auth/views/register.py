@@ -41,7 +41,13 @@ def register():
             branches=branches,
             positions=positions
             )
-    
+
+    role = Role.objects.get(id=form.position.data)
+
+    if role.name not in ['Secretary', 'Admin', 'Marketer']:
+        flash('Sorry, only Secretaries and Marketers can be registered at the moment','error')
+        return redirect(url_for('bp_auth.register'))
+
     if not form.validate_on_submit():
         for key, value in form.errors.items():
             flash(str(key) + str(value), 'error')

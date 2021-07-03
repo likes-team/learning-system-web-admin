@@ -22,97 +22,13 @@
 
         <div class="main-card mb-3 card">
             <div class="card-body">
-                <h5 class="card-title">General Information</h5>
-                <div class="form-row">
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="batch_number" class="">Batch No.</label>
-                            <select name="batch_number" id="batch_number" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for batch_number in form.batch_number.data %}
-                                <option value="{{ batch_number.id }}">
-                                    {{ batch_number.number }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a batch no.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="schedule" class="">Schedule</label>
-                            <select name="schedule" id="schedule" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for key,value,checked in form.schedule.iter_choices() %}
-                                <option value="{{ key }}">
-                                    {{ value }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a schedule
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="branch" class="">Branch</label>
-                            <select name="branch" id="branch" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for branch in data['branches'] %}
-                                <option value="{{ branch.id }}">
-                                    {{ branch.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a branch
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="contact_person" class="">Contact Person</label>
-                            <select name="contact_person" id="contact_person" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for contact_person in data['contact_persons'] %}
-                                <option value="{{ contact_person.id }}">
-                                    {{contact_person.fname}}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a contact person
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-card mb-3 card">
-            <div class="card-body">
                 <h5 class="card-title">Member Information</h5>
                 <div class="form-row">
                     <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="lname" class="">Last Name</label>
                             <div class="input-group"><input id="lname" name="lname" type="text"
-                                    class="form-control" required>
+                                    class="form-control" required readonly>
                                 <div class="input-group-append">
                                     <button
                                         type="button" 
@@ -134,7 +50,7 @@
                     <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="fname" class="">First Name</label>
-                            <input required name="fname" id="fname" type="text" class="form-control">
+                            <input readonly required name="fname" id="fname" type="text" class="form-control">
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -241,6 +157,90 @@
                             </div>
                             <div class="invalid-feedback">
                                 Please provide a valid date of birth
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">General Information</h5>
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="batch_number" class="">Batch No.</label>
+                            <select name="batch_number" id="batch_number" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for batch_number in form.batch_number.data %}
+                                <option value="{{ batch_number.id }}">
+                                    {{ batch_number.number }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a batch no.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="schedule" class="">Schedule</label>
+                            <select name="schedule" id="schedule" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for key,value,checked in form.schedule.iter_choices() %}
+                                <option value="{{ key }}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a schedule
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="branch" class="">Branch</label>
+                            <select disabled name="branch" id="branch" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for branch in data['branches'] %}
+                                <option value="{{ branch.id }}">
+                                    {{ branch.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a branch
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="contact_person" class="">Contact Person</label>
+                            <select disabled name="contact_person" id="contact_person" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for contact_person in data['contact_persons'] %}
+                                <option value="{{ contact_person.id }}">
+                                    {{contact_person.fname}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a contact person
                             </div>
                         </div>
                     </div>
@@ -361,12 +361,12 @@
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">
-                            <label for="others" class="">Others</label>
+                            <label class="">Others</label>
                             <div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_card" name="others" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_card" name="id_materials" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
                                     ID Card
                                 </label></div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_lace" name="others" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
+                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_lace" name="id_materials" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
                                     ID Lace
                                 </label></div>
                             </div>

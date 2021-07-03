@@ -156,6 +156,18 @@
 					<td>{{student.payment_mode.upper()}}</td>
 				</tr>
 				<tr class="item">
+					<td>Remarks</td>
+
+					<td>
+						{% if student.balance > 0 %}
+							Not Paid
+						{% else %}
+							Paid
+						{% endif %}
+
+					</td>
+				</tr>
+				<tr class="item">
 					<td>Amount</td>
 
 					<td>{{student.amount}}</td>

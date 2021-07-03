@@ -1,5 +1,7 @@
 $(document).ready(function(){
 
+    $("#lbl_search_client").html("Search Oriented Students");
+
     $("#amount").change(function(){
         var payment_mode = $('input[name="payment_modes"]:checked').val();
         var balance;

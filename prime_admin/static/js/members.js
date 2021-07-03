@@ -157,9 +157,11 @@ $(document).ready(function(){
                 $("#view_contact_no").val(response.data.contact_no);
                 $("#view_email").val(response.data.email);
                 $("#view_address").val(response.data.address);
+                $("#view_e_registration").val(response.data.e_registration);
                 $("#view_mode_of_payment").val(response.data.mode_of_payment.toUpperCase());
                 $("#view_book").val(response.data.book);
                 $("#view_uniform").val(response.data.uniform);
+                $("#view_id_materials").val(response.data.id_materials);
                 $("#view_amount").val(response.data.amount);
                 $("#view_balance").val(response.data.balance);
 
@@ -192,6 +194,7 @@ $(document).ready(function(){
             $("#view_contact_no").prop('disabled', false);
             $("#view_email").prop('disabled', false);
             $("#view_address").prop('disabled', false);
+            $("#view_e_registration").prop('disabled', false);
         }else if ($(this).html() == "Save"){
             $(this).html("Edit");
             $("#view_last_name").prop('disabled', true);
@@ -204,6 +207,7 @@ $(document).ready(function(){
             $("#view_contact_no").prop('disabled', true);
             $("#view_email").prop('disabled', true);
             $("#view_address").prop('disabled', true);
+            $("#view_e_registration").prop('disabled', true);
 
             var lname = $("#view_last_name").val();
             var fname = $("#view_first_name").val();
@@ -214,6 +218,7 @@ $(document).ready(function(){
             var contact_no = $("#view_contact_no").val();
             var email = $("#view_email").val();
             var address = $("#view_address").val();
+            var e_registration = $("#view_e_registration").val();
 
             $.ajax({
                 url: "/learning-management/api/members/" + $("#client_id").val() + "/edit",
@@ -228,7 +233,8 @@ $(document).ready(function(){
                     "passport": passport,
                     "contact_no": contact_no,
                     "email": email,
-                    "address": address
+                    "address": address,
+                    "e_registration": e_registration
                 }),
                 contentType: "application/json; charset=utf-8",
                 success: function(response){
