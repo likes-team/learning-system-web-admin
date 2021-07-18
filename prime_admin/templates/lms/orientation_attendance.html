@@ -82,7 +82,7 @@
                         <div class="position-relative form-group">
                             <label for="branch" class="">Branch</label>
                             <select name="branch" id="branch" class="form-control" required>
-                                {% if current_user.role_name == "Secretary" %}
+                                {% if current_user.role.name == "Secretary" %}
                                 <!-- Pass -->
                                 {% else %}
                                     <option value="">Choose...</option>

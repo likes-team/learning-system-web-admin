@@ -1,0 +1,164 @@
+<div id="mdl_withdraw" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Withdraw</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{url_for('lms.withdraw')}}" method="POST" class="needs-validation" novalidate>
+                    <div class="main-card mb-3 card">
+                        <div class="card-body">
+                        <!-- <h5 class="card-title">Student Information</h5> -->
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id"
+                            value="">
+                            
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="date_deposit"
+                                            class="">Date</label>
+                                            <input name="date_deposit" id="date_deposit"
+                                            type="date" class="form-control" required>
+                                            <div class="valid-feedback">
+                                                Looks good!
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid date
+                                            </div>
+                                        </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="bank_name"
+                                            class="">Bank Name</label><input name="bank_name" id="bank_name"
+                                            type="text" class="form-control" required>
+                                            <div class="valid-feedback">
+                                                Looks good!
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid bank name
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="account_no"
+                                            class="">Account No.</label><input name="account_no" id="account_no"
+                                            type="text" class="form-control" required></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="account_name"
+                                            class="">Account Name</label><input name="account_name" id="account_name"
+                                            type="text" class="form-control" required>
+                                            <div class="valid-feedback">
+                                                Looks good!
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid account name
+                                            </div></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="amount"
+                                            class="">Withdraw Amount</label>
+                                            <input required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                                            <div class="valid-feedback">
+                                                Looks good!
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid amount
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label for="from_what" class="">From</label>
+                                        <select name="from_what" id="from_what" class="form-control" required="">
+                                            <option value="">Choose...</option>
+                                            <option value="Sales">
+                                                Sales
+                                            </option>
+                                            <option value="Fund 1">
+                                                Fund 1
+                                            </option>
+                                            <option value="Fund 2">
+                                                Fund 2
+                                            </option>
+                                        </select>
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Please provide a schedule
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label for="branch" class="">Branch</label>
+                                        <select name="branch" id="branch" class="form-control" required>
+                                            <option value="">Choose...</option>
+                                            {% for branch in TABLE_OPTIONS['branches'] %}
+                                            <option value="{{ branch.id }}">
+                                                {{ branch.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Please provide a branch
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="by_who"
+                                            class="">By Who</label><input name="by_who" id="by_who"
+                                            type="text" class="form-control" value="{{current_user.full_name}}" readonly>
+                                            </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // Example starter JavaScript for disabling form submissions if there are invalid fields
+                        (function() {
+                            'use strict';
+                            window.addEventListener('load', function() {
+                                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                var forms = document.getElementsByClassName('needs-validation');
+                                // Loop over them and prevent submission
+                                var validation = Array.prototype.filter.call(forms, function(form) {
+                                    form.addEventListener('submit', function(event) {
+                                        if (form.checkValidity() === false) {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                        }
+                                        form.classList.add('was-validated');
+                                    }, false);
+                                });
+                            }, false);
+                        })();
+                    </script>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Withdraw</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,3 @@
-from flask.app import Flask
 from flask_wtf import FlaskForm
 from app.admin.forms import AdminTableForm, AdminEditForm, AdminInlineForm, AdminField
 from wtforms.validators import DataRequired
@@ -48,7 +47,7 @@ class OrientationAttendanceForm(AdminTableForm):
         return []
 
 
-class CashFlowForm(AdminTableForm):
+class CashFlowSecretaryForm(AdminTableForm):
     __table_columns__ = [
         'Date',
         'Bank name',
@@ -56,18 +55,54 @@ class CashFlowForm(AdminTableForm):
         'account name',
         'Deposit amount',
         'from',
-        'by who'
+        'by who',
+        'group'
     ]
 
     __heading__ = "Cash Flow"
 
-    contact_person = StringField()
-    orientator = StringField()
-    branch = StringField()
+    @property
+    def fields(self):
+        return []
+
+
+class CashFlowAdminForm(AdminTableForm):
+    __table_columns__ = [
+        'Date',
+        'Deposit',
+        'from',
+        'withdraw',
+        'balance',
+        'withdraw from',
+        'by who',
+        'group'
+    ]
+
+    __heading__ = "Cash Flow"
 
     @property
     def fields(self):
         return []
+class DepositForm(FlaskForm):
+    date_deposit = DateField()
+    bank_name = StringField()
+    account_no = StringField()
+    account_name = StringField()
+    amount = DecimalField()
+    from_what = StringField()
+    by_who = StringField()
+
+
+class WithdrawForm(FlaskForm):
+    date_deposit = DateField()
+    bank_name = StringField()
+    account_no = StringField()
+    account_name = StringField()
+    amount = DecimalField()
+    from_what = StringField()
+    by_who = StringField()    
+    branch = StringField()    
+
 
 class InventoryForm(AdminTableForm):
     from prime_admin.models import Branch
