@@ -40,14 +40,14 @@ class LearningManagementModule(CoreModule):
             Marketer,
             Secretary,
             OrientationAttendance,
-            Expenses,
+            # Expenses,
         ],
         'Accounting': [
             CashFlow
         ],
-        'Inventory': [
-            Equipment,
-            Supplies,
-            Utilities
-        ]
+        # 'Inventory': [
+        #     Equipment,
+        #     Supplies,
+        #     Utilities
+        # ]
     }

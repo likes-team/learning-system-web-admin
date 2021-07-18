@@ -1,5 +1,7 @@
 from datetime import datetime
 from enum import unique
+
+from mongoengine.fields import DateField
 from app import db
 from app.admin.models import Admin
 from app.core.models import Base
@@ -205,13 +207,41 @@ class Equipment(Admin):
     __view_url__ = 'lms.equipments'
 
 
-class CashFlow(Admin):
-    __tablename__ = 'lms_inventories'
+class CashFlow(Base, Admin):
+    meta = {
+        'collection': 'lms_bank_statements'
+    }
+    
+    __tablename__ = 'lms_bank_statements'
     __amname__ = 'cash_flow'
     __amdescription__ = 'Cash Flow'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.cash_flow'
+    
+    date_deposit = db.DateField()
+    bank_name = db.StringField()
+    account_no = db.StringField()
+    account_name = db.StringField()
+    amount = db.DecimalField()
+    from_what = db.StringField()
+    by_who = db.StringField()
+    type = db.StringField()
+    branch = db.ReferenceField('Branch')
+    balance = db.DecimalField()
+    group = db.IntField()
 
+
+class Accounting(Base):
+    meta = {
+        'collection': 'lms_accounting'
+    }
+    
+    branch = db.ReferenceField('Branch')
+    total_gross_sale = db.DecimalField()
+    final_fund1 = db.DecimalField()
+    final_fund2 = db.DecimalField()
+    profits = db.ListField()
+    active_group = db.IntField()
 
 class Supplies(Admin):
     __tablename__ = 'lms_inventories'
