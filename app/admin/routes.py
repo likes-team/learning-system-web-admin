@@ -1,12 +1,18 @@
 """ MODULE: ADMIN.ROUTES """
 from flask import flash, redirect, url_for, request, jsonify
-from flask_login import login_required
+from flask.templating import render_template
+from flask_login import login_required, current_user
 from flask_cors import cross_origin
 from sqlalchemy import text
 from app import db, mongo
 from app.admin import bp_admin
 
 
+
+# @bp_admin.before_request
+# def admin_before_request():
+#     if current_user.role.name != "Admin":
+#         return render_template('auth/authorization_error.html')
 
 @bp_admin.route('/delete/<string:table_name>/<string:oid>',methods=['POST'])
 @login_required

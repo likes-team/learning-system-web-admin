@@ -40,7 +40,7 @@ def marketers():
         fields=[],
         form=form,
         table_data=_table_data,
-        create_url='lms.create_marketer',
+        # create_url='lms.create_marketer',
         edit_url='lms.edit_marketer',
         view_modal_url='/learning-management/get-view-contact-person-data',
         create_button=True,

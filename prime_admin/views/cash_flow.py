@@ -84,7 +84,7 @@ def deposit():
             if new_deposit.from_what == "Sales":
                 new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
                 accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
-            elif new_deposit.from_what == "Student Payment":
+            elif new_deposit.from_what == "Student Loan Payment":
 
                 if accounting.final_fund1:
                     accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
@@ -99,7 +99,7 @@ def deposit():
             
             if new_deposit.from_what == "Sales":
                 accounting.total_gross_sale = new_deposit.amount
-            elif new_deposit.from_what == "Student Payment":
+            elif new_deposit.from_what == "Student Loan Payment":
                 accounting.final_fund1 = new_deposit.amount
             new_deposit.balance = new_deposit.amount
 
@@ -176,6 +176,7 @@ def get_cash_flow():
     # search_value = "%" + request.args.get("search[value]") + "%"
     # column_order = request.args.get('column_order')
     branch_id = request.args.get('branch')
+    from_what = request.args.get('from_what')
 
     if branch_id == 'all':
         response = {
@@ -194,13 +195,44 @@ def get_cash_flow():
 
         return jsonify(response)
         # bank_statements = CashFlow.objects.skip(start).limit(length)
+        
+    if current_user.role.name == "Secretary":
+        accounting = Accounting.objects(branch=current_user.branch.id).first()
     else:
+        accounting = Accounting.objects(branch=branch_id).first()
+
+    if accounting:
+        total_gross_sales = accounting.total_gross_sale
+        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
+        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
+        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else 0.00
+        final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else 0.00
 
         if current_user.role.name == "Secretary":
-            bank_statements = CashFlow.objects(branch=current_user.branch.id).skip(start).limit(length)
-            print(bank_statements)
+            if from_what == "sales":
+                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what="Sales").skip(start).limit(length)
+            else: # fund
+                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").skip(start).limit(length)
         else:
-            bank_statements = CashFlow.objects(branch=branch_id).skip(start).limit(length)
+            if from_what == "sales":
+                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").skip(start).limit(length)
+            else: # fund
+                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").skip(start).limit(length)
+        recordsTotal = bank_statements.count(),
+        recordsFiltered = bank_statements.count(),
+    else:
+        total_gross_sales = 0.00
+        remaining = 0.00
+        net = 0.00
+        fund1 = 0.00
+        fund2 = 0.00
+        final_fund1 = 0.00
+        final_fund2 = 0.00
+        recordsTotal = 0,
+        recordsFiltered = 0,
+        bank_statements = []
 
     _table_data = []
 
@@ -214,6 +246,7 @@ def get_cash_flow():
                 str(statement.amount),
                 statement.from_what,
                 statement.by_who,
+                '',
                 statement.group
             ))
     else:
@@ -226,32 +259,14 @@ def get_cash_flow():
                 str(statement.balance) if statement.balance is not None else '',
                 '' if statement.type == "deposit" else statement.from_what,
                 statement.by_who,
+                '',
                 statement.group
             ))
 
-    accounting = Accounting.objects(branch=branch_id).first()
-
-    if accounting:
-        total_gross_sales = accounting.total_gross_sale
-        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
-        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
-        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-        final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else 0.00
-        final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else 0.00
-    else:
-        total_gross_sales = 0.00
-        remaining = 0.00
-        net = 0.00
-        fund1 = 0.00
-        fund2 = 0.00
-        final_fund1 = 0.00
-        final_fund2 = 0.00
-
     response = {
         'draw': draw,
-        'recordsTotal': bank_statements.count(),
-        'recordsFiltered': bank_statements.count(),
+        'recordsTotal': recordsTotal,
+        'recordsFiltered': recordsFiltered,
         'data': _table_data,
         'totalGrossSales': str(total_gross_sales),
         'remaining': str(remaining),

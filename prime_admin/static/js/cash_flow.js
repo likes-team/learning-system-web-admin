@@ -7,12 +7,47 @@ $(document).ready(function(){
         "serverSide": true,
         "ordering": false,
         "columnDefs": [
-            { "visible": false, "targets": 7 }
+            { "visible": false, "targets": 8 }
         ],
         "ajax": {
             "url": "/learning-management/dtbl/get-cash-flow",
             "data": function (d) {
                 d.branch = $("#btn_branch_label").val();
+                d.from_what = "sales"
+            },
+            "dataSrc": function(json){
+                var remaining = parseFloat(json.remaining).toFixed(2);
+                var net = parseFloat(json.net).toFixed(2);
+                var fund1 = parseFloat(json.fund1).toFixed(2);
+                var fund2 = parseFloat(json.fund2).toFixed(2);
+
+                $("#total_gross_sales").html("₱" + json.totalGrossSales);
+                $("#remaining").html("₱" + remaining);
+                $("#net").html("₱" + net);
+                $("#fund1").html("₱" + fund1);
+                $("#fund2").html("₱" + fund2);
+                $("#final_fund1").html("₱" + json.finalFund1);
+                $("#final_fund2").html("₱" + json.finalFund2);  
+                return json.data;
+            }
+        }
+    });
+
+    var dtbl_fund_statement = $('#tbl_fund_statement').DataTable({
+        "dom": 'rtip',
+        "pageLength": 100,
+        "order": [[ 1, 'asc' ]],
+        "processing": true,
+        "serverSide": true,
+        "ordering": false,
+        "columnDefs": [
+            { "visible": false, "targets": 8 }
+        ],
+        "ajax": {
+            "url": "/learning-management/dtbl/get-cash-flow",
+            "data": function (d) {
+                d.branch = $("#btn_branch_label").val();
+                d.from_what = "fund"
             },
             "dataSrc": function(json){
                 var remaining = parseFloat(json.remaining).toFixed(2);
@@ -48,6 +83,7 @@ $(document).ready(function(){
 
     $("#btn_branch_label").change(function(){
         dtbl_statement.ajax.reload();
+        dtbl_fund_statement.ajax.reload();
     });
 
     // $("#branch").change(function(){

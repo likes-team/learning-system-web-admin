@@ -42,67 +42,72 @@
             </div>
 
             {% block actions %}
+            {% if current_user.role.name == "Marketer" %}
+            <!-- Pass -->
+            {% else %}
+                <div class="page-title-actions">
 
-            <div class="page-title-actions">
-
-                <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-print">   Print Student Records</i>
-                </button>
-
-                <button id="btn_print_audit" type="button" class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-print">    Print Student Records Audit</i>
-                </button>
-
-                <div class="d-inline-block dropdown">
-                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                        class="btn-shadow dropdown-toggle btn btn-info">
-                        <span class="btn-icon-wrapper pr-2 opacity-7">
-                            <i class="fa fa-list-alt fa-w-20"></i>
-                        </span>
-                        Actions
+                    <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-print">   Print Student Records</i>
                     </button>
-                    
-                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                        <ul class="nav flex-column">
-                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
-                            current_user.is_superuser %}
-                            <li id="nav_action_btns" class="nav-item">
-                                {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0"
-                                    class="dropdown-item">Delete</button>
-                                {% endblock %}
-                            </li>
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
+
+                    <button id="btn_print_audit" type="button" class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-print">    Print Student Records Audit</i>
+                    </button>
+
+                    <div class="d-inline-block dropdown">
+                        <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                            <span class="btn-icon-wrapper pr-2 opacity-7">
+                                <i class="fa fa-list-alt fa-w-20"></i>
+                            </span>
+                            Actions
+                        </button>
+                        
+                        <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                            <ul class="nav flex-column">
+                                {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                                {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
+                                current_user.is_superuser %}
+                                <li id="nav_action_btns" class="nav-item">
+                                    {% block dropdown_buttons %}
+                                    <button disabled id="btndelete" type="button" tabindex="0"
+                                        class="dropdown-item">Delete</button>
+                                    {% endblock %}
+                                </li>
+                                {% else %}
+                                <li class="nav-item">
+                                    <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                        <i class="nav-link-icon lnr-file-empty"></i>
+                                        <span>
+                                            No actions
+                                        </span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% else %}
+                                <li class="nav-item">
+                                    <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                        <i class="nav-link-icon lnr-file-empty"></i>
+                                        <span>
+                                            No actions
+                                        </span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+                {% endif %}
 
             {% endblock %}
-
         </div>
     </div>
 
+    {% if current_user.role.name == "Marketer" %}
+    <!-- Pass -->
+    {% else %}
     <div class="main-card mb-3 card">
         <h5 class="card-header">Sales</h5>
 
@@ -187,6 +192,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <div class="main-card mb-3 card">
         <div class="card-body">

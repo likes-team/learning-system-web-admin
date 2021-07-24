@@ -1,7 +1,8 @@
 from datetime import datetime
 from flask import redirect, url_for
 from flask.json import jsonify
-from flask_login import login_required
+from flask.templating import render_template
+from flask_login import login_required, current_user
 from werkzeug.wrappers import ResponseStream
 from app.core.models import CoreModule, CoreModel
 from prime_admin import bp_lms
@@ -41,6 +42,9 @@ DECEND = datetime(2021, 12, 31)
 @bp_lms.route('/dashboard')
 @login_required
 def dashboard():
+    if current_user.role.name != "Admin":
+        return render_template('auth/authorization_error.html')
+
     from app.auth.models import User
     
     options = {

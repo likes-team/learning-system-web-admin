@@ -14,6 +14,7 @@ class Base(db.Document):
     }
 
     active = db.BooleanField(default=True)
+    is_deleted = db.BooleanField(default=False)
     created_at = db.DateTimeField(default=datetime.now)
     # TODO: updated_at = db.DateTimeField(default=datetime.utcnow, onupdate=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.now)

@@ -56,7 +56,8 @@ class CashFlowSecretaryForm(AdminTableForm):
         'Deposit amount',
         'from',
         'by who',
-        'group'
+        'remarks',
+        'group',
     ]
 
     __heading__ = "Cash Flow"
@@ -75,6 +76,7 @@ class CashFlowAdminForm(AdminTableForm):
         'balance',
         'withdraw from',
         'by who',
+        'remarks',
         'group'
     ]
 
@@ -379,4 +381,4 @@ class RegistrationForm(FlaskForm):
     book = StringField()
     payment_mode = StringField()
     e_registration = StringField()
-
+    referred_by = StringField()

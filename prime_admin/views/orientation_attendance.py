@@ -1,3 +1,5 @@
+from flask_mongoengine import json
+from werkzeug.exceptions import abort
 from prime_admin.globals import SECRETARYREFERENCE
 from app.auth.models import User
 from prime_admin.forms import OrientationAttendanceForm
@@ -26,7 +28,6 @@ def orientation_attendance():
     _table_data = []
 
     for client in Registration.objects(Q(is_oriented=True) & Q(status__ne="registered")):
-        print(client.status)
         _table_data.append((
             client.id,
             client.branch.name if client.branch is not None else "",
@@ -38,7 +39,10 @@ def orientation_attendance():
     
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
-        contact_persons = User.objects(branches__in=[str(current_user.branch.id)] | Q(role__ne=SECRETARYREFERENCE) | Q(is_superuser=False))
+        contact_persons = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
+        contact_persons = User.objects(id=current_user.id)
     else:
         branches = Branch.objects
         contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
@@ -48,6 +52,10 @@ def orientation_attendance():
     scripts = [
         {'lms.static': 'js/orientation_attendance.js'},
         {'bp_admin.static': 'js/admin_table.js'}
+    ]
+
+    modals = [
+        'lms/search_refferal_modal.html'
     ]
 
     return admin_table(
@@ -62,7 +70,8 @@ def orientation_attendance():
         scripts=scripts,
         contact_persons=contact_persons,
         branches=branches,
-        orientators=orientators
+        orientators=orientators,
+        modals=modals
         )
 
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients', methods=['GET'])
@@ -95,7 +104,6 @@ def get_pre_registered_clients():
 def orient():
     form = OrientationAttendanceForm()
 
-    print(form.contact_person.data)
     client_id = request.form['client_id']
     try:
         if client_id != '':
@@ -125,3 +133,60 @@ def orient():
         flash(str(e), 'error')
 
     return redirect(url_for('lms.orientation_attendance'))
+
+
+@bp_lms.route('/api/dtbl/mdl-referrals', methods=['GET'])
+def get_referrals():
+    if current_user.role.name == "Secretary":
+        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
+    elif current_user.role.name == "Admin":
+        clients = Registration.objects(status="registered")
+    elif current_user.role.name == "Partner":
+        clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
+    else:
+        return jsonify({'data': []})
+
+    _data = []
+
+    for client in clients:
+        _data.append([
+            str(client.id),
+            client.lname,
+            client.fname,
+            client.mname,
+            client.suffix,
+            client.contact_number,
+            client.status
+        ])
+
+    response = {
+        'data': _data
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/get-branch-contact-persons/<string:branch_id>', methods=['GET'])
+def get_branch_contact_persons(branch_id):
+    contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
+
+    if contact_persons is None:
+        response = {
+            'data': []
+        }
+
+        return jsonify(response)
+
+    data = []
+
+    for contact_person in contact_persons:
+        data.append({
+            'id': str(contact_person.id),
+            'fname': contact_person.fname
+        })
+
+    response = {
+        'data': data
+        }
+
+    return jsonify(response)

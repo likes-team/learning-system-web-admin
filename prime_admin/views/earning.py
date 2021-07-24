@@ -22,7 +22,7 @@ D128_CTX = create_decimal128_context()
 @login_required
 def earnings():
     _table_columns = [
-        'Branch', 'Full Name', 'batch no.', 'schedule', 'remark'
+        'Branch', 'Full Name', 'batch no.','fle', 'sle', 'schedule', 'remark'
     ]
 
     _scripts = [
@@ -32,7 +32,11 @@ def earnings():
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
-        marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) | Q(role__ne=SECRETARYREFERENCE))
+        marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE))
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
+        marketers = User.objects(id=current_user.id)
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
@@ -61,6 +65,7 @@ def get_dtbl_earnings_members():
     # search_value = "%" + request.args.get("search[value]") + "%"
     # column_order = request.args.get('column_order')
     contact_person_id = request.args.get('contact_person')
+    print(contact_person_id)
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
 
@@ -69,7 +74,7 @@ def get_dtbl_earnings_members():
     branches_total_earnings = []
 
     if contact_person_id == 'all':
-        registrations = Registration.objects.skip(start).limit(length)
+        registrations = Registration.objects(status="registered").skip(start).limit(length)
         if current_user.role.name == "Secretary":
             contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
         else:
@@ -84,7 +89,6 @@ def get_dtbl_earnings_members():
                     total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
                     total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                     
-                    print(total_earnings)
                     if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
                         branches_total_earnings.append(
                             {
@@ -96,9 +100,12 @@ def get_dtbl_earnings_members():
                     else:
                         for x in branches_total_earnings:
                             if x['id'] == str(earning['branch'].id):
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                if type(x['totalEarnings']) == decimal.Decimal:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                else:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
     else:
-        registrations = Registration.objects(contact_person=contact_person_id).skip(start).limit(length)
+        registrations = Registration.objects(contact_person=contact_person_id).filter(status="registered").skip(start).limit(length)
         contact_person = User.objects.get(id=contact_person_id)
 
         with decimal.localcontext(D128_CTX):
@@ -120,7 +127,10 @@ def get_dtbl_earnings_members():
                 else:
                     for x in branches_total_earnings:
                         if x['id'] == str(earning['branch'].id):
-                            x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                if type(x['totalEarnings']) == decimal.Decimal:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                else:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
 
     if branch_id != 'all':
         registrations = registrations.filter(branch=branch_id)
@@ -135,11 +145,11 @@ def get_dtbl_earnings_members():
             registration.branch.name if registration.branch is not None else '',
             registration.full_name,
             registration.batch_number.number if registration.batch_number is not None else '',
+            '',
+            '',
             registration.schedule,
             "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
         ])
-
-    print(branches_total_earnings)
 
     for branch in branches_total_earnings:
         branch['totalEarnings'] = str(branch['totalEarnings'])

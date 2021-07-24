@@ -58,7 +58,7 @@ def register():
         ]
         
         _modals = [
-            'lms/search_client_last_name_modal.html'
+            'lms/search_client_last_name_modal.html',
         ]
 
         return admin_render_template(
@@ -114,7 +114,7 @@ def register():
         client.amount = form.amount.data
         client.payment_mode = request.form['payment_modes']
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
-
+        
         books = request.form.getlist('books')
         
         client.books = {
@@ -144,15 +144,16 @@ def register():
 
         if client.payment_mode == "full_payment":
             client.balance = 7000 - client.amount
-            earnings = 7000 * decimal.Decimal(0.14286)
+            earnings = 7000 * decimal.Decimal(0.14)
+            savings = 7000 * decimal.Decimal(0.00286)
         elif client.payment_mode == "installment":
             client.balance = 7800 - client.amount
-            earnings = client.amount * decimal.Decimal(0.125)
-            savings = 25.00
+            earnings = 7800 * decimal.Decimal(0.14)
+            savings = 7800 * decimal.Decimal(0.00286)
         elif client.payment_mode == 'premium':
             client.balance = 8500 - client.amount
-            earnings = 8500 * decimal.Decimal(0.11765)
-            savings = 85.00
+            earnings = 8500 * decimal.Decimal(0.14)
+            savings = 8500 * decimal.Decimal(0.00286)
 
         client.payments.append(
             {
@@ -237,7 +238,6 @@ def get_pre_registered_clients_registration():
 
     return jsonify(response)
 
-
 @bp_lms.route('/api/clients/<string:client_id>', methods=['GET'])
 def get_client(client_id):
     
@@ -287,8 +287,46 @@ def get_client(client_id):
             'branch': str(client.branch.id) if client.branch is not None else ''
         }
 
+    batch_numbers = Batch.objects(branch=client.branch.id).filter(active=True)
+
+    batch_no_data = []
+
+    for batch_number in batch_numbers:
+        batch_no_data.append({
+            'id': str(batch_number.id),
+            'number': batch_number.number
+        })
+
+    _data['batch_numbers'] = batch_no_data
+
     response = {
         'data': _data
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/get-batch-numbers/<string:branch_id>', methods=['GET'])
+def get_batch_numbers(branch_id):
+    batch_numbers = Batch.objects(branch=branch_id).filter(active=True)
+
+    if batch_numbers is None:
+        response = {
+            'data': []
+        }
+
+        return jsonify(response)
+
+    data = []
+
+    for batch_number in batch_numbers:
+        data.append({
+            'id': str(batch_number.id),
+            'number': batch_number.number
+        })
+
+    response = {
+        'data': data
         }
 
     return jsonify(response)

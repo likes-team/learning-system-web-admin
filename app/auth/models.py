@@ -63,6 +63,8 @@ class User(UserMixin, Base, Admin):
     date_of_birth = db.DateField()
     contact_no = db.StringField()
     address = db.StringField()
+    full_employee_id = db.StringField()
+    employee_id_no = db.IntField()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

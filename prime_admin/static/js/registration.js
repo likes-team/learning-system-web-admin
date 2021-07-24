@@ -100,7 +100,6 @@ $(document).ready(function(){
         }
     });
 
-
     $('#tbl_mdl_clients tbody').on( 'click', 'tr', function () {
         if ( $(this).hasClass('selected') ) {
             $(this).removeClass('selected');
@@ -189,6 +188,21 @@ $(document).ready(function(){
                     $("#contact_person").prop('disabled', true);
                     $("#branch").prop('disabled', true);
                 }
+                
+                $('#batch_number').find('option').remove();
+
+                if(response.data.batch_numbers.length > 0){
+                    var newOption = $('<option value="">Choose...</option>');
+                    $('#batch_number').append(newOption);
+                    
+                    for(i=0; i < response.data.batch_numbers.length; i++){
+                        var newOption = $(`<option value="${response.data.batch_numbers[i].id}">${response.data.batch_numbers[i].number}</option>`);
+                        $('#batch_number').append(newOption);
+                    }
+                } else {
+                    var newOption = $('<option value="">No Batch Numbers yet</option>');
+                    $('#batch_number').append(newOption);
+                }
             }
         });
     });
@@ -215,4 +229,21 @@ $(document).ready(function(){
         $("#address").prop('readonly', false);
         $("#contact_person").prop('disabled', false);
     });
+
+    // $('#branch').change(function() {
+    //     $.ajax({
+    //         url: '/learning-management/api/get-batch-numbers/' + $("#branch").val(),
+    //         type: "GET",
+    //         contentType: "application/json; charset=utf-8",
+    //         success: function(response) {
+    //             var newOption = $('<option value=""></option>');
+    //             $('#batch_number').append(newOption);
+
+    //             if(response.data.length > 0){
+    //                 var newOption = $('<option value="'+val+'">'+val+'</option>');
+    //                 $('#batch_number').append(newOption);
+    //             }
+    //         }
+    //     });
+    //   });
 });

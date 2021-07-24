@@ -59,10 +59,76 @@ $(document).ready(function(){
         $("#fname").val('');
         $("#contact_no").val('');
         $("#contact_person").val('');
+        $("#referred_by").val('');
+        $("#referred_by_name").val('');
 
         $("#lname").prop('readonly', false);
         $("#fname").prop('readonly', false);
         $("#contact_no").prop('readonly', false);
         $("#contact_person").prop('disabled', false);
     });
+
+    var dtbl_search_refferal = $("#tbl_mdl_referrals").DataTable({
+        pageLength: 10,
+        columnDefs: [
+            {
+                "targets": 0,
+                "visible": false,
+            },
+        ],
+        ajax: {
+            url: "/learning-management/api/dtbl/mdl-referrals",
+        }
+    });
+
+    $('#tbl_mdl_referrals tbody').on( 'click', 'tr', function () {
+        if ( $(this).hasClass('selected') ) {
+            $(this).removeClass('selected');
+        }
+        else {
+            dtbl_search_refferal.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+        }
+    } );
+
+    $('#btn_confirm_referral').click( function () {
+        var selected = dtbl_search_refferal.row('.selected').data();
+        
+        $.ajax({
+            url: '/learning-management/api/clients/' + selected[0],
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                $("#referred_by").val(response.data.id);
+                var full_name = response.data.fname + " " + response.data.lname;
+                $("#referred_by_name").val(full_name);
+                $("#contact_person").val(response.data.contact_person);
+                $("#contact_person").prop('disabled', true);
+            }
+        });
+    });
+
+    $('#branch').change(function() {
+        $.ajax({
+            url: '/learning-management/api/get-branch-contact-persons/' + $("#branch").val(),
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                $('#contact_person').find('option').remove();
+
+                if(response.data.length > 0){
+                    var newOption = $('<option value="">Choose...</option>');
+                    $('#contact_person').append(newOption);
+                    
+                    for(i=0; i < response.data.length; i++){
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                        $('#contact_person').append(newOption);
+                    }
+                } else{
+                    var newOption = $('<option value="">No Contact Persons available</option>');
+                    $('#contact_person').append(newOption);
+                }
+            }
+        });
+      });
 });
