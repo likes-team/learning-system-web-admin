@@ -188,9 +188,9 @@ def email_check():
 
 @bp_auth.route('/change_password/<string:oid>',methods=['POST'])
 def change_password(oid):
-    user = User.query.get_or_404(oid)
+    user = User.objects.get(id=oid)
     user.set_password(request.form.get('password'))
-    db.session.commit()
+    user.save()
     flash("Password change successfully!",'success')
     return redirect(request.referrer)
 

@@ -39,7 +39,10 @@ def secretaries():
         fields=[],
         form=form,
         table_data=_table_data,
-        create_url='lms.create_secretary',
+        create_button=None,
+        create_url=None,
+        create_modal=False,
+        # create_url='lms.create_secretary',
         edit_url='lms.edit_secretary',
         view_modal_url='/learning-management/get-view-secretary-data'
         )

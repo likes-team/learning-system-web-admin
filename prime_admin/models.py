@@ -16,7 +16,7 @@ class Registration(Base, Admin):
     __tablename__ = 'lms_registrations'
     __amname__ = 'registration'
     __amdescription__ = 'Register'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-add-user'
     __view_url__ = 'lms.register'
 
     registration_number = db.IntField()
@@ -47,6 +47,8 @@ class Registration(Base, Admin):
     orientator = db.ReferenceField('Orientator')
     payments = db.ListField()
     e_registration = db.StringField()
+    referred_by = db.ReferenceField('Registration')
+    reffered_by = db.ReferenceField('Registration')
 
     @property
     def full_name(self):
@@ -64,7 +66,7 @@ class Branch(Base, Admin):
     __tablename__ = 'lms_branches'
     __amname__ = 'branch'
     __amdescription__ = 'Branches'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-network'
     __view_url__ = 'lms.branches'
 
     name = db.StringField()
@@ -79,7 +81,7 @@ class Batch(Base, Admin):
     __tablename__ = 'lms_batches'
     __amname__ = 'batch'
     __amdescription__ = 'Batch Numbers'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-date'
     __view_url__ = 'lms.batches'
 
     number = db.StringField(unique=True)
@@ -90,7 +92,7 @@ class Partner(Admin):
     __tablename__ = 'auth_user'
     __amname__ = 'partner'
     __amdescription__ = 'Partners'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-user'
     __view_url__ = 'lms.contact_persons'
 
 class Orientator(Base, Admin):
@@ -138,14 +140,14 @@ class Marketer(Admin):
     __tablename__ = 'auth_users'
     __amname__ = 'marketer'
     __amdescription__ = 'Marketers'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-user'
     __view_url__ = 'lms.marketers'
 
 class Member(Admin):
     __tablename__ = 'lms_members'
     __amname__ = 'member'
     __amdescription__ = 'Student Records'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-users'
     __view_url__ = 'lms.members'
 
 
@@ -153,7 +155,7 @@ class Earning(Admin):
     __tablename__ = 'lms_earnings'
     __amname__ = 'earning'
     __amdescription__ = 'Earnings'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-cash'
     __view_url__ = 'lms.earnings'
 
 
@@ -161,7 +163,7 @@ class Secretary(Admin):
     __tablename__ = 'auth_users'
     __amname__ = 'secretary'
     __amdescription__ = 'Secretary'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-user'
     __view_url__ = 'lms.secretaries'
 
 
@@ -169,7 +171,7 @@ class OrientationAttendance(Admin):
     __tablename__ = 'lms_orientation_attendance'
     __amname__ = 'orientation_attendance'
     __amdescription__ = 'Orientation Attendance'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-note2'
     __view_url__ = 'lms.orientation_attendance'
 
 
@@ -195,7 +197,7 @@ class Expenses(Base, Admin):
 class Dashboard(Admin):
     __amname__ = 'dashboard'
     __amdescription__ = 'Dashboard'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-graph2'
     __view_url__ = 'lms.dashboard'
 
 
@@ -215,7 +217,7 @@ class CashFlow(Base, Admin):
     __tablename__ = 'lms_bank_statements'
     __amname__ = 'cash_flow'
     __amdescription__ = 'Cash Flow'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-refresh-2'
     __view_url__ = 'lms.cash_flow'
     
     date_deposit = db.DateField()

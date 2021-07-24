@@ -42,7 +42,10 @@ def members():
     elif current_user.role.name == "Admin":
         branches = Branch.objects
         batch_numbers = Batch.objects()
-    
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects()
+
     return admin_table(
         Member,
         fields=fields,
@@ -73,8 +76,12 @@ def get_dtbl_members():
         registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
         sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
     else:
-        registrations = Registration.objects(status='registered').skip(start).limit(length)
-        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
+        if current_user.role.name == "Marketer":
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
+            sales_today = registrations.filter(created_at__gte=datetime.now().date()).filter(branch__in=current_user.branches).sum('amount')
+        else:
+            registrations = Registration.objects(status='registered').skip(start).limit(length)
+            sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)

@@ -40,26 +40,45 @@
 
     <div class="main-card mb-3 card">
         <div class="card-header">
-            <div id="card_header_label">MARKETER'S NAME</div>
+            <div id="card_header_label">
+                {% if current_user.role.name == "Marketer" %}
+                    {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                {% else %}
+                    MARKETER'S NAME
+                {% endif %}
+            </div>
 
             <div class="btn-actions-pane-right">
                 <div class="nav">
 
                     <div class="dropleft btn-group">
+                        {% if current_user.role.name == "Marketer" %}
+                        <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
+                            data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                            {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                        </button>
+                        {% else %}
                         <button value="all" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
                             data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
                             ALL MARKETERS
                         </button>
+                        {% endif %}
+
+                        {% if current_user.role.name != "Marketer" %}
                         <div id="div_marketer_buttons" tabindex="-1" role="menu" aria-hidden="true"
                             class="dropdown-menu" x-placement="left-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
+                            
                             <button value="all" type="button" tabindex="0"
                             class="dropdown-item btn-marketer">All Marketers</button>
+                            
                             {% for marketer in TABLE_OPTIONS['marketers'] %}
                             <button value="{{marketer.id}}" type="button" tabindex="0"
                                 class="dropdown-item btn-marketer">{{marketer.fname}}</button>
                             {% endfor %}
                         </div>
+                        {% endif %}
+
                     </div>
                 </div>
             </div>

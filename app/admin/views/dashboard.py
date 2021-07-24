@@ -1,5 +1,7 @@
+from datetime import datetime
 from flask import redirect, url_for, request, jsonify
-from flask_login import login_required
+from flask.templating import render_template
+from flask_login import login_required, current_user
 from app.core.models import CoreModule, CoreModel
 from app.admin import bp_admin
 from app.admin.models import AdminDashboard
@@ -9,6 +11,9 @@ from app.admin.templating import admin_dashboard, DashboardBox
 @bp_admin.route('/') # move to views
 @login_required
 def dashboard():
+    if current_user.role.name != "Admin":
+        return render_template('auth/authorization_error.html')
+
     from app.auth.models import User
 
     if AdminDashboard.__view_url__ == 'bp_admin.no_view_url':
@@ -59,13 +64,28 @@ def get_dashboard_users():
 @bp_admin.route('/dashboard/approve-user', methods=['POST'])
 def approve_user():
     from app.auth.models import User
+    from prime_admin.functions import generate_employee_id
 
     user_id = request.json['user_id']
 
     user = User.objects.get_or_404(id=user_id)
 
+    generated_employee_id = ""
+    
+    last_registration_number = User.objects(active=True).order_by('-employee_id_no').first()
+
+    date_now = datetime.now()
+
+    if last_registration_number:
+        generated_employee_id = generate_employee_id(last_registration_number.employee_id_no)
+    else:
+        generated_employee_id = str(date_now.year) + '%02d' % date_now.month + "0001"
+
+    user.full_employee_id = generated_employee_id
+    user.employee_id_no = last_registration_number.employee_id_no + 1 if last_registration_number is not None else 1
     user.active = True
 
     user.save()
 
     return jsonify(True)
+

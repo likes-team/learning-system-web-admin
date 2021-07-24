@@ -9,7 +9,7 @@
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
                     <div class="page-title-icon">
-                        <i class="text-success pe-7s-tools">
+                        <i class="text-success pe-7s-add-user">
                         </i>
                     </div>
                     <div id="registration_generated_number">{{ data['registration_generated_number'] }}
@@ -168,16 +168,16 @@
             <div class="card-body">
                 <h5 class="card-title">General Information</h5>
                 <div class="form-row">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="batch_number" class="">Batch No.</label>
                             <select name="batch_number" id="batch_number" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for batch_number in form.batch_number.data %}
+                                <option value="">No Branch Selected...</option>
+                                <!-- {% for batch_number in form.batch_number.data %}
                                 <option value="{{ batch_number.id }}">
                                     {{ batch_number.number }}
                                 </option>
-                                {% endfor %}
+                                {% endfor %} -->
                             </select>
                             <div class="valid-feedback">
                                 Looks good!
@@ -187,7 +187,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="schedule" class="">Schedule</label>
                             <select name="schedule" id="schedule" class="form-control" required>
@@ -206,7 +206,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="position-relative form-group">
                             <label for="branch" class="">Branch</label>
                             <select disabled name="branch" id="branch" class="form-control" required>
@@ -225,7 +225,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="position-relative form-group">
                             <label for="contact_person" class="">Contact Person</label>
                             <select disabled name="contact_person" id="contact_person" class="form-control" required>

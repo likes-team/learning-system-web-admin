@@ -29,15 +29,56 @@
 
             {% block actions %}
 
-            {% if TABLE_OPTIONS['actions'] %}
-            {% include TABLE_OPTIONS['action_template'] %}
-            {% endif %}
-
+            <div class="page-title-actions">
+            
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
             {% endblock %}
 
         </div>
     </div>
 
+    {% if current_user.role.name == "Marketer" %}
+    {% else %}
     <div class="main-card mb-3 card">
         <div class="card-body">
             <h5 class="card-title">Encode</h5>
@@ -45,13 +86,13 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input id="client_id" name="client_id" type="hidden" class="form-control">
                 <div class="form-row">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="lname" class="">Last Name</label>
                             <div class="input-group"><input id="lname" name="lname" type="text"
                                     class="form-control" required>
                                 <div class="input-group-append">
-                                    <button
+                                    <button disabled
                                         type="button" 
                                         data-toggle="modal"
                                         data-target="#mdl_search_client_last_name"
@@ -68,17 +109,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group"><label for="fname"
                                 class="">First Name</label><input name="fname" id="fname"
                                 type="text" class="form-control" required></div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group"><label for="contact_no"
                                 class="">Contact No.</label><input name="contact_no" id="contact_no"
                                 type="text" class="form-control" required></div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="position-relative form-group">
                             <label for="branch" class="">Branch</label>
                             <select name="branch" id="branch" class="form-control" required>
@@ -102,16 +143,40 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                </div>
+                <div class="form-row">
+                    <div class="col-md-4">
+                        <input id="referred_by" name="referred_by" type="hidden"
+                                    class="form-control">
+                        <div class="position-relative form-group">
+                            <label for="referred_by_name" class="">Referred By (Optional)</label>
+                            <div class="input-group"><input id="referred_by_name" name="referred_by_name" type="text"
+                                    class="form-control" readonly>
+                                <div class="input-group-append">
+                                    <button
+                                        type="button" 
+                                        data-toggle="modal"
+                                        data-target="#mdl_search_referral"
+                                        data-placement="bottom"
+                                        class="btn btn-primary pe-7s-search">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="position-relative form-group">
                             <label for="contact_person" class="">Contact Person</label>
                             <select name="contact_person" id="contact_person" class="form-control" required>
-                                <option value="">Choose...</option>
-                                {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
+                                <option value="">No Branch Selected...</option>
+                                <!-- {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
                                 <option value="{{ contact_person.id }}">
                                     {{contact_person.fname}}
                                 </option>
-                                {% endfor %}
+                                {% endfor %} -->
                             </select>
                             <div class="valid-feedback">
                                 Looks good!
@@ -121,7 +186,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <div class="position-relative form-group">
                             <label for="orientator" class="">Orientator</label>
                             <select name="orientator" id="orientator" class="form-control" required>
@@ -141,6 +206,7 @@
                         </div>
                     </div>
                 </div>
+
                 <script>
                     // Example starter JavaScript for disabling form submissions if there are invalid fields
                     (function () {
@@ -169,6 +235,7 @@
             <input form="orientation_form" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="Save">
         </div>
     </div>
+    {% endif %}
 
     <div class="main-card mb-3 card"><h5 class="card-header">Members</h5>
         <div class="card-body">

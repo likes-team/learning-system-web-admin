@@ -29,6 +29,10 @@ def login():
 
     user = User.objects(username=form.username.data).first()
 
+    if not user:
+        flash('Invalid username or password','error')
+        return redirect(url_for(auth_urls['login']))
+
     if not user.active:
         flash('Your account is not approved yet!, please contact system administrator','error')
         return redirect(url_for(auth_urls['login']))
@@ -44,6 +48,8 @@ def login():
     next_page = request.args.get('next')
     
     if current_user.role.name == "Secretary":
+        return redirect(url_for('lms.members'))
+    elif current_user.role.name == "Marketer":
         return redirect(url_for('lms.members'))
 
     if not next_page or url_parse(next_page).netloc != '':

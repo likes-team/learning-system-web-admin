@@ -64,13 +64,17 @@ def register():
         user.set_password(form.password.data)
         user.is_superuser = False
         user.active = False
-        user.branch = Branch.objects.get(id=form.branch.data)
         user.father_name = form.father_name.data
         user.mother_name = form.mother_name.data
         user.nickname = form.nickname.data
         user.date_of_birth = form.date_of_birth.data
         user.contact_no = form.contact_no.data
         user.address = form.address.data
+
+        if user.role.name == "Marketer":
+            user.branches.append(form.branch.data)
+        else:    
+            user.branch = Branch.objects.get(id=form.branch.data)
 
         user.save()
 

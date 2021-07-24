@@ -36,7 +36,7 @@ def contact_persons():
         fields=[],
         form=form,
         table_data=_table_data,
-        create_url='lms.create_contact_person',
+        # create_url='lms.create_contact_person',
         edit_url='lms.edit_contact_person',
         view_modal_url='/learning-management/get-view-contact-person-data',
         create_button=True,
