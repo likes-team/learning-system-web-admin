@@ -27,15 +27,15 @@ def orientation_attendance():
 
     _table_data = []
 
-    for client in Registration.objects(Q(is_oriented=True) & Q(status__ne="registered")):
-        _table_data.append((
-            client.id,
-            client.branch.name if client.branch is not None else "",
-            client.full_name,
-            client.contact_number,
-            client.contact_person.name if client.contact_person is not None else '',
-            client.orientator.fname if client.orientator is not None else ''
-        ))
+    # for client in Registration.objects(Q(is_oriented=True) & Q(status__ne="registered")):
+    #     _table_data.append((
+    #         client.id,
+    #         client.branch.name if client.branch is not None else "",
+    #         client.full_name,
+    #         client.contact_number,
+    #         client.contact_person.name if client.contact_person is not None else '',
+    #         client.orientator.fname if client.orientator is not None else ''
+    #     ))
     
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
@@ -105,6 +105,9 @@ def orient():
     form = OrientationAttendanceForm()
 
     client_id = request.form['client_id']
+
+    referred_by = request.form['referred_by']
+
     try:
         if client_id != '':
             client = Registration.objects.get(id=client_id)
@@ -125,6 +128,22 @@ def orient():
             new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True
             new_client.status = "oriented"
+
+            if referred_by == '':
+                new_client.level = "first"
+            else:
+                referred_student = Registration.objects.get(id=referred_by)
+
+                if referred_student.level == "first":
+                    new_client.level = "second"
+                elif referred_student.level == "second":
+                    new_client.level = "third"
+                elif referred_student.level == "third":
+                    new_client.level = str(4)
+                else:
+                    print(referred_student.level)
+                    new_client.level = str(int(referred_student.level) + 1)
+
             new_client.save()
 
         flash("Added successfully!", 'success')
@@ -188,5 +207,47 @@ def get_branch_contact_persons(branch_id):
     response = {
         'data': data
         }
+
+    return jsonify(response)
+
+@bp_lms.route('/dtbl/orientation-attendance-members')
+def get_dtbl_orientation_attendance_members():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch')
+    contact_person_id = request.args.get('contact_person')
+    
+    print('TESTSETEST',branch_id, contact_person_id)
+
+    if branch_id != 'all':
+        registrations = Registration.objects(branch=branch_id).filter(status='oriented').skip(start).limit(length)
+    else:
+        if current_user.role.name == "Marketer":
+            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
+        else:
+            registrations = Registration.objects(status='oriented').skip(start).limit(length)
+
+    if contact_person_id != 'all':
+        registrations = registrations.filter(contact_person=contact_person_id)
+
+    _table_data = []
+
+    print(registrations)
+    for registration in registrations:
+        _table_data.append([
+            str(registration.id),
+            registration.branch.name if registration.branch is not None else "",
+            registration.full_name,
+            registration.contact_number,
+            registration.contact_person.name if registration.contact_person is not None else '',
+            registration.orientator.fname if registration.orientator is not None else ''
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': registrations.count(),
+        'recordsFiltered': registrations.count(),
+        'data': _table_data,
+    }
 
     return jsonify(response)

@@ -41,6 +41,7 @@ class OrientationAttendanceForm(AdminTableForm):
     contact_person = StringField()
     orientator = StringField()
     branch = StringField()
+    referred_by = StringField()
 
     @property
     def fields(self):
@@ -381,4 +382,3 @@ class RegistrationForm(FlaskForm):
     book = StringField()
     payment_mode = StringField()
     e_registration = StringField()
-    referred_by = StringField()

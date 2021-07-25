@@ -48,7 +48,9 @@ class Registration(Base, Admin):
     payments = db.ListField()
     e_registration = db.StringField()
     referred_by = db.ReferenceField('Registration')
-    reffered_by = db.ReferenceField('Registration')
+    level = db.StringField()
+    fle = db.DecimalField()
+    sle = db.DecimalField()
 
     @property
     def full_name(self):

@@ -55,7 +55,7 @@ $(document).ready(function(){
             $('#id_lace').prop('checked', false);
         }
         else if (this.value == 'installment') {
-            $("#amount").val(0);
+            $("#amount").val(1000);
             $("#amount").prop('readonly', false);
 
             balance = 7800 - $("#amount").val();

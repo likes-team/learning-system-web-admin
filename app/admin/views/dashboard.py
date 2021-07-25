@@ -43,6 +43,7 @@ def get_dashboard_users():
     for user in users:
         _table_data.append([
             str(user.id),
+            user.full_employee_id,
             {
                 'name': user.full_name, 
                 'username': user.username},
