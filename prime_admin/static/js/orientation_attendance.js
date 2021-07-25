@@ -1,4 +1,30 @@
 $(document).ready(function(){
+    var dtbl_members = $('#tbl_members').DataTable({
+        "dom": 'rtip',
+        "pageLength": 20,
+        "order": [[ 1, 'asc' ]],
+        "processing": true,
+        "serverSide": true,
+        "autoWidth": false,
+        "columnDefs": [
+            { "visible": false, "targets": 0},
+        ],
+        "ajax": {
+            "url": "/learning-management/dtbl/orientation-attendance-members",
+            "data": function (d) {
+                d.branch = $("#branch_filter").val();
+                d.contact_person = $("#contact_person_filter").val();
+            },
+        }
+    });
+
+    $("#branch_filter").change(function(){
+        dtbl_members.ajax.reload();
+    });
+
+    $("#contact_person_filter").change(function(){
+        dtbl_members.ajax.reload();
+    });
 
     var dtbl_search = $("#tbl_mdl_clients").DataTable({
         pageLength: 10,
@@ -49,8 +75,6 @@ $(document).ready(function(){
                 }
             }
         });
-
-
     });
 
     $('#btn_clear_entries').click( function () {
@@ -81,6 +105,8 @@ $(document).ready(function(){
         }
     });
 
+    load();
+
     $('#tbl_mdl_referrals tbody').on( 'click', 'tr', function () {
         if ( $(this).hasClass('selected') ) {
             $(this).removeClass('selected');
@@ -107,6 +133,31 @@ $(document).ready(function(){
             }
         });
     });
+
+    function load(){
+        $.ajax({
+            url: '/learning-management/api/get-branch-contact-persons/' + $("#branch").val(),
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                $('#contact_person').find('option').remove();
+    
+                if(response.data.length > 0){
+                    var newOption = $('<option value="">Choose...</option>');
+                    $('#contact_person').append(newOption);
+                    
+                    for(i=0; i < response.data.length; i++){
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                        $('#contact_person').append(newOption);
+                    }
+                } else{
+                    var newOption = $('<option value="">No Contact Persons available</option>');
+                    $('#contact_person').append(newOption);
+                }
+            }
+        });
+    }
+
 
     $('#branch').change(function() {
         $.ajax({

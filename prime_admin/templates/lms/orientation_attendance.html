@@ -240,11 +240,10 @@
     <div class="main-card mb-3 card"><h5 class="card-header">Members</h5>
         <div class="card-body">
             <div class="form-row">
-          
                 <div class="col-md-2">
                     <div class="position-relative form-group">
-                        <label for="schedule" class="">Branch</label>
-                        <select name="schedule" id="schedule" class="form-control" required>
+                        <label for="branch_filter" class="">Branch</label>
+                        <select name="branch_filter" id="branch_filter" class="form-control" required>
                             <option value="all">All</option>
                             {% for branch in TABLE_OPTIONS['branches'] %}
                             <option value="{{ branch.id }}">
@@ -264,8 +263,8 @@
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
-                        <label for="" class="">Contact Person</label>
-                        <select name="" id="" class="form-control" required>
+                        <label for="contact_person_filter" class="">Contact Person</label>
+                        <select name="contact_person_filter" id="contact_person_filter" class="form-control" required>
                             <option value="all">All</option>
                             {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
                             <option value="{{ contact_person.id }}">
@@ -284,7 +283,7 @@
             </div>
 
             <div class="table-responsive">
-                <table id="index_table" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
                             <th class="text-center"></th>
@@ -294,30 +293,7 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        {% for row_data in TABLE_OPTIONS['table_data'] %}
-                 
-                        <tr class="item row_object" id="{{row_data[0]}}">
-
-                            <!-- TEMPORARY conversion ng boolean word 'true' to 'YES' and 'false' to 'NO' -->
-                            <td class="text-center"></td>
-
-                            {% for value in row_data %}
-                            {% if loop.index > 1 %}
-
-                            <td class="text-center">
-                                {% if value == none %}
-                                <!-- pass -->
-                                {% else %}
-                                {{value}}
-                                {% endif %}
-                            </td>
-
-                            {% endif %}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-
+                        <!-- Load with ajax request -->
                     </tbody>
                 </table>
             </div>

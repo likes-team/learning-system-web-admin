@@ -141,14 +141,21 @@ def get_dtbl_earnings_members():
     _table_data = []
 
     for registration in registrations:
+        if registration.payment_mode == "full_payment":
+            remarks = "Full Payment"
+        elif registration.payment_mode == "premium":
+            remarks = "Premium"
+        else:
+            remarks = "Installment"
+
         _table_data.append([
             registration.branch.name if registration.branch is not None else '',
             registration.full_name,
             registration.batch_number.number if registration.batch_number is not None else '',
-            '',
-            '',
+            str(registration.fle),
+            str(registration.sle),
             registration.schedule,
-            "Full Payment" if registration.payment_mode == "full_payment" else "Installment",
+            remarks,
         ])
 
     for branch in branches_total_earnings:

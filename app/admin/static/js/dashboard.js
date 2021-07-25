@@ -44,6 +44,10 @@ $(document).ready(function(){
             },
             {
                 "targets": 1,
+                "className": "text-center",
+            },
+            {
+                "targets": 2,
                 "render": function(data, type, row){
                     return `<td>
                         <div class="widget-content p-0">
@@ -62,11 +66,11 @@ $(document).ready(function(){
                 }
             },
             {
-                "targets": 2,
+                "targets": 3,
                 "className": "text-center",
             },
             {
-                "targets": 3,
+                "targets": 4,
                 "className": "text-center",
                 "render": function(data, type, row){
                     if(data){
@@ -76,7 +80,7 @@ $(document).ready(function(){
                 }
             },
             {
-                "targets": 4,
+                "targets": 5,
                 "className": "text-center",
                 "render": function(data, type, row){
                     if(!data){

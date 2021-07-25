@@ -142,18 +142,38 @@ def register():
             'id_lace': True if 'id_lace' in id_materials else False,
         }
 
+        if client.level == "first":
+            earnings_percent = decimal.Decimal(0.14)
+            savings_percent = decimal.Decimal(0.00286)
+        elif client.level == "second":
+            earnings_percent = decimal.Decimal(0.0286)
+            savings_percent = decimal.Decimal(0.00)
+        else:
+            earnings_percent = decimal.Decimal(0.00)
+            savings_percent = decimal.Decimal(0.00)
+
         if client.payment_mode == "full_payment":
             client.balance = 7000 - client.amount
-            earnings = 7000 * decimal.Decimal(0.14)
-            savings = 7000 * decimal.Decimal(0.00286)
+            earnings = 7000 * earnings_percent
+            savings = 7000 * savings_percent
         elif client.payment_mode == "installment":
             client.balance = 7800 - client.amount
-            earnings = 7800 * decimal.Decimal(0.14)
-            savings = 7800 * decimal.Decimal(0.00286)
+            earnings = 7800 * earnings_percent
+            savings = 7800 * savings_percent
         elif client.payment_mode == 'premium':
             client.balance = 8500 - client.amount
-            earnings = 8500 * decimal.Decimal(0.14)
-            savings = 8500 * decimal.Decimal(0.00286)
+            earnings = 8500 * earnings_percent
+            savings = 8500 * savings_percent
+
+        if client.level == "first":
+            client.fle = earnings
+            client.sle = decimal.Decimal(0.00)
+        elif client.level == "second":
+            client.sle = earnings
+            client.fle = decimal.Decimal(0.00)
+        else:
+            client.fle = decimal.Decimal(0.00)
+            client.sle = decimal.Decimal(0.00)
 
         client.payments.append(
             {
