@@ -31,6 +31,23 @@ $(document).ready(function(){
     "hideMethod": "fadeOut"
     }
 
+    var columnDefs;
+
+    if(ROLE == "Marketer"){
+        columnDefs = [
+            { "visible": false, "targets": 0},
+            { "visible": false, "targets": 8},
+            { "width": 100, "targets": 15},
+            { "width": "10px", "targets": 12}
+        ];
+    } else {
+        columnDefs = [
+            { "visible": false, "targets": 0},
+            { "width": 100, "targets": 15},
+            { "width": "10px", "targets": 12}
+        ];
+    }
+
     var table = $('#tbl_members').DataTable({
         "dom": 'rtip',
         "pageLength": 20,
@@ -38,11 +55,7 @@ $(document).ready(function(){
         "processing": true,
         "serverSide": true,
         "autoWidth": false,
-        "columnDefs": [
-            { "visible": false, "targets": 0},
-            { "width": 100, "targets": 15},
-            { "width": "10px", "targets": 12}
-        ],
+        "columnDefs": columnDefs,
         "ajax": {
             "url": "/learning-management/dtbl/members",
             "data": function (d) {

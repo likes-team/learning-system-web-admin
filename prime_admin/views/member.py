@@ -1,6 +1,5 @@
-from decimal import Decimal
+import decimal
 from random import uniform
-
 from pymongo.common import clean_node
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
@@ -12,7 +11,7 @@ from flask import json, redirect, url_for, request, current_app, flash, jsonify,
 from app import db, csrf
 from datetime import datetime
 from bson.decimal128 import Decimal128
-from app.auth.models import User
+from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
 
 
@@ -318,10 +317,15 @@ def get_member(client_id):
 @login_required
 def new_payment():
     client_id = request.form['client_id']
-    amount = Decimal(request.form['new_amount'])
+    amount = decimal.Decimal(request.form['new_amount'])
     date = request.form['date']
 
     client = Registration.objects.get_or_404(id=client_id)
+
+
+    if amount > client.balance:
+        flash("New payment is greater than the student balance!", 'error')
+        return redirect(url_for('lms.members'))
 
     is_premium = request.form.get('chkbox_upgrade', False)
 
@@ -333,6 +337,39 @@ def new_payment():
     else:
         client.balance = client.balance - amount
     
+    if client.level == "first":
+        earnings_percent = decimal.Decimal(0.14)
+        savings_percent = decimal.Decimal(0.00286)
+    elif client.level == "second":
+        earnings_percent = decimal.Decimal(0.0286)
+        savings_percent = decimal.Decimal(0.00)
+    else:
+        earnings_percent = decimal.Decimal(0.00)
+        savings_percent = decimal.Decimal(0.00)
+
+    earnings = amount * earnings_percent
+    savings = amount * savings_percent
+
+    if client.level == "first":
+        client.fle = client.fle + earnings
+    elif client.level == "second":
+        client.sle = client.sle + earnings
+
+    custom_id = client.full_registration_number + str(datetime.now())
+
+    client.contact_person.earnings.append(
+        Earning(
+            custom_id=custom_id,
+            payment_mode=client.payment_mode,
+            savings=Decimal128(str(savings)),
+            earnings=Decimal128(str(earnings)),
+            branch=client.branch,
+            client=client,
+            date=datetime.now(),
+            registered_by=User.objects.get(id=str(current_user.id))
+        )
+    )
+
     client.payments.append(
         {
             'payment_mode': client.payment_mode,
@@ -364,6 +401,7 @@ def new_payment():
     }
 
     client.save()
+    client.contact_person.save()
     
     flash("Update client's payment successfully!", 'success')
 
