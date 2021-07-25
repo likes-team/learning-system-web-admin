@@ -158,8 +158,8 @@ def register():
             savings = 7000 * savings_percent
         elif client.payment_mode == "installment":
             client.balance = 7800 - client.amount
-            earnings = 7800 * earnings_percent
-            savings = 7800 * savings_percent
+            earnings = client.amount * earnings_percent
+            savings = client.amount * savings_percent
         elif client.payment_mode == 'premium':
             client.balance = 8500 - client.amount
             earnings = 8500 * earnings_percent

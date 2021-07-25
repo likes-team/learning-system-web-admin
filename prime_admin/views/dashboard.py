@@ -87,18 +87,31 @@ def get_chart_data():
         'dec': Registration.objects(status='registered').filter(Q(created_at__gte=DECSTART) & Q(created_at__lte=DECEND)).sum('amount'),
     }
 
-    gross_sales.append(gross_sales_per_month['jan'])
-    gross_sales.append(gross_sales_per_month['feb'])
-    gross_sales.append(gross_sales_per_month['mar'])
-    gross_sales.append(gross_sales_per_month['apr'])
-    gross_sales.append(gross_sales_per_month['may'])
-    gross_sales.append(gross_sales_per_month['jun'])
-    gross_sales.append(gross_sales_per_month['jul'])
-    gross_sales.append(gross_sales_per_month['aug'])
-    gross_sales.append(gross_sales_per_month['sep'])
-    gross_sales.append(gross_sales_per_month['oct'])
-    gross_sales.append(gross_sales_per_month['nov'])
-    gross_sales.append(gross_sales_per_month['dec'])
+    # gross_sales.append(gross_sales_per_month['jan'])
+    # gross_sales.append(gross_sales_per_month['feb'])
+    # gross_sales.append(gross_sales_per_month['mar'])
+    # gross_sales.append(gross_sales_per_month['apr'])
+    # gross_sales.append(gross_sales_per_month['may'])
+    # gross_sales.append(gross_sales_per_month['jun'])
+    # gross_sales.append(gross_sales_per_month['jul'])
+    # gross_sales.append(gross_sales_per_month['aug'])
+    # gross_sales.append(gross_sales_per_month['sep'])
+    # gross_sales.append(gross_sales_per_month['oct'])
+    # gross_sales.append(gross_sales_per_month['nov'])
+    # gross_sales.append(gross_sales_per_month['dec'])
+
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
+    gross_sales.append(0)
 
     expenses_per_month = {
         'jan': Registration.objects(status='registered').filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).sum('amount'),
@@ -115,18 +128,31 @@ def get_chart_data():
         'dec': Registration.objects(status='registered').filter(Q(created_at__gte=DECSTART) & Q(created_at__lte=DECEND)).sum('amount'),
     }
 
-    expenses.append(expenses_per_month['jan'])
-    expenses.append(expenses_per_month['feb'])
-    expenses.append(expenses_per_month['mar'])
-    expenses.append(expenses_per_month['apr'])
-    expenses.append(expenses_per_month['may'])
+    # expenses.append(expenses_per_month['jan'])
+    # expenses.append(expenses_per_month['feb'])
+    # expenses.append(expenses_per_month['mar'])
+    # expenses.append(expenses_per_month['apr'])
+    # expenses.append(expenses_per_month['may'])
+    # expenses.append(0)
+    # expenses.append(expenses_per_month['jul'])
+    # expenses.append(expenses_per_month['aug'])
+    # expenses.append(expenses_per_month['sep'])
+    # expenses.append(expenses_per_month['oct'])
+    # expenses.append(expenses_per_month['nov'])
+    # expenses.append(expenses_per_month['dec'])
+
     expenses.append(0)
-    expenses.append(expenses_per_month['jul'])
-    expenses.append(expenses_per_month['aug'])
-    expenses.append(expenses_per_month['sep'])
-    expenses.append(expenses_per_month['oct'])
-    expenses.append(expenses_per_month['nov'])
-    expenses.append(expenses_per_month['dec'])
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
+    expenses.append(0)
 
     no_of_students_per_month = {
         'jan': Registration.objects(status='registered').filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).count(),
@@ -156,8 +182,12 @@ def get_chart_data():
     no_of_students.append(no_of_students_per_month['nov'])
     no_of_students.append(no_of_students_per_month['dec'])
 
+    # maintaining_sales = [
+    #     85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,
+    # ]
+
     maintaining_sales = [
-        85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,
+        0,0,0,0,0,0,0,0,0,0,0,0,
     ]
 
     month_count = datetime.now().month

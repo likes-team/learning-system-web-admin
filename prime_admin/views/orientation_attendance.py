@@ -216,14 +216,14 @@ def get_dtbl_orientation_attendance_members():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
     contact_person_id = request.args.get('contact_person')
-    
-    print('TESTSETEST',branch_id, contact_person_id)
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(status='oriented').skip(start).limit(length)
     else:
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
+        elif current_user.role.name == "Secretary":
+            registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).skip(start).limit(length)
         else:
             registrations = Registration.objects(status='oriented').skip(start).limit(length)
 
