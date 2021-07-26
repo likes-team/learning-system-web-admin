@@ -37,6 +37,7 @@ $(document).ready(function(){
         columnDefs = [
             { "visible": false, "targets": 0},
             { "visible": false, "targets": 8},
+            { "visible": false, "targets": 15},
             { "width": 100, "targets": 15},
             { "width": "10px", "targets": 12}
         ];

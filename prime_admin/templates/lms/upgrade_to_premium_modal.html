@@ -1,9 +1,9 @@
-<div id="editModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+<div id="upgradeModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
      aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Update Client's Payment</h5>
+                <h5 class="modal-title">Upgrade to Premium Payment</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -95,7 +95,7 @@
                                     <div class="position-relative form-group">
                                         <div>
                                             <div class="custom-checkbox custom-control">
-                                                <input disabled name="chkbox_upgrade" type="checkbox" id="chkbox_upgrade" class="custom-control-input">
+                                                <input name="chkbox_upgrade" type="checkbox" id="chkbox_upgrade" class="custom-control-input">
                                                 <label class="custom-control-label" for="chkbox_upgrade"><strong>UPGRADE TO PREMIUM PAYMENT</strong></label></div>
                                         </div>
                                     </div>
@@ -106,7 +106,7 @@
                             <div class="form-row">
                                 <div class="col-md-6 mb-3">
                                     <label for="new_amount">New Payment</label>
-                                    <input style="font-weight: bold;" type="number" step="1" class="form-control" id="new_amount" name="new_amount"
+                                    <input readonly style="font-weight: bold;" type="number" step="1" class="form-control" id="new_amount" name="new_amount"
                                         value="" required>
                                 </div>
 
@@ -188,7 +188,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success">Confirm Payment</button>
+                        <button type="submit" class="btn btn-success">Confirm Upgrade</button>
                     </div>
                 </form>
             </div>

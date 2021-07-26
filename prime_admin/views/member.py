@@ -96,6 +96,7 @@ def get_dtbl_members():
     for registration in registrations:
         books = ""
         uniforms = ""
+
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
@@ -104,6 +105,12 @@ def get_dtbl_members():
         if registration.balance <= 0.00:
             actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
             paid = 'PAID'
+
+        # if registration.payment_mode == "premium":
+        #     actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        # elif registration.payment_mode == "full_payment":
+        #     actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
+        #     <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
         branch = registration.branch
         contact_person = registration.contact_person
