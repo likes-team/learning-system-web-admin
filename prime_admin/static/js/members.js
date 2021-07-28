@@ -49,6 +49,21 @@ $(document).ready(function(){
         ];
     }
 
+    var savedValues = {
+        'book_none': false,
+        'book1': false,
+        'book2': false,
+        'uniform_xs': false,
+        'uniform_s': false,
+        'uniform_m': false,
+        'uniform_l': false,
+        'uniform_xl': false,
+        'uniform_xxl': false,
+        'uniform_none': false,
+        'id_card': false,
+        'id_lace': false,
+    }
+
     var table = $('#tbl_members').DataTable({
         "dom": 'rtip',
         "pageLength": 20,
@@ -83,7 +98,79 @@ $(document).ready(function(){
     //     $("#viewModal").modal('show');
     // } );
 
-    
+    $('#tbl_members tbody').on('click', '.btn-upgrade', function () {
+        var data = table.row( $(this).parents('tr')).data();
+        
+        $.ajax({
+            url: '/learning-management/api/members/' + data[0],
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                CLIENTID = response.data.id;
+
+                $("#upgrade_client_id").val(response.data.id);
+                $("#upgrade_last_name").val(response.data.lname);
+                $("#upgrade_first_name").val(response.data.fname);
+                $("#upgrade_middle_name").val(response.data.mname);
+                $("#upgrade_suffix").val(response.data.suffix);
+                $("#upgrade_mode_of_payment").val(response.data.mode_of_payment.toUpperCase());
+                $("#upgrade_amount").val(response.data.amount);
+                $("#upgrade_balance").val(response.data.balance);
+
+                $("#tbl_upgrade_payment_history > tbody").empty();
+
+                for(i=0; i < response.data.payments.length; i++){
+                    $('#tbl_upgrade_payment_history > tbody:first').append(
+                        `<tr>
+                        <td>${response.data.payments[i].amount}</td>
+                        <td>${response.data.payments[i].current_balance}</td>
+                        <td>${response.data.payments[i].date}</td>
+                        </tr>`
+                        );
+                }
+
+                console.log(response.data);
+                $('#upgrade_book_none').prop('checked', false);
+                $('#upgrade_book1').prop('checked', false);
+                $('#upgrade_book2').prop('checked', false);
+
+                if(response.data.books.book_none){
+                    $('#upgrade_book_none').prop('checked', true);
+                    savedValues.book_none = true;
+                } else if(response.data.books.volume1){
+                    $('#upgrade_book1').prop('checked', true);
+                    savedValues.book1 = true;
+                } else if(response.data.books.volume2){
+                    $('#upgrade_book2').prop('checked', true);
+                    savedValues.book2 = true;
+                }
+
+                if(response.data.uniforms.uniform_none){
+                   $("#upgrade_uniform_none").prop("checked", true);
+                   savedValues.uniform_none = true;
+                } else if(response.data.uniforms.uniform_xs){
+                    $("#upgrade_uniform_xs").prop("checked", true);
+                    savedValues.uniform_xs = true;
+                } else if(response.data.uniforms.uniform_s){
+                    $("#upgrade_uniform_s").prop("checked", true);
+                    savedValues.uniform_s = true;
+                } else if(response.data.uniforms.uniform_m){
+                    $("#upgrade_uniform_m").prop("checked", true);
+                    savedValues.uniform_m = true;
+                } else if(response.data.uniforms.uniform_l){
+                    $("#upgrade_uniform_l").prop("checked", true);
+                    savedValues.uniform_l = true;
+                } else if(response.data.uniforms.uniform_xl){
+                    $("#upgrade_uniform_xl").prop("checked", true);
+                    savedValues.uniform_xl = true;
+                } else if(response.data.uniforms.uniform_xxl){
+                    $("#upgrade_uniform_xxl").prop("checked", true);
+                    savedValues.uniform_xxl = true;
+                }
+            }
+        });
+    } );
+
     $('#tbl_members tbody').on('click', '.btn-edit', function () {
         var data = table.row( $(this).parents('tr')).data();
         
@@ -363,6 +450,149 @@ $(document).ready(function(){
         $("#book_none").attr('onclick', "");
         $("#book1").attr('onclick', "");
         $("#book2").attr('onclick', "");
+    });
+
+
+    $("#upgrade_chkbox_upgrade").click(function(){
+        if(ISLOADING){
+            $("#upgrade_chkbox_upgrade").attr('onclick', "return false;");
+            return;
+        }
+
+        var is_checked = $(this).is(":checked");
+
+        if(is_checked){
+            ISLOADING = true;
+
+            $("#btn_confirm_upgrade").prop('disabled', false);
+
+            $.ajax({
+                url: '/learning-management/api/members/' + CLIENTID,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    if (response.data.mode_of_payment == "full_payment"){
+                        var new_amount = 1500;
+
+                        $("#upgrade_new_amount").val(new_amount);
+                        $('#upgrade_book_none').prop('checked', false);
+                        $('#upgrade_book1').prop('checked', true);
+                        $('#upgrade_book2').prop('checked', true);
+    
+                        $('#upgrade_id_card').prop('checked', true);
+                        $('#upgrade_id_lace').prop('checked', true);
+    
+                        $("#upgrade_id_lace").attr('onclick', "return false;");
+                        $("#upgrade_id_card").attr('onclick', "return false;");
+                        $("#upgrade_book_none").attr('onclick', "return false;");
+                        $("#upgrade_book1").attr('onclick', "return false;");
+                        $("#upgrade_book2").attr('onclick', "return false;");
+                    } else {
+                        var new_amount = parseInt(response.data.balance) + 700;
+
+                        $("#upgrade_new_amount").val(new_amount);
+                        $('#upgrade_book_none').prop('checked', false);
+                        $('#upgrade_book1').prop('checked', true);
+                        $('#upgrade_book2').prop('checked', true);
+    
+                        $("#upgrade_uniform_m").prop("checked", true);
+    
+                        $('#upgrade_id_card').prop('checked', true);
+                        $('#upgrade_id_lace').prop('checked', true);
+    
+                        $("#upgrade_id_lace").attr('onclick', "return false;");
+                        $("#upgrade_id_card").attr('onclick', "return false;");
+                        $("#upgrade_book_none").attr('onclick', "return false;");
+                        $("#upgrade_book1").attr('onclick', "return false;");
+                        $("#upgrade_book2").attr('onclick', "return false;");
+                    }
+                    
+                    ISLOADING = false;
+                    $("#upgrade_chkbox_upgrade").attr('onclick', "");
+                }
+            });
+
+            return;
+        }
+
+        $("#upgrade_new_amount").val('');
+
+        $("#btn_confirm_upgrade").prop('disabled', true);
+
+        if(savedValues.book_none){
+            $('#upgrade_book_none').prop('checked', true);
+        } else {
+            $('#upgrade_book_none').prop('checked', false);
+        }
+        
+        if(savedValues.book1){
+            $('#upgrade_book1').prop('checked', true);
+        } else{
+            $('#upgrade_book1').prop('checked', false);
+        }
+        
+        if(savedValues.book2){
+            $('#upgrade_book2').prop('checked', true);
+        } else {
+            $('#upgrade_book2').prop('checked', false);
+        }
+
+        if(savedValues.uniform_none){
+            $("#upgrade_uniform_none").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_none").prop("checked", false);
+        }
+
+        if(savedValues.uniform_m){
+            $("#upgrade_uniform_m").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_m").prop("checked", false);
+        }
+
+        if(savedValues.uniform_xs){
+            $("#upgrade_uniform_xs").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_xs").prop("checked", false);
+        }
+
+        if(savedValues.uniform_s){
+            $("#upgrade_uniform_s").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_s").prop("checked", false);
+        }
+
+        if(savedValues.uniform_m){
+            $("#upgrade_uniform_m").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_m").prop("checked", false);
+        }
+
+        if(savedValues.uniform_l){
+            $("#upgrade_uniform_l").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_l").prop("checked", false);
+        }
+
+        if(savedValues.uniform_xl){
+            $("#upgrade_uniform_xl").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_xl").prop("checked", false);
+        }
+
+        if(savedValues.uniform_xxl){
+            $("#upgrade_uniform_xxl").prop("checked", true);
+        } else{
+            $("#upgrade_uniform_xxl").prop("checked", false);
+        }
+
+        $('#upgrade_id_card').prop('checked', false);
+        $('#upgrade_id_lace').prop('checked', false);
+
+        $("#upgrade_id_lace").attr('onclick', "");
+        $("#upgrade_id_card").attr('onclick', "");
+        $("#upgrade_book_none").attr('onclick', "");
+        $("#upgrade_book1").attr('onclick', "");
+        $("#upgrade_book2").attr('onclick', "");
     });
 
     $("#book_none").click(function(){

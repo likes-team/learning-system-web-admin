@@ -43,7 +43,7 @@ def batches():
         form=form,
         table_data=_table_data,
         create_url='lms.create_batch',
-        edit_url=False,
+        edit_url='lms.edit_batch',
         table_template='lms/branch_table.html',
         view_modal_url='/learning-management/get-view-batch-data',
         view_modal_template="lms/batch_view_modal.html",
@@ -118,7 +118,7 @@ def edit_batch(oid):
         
     try:
         batch.number = form.number.data
-        batch.branch = Branch.objects.get_or_404(id=form.branch.data)
+        # batch.branch = Branch.objects.get_or_404(id=form.branch.data)
         batch.updated_at = datetime.now()
         batch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         

@@ -72,37 +72,45 @@
 
   <table>
     <tr>
-      <th>REGISTRATION NO.</th>
-      <th>FULL NAME</th>
+      <th>E-REGISTRATION NO.</th>
+      <th>LAST NAME</th>
+      <th>FIRST NAME</th>
+      <th>MIDDLE NAME</th>
+      <th>ADDRESS</th>
+      <th>EMAIL</th>
+      <th>DATE OF BIRTH</th>
       <th>PASSPORT NO.</th>
       <th>CONTACT NO.</th>
-      <th>BALANCE</th>
-      <th>PAID/NOT PAID</th>
-      <th>REMARK</th>
     </tr>
 
     {% for student in students %}
     <tr>
       <td>
-        {{student[2]}}
+        {{student[20]}}
       </td>
       <td>
-        {{student[3]}}
+        {{student[23]}}
+      </td>
+      <td>
+        {{student[24]}}
+      </td>
+      <td>
+        {{student[25]}}
+      </td>
+      <td>
+        {{student[26]}}
+      </td>
+      <td>
+        {{student[27]}}
+      </td>
+      <td>
+        {{student[28]}}
       </td>
       <td>
         {{student[16]}}
       </td>
       <td>
-        {{student[17]}}
-      </td>
-      <td>
-        {{student[9]}}
-      </td>
-      <td>
-        {{student[10]}}
-      </td>
-      <td>
-        {{student[7]}}
+        {{student[22]}}
       </td>
     </tr>
     {% endfor %}
