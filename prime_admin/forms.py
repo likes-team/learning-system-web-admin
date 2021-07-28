@@ -150,12 +150,12 @@ class BatchEditForm(AdminEditForm):
     __heading__ = "Update existing data"
 
     number = AdminField(label="Number", validators=[DataRequired()])
-    branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    # branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
 
     @property
     def fields(self):
         return [
-            [self.number, self.branch]
+            [self.number]
             ]
 
 

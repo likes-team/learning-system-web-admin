@@ -32,7 +32,8 @@ def members():
 
     modals = [
         'lms/client_view_modal.html',
-        'lms/client_edit_modal.html'
+        'lms/client_edit_modal.html',
+        'lms/client_upgrade_modal.html'
     ]
 
     if current_user.role.name == "Secretary":
@@ -103,14 +104,16 @@ def get_dtbl_members():
         paid = 'NOT PAID'
 
         if registration.balance <= 0.00:
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
             paid = 'PAID'
 
-        # if registration.payment_mode == "premium":
-        #     actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        # elif registration.payment_mode == "full_payment":
-        #     actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
-        #     <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        if registration.payment_mode == "premium":
+            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        elif registration.payment_mode == "full_payment":
+            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        elif registration.payment_mode == "installment" and registration.balance <= 0.00:
+            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
         branch = registration.branch
         contact_person = registration.contact_person
@@ -329,12 +332,12 @@ def new_payment():
 
     client = Registration.objects.get_or_404(id=client_id)
 
-
-    if amount > client.balance:
-        flash("New payment is greater than the student balance!", 'error')
-        return redirect(url_for('lms.members'))
-
     is_premium = request.form.get('chkbox_upgrade', False)
+
+    if is_premium != 'on':
+        if amount > client.balance:
+            flash("New payment is greater than the student balance!", 'error')
+            return redirect(url_for('lms.members'))
 
     client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
     client.amount += amount
@@ -407,10 +410,111 @@ def new_payment():
         'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
     }
 
+    id_materials = request.form.getlist('others')
+
+    client.id_materials = {
+        'id_card': True if 'id_card' in id_materials else False,
+        'id_lace': True if 'id_lace' in id_materials else False,
+    }
+
     client.save()
     client.contact_person.save()
     
-    flash("Update client's payment successfully!", 'success')
+    if is_premium == 'on':
+        flash("Client's payment upgraded successfully!", 'success')
+    else:
+        print("TEST!!!!!!!!!!!!")
+        flash("Update client's payment successfully!", 'success')
+
+    return redirect(url_for('lms.members'))
+
+
+@bp_lms.route('/clients/upgrade_to_premium', methods=['POST'])
+@login_required
+def upgrade_to_premium():
+    client_id = request.form['client_id']
+    amount = decimal.Decimal(request.form['upgrade_new_amount'])
+    date = request.form['upgrade_date']
+
+    client = Registration.objects.get_or_404(id=client_id)
+    
+    client.payment_mode = 'premium'
+    client.amount += amount
+    
+    if client.level == "first":
+        earnings_percent = decimal.Decimal(0.14)
+        savings_percent = decimal.Decimal(0.00286)
+    elif client.level == "second":
+        earnings_percent = decimal.Decimal(0.0286)
+        savings_percent = decimal.Decimal(0.00)
+    else:
+        earnings_percent = decimal.Decimal(0.00)
+        savings_percent = decimal.Decimal(0.00)
+
+    earnings = amount * earnings_percent
+    savings = amount * savings_percent
+
+    if client.level == "first":
+        client.fle = client.fle + earnings
+    elif client.level == "second":
+        client.sle = client.sle + earnings
+
+    custom_id = client.full_registration_number + str(datetime.now())
+
+    client.contact_person.earnings.append(
+        Earning(
+            custom_id=custom_id,
+            payment_mode=client.payment_mode,
+            savings=Decimal128(str(savings)),
+            earnings=Decimal128(str(earnings)),
+            branch=client.branch,
+            client=client,
+            date=datetime.now(),
+            registered_by=User.objects.get(id=str(current_user.id))
+        )
+    )
+
+    client.payments.append(
+        {
+            'payment_mode': client.payment_mode,
+            'amount': Decimal128(str(amount)),
+            'current_balance': Decimal128(str(client.balance)),
+            'confirm_by': User.objects.get(id=str(current_user.id)),
+            'date': date
+        }
+    )
+
+    books = request.form.getlist('upgrade_books')
+    
+    client.books = {
+        'book_none': True if 'book_none' in books else False,
+        'volume1': True if 'volume1' in books else False,
+        'volume2': True if 'volume2' in books else False,
+    }
+
+    uniforms = request.form.getlist('upgrade_uniforms')
+
+    client.uniforms = {
+        'uniform_none': True if 'uniform_none' in uniforms else False,
+        'uniform_xs': True if 'uniform_xs' in uniforms else False,
+        'uniform_s': True if 'uniform_s' in uniforms else False,
+        'uniform_m': True if 'uniform_m' in uniforms else False,
+        'uniform_l': True if 'uniform_l' in uniforms else False,
+        'uniform_xl': True if 'uniform_xl' in uniforms else False,
+        'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+    }
+
+    id_materials = request.form.getlist('upgrade_others')
+
+    client.id_materials = {
+        'id_card': True if 'id_card' in id_materials else False,
+        'id_lace': True if 'id_lace' in id_materials else False,
+    }
+
+    client.save()
+    client.contact_person.save()
+    
+    flash("Client's payment upgraded successfully!", 'success')
 
     return redirect(url_for('lms.members'))
 
@@ -536,8 +640,17 @@ def print_students_pdf():
             actions, # 15
             registration.passport, # 16
             registration.contact_number, # 17
-            id_card,
-            id_lace
+            id_card, # 18
+            id_lace, # 19
+            registration.e_registration, # 20
+            registration.passport, # 21
+            registration.contact_number, #22
+            registration.lname, #23
+            registration.fname, # 24
+            registration.mname, # 25
+            registration.address, # 26
+            registration.email, # 27
+            registration.birth_date if registration.birth_date else '', #28
         ])
         print(books)
 
