@@ -25,6 +25,9 @@ class Base(db.Document):
     created_by = db.StringField()
     updated_by = db.StringField()
 
+    date_string = str(datetime.now(TIMEZONE))
+    created_at_string = db.StringField(default=date_string)
+
 
 class CoreModel(Base):
     meta = {
