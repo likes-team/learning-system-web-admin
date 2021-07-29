@@ -115,7 +115,8 @@ def register():
         client.amount = form.amount.data
         client.payment_mode = request.form['payment_modes']
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
-        
+        client.set_registration_date()
+
         books = request.form.getlist('books')
         
         client.books = {

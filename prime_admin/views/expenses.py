@@ -99,7 +99,7 @@ def get_dtbl_expenses():
     try:
         for exp in _expenses:
             _table_data.append([
-                exp.created_at,
+                exp.created_at_local,
                 exp.inventory.description if exp.inventory is not None else '',
                 str(exp.price),
                 exp.quantity,

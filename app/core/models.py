@@ -6,7 +6,8 @@ from datetime import datetime
 from app import db
 import enum
 from config import TIMEZONE
-
+from dateutil.tz import tzutc, tzlocal
+import pytz
 
 
 class Base(db.Document):
@@ -16,17 +17,43 @@ class Base(db.Document):
 
     active = db.BooleanField(default=True)
     is_deleted = db.BooleanField(default=False)
-    created_at = db.DateTimeField(default=datetime.now(TIMEZONE))
+    created_at = db.DateTimeField()
     # TODO: updated_at = db.DateTimeField(default=datetime.utcnow, onupdate=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.now(TIMEZONE))
+    updated_at = db.DateTimeField()
 
     # TODO: I relate na to sa users table 
     # Sa ngayon i store nalang muna yung names kasi andaming error kapag foreign key
     created_by = db.StringField()
     updated_by = db.StringField()
 
-    date_string = str(datetime.now(TIMEZONE))
+    date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
     created_at_string = db.StringField(default=date_string)
+
+    @property
+    def created_at_local(self):
+        local_datetime = ''
+        if self.created_at is not None:
+            local_datetime = self.created_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+        return local_datetime
+
+    @property
+    def updated_at_local(self):
+        local_datetime = ''
+        if self.updated_at is not None:
+            local_datetime = self.updated_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+        return local_datetime
+
+    def set_created_at(self):
+        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        local_dt = TIMEZONE.localize(naive, is_dst=None)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        self.created_at = utc_dt
+
+    def set_updated_at(self):
+        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        local_dt = TIMEZONE.localize(naive, is_dst=None)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        self.updated_at = utc_dt
 
 
 class CoreModel(Base):

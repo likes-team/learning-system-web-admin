@@ -1,3 +1,5 @@
+import pytz
+from config import TIMEZONE
 from datetime import datetime
 from enum import unique
 
@@ -51,6 +53,20 @@ class Registration(Base, Admin):
     level = db.StringField()
     fle = db.DecimalField()
     sle = db.DecimalField()
+    registration_date = db.DateTimeField()
+    
+    def set_registration_date(self):
+        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        local_dt = TIMEZONE.localize(naive, is_dst=None)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        self.registration_date = utc_dt
+
+    @property
+    def registration_date_local(self):
+        local_datetime = ''
+        if self.registration_date is not None:
+            local_datetime = self.registration_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+        return local_datetime
 
     @property
     def full_name(self):

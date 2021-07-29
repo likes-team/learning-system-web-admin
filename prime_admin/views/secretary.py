@@ -30,9 +30,9 @@ def secretaries():
             secretary.lname,
             secretary.branch.name if secretary.branch is not None else '',
             secretary.created_by,
-            secretary.created_at,
+            secretary.created_at_local,
             secretary.updated_by,
-            secretary.updated_at
+            secretary.updated_at_local
         ))
 
     return admin_table(
@@ -128,7 +128,7 @@ def edit_secretary(oid):
         secretary.role = Role.objects(name="Secretary").first()
         secretary.username = form.username.data
         secretary.email = form.email.data if form.email.data != '' else None
-        secretary.updated_at = datetime.now(TIMEZONE)
+        secretary.set_updated_at()
         secretary.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         secretary.save()

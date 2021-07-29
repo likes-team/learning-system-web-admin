@@ -162,7 +162,7 @@ def get_dtbl_members():
 
         _table_data.append([
             str(registration.id),
-            registration.created_at,
+            registration.registration_date_local,
             registration.full_registration_number,
             registration.full_name,
             registration.batch_number.number if registration.batch_number is not None else "",
@@ -624,7 +624,7 @@ def print_students_pdf():
 
         _table_data.append([
             str(registration.id), # 0
-            registration.created_at, # 1
+            registration.created_at_local, # 1
             registration.full_registration_number, # 2
             registration.full_name, # 3
             registration.batch_number.number if registration.batch_number is not None else "",
