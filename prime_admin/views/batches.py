@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from prime_admin.views.branches import branches
 from flask.json import jsonify
 from app.auth.models import Role, User
@@ -119,7 +120,7 @@ def edit_batch(oid):
     try:
         batch.number = form.number.data
         # batch.branch = Branch.objects.get_or_404(id=form.branch.data)
-        batch.updated_at = datetime.now()
+        batch.updated_at = datetime.now(TIMEZONE)
         batch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         batch.save()

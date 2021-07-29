@@ -5,6 +5,7 @@ from datetime import datetime
 
 from app import db
 import enum
+from config import TIMEZONE
 
 
 
@@ -15,9 +16,9 @@ class Base(db.Document):
 
     active = db.BooleanField(default=True)
     is_deleted = db.BooleanField(default=False)
-    created_at = db.DateTimeField(default=datetime.now)
+    created_at = db.DateTimeField(default=datetime.now(TIMEZONE))
     # TODO: updated_at = db.DateTimeField(default=datetime.utcnow, onupdate=datetime.utcnow)
-    updated_at = db.DateTimeField(default=datetime.now)
+    updated_at = db.DateTimeField(default=datetime.now(TIMEZONE))
 
     # TODO: I relate na to sa users table 
     # Sa ngayon i store nalang muna yung names kasi andaming error kapag foreign key

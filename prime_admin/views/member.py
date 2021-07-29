@@ -13,6 +13,7 @@ from datetime import datetime
 from bson.decimal128 import Decimal128
 from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
+from config import TIMEZONE
 
 
 
@@ -74,14 +75,14 @@ def get_dtbl_members():
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
-        sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
+        sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).sum('amount')
     else:
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
-            sales_today = registrations.filter(created_at__gte=datetime.now().date()).filter(branch__in=current_user.branches).sum('amount')
+            sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).filter(branch__in=current_user.branches).sum('amount')
         else:
             registrations = Registration.objects(status='registered').skip(start).limit(length)
-            sales_today = registrations.filter(created_at__gte=datetime.now().date()).sum('amount')
+            sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).sum('amount')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -365,7 +366,7 @@ def new_payment():
     elif client.level == "second":
         client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(datetime.now())
+    custom_id = client.full_registration_number + str(datetime.now(TIMEZONE))
 
     client.contact_person.earnings.append(
         Earning(
@@ -375,7 +376,7 @@ def new_payment():
             earnings=Decimal128(str(earnings)),
             branch=client.branch,
             client=client,
-            date=datetime.now(),
+            date=datetime.now(TIMEZONE),
             registered_by=User.objects.get(id=str(current_user.id))
         )
     )
@@ -459,7 +460,7 @@ def upgrade_to_premium():
     elif client.level == "second":
         client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(datetime.now())
+    custom_id = client.full_registration_number + str(datetime.now(TIMEZONE))
 
     client.contact_person.earnings.append(
         Earning(
@@ -469,7 +470,7 @@ def upgrade_to_premium():
             earnings=Decimal128(str(earnings)),
             branch=client.branch,
             client=client,
-            date=datetime.now(),
+            date=datetime.now(TIMEZONE),
             registered_by=User.objects.get(id=str(current_user.id))
         )
     )

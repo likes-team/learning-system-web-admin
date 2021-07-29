@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
@@ -132,7 +133,7 @@ def edit_user(oid,**kwargs):
         user.lname = form.lname.data
         user.email = form.email.data if not form.email.data == '' else None
         user.role = Role.objects.get(id=form.role.data)
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.now(TIMEZONE)
         user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
 
         user.save()

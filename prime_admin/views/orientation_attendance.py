@@ -12,6 +12,8 @@ from prime_admin.models import Branch, OrientationAttendance, Registration, Batc
 from flask import jsonify, request
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
+from config import TIMEZONE
+
 
 
 @bp_lms.route('/orientation-attendance')
@@ -113,7 +115,7 @@ def orient():
             client = Registration.objects.get(id=client_id)
 
             client.is_oriented = True
-            client.date_oriented = datetime.now()
+            client.date_oriented = datetime.now(TIMEZONE)
             client.contact_person = User.objects.get(id=form.contact_person.data)
             client.orientator = Orientator.objects.get(id=form.orientator.data)
             client.save()
@@ -124,7 +126,7 @@ def orient():
             new_client.contact_number = request.form['contact_no']
             new_client.contact_person = User.objects.get(id=form.contact_person.data)
             new_client.branch = Branch.objects.get(id=form.branch.data)
-            new_client.date_oriented = datetime.now()
+            new_client.date_oriented = datetime.now(TIMEZONE)
             new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True
             new_client.status = "oriented"

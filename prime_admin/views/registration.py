@@ -12,6 +12,7 @@ from app import db, mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128
 from mongoengine.queryset.visitor import Q
+from config import TIMEZONE
 
 
 
@@ -23,7 +24,7 @@ def register():
     
     last_registration_number = Registration.objects(status="registered").order_by('-registration_number').first()
 
-    date_now = datetime.now()
+    date_now = datetime.now(TIMEZONE)
 
     if last_registration_number:
         print(last_registration_number)
@@ -181,7 +182,7 @@ def register():
                 'amount': Decimal128(str(client.amount)),
                 'current_balance': Decimal128(str(client.balance)),
                 'confirm_by': User.objects.get(id=str(current_user.id)),
-                'date': datetime.now()
+                'date': datetime.now(TIMEZONE)
             }
         )
 
@@ -194,7 +195,7 @@ def register():
                     earnings=Decimal128(str(earnings)),
                     branch=client.branch,
                     client=client,
-                    date=datetime.now(),
+                    date=datetime.now(TIMEZONE),
                     registered_by=User.objects.get(id=str(current_user.id))
                 )
             )
@@ -211,7 +212,7 @@ def register():
                     earnings=Decimal128(str(earnings)),
                     branch=client.branch,
                     client=client,
-                    date=datetime.now(),
+                    date=datetime.now(TIMEZONE),
                     registered_by=User.objects.get(id=str(current_user.id))
                 )
             )

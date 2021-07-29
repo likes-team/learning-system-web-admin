@@ -8,6 +8,7 @@ from prime_admin.models import Branch, Secretary
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
+from config import TIMEZONE
 
 
 
@@ -127,7 +128,7 @@ def edit_secretary(oid):
         secretary.role = Role.objects(name="Secretary").first()
         secretary.username = form.username.data
         secretary.email = form.email.data if form.email.data != '' else None
-        secretary.updated_at = datetime.now()
+        secretary.updated_at = datetime.now(TIMEZONE)
         secretary.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         secretary.save()

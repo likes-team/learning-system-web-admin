@@ -10,6 +10,7 @@ from prime_admin.models import Branch, Marketer, Partner
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
+from config import TIMEZONE
 
 
 
@@ -170,7 +171,7 @@ def edit_marketer(oid):
 
         contact_person.branches = branches
 
-        contact_person.updated_at = datetime.now()
+        contact_person.updated_at = datetime.now(TIMEZONE)
         contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         contact_person.save()

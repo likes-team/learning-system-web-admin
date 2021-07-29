@@ -9,6 +9,7 @@ from prime_admin import bp_lms
 from prime_admin.models import Dashboard, Registration
 from app.admin.templating import admin_dashboard, DashboardBox
 from mongoengine.queryset.visitor import Q
+from config import TIMEZONE
 
 
 
@@ -190,7 +191,7 @@ def get_chart_data():
         0,0,0,0,0,0,0,0,0,0,0,0,
     ]
 
-    month_count = datetime.now().month
+    month_count = datetime.now(TIMEZONE).month
 
     response = {
         'gross_sales': gross_sales[:month_count],

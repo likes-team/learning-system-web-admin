@@ -10,6 +10,7 @@ from prime_admin.models import Branch, Expenses, Inventory
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
+from config import TIMEZONE
 
 
 @bp_lms.route('/expenses')
@@ -83,10 +84,10 @@ def get_dtbl_expenses():
 
     if branch_id != 'all':
         _expenses = Expenses.objects(branch=branch_id)[start:length]
-        expenses_today = Expenses.objects(branch=branch_id).filter(created_at__gte=datetime.now().date()).sum('total')
+        expenses_today = Expenses.objects(branch=branch_id).filter(created_at__gte=datetime.now(TIMEZONE).date()).sum('total')
     else:
         _expenses = Expenses.objects[start:length]
-        expenses_today = Expenses.objects(created_at__gte=datetime.now().date()).sum('total')
+        expenses_today = Expenses.objects(created_at__gte=datetime.now(TIMEZONE).date()).sum('total')
 
     if description_id != 'all':
         _expenses = _expenses.filter(inventory=description_id)
