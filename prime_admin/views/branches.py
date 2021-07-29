@@ -24,9 +24,9 @@ def branches():
             branch.id,
             branch.name,
             branch.created_by,
-            branch.created_at,
+            branch.created_at_local,
             branch.updated_by,
-            branch.updated_at,
+            branch.updated_at_local,
         ))
 
     return admin_table(
@@ -104,7 +104,7 @@ def edit_branch(oid,**kwargs):
         
         branch.name = form.name.data
         branch.address = form.address.data
-        branch.updated_at = datetime.now(TIMEZONE)
+        branch.set_updated_at()
         branch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         branch.save()

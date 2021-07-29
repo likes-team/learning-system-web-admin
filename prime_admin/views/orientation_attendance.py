@@ -19,14 +19,6 @@ from config import TIMEZONE
 @bp_lms.route('/orientation-attendance')
 @login_required
 def orientation_attendance():
-    _table_columns = [
-        'Branch',
-        'full name',
-        'contact no',
-        'contact person',
-        'orientator'
-    ]
-
     _table_data = []
 
     # for client in Registration.objects(Q(is_oriented=True) & Q(status__ne="registered")):
@@ -65,7 +57,6 @@ def orientation_attendance():
         fields=[],
         form=OrientationAttendanceForm(),
         table_data=_table_data,
-        table_columns=_table_columns,
         heading="Orientation Attendance",
         title="Orientation attendance",
         table_template="lms/orientation_attendance.html",
@@ -130,6 +121,7 @@ def orient():
             new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True
             new_client.status = "oriented"
+            new_client.set_created_at()
 
             if referred_by == '':
                 new_client.level = "first"
@@ -242,7 +234,8 @@ def get_dtbl_orientation_attendance_members():
             registration.full_name,
             registration.contact_number,
             registration.contact_person.name if registration.contact_person is not None else '',
-            registration.orientator.fname if registration.orientator is not None else ''
+            registration.orientator.fname if registration.orientator is not None else '',
+            registration.created_at_local,
         ])
 
     response = {

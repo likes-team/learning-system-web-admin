@@ -28,8 +28,8 @@ def roles(**options):
         _table_data.append((
             role.id,
             role.name,
-            role.created_at,
-            role.updated_at
+            role.created_at_local,
+            role.updated_at_local
         ))
 
     return admin_table(Role, fields=fields, form=form, create_modal_template="auth/role_create_modal.html", \
@@ -150,7 +150,7 @@ def edit_role(oid,**options):
     try:
         role.name = form.name.data
         role.updated_by = "{} {}".format(current_user.fname,current_user.lname)
-        role.updated_at = datetime.now(TIMEZONE)
+        role.set_updated_at()
 
         role.permissions = permissions
         role.save()

@@ -292,7 +292,7 @@ def edit_utilities(oid):
         utility.branch = Branch.objects.get(id=form.branch.data)
         utility.type = "utilities"
 
-        utility.updated_at = datetime.now(TIMEZONE)
+        utility.set_updated_at()
         utility.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         utility.save()

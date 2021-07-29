@@ -27,9 +27,9 @@ def contact_persons():
             contact_person.fname,
             contact_person.lname,
             contact_person.created_by,
-            contact_person.created_at,
+            contact_person.created_at_local,
             contact_person.updated_by,
-            contact_person.updated_at,
+            contact_person.updated_at_local,
         ))
 
     return admin_table(
@@ -162,7 +162,7 @@ def edit_contact_person(oid):
 
         contact_person.branches = branches
 
-        contact_person.updated_at = datetime.now(TIMEZONE)
+        contact_person.set_updated_at()
         contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         contact_person.save()

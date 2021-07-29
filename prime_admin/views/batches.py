@@ -27,9 +27,9 @@ def batches():
             batch.number,
             batch.branch.name if batch.branch is not None else '',
             batch.created_by,
-            batch.created_at,
+            batch.created_at_local,
             batch.updated_by,
-            batch.updated_at
+            batch.updated_at_local
         ))
 
 
@@ -85,6 +85,7 @@ def create_batch():
         batch.number = form.number.data
         batch.branch = Branch.objects.get_or_404(id=form.branch.data)
         batch.created_by = "{} {}".format(current_user.fname,current_user.lname)
+        batch.set_created_at()
 
         batch.save()
 
@@ -120,7 +121,7 @@ def edit_batch(oid):
     try:
         batch.number = form.number.data
         # batch.branch = Branch.objects.get_or_404(id=form.branch.data)
-        batch.updated_at = datetime.now(TIMEZONE)
+        batch.set_updated_at()
         batch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         batch.save()
