@@ -1,3 +1,4 @@
+from config import TIMEZONE
 import decimal
 from hashlib import new
 from prime_admin.globals import SECRETARYREFERENCE
@@ -315,7 +316,7 @@ def profit():
     
     accounting.profits.append(
         {
-            'date': datetime.now(),
+            'date': datetime.now(TIMEZONE),
             'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
             'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
             'net': Decimal128(net),

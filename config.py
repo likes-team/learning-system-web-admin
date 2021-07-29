@@ -1,9 +1,12 @@
 import os
+import pytz
 from dotenv import load_dotenv
 
 
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+TIMEZONE = pytz.timezone('Asia/Manila')
 
 
 class Config(object):

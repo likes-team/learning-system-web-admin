@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from app.auth.views.user import edit_user
 from flask.json import jsonify
 from prime_admin.forms import BranchEditForm, BranchForm, PartnerForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
@@ -103,7 +104,7 @@ def edit_branch(oid,**kwargs):
         
         branch.name = form.name.data
         branch.address = form.address.data
-        branch.updated_at = datetime.now()
+        branch.updated_at = datetime.now(TIMEZONE)
         branch.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         branch.save()

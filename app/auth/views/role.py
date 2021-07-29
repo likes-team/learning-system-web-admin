@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from datetime import datetime
 from flask import flash, redirect, url_for, request, jsonify
 from flask_cors import cross_origin
@@ -149,7 +150,7 @@ def edit_role(oid,**options):
     try:
         role.name = form.name.data
         role.updated_by = "{} {}".format(current_user.fname,current_user.lname)
-        role.updated_at = datetime.now()
+        role.updated_at = datetime.now(TIMEZONE)
 
         role.permissions = permissions
         role.save()

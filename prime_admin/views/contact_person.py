@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from prime_admin.globals import PARTNERREFERENCE
 from app.auth.models import Role, User
 from app.auth.views.user import edit_user
@@ -161,7 +162,7 @@ def edit_contact_person(oid):
 
         contact_person.branches = branches
 
-        contact_person.updated_at = datetime.now()
+        contact_person.updated_at = datetime.now(TIMEZONE)
         contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
         
         contact_person.save()

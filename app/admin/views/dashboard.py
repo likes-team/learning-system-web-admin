@@ -1,3 +1,4 @@
+from config import TIMEZONE
 from datetime import datetime
 from flask import redirect, url_for, request, jsonify
 from flask.templating import render_template
@@ -75,7 +76,7 @@ def approve_user():
     
     last_registration_number = User.objects(active=True).order_by('-employee_id_no').first()
 
-    date_now = datetime.now()
+    date_now = datetime.now(TIMEZONE)
 
     if last_registration_number:
         generated_employee_id = generate_employee_id(last_registration_number.employee_id_no)
