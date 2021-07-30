@@ -1,4 +1,5 @@
 from datetime import datetime
+from prime_admin.globals import get_date_now
 from flask import redirect, url_for
 from flask.json import jsonify
 from flask.templating import render_template
@@ -191,7 +192,7 @@ def get_chart_data():
         0,0,0,0,0,0,0,0,0,0,0,0,
     ]
 
-    month_count = datetime.now(TIMEZONE).month
+    month_count = get_date_now().month
 
     response = {
         'gross_sales': gross_sales[:month_count],

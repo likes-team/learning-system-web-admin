@@ -1,7 +1,7 @@
 from config import TIMEZONE
 import decimal
 from hashlib import new
-from prime_admin.globals import SECRETARYREFERENCE
+from prime_admin.globals import SECRETARYREFERENCE, get_date_now
 from app.auth.models import User
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
 from flask.helpers import flash, url_for
@@ -316,7 +316,7 @@ def profit():
     
     accounting.profits.append(
         {
-            'date': datetime.now(TIMEZONE),
+            'date': get_date_now(),
             'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
             'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
             'net': Decimal128(net),

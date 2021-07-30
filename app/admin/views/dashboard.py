@@ -67,6 +67,7 @@ def get_dashboard_users():
 def approve_user():
     from app.auth.models import User
     from prime_admin.functions import generate_employee_id
+    from prime_admin.globals import get_date_now
 
     user_id = request.json['user_id']
 
@@ -76,7 +77,7 @@ def approve_user():
     
     last_registration_number = User.objects(active=True).order_by('-employee_id_no').first()
 
-    date_now = datetime.now(TIMEZONE)
+    date_now = get_date_now()
 
     if last_registration_number:
         generated_employee_id = generate_employee_id(last_registration_number.employee_id_no)

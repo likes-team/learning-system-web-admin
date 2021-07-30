@@ -1,5 +1,5 @@
 import decimal
-from prime_admin.globals import SECRETARYREFERENCE
+from prime_admin.globals import SECRETARYREFERENCE, get_date_now
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
@@ -24,7 +24,7 @@ def register():
     
     last_registration_number = Registration.objects(status="registered").order_by('-registration_number').first()
 
-    date_now = datetime.now(TIMEZONE)
+    date_now = get_date_now()
 
     if last_registration_number:
         print(last_registration_number)
@@ -183,7 +183,7 @@ def register():
                 'amount': Decimal128(str(client.amount)),
                 'current_balance': Decimal128(str(client.balance)),
                 'confirm_by': User.objects.get(id=str(current_user.id)),
-                'date': datetime.now(TIMEZONE)
+                'date': get_date_now()
             }
         )
 
@@ -196,7 +196,7 @@ def register():
                     earnings=Decimal128(str(earnings)),
                     branch=client.branch,
                     client=client,
-                    date=datetime.now(TIMEZONE),
+                    date=get_date_now(),
                     registered_by=User.objects.get(id=str(current_user.id))
                 )
             )
@@ -213,7 +213,7 @@ def register():
                     earnings=Decimal128(str(earnings)),
                     branch=client.branch,
                     client=client,
-                    date=datetime.now(TIMEZONE),
+                    date=get_date_now(),
                     registered_by=User.objects.get(id=str(current_user.id))
                 )
             )

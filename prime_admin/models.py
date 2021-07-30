@@ -66,6 +66,17 @@ class Registration(Base, Admin):
         local_datetime = ''
         if self.registration_date is not None:
             local_datetime = self.registration_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            return local_datetime.strftime("%B %d, %Y %I:%M %p")
+            
+        return local_datetime
+
+    @property
+    def oriented_date_local(self):
+        local_datetime = ''
+        if self.date_oriented is not None:
+            local_datetime = self.date_oriented.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            return local_datetime.strftime("%B %d, %Y %I:%M %p")
+            
         return local_datetime
 
     @property

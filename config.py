@@ -1,4 +1,5 @@
 import os
+from dateutil import tz
 import pytz
 from dotenv import load_dotenv
 
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 TIMEZONE = pytz.timezone('Asia/Manila')
+FROM_ZONE = tz.tzutc()
 
 
 class Config(object):

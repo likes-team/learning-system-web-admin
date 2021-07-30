@@ -1,6 +1,6 @@
 from flask_mongoengine import json
 from werkzeug.exceptions import abort
-from prime_admin.globals import SECRETARYREFERENCE
+from prime_admin.globals import SECRETARYREFERENCE, get_date_now
 from app.auth.models import User
 from prime_admin.forms import OrientationAttendanceForm
 from flask.helpers import flash, url_for
@@ -106,7 +106,7 @@ def orient():
             client = Registration.objects.get(id=client_id)
 
             client.is_oriented = True
-            client.date_oriented = datetime.now(TIMEZONE)
+            client.date_oriented = get_date_now()
             client.contact_person = User.objects.get(id=form.contact_person.data)
             client.orientator = Orientator.objects.get(id=form.orientator.data)
             client.save()
@@ -117,7 +117,7 @@ def orient():
             new_client.contact_number = request.form['contact_no']
             new_client.contact_person = User.objects.get(id=form.contact_person.data)
             new_client.branch = Branch.objects.get(id=form.branch.data)
-            new_client.date_oriented = datetime.now(TIMEZONE)
+            new_client.date_oriented = get_date_now()
             new_client.orientator = Orientator.objects.get(id=form.orientator.data)
             new_client.is_oriented = True
             new_client.status = "oriented"
@@ -235,7 +235,7 @@ def get_dtbl_orientation_attendance_members():
             registration.contact_number,
             registration.contact_person.name if registration.contact_person is not None else '',
             registration.orientator.fname if registration.orientator is not None else '',
-            registration.created_at_local,
+            registration.oriented_date_local,
         ])
 
     response = {
