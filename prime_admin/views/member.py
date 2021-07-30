@@ -1,4 +1,5 @@
 import decimal
+from prime_admin.globals import get_date_now, get_sales_today_date
 from random import uniform
 from pymongo.common import clean_node
 from prime_admin.functions import generate_number
@@ -75,14 +76,16 @@ def get_dtbl_members():
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
-        sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).sum('amount')
+        # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
     else:
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
-            sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).filter(branch__in=current_user.branches).sum('amount')
+            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).filter(branch__in=current_user.branches).sum('amount')
         else:
             registrations = Registration.objects(status='registered').skip(start).limit(length)
-            sales_today = registrations.filter(created_at__gte=datetime.now(TIMEZONE).date()).sum('amount')
+            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
+
+    sales_today = 0.00
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -159,6 +162,8 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
 
+        # if get_sales_today_date().date() == registration.registration_date_local:
+        #     sales_today += registration.amount
 
         _table_data.append([
             str(registration.id),
@@ -366,7 +371,7 @@ def new_payment():
     elif client.level == "second":
         client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(datetime.now(TIMEZONE))
+    custom_id = client.full_registration_number + str(get_date_now())
 
     client.contact_person.earnings.append(
         Earning(
@@ -376,7 +381,7 @@ def new_payment():
             earnings=Decimal128(str(earnings)),
             branch=client.branch,
             client=client,
-            date=datetime.now(TIMEZONE),
+            date=get_date_now(),
             registered_by=User.objects.get(id=str(current_user.id))
         )
     )
@@ -460,7 +465,7 @@ def upgrade_to_premium():
     elif client.level == "second":
         client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(datetime.now(TIMEZONE))
+    custom_id = client.full_registration_number + str(get_date_now())
 
     client.contact_person.earnings.append(
         Earning(
@@ -470,7 +475,7 @@ def upgrade_to_premium():
             earnings=Decimal128(str(earnings)),
             branch=client.branch,
             client=client,
-            date=datetime.now(TIMEZONE),
+            date=get_date_now(),
             registered_by=User.objects.get(id=str(current_user.id))
         )
     )

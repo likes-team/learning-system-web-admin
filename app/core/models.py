@@ -34,14 +34,20 @@ class Base(db.Document):
         local_datetime = ''
         if self.created_at is not None:
             local_datetime = self.created_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            return local_datetime.strftime("%B %d, %Y %I:%M %p")
+            
         return local_datetime
+
 
     @property
     def updated_at_local(self):
         local_datetime = ''
         if self.updated_at is not None:
             local_datetime = self.updated_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            return local_datetime.strftime("%B %d, %Y %I:%M %p")
+            
         return local_datetime
+
 
     def set_created_at(self):
         naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")

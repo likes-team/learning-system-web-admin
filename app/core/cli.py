@@ -1,5 +1,6 @@
 import platform
 import os
+from prime_admin.models import Registration
 import click
 import csv
 from shutil import copyfile
@@ -216,3 +217,15 @@ def _create_superuser():
         print("SuperUser Created!")
     except Exception as exc:
         print(str(exc))
+
+
+# @bp_core.cli.command("add_registration_date_field")
+# def install():
+#     registrations = Registration.objects()
+
+#     for x in registrations:
+#         registrations.registered_
+
+
+
+
