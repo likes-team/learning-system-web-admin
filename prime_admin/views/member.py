@@ -162,8 +162,9 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
 
-        if get_sales_today_date().date() == registration.registration_date_local_date.date():
-            sales_today += registration.amount
+        if registration.registration_date_local_date:
+            if get_sales_today_date().date() == registration.registration_date_local_date.date():
+                sales_today += registration.amount
 
         _table_data.append([
             str(registration.id),
