@@ -34,7 +34,8 @@ class OrientationAttendanceForm(AdminTableForm):
         'contact no',
         'contact person',
         'orientator',
-        'Date'
+        'Date',
+        'Actions'
     ]
 
     __heading__ = "Orientation Attendance"

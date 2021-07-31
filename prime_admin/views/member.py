@@ -85,7 +85,7 @@ def get_dtbl_members():
             registrations = Registration.objects(status='registered').skip(start).limit(length)
             # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
 
-    sales_today = 0.00
+    sales_today = 0
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -162,12 +162,12 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
 
-        # if get_sales_today_date().date() == registration.registration_date_local:
-        #     sales_today += registration.amount
+        if get_sales_today_date().date() == registration.registration_date_local_date.date():
+            sales_today += registration.amount
 
         _table_data.append([
             str(registration.id),
-            registration.registration_date_local,
+            registration.registration_date_local_string,
             registration.full_registration_number,
             registration.full_name,
             registration.batch_number.number if registration.batch_number is not None else "",
@@ -198,7 +198,7 @@ def get_dtbl_members():
         'totalFullPayment': total_full_payment,
         'totalPremiumPayment': total_premium_payment,
         'totalPayment': total_payment,
-        'salesToday': sales_today
+        'salesToday': str(sales_today)
     }
 
     return jsonify(response)
@@ -207,6 +207,30 @@ def get_dtbl_members():
 @bp_lms.route('/api/members/<string:client_id>/edit', methods=['POST'])
 @login_required
 def edit_member(client_id):
+    _from = request.json.get('from', 'student_records')
+
+    if _from == "orientation_attendance":
+        lname = request.json['lname']
+        fname = request.json['fname']
+        mname = request.json['mname']
+        suffix = request.json['suffix']
+        contact_no = request.json['contact_no']
+
+        client = Registration.objects.get_or_404(id=client_id)
+        client.lname = lname
+        client.fname = fname
+        client.mname = mname
+        client.suffix = suffix
+        client.contact_number = contact_no
+
+        client.save()
+
+        response = {
+            'result': True
+        }
+
+        return jsonify(response)
+
     lname = request.json['lname']
     fname = request.json['fname']
     mname = request.json['mname']
@@ -299,7 +323,7 @@ def get_member(client_id):
         'lname': client.lname,
         'mname': client.mname,
         'suffix': client.suffix,
-        'batch_no': client.batch_number.number,
+        'batch_no': client.batch_number.number if client.batch_number is not None else '',
         'schedule': client.schedule,
         'branch': client.branch.name,
         'contact_person': client.contact_person.fname,
