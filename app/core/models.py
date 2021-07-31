@@ -25,9 +25,7 @@ class Base(db.Document):
     # Sa ngayon i store nalang muna yung names kasi andaming error kapag foreign key
     created_by = db.StringField()
     updated_by = db.StringField()
-
-    date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
-    created_at_string = db.StringField(default=date_string)
+    created_at_string = db.StringField()
 
     @property
     def created_at_local(self):
@@ -50,13 +48,16 @@ class Base(db.Document):
 
 
     def set_created_at(self):
-        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
+        naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
         local_dt = TIMEZONE.localize(naive, is_dst=None)
         utc_dt = local_dt.astimezone(pytz.utc)
         self.created_at = utc_dt
+        self.created_at_string = date_string
 
     def set_updated_at(self):
-        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
+        naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
         local_dt = TIMEZONE.localize(naive, is_dst=None)
         utc_dt = local_dt.astimezone(pytz.utc)
         self.updated_at = utc_dt

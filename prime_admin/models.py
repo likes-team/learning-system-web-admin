@@ -56,19 +56,30 @@ class Registration(Base, Admin):
     registration_date = db.DateTimeField()
     
     def set_registration_date(self):
-        naive = datetime.strptime(self.date_string, "%Y-%m-%d %H:%M:%S")
+        date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
+        naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
         local_dt = TIMEZONE.localize(naive, is_dst=None)
         utc_dt = local_dt.astimezone(pytz.utc)
         self.registration_date = utc_dt
 
     @property
-    def registration_date_local(self):
+    def registration_date_local_string(self):
         local_datetime = ''
         if self.registration_date is not None:
             local_datetime = self.registration_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
             return local_datetime.strftime("%B %d, %Y %I:%M %p")
             
         return local_datetime
+
+    @property
+    def registration_date_local_date(self):
+        if self.registration_date is not None:
+            local_datetime = self.registration_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            date_string = local_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            registration_date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+            return registration_date
+
+        return None
 
     @property
     def oriented_date_local(self):

@@ -45,11 +45,11 @@ def orientation_attendance():
 
     scripts = [
         {'lms.static': 'js/orientation_attendance.js'},
-        {'bp_admin.static': 'js/admin_table.js'}
     ]
 
     modals = [
-        'lms/search_refferal_modal.html'
+        'lms/search_refferal_modal.html',
+        'lms/orientation_attendance_client_view_modal.html'
     ]
 
     return admin_table(
@@ -64,8 +64,56 @@ def orientation_attendance():
         contact_persons=contact_persons,
         branches=branches,
         orientators=orientators,
-        modals=modals
+        modals=modals,
+        view_modal=False
         )
+
+
+@bp_lms.route('/dtbl/orientation-attendance-members')
+def get_dtbl_orientation_attendance_members():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch')
+    contact_person_id = request.args.get('contact_person')
+
+    if branch_id != 'all':
+        registrations = Registration.objects(branch=branch_id).filter(status='oriented').skip(start).limit(length)
+    else:
+        if current_user.role.name == "Marketer":
+            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
+        elif current_user.role.name == "Secretary":
+            registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).skip(start).limit(length)
+        else:
+            registrations = Registration.objects(status='oriented').skip(start).limit(length)
+
+    if contact_person_id != 'all':
+        registrations = registrations.filter(contact_person=contact_person_id)
+
+    _table_data = []
+
+    for registration in registrations:
+        actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+
+        _table_data.append([
+            str(registration.id),
+            registration.branch.name if registration.branch is not None else "",
+            registration.full_name,
+            registration.contact_number,
+            registration.contact_person.name if registration.contact_person is not None else '',
+            registration.orientator.fname if registration.orientator is not None else '',
+            registration.oriented_date_local,
+            actions
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': registrations.count(),
+        'recordsFiltered': registrations.count(),
+        'data': _table_data,
+    }
+
+    return jsonify(response)
+
 
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients', methods=['GET'])
 def get_pre_registered_clients():
@@ -201,48 +249,5 @@ def get_branch_contact_persons(branch_id):
     response = {
         'data': data
         }
-
-    return jsonify(response)
-
-@bp_lms.route('/dtbl/orientation-attendance-members')
-def get_dtbl_orientation_attendance_members():
-    draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
-    branch_id = request.args.get('branch')
-    contact_person_id = request.args.get('contact_person')
-
-    if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='oriented').skip(start).limit(length)
-    else:
-        if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
-        elif current_user.role.name == "Secretary":
-            registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).skip(start).limit(length)
-        else:
-            registrations = Registration.objects(status='oriented').skip(start).limit(length)
-
-    if contact_person_id != 'all':
-        registrations = registrations.filter(contact_person=contact_person_id)
-
-    _table_data = []
-
-    print(registrations)
-    for registration in registrations:
-        _table_data.append([
-            str(registration.id),
-            registration.branch.name if registration.branch is not None else "",
-            registration.full_name,
-            registration.contact_number,
-            registration.contact_person.name if registration.contact_person is not None else '',
-            registration.orientator.fname if registration.orientator is not None else '',
-            registration.oriented_date_local,
-        ])
-
-    response = {
-        'draw': draw,
-        'recordsTotal': registrations.count(),
-        'recordsFiltered': registrations.count(),
-        'data': _table_data,
-    }
 
     return jsonify(response)
