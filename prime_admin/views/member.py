@@ -110,15 +110,15 @@ def get_dtbl_members():
         if registration.balance <= 0.00:
             paid = 'PAID'
 
-        if registration.payment_mode == "premium":
+        if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
             actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif registration.payment_mode == "full_payment":
+        elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
             actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif registration.payment_mode == "installment" and registration.balance <= 0.00:
+        elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
             actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
                 <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-
+        
         branch = registration.branch
         contact_person = registration.contact_person
 
@@ -161,6 +161,12 @@ def get_dtbl_members():
             payment_mode = "Installment"
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
+        elif registration.payment_mode == 'full_payment_promo':
+            payment_mode = "Full Payment - Promo"
+        elif registration.payment_mode == 'installment_promo':
+            payment_mode = "Installment - Promo"
+        elif registration.payment_mode == 'premium_promo':
+            payment_mode = "Premium Payment - Promo"
 
         if registration.registration_date_local_date:
             if get_sales_today_date().date() == registration.registration_date_local_date.date():
@@ -185,6 +191,7 @@ def get_dtbl_members():
             actions
         ])
 
+    # TODO: add promos
     total_installment = registrations.filter(payment_mode='installment').sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
     total_premium_payment = registrations.filter(payment_mode='premium').sum('amount')
@@ -370,10 +377,14 @@ def new_payment():
             flash("New payment is greater than the student balance!", 'error')
             return redirect(url_for('lms.members'))
 
-    client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
+    if client.payment_mode == "installment_promo":
+        client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium_promo'
+    else:
+        client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
+
     client.amount += amount
     
-    if client.payment_mode == "premium":
+    if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
         client.balance = ((client.balance + 700) - amount)
     else:
         client.balance = client.balance - amount
@@ -469,7 +480,11 @@ def upgrade_to_premium():
 
     client = Registration.objects.get_or_404(id=client_id)
     
-    client.payment_mode = 'premium'
+    if client.payment_mode == "full_payment_promo" or client.payment_mode == "installment_promo":
+        client.payment_mode = 'premium_promo'
+    else:
+        client.payment_mode = 'premium'
+    
     client.amount += amount
     
     if client.level == "first":

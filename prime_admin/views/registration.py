@@ -166,6 +166,18 @@ def register():
             client.balance = 8500 - client.amount
             earnings = 8500 * earnings_percent
             savings = 8500 * savings_percent
+        elif client.payment_mode == "full_payment_promo":
+            client.balance = 5500 - client.amount
+            earnings = 5500 * earnings_percent
+            savings = 5500 * savings_percent
+        elif client.payment_mode == "installment_promo":
+            client.balance = 6300 - client.amount
+            earnings = client.amount * earnings_percent
+            savings = client.amount * savings_percent
+        elif client.payment_mode == 'premium_promo':
+            client.balance = 7000 - client.amount
+            earnings = 7000 * earnings_percent
+            savings = 7000 * savings_percent
 
         if client.level == "first":
             client.fle = earnings

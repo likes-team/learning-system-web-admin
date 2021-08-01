@@ -145,8 +145,14 @@ def get_dtbl_earnings_members():
             remarks = "Full Payment"
         elif registration.payment_mode == "premium":
             remarks = "Premium"
-        else:
+        elif registration.payment_mode == "installment":
             remarks = "Installment"
+        elif registration.payment_mode == "full_payment_promo":
+            remarks = "Full Payment - Promo"
+        elif registration.payment_mode == "installment_promo":
+            remarks = "Installment - Promo"
+        elif registration.payment_mode == "premium_promo":
+            remarks = "Premium - Promo"
 
         _table_data.append([
             registration.branch.name if registration.branch is not None else '',
