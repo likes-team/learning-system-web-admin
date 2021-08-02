@@ -11,7 +11,10 @@ $(document).ready(function(){
           
         } else if (payment_mode == "installment") {
             balance = 7800 - $(this).val();
-         
+        } else if (payment_mode == "full_payment_promo"){
+            balance = 5500 - $(this).val();
+        } else if (payment_mode == "installment_promo"){
+            balance = 6300 - $(this).val();
         }
 
         $("#balance").val(balance);
@@ -27,7 +30,17 @@ $(document).ready(function(){
             
                 $(this).val(Math.max(Math.min(value, 7000), -7000));
             }
+        } else if (payment_mode == "full_payment_promo"){
+            if ((value !== '') && (value.indexOf('.') === -1)) {
+            
+                $(this).val(Math.max(Math.min(value, 5500), -5500));
+            }
         } else if (payment_mode == "installment") {
+            if ((value !== '') && (value.indexOf('.') === -1)) {
+            
+                $(this).val(Math.max(Math.min(value, 4000), -4000));
+            }
+        } else if (payment_mode == "installment_promo"){
             if ((value !== '') && (value.indexOf('.') === -1)) {
             
                 $(this).val(Math.max(Math.min(value, 4000), -4000));
@@ -73,6 +86,48 @@ $(document).ready(function(){
             $("#amount").prop('readonly', true);
 
             balance = 8500 - $("#amount").val();
+
+            $('#book_none').prop('checked', false);
+            $('#book1').prop('checked', true);
+            $('#book2').prop('checked', true);
+
+            $("#uniform_m").prop("checked", true);
+
+            $('#id_card').prop('checked', true);
+            $('#id_lace').prop('checked', true);
+        } else if (this.value == 'full_payment_promo') {
+            $("#amount").val(5500);
+            $("#amount").prop('readonly', true);
+
+            balance = 5500 - $("#amount").val();
+
+            $('#book_none').prop('checked', false);
+            $('#book1').prop('checked', true);
+            $('#book2').prop('checked', false);
+
+            $("#uniform_m").prop("checked", true);
+
+            $('#id_card').prop('checked', false);
+            $('#id_lace').prop('checked', false);
+        } else if (this.value == 'installment_promo') {
+            $("#amount").val(4000);
+            $("#amount").prop('readonly', false);
+
+            balance = 6300 - $("#amount").val();
+
+            $('#book_none').prop('checked', true);
+            $('#book1').prop('checked', false);
+            $('#book2').prop('checked', false);
+
+            $("#uniform_none").prop("checked", true);
+
+            $('#id_card').prop('checked', false);
+            $('#id_lace').prop('checked', false);
+        } else if(this.value == "premium_promo"){
+            $("#amount").val(7000);
+            $("#amount").prop('readonly', true);
+
+            balance = 7000 - $("#amount").val();
 
             $('#book_none').prop('checked', false);
             $('#book1').prop('checked', true);

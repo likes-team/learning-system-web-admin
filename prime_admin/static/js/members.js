@@ -471,7 +471,7 @@ $(document).ready(function(){
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function(response) {
-                    if (response.data.mode_of_payment == "full_payment"){
+                    if (response.data.mode_of_payment == "full_payment" || response.data.mode_of_payment == "full_payment_promo"){
                         var new_amount = 1500;
 
                         $("#upgrade_new_amount").val(new_amount);
