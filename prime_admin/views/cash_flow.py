@@ -294,20 +294,23 @@ def profit():
     accounting = Accounting.objects(branch=branch).first()
 
     if accounting is None:
-        flash('Error Occured','error')
+        flash('No cash flow transaction found','error')
         return redirect(url_for('lms.cash_flow'))
 
     remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
     net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
     fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
     fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-    previous_final_fund1 = accounting.final_fund1
+    previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
     previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
     previous_total_gross_sale = accounting.total_gross_sale
     
     accounting.total_gross_sale = remaining
 
-    accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
+    if accounting.final_fund1:
+        accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
+    else: 
+        accounting.final_fund1 = fund1
 
     if accounting.final_fund2:
         accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
