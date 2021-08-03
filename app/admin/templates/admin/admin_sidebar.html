@@ -33,6 +33,10 @@
     <div class="scrollbar-sidebar">
         <div class="app-sidebar__inner">
             <ul class="vertical-nav-menu">
+                {% if debug %}
+                <li class="app-sidebar__heading" style="color: red;">DEVELOPMENT MODE</li>
+                {% endif %}
+                
                 {% if VDATA['sidebar'] is not none %}
                 
                     {% for header, models in VDATA['sidebar'].items() %}

@@ -5,7 +5,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, Registration
+from prime_admin.models import Batch, Branch, Payment, Registration
 from app.auth.models import Earning, Role, User
 from flask import redirect, url_for, request, current_app, flash, jsonify, abort
 from app import db, mongo
@@ -190,13 +190,14 @@ def register():
             client.sle = decimal.Decimal(0.00)
 
         client.payments.append(
-            {
-                'payment_mode': client.payment_mode,
-                'amount': Decimal128(str(client.amount)),
-                'current_balance': Decimal128(str(client.balance)),
-                'confirm_by': User.objects.get(id=str(current_user.id)),
-                'date': get_date_now()
-            }
+            Payment(
+                deposited="No",
+                payment_mode=client.payment_mode,
+                amount=Decimal128(str(client.amount)),
+                current_balance=Decimal128(str(client.balance)),
+                confirm_by=User.objects.get(id=str(current_user.id)),
+                date=get_date_now()
+            )
         )
 
         if client_id == '': # NO SELECTED CLIENT

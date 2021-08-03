@@ -1,3 +1,5 @@
+from flask_mongoengine import json
+import pytz
 from config import TIMEZONE
 import decimal
 from hashlib import new
@@ -43,7 +45,8 @@ def cash_flow():
     modals = [
         'lms/deposit_modal.html',
         'lms/withdraw_modal.html',
-        'lms/profit_modal.html'
+        'lms/profit_modal.html',
+        'lms/pre_deposit_modal.html',
     ]
 
     return admin_table(
@@ -66,51 +69,67 @@ def cash_flow():
 def deposit():
     form = DepositForm()
     
-    try:
-        new_deposit = CashFlow()
-        new_deposit.date_deposit = form.date_deposit.data
-        new_deposit.bank_name = form.bank_name.data
-        new_deposit.account_no = form.account_no.data
-        new_deposit.account_name = form.account_name.data
-        new_deposit.amount = form.amount.data
-        new_deposit.from_what = form.from_what.data
-        new_deposit.by_who = form.by_who.data
-        new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
-        new_deposit.branch = current_user.branch
-        new_deposit.type = "deposit"
+    # try:
+    new_deposit = CashFlow()
+    new_deposit.date_deposit = form.date_deposit.data
+    new_deposit.bank_name = form.bank_name.data
+    new_deposit.account_no = form.account_no.data
+    new_deposit.account_name = form.account_name.data
+    new_deposit.amount = form.amount.data
+    new_deposit.from_what = form.from_what.data
+    new_deposit.by_who = form.by_who.data
+    new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
+    new_deposit.branch = current_user.branch
+    new_deposit.type = "deposit"
 
-        accounting = Accounting.objects(branch=current_user.branch.id).first()
+    accounting = Accounting.objects(branch=current_user.branch.id).first()
 
-        if accounting:
-            if new_deposit.from_what == "Sales":
-                new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
-                accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
-            elif new_deposit.from_what == "Student Loan Payment":
+    if accounting:
+        if new_deposit.from_what == "Sales":
+            new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
+            accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
 
-                if accounting.final_fund1:
-                    accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
-                else:
-                    accounting.final_fund1 = new_deposit.amount
+            clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
 
-                new_deposit.balance = accounting.final_fund1
-        else:
-            accounting = Accounting()
-            accounting.branch = current_user.branch
-            accounting.active_group = 1
-            
-            if new_deposit.from_what == "Sales":
-                accounting.total_gross_sale = new_deposit.amount
-            elif new_deposit.from_what == "Student Loan Payment":
+            for client in clients:
+                if client.amount != client.amount_deposit:
+                    for payment in client.payments:
+                        if payment.deposited is not None and payment.deposited == "Pre Deposit":
+                            payment.deposited = "Yes"
+                            if client.amount_deposit is not None:
+                                client.amount_deposit += payment.amount
+                            else:
+                                client.amount_deposit = payment.amount
+
+                            print(payment.deposited, payment.amount)
+                    client.save()
+
+        elif new_deposit.from_what == "Student Loan Payment":
+
+            if accounting.final_fund1:
+                accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
+            else:
                 accounting.final_fund1 = new_deposit.amount
-            new_deposit.balance = new_deposit.amount
 
-        new_deposit.group = accounting.active_group
-        new_deposit.save()
-        accounting.save()
+            new_deposit.balance = accounting.final_fund1
+    else:
+        accounting = Accounting()
+        accounting.branch = current_user.branch
+        accounting.active_group = 1
+        
+        if new_deposit.from_what == "Sales":
+            accounting.total_gross_sale = new_deposit.amount
+        elif new_deposit.from_what == "Student Loan Payment":
+            accounting.final_fund1 = new_deposit.amount
+        new_deposit.balance = new_deposit.amount
 
-        flash('Deposit Successfully!','success')
-    except Exception as exc:
-        flash(str(exc),'error')
+    new_deposit.group = accounting.active_group
+    new_deposit.save()
+    accounting.save()
+
+    flash('Deposit Successfully!','success')
+    # except Exception as exc:
+    #     flash(str(exc),'error')
 
     return redirect(url_for('lms.cash_flow'))
 
@@ -339,3 +358,118 @@ def profit():
     flash('Proccessed Successfully!','success')
 
     return redirect(url_for('lms.cash_flow'))
+
+
+@bp_lms.route('/api/dtbl/mdl-pre-deposit', methods=['GET'])
+def get_mdl_pre_deposit():
+    if current_user.role.name == "Secretary":
+        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
+    elif current_user.role.name == "Admin":
+        clients = Registration.objects(status="registered")
+    elif current_user.role.name == "Partner":
+        clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
+    else:
+        return jsonify({'data': []})
+
+    _data = []
+
+    for client in clients:
+        if client.amount != client.amount_deposit:
+            print(client.payments)
+            for payment in client.payments:
+                if payment.deposited is None or payment.deposited == "No":
+                    if type(payment.date) == datetime:
+                        local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+                    elif type(payment.date == str):
+                        to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+                        local_datetime = to_date.strftime("%B %d, %Y")
+                    else: 
+                        local_datetime = ''
+
+                    _data.append([
+                        payment.id,
+                        str(client.full_registration_number),
+                        client.lname,
+                        client.fname,
+                        client.mname,
+                        client.suffix,
+                        str(payment.amount),
+                        local_datetime
+                        # str(payment['current_balance']),
+                        # str(payment['deposited']) if 'deposit' in payment else 'No'
+                    ])
+    response = {
+        'data': _data
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/dtbl/mdl-deposit', methods=['GET'])
+def get_mdl_deposit():
+    if current_user.role.name == "Secretary":
+        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
+    elif current_user.role.name == "Admin":
+        clients = Registration.objects(status="registered")
+    elif current_user.role.name == "Partner":
+        clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
+    else:
+        return jsonify({'data': []})
+
+    _data = []
+    deposit_amount = 0
+
+    for client in clients:
+        if client.amount != client.amount_deposit:
+            for payment in client.payments:
+                if payment.deposited == "Pre Deposit":
+                    if type(payment.date) == datetime:
+                        local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+                    elif type(payment.date == str):
+                        to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+                        local_datetime = to_date.strftime("%B %d, %Y")
+                    else: 
+                        local_datetime = ''
+                    
+                    _data.append([
+                        str(client.full_registration_number),
+                        client.lname,
+                        client.fname,
+                        client.mname,
+                        client.suffix,
+                        str(payment.amount),
+                        local_datetime
+                        # str(payment['current_balance']),
+                        # str(payment['deposited']) if 'deposit' in payment else 'No'
+                    ])
+
+                    deposit_amount += decimal.Decimal(payment.amount)
+
+    response = {
+        'data': _data,
+        'deposit_amount': str(deposit_amount)
+        }
+
+    return jsonify(response)
+
+
+
+@bp_lms.route('/api/to-pre-deposit', methods=['POST'])
+def to_pre_deposit():
+    payments_selected = request.json['payments_selected']
+
+    for selected_payment in payments_selected:
+        student = Registration.objects(full_registration_number=selected_payment['full_registration_number']).first()
+
+        for student_payment in student.payments:
+            if student_payment.id == selected_payment['payment_id']:
+                student_payment.deposited = "Pre Deposit"
+
+        student.save()
+
+    response = {
+        'result': True
+    }
+
+    return jsonify(response)
+

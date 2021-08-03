@@ -44,6 +44,9 @@ DECEND = datetime(2021, 12, 31)
 @bp_lms.route('/dashboard')
 @login_required
 def dashboard():
+    if current_user.role.name == "Secretary":
+        return redirect(url_for('lms.members'))
+
     if current_user.role.name != "Admin":
         return render_template('auth/authorization_error.html')
 
