@@ -122,9 +122,11 @@ $(document).ready(function(){
                 for(i=0; i < response.data.payments.length; i++){
                     $('#tbl_upgrade_payment_history > tbody:first').append(
                         `<tr>
-                        <td>${response.data.payments[i].amount}</td>
-                        <td>${response.data.payments[i].current_balance}</td>
-                        <td>${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].amount}</td>
+                        <td class="text-center">${response.data.payments[i].current_balance}</td>
+                        <td class="text-center">${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].remarks}</td>
+                        <td class="text-center">${response.data.payments[i].deposited}</td>
                         </tr>`
                         );
                 }
@@ -195,9 +197,11 @@ $(document).ready(function(){
                 for(i=0; i < response.data.payments.length; i++){
                     $('#tbl_edit_payment_history > tbody:first').append(
                         `<tr>
-                        <td>${response.data.payments[i].amount}</td>
-                        <td>${response.data.payments[i].current_balance}</td>
-                        <td>${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].amount}</td>
+                        <td class="text-center">${response.data.payments[i].current_balance}</td>
+                        <td class="text-center">${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].remarks}</td>
+                        <td class="text-center">${response.data.payments[i].deposited}</td>
                         </tr>`
                         );
                 }
@@ -271,9 +275,11 @@ $(document).ready(function(){
                 for(i=0; i < response.data.payments.length; i++){
                     $('#tbl_payment_history > tbody:first').append(
                         `<tr>
-                        <td>${response.data.payments[i].amount}</td>
-                        <td>${response.data.payments[i].current_balance}</td>
-                        <td>${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].amount}</td>
+                        <td class="text-center">${response.data.payments[i].current_balance}</td>
+                        <td class="text-center">${response.data.payments[i].date}</td>
+                        <td class="text-center">${response.data.payments[i].remarks}</td>
+                        <td class="text-center">${response.data.payments[i].deposited}</td>
                         </tr>`
                         );
                 }

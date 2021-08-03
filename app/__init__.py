@@ -103,6 +103,9 @@ def create_app(config_name):
         # Load CONTEXT data
         CONTEXT['header_color'] = 'header_color15' # Default color
         CONTEXT['sidebar_color'] = "sidebar_color15" # Default color
-        
+    
+    @app.context_processor
+    def inject_debug():
+        return dict(debug=app.debug)
 
     return app

@@ -30,6 +30,13 @@
             <div class="page-title-actions">
                 {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
                     {% if current_user.role.name == "Secretary" %}
+                    <button type="button" data-toggle="modal" data-target="#mdl_pre_deposit" data-placement="bottom"
+                            class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-plus"></i> Pre Deposit
+                    </button>
+                    {% endif %}
+
+                    {% if current_user.role.name == "Secretary" %}
                     <button type="button" data-toggle="modal" data-target="#mdl_deposit" data-placement="bottom"
                             class="btn-shadow mr-3 btn btn-primary">
                         <i class="fa fa-plus"></i> Deposit
@@ -139,7 +146,7 @@
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
                                 <div class="widget-heading">Final Fund 1</div>
-                                <div class="widget-subheading"></div>
+                                <div class="widget-subheading">Student Loan</div>
                             </div>
                             <div class="widget-content-right">
                                 <div class="widget-numbers text-success"><span id="final_fund1">₱ 0.00</span></div>
@@ -152,7 +159,7 @@
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
                                 <div class="widget-heading">Final Fund 2</div>
-                                <div class="widget-subheading"></div>
+                                <div class="widget-subheading">Emergency Loan</div>
                             </div>
                             <div class="widget-content-right">
                                 <div class="widget-numbers text-primary"><span id="final_fund2">₱ 0.00</span></div>

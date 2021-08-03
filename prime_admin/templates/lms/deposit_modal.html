@@ -81,7 +81,7 @@
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
                                         <label for="from_what" class="">From</label>
-                                        <select name="from_what" id="from_what" class="form-control" required="">
+                                        <select id="from_what" name="from_what" id="from_what" class="form-control" required="">
                                             <option value="">Choose...</option>
                                             <option value="Sales">
                                                 Sales
@@ -108,6 +108,29 @@
                                             </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div style="display: none;" id="tbl_deposit" class="main-card mb-3 card">
+                        <div class="card-body">
+                            <table id="tbl_mdl_deposit" style="width:100%; cursor:pointer;" class="table-responsive mb-0 table">
+                            <thead>
+                                <tr>
+                                    <th>REGISTRATION NO.</th>
+                                    <th>LAST NAME</th>
+                                    <th>FIRST NAME</th>
+                                    <th>MIDDLE NAME</th>
+                                    <th>SUFFIX</th>
+                                    <th>AMOUNT</th>
+                                    <th>DATE OF PAYMENT</th>
+                                    <!-- <th>BALANCE</th> -->
+                                    <!-- <th>DEPOSIT</th> -->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                     <!-- load with ajax -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <script>

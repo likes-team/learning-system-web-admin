@@ -1,4 +1,5 @@
 import decimal
+import pytz
 from prime_admin.globals import get_date_now, get_sales_today_date
 from random import uniform
 from pymongo.common import clean_node
@@ -7,7 +8,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, Registration, Member
+from prime_admin.models import Batch, Branch, Payment, Registration, Member
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template
 from app import db, csrf
 from datetime import datetime
@@ -23,7 +24,7 @@ from config import TIMEZONE
 def members():
     _table_columns = [
         'id', 'date', 'registration','name of student', 'batch no.', 'branch', 'schedule', 'remark',
-        'amount','balance', 'paid/not paid', 'contact person', 'book', 'Uniform', 'cashier', 'actions'
+        'amount','balance', 'paid/not paid', 'Deposit','contact person', 'book', 'Uniform', 'cashier', 'actions'
         ]
 
     fields = []
@@ -172,6 +173,11 @@ def get_dtbl_members():
             if get_sales_today_date().date() == registration.registration_date_local_date.date():
                 sales_today += registration.amount
 
+        if registration.amount == registration.amount_deposit:
+            deposit = "Yes"
+        else: 
+            deposit = "No"
+
         _table_data.append([
             str(registration.id),
             registration.registration_date_local_string,
@@ -184,6 +190,7 @@ def get_dtbl_members():
             str(registration.amount),
             str(registration.balance),
             paid,
+            deposit,
             contact_person.fname if contact_person is not None else '',
             books,
             uniforms,
@@ -318,11 +325,23 @@ def get_member(client_id):
 
     payments = []
 
+    print('TETSTSTET',client.payments)
     for payment in client.payments:
+        print(payment)
+        if type(payment.date) == datetime:
+            local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(payment.date == str):
+            to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+
         payments.append({
-            'amount': str(payment['amount']),
-            'current_balance': str(payment['current_balance']),
-            'date': payment['date']
+            'amount': str(payment.amount),
+            'current_balance': str(payment.current_balance),
+            'date': local_datetime,
+            'remarks': payment.payment_mode,
+            'deposited': payment.deposited if payment.deposited is not None else 'No',
         })
 
     data = {
@@ -423,13 +442,14 @@ def new_payment():
     )
 
     client.payments.append(
-        {
-            'payment_mode': client.payment_mode,
-            'amount': Decimal128(str(amount)),
-            'current_balance': Decimal128(str(client.balance)),
-            'confirm_by': User.objects.get(id=str(current_user.id)),
-            'date': date
-        }
+        Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date
+        )
     )
 
     books = request.form.getlist('books')
@@ -521,13 +541,14 @@ def upgrade_to_premium():
     )
 
     client.payments.append(
-        {
-            'payment_mode': client.payment_mode,
-            'amount': Decimal128(str(amount)),
-            'current_balance': Decimal128(str(client.balance)),
-            'confirm_by': User.objects.get(id=str(current_user.id)),
-            'date': date
-        }
+        Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date
+        )
     )
 
     books = request.form.getlist('upgrade_books')

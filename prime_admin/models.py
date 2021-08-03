@@ -2,12 +2,30 @@ import pytz
 from config import TIMEZONE
 from datetime import datetime
 from enum import unique
-
 from mongoengine.fields import DateField
 from app import db
 from app.admin.models import Admin
 from app.core.models import Base
+from bson.objectid import ObjectId
 
+
+
+class Payment(db.EmbeddedDocument):
+    # custom_id = db.StringField(primary_key=True)
+    _id = db.ObjectIdField( required=True, default=lambda: ObjectId())
+    deposited = db.StringField()
+    payment_mode = db.StringField()
+    amount = db.DecimalField()
+    current_balance = db.DecimalField()
+    confirm_by = db.ReferenceField('User')
+    date = db.DateTimeField()
+
+    @property
+    def id(self):
+        if not self._id:
+            return ''
+
+        return str(self._id)
 
 
 class Registration(Base, Admin):
@@ -48,12 +66,16 @@ class Registration(Base, Admin):
     date_oriented = db.DateTimeField()
     orientator = db.ReferenceField('Orientator')
     payments = db.ListField()
+    # payments = db.EmbeddedDocumentListField(Payment)
+    # payments = db.ListField(db.EmbeddedDocumentField(Payment))
     e_registration = db.StringField()
     referred_by = db.ReferenceField('Registration')
     level = db.StringField()
     fle = db.DecimalField()
     sle = db.DecimalField()
     registration_date = db.DateTimeField()
+    amount_deposit = db.DecimalField()
+    copy_payments = db.ListField()
     
     def set_registration_date(self):
         date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))

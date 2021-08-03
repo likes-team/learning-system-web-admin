@@ -1,6 +1,6 @@
 import platform
 import os
-from prime_admin.models import Registration
+from prime_admin.models import Registration, Payment
 import click
 import csv
 from shutil import copyfile
@@ -228,4 +228,32 @@ def _create_superuser():
 
 
 
+@bp_core.cli.command("update_payments")
+def update_payments():
+    """
+    Update ang lahat ng payments ng studyante na dating array of objects lang
+    ngayon ay magigiging array of documents na 
+    """
+    registrations = Registration.objects(status="registered")
+
+    for student in registrations:
+        # if student.full_registration_number in ["2021080013","2021080012"]:
+        student.copy_payments = student.payments
+        student.payments = []
+
+        for payment in student.copy_payments:
+            print(payment)
+            student.payments.append(
+                Payment(
+                    deposited="No",
+                    payment_mode=payment['payment_mode'],
+                    amount=payment['amount'],
+                    current_balance=payment['current_balance'],
+                    confirm_by=payment['confirm_by'],
+                    date=payment['date']
+                )
+            )
+        
+        student.save()
+        print("Updated:", student.full_registration_number)
 
