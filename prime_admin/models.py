@@ -30,7 +30,8 @@ class Payment(db.EmbeddedDocument):
 
 class Registration(Base, Admin):
     meta = {
-        'collection': 'lms_registrations'
+        'collection': 'lms_registrations',
+        'strict': False
     }
 
     __tablename__ = 'lms_registrations'
@@ -65,8 +66,8 @@ class Registration(Base, Admin):
     is_oriented = db.BooleanField()
     date_oriented = db.DateTimeField()
     orientator = db.ReferenceField('Orientator')
-    payments = db.ListField()
-    # payments = db.EmbeddedDocumentListField(Payment)
+    # payments = db.ListField()
+    payments = db.EmbeddedDocumentListField(Payment)
     # payments = db.ListField(db.EmbeddedDocumentField(Payment))
     e_registration = db.StringField()
     referred_by = db.ReferenceField('Registration')
@@ -293,6 +294,7 @@ class CashFlow(Base, Admin):
     branch = db.ReferenceField('Branch')
     balance = db.DecimalField()
     group = db.IntField()
+    payments = db.EmbeddedDocumentListField(Payment)
 
 
 class Accounting(Base):
