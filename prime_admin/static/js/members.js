@@ -80,11 +80,11 @@ $(document).ready(function(){
                 d.schedule = $("#schedule").val();
             },
             "dataSrc": function(json){
-                $("#total_installment").html("₱" + json.totalInstallment + ".00");
-                $("#total_full_payment").html("₱" + json.totalFullPayment + ".00");
-                $("#total_premium_payment").html("₱" + json.totalPremiumPayment + ".00");
-                $("#total_payment").html("₱" + json.totalPayment + ".00");
-                $("#sales_today").html("₱" + json.salesToday + ".00");
+                $("#total_installment").html("₱" + json.totalInstallment);
+                $("#total_full_payment").html("₱" + json.totalFullPayment);
+                $("#total_premium_payment").html("₱" + json.totalPremiumPayment);
+                $("#total_payment").html("₱" + json.totalPayment);
+                $("#sales_today").html("₱" + json.salesToday);
 
                 return json.data;
             }
