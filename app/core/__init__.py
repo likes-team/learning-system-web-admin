@@ -16,6 +16,9 @@ bp_core = Blueprint('core', __name__)
 def index():
     if request.method == "GET":
         if current_user.is_authenticated:
+            if current_user.role.name != "Admin":
+                return redirect(url_for('lms.members'))
+
             return redirect(url_for(admin_urls['admin']))
         else:
             return redirect(url_for(auth_urls['login']))

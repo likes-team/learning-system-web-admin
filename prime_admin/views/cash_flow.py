@@ -69,67 +69,86 @@ def cash_flow():
 def deposit():
     form = DepositForm()
     
-    # try:
-    new_deposit = CashFlow()
-    new_deposit.date_deposit = form.date_deposit.data
-    new_deposit.bank_name = form.bank_name.data
-    new_deposit.account_no = form.account_no.data
-    new_deposit.account_name = form.account_name.data
-    new_deposit.amount = form.amount.data
-    new_deposit.from_what = form.from_what.data
-    new_deposit.by_who = form.by_who.data
-    new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
-    new_deposit.branch = current_user.branch
-    new_deposit.type = "deposit"
+    try:
+        new_deposit = CashFlow()
+        new_deposit.date_deposit = form.date_deposit.data
+        new_deposit.bank_name = form.bank_name.data
+        new_deposit.account_no = form.account_no.data
+        new_deposit.account_name = form.account_name.data
+        new_deposit.amount = form.amount.data
+        new_deposit.from_what = form.from_what.data
+        new_deposit.by_who = form.by_who.data
+        new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
+        new_deposit.branch = current_user.branch
+        new_deposit.type = "deposit"
 
-    accounting = Accounting.objects(branch=current_user.branch.id).first()
-
-    if accounting:
-        if new_deposit.from_what == "Sales":
-            new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
-            accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
-
-            clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
-
-            for client in clients:
-                if client.amount != client.amount_deposit:
-                    for payment in client.payments:
-                        if payment.deposited is not None and payment.deposited == "Pre Deposit":
-                            payment.deposited = "Yes"
-                            if client.amount_deposit is not None:
-                                client.amount_deposit += payment.amount
-                            else:
-                                client.amount_deposit = payment.amount
-
-                            print(payment.deposited, payment.amount)
-                    client.save()
-
-        elif new_deposit.from_what == "Student Loan Payment":
-
-            if accounting.final_fund1:
-                accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
-            else:
-                accounting.final_fund1 = new_deposit.amount
-
-            new_deposit.balance = accounting.final_fund1
-    else:
-        accounting = Accounting()
-        accounting.branch = current_user.branch
-        accounting.active_group = 1
+        accounting = Accounting.objects(branch=current_user.branch.id).first()
         
-        if new_deposit.from_what == "Sales":
-            accounting.total_gross_sale = new_deposit.amount
-        elif new_deposit.from_what == "Student Loan Payment":
-            accounting.final_fund1 = new_deposit.amount
-        new_deposit.balance = new_deposit.amount
+        payments = []
 
-    new_deposit.group = accounting.active_group
-    new_deposit.save()
-    accounting.save()
+        if accounting:
+            if new_deposit.from_what == "Sales":
+                new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
+                accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
 
-    flash('Deposit Successfully!','success')
-    # except Exception as exc:
-    #     flash(str(exc),'error')
+                clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
+
+                for client in clients:
+                    if client.amount != client.amount_deposit:
+                        for payment in client.payments:
+                            if payment.deposited is not None and payment.deposited == "Pre Deposit":
+                                payment.deposited = "Yes"
+                                if client.amount_deposit is not None:
+                                    client.amount_deposit += payment.amount
+                                else:
+                                    client.amount_deposit = payment.amount
+
+                                payments.append(payment)
+                        client.save()
+
+            elif new_deposit.from_what == "Student Loan Payment":
+
+                if accounting.final_fund1:
+                    accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
+                else:
+                    accounting.final_fund1 = new_deposit.amount
+
+                new_deposit.balance = accounting.final_fund1
+        else:
+            accounting = Accounting()
+            accounting.branch = current_user.branch
+            accounting.active_group = 1
+            
+            if new_deposit.from_what == "Sales":
+                accounting.total_gross_sale = new_deposit.amount
+
+                clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
+
+                for client in clients:
+                    if client.amount != client.amount_deposit:
+                        for payment in client.payments:
+                            if payment.deposited is not None and payment.deposited == "Pre Deposit":
+                                payment.deposited = "Yes"
+                                if client.amount_deposit is not None:
+                                    client.amount_deposit += payment.amount
+                                else:
+                                    client.amount_deposit = payment.amount
+
+                                payments.append(payment)
+                        client.save()
+
+            elif new_deposit.from_what == "Student Loan Payment":
+                accounting.final_fund1 = new_deposit.amount
+            new_deposit.balance = new_deposit.amount
+
+        new_deposit.payments = payments
+        new_deposit.group = accounting.active_group
+        new_deposit.save()
+        accounting.save()
+
+        flash('Deposit Successfully!','success')
+    except Exception as exc:
+        flash(str(exc),'error')
 
     return redirect(url_for('lms.cash_flow'))
 
