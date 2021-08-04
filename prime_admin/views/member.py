@@ -202,7 +202,7 @@ def get_dtbl_members():
     total_installment = registrations.filter(payment_mode='installment').filter(is_archived__ne=True).sum('amount')
     total_full_payment = registrations.filter(payment_mode='full_payment').filter(is_archived__ne=True).sum('amount')
     total_premium_payment = registrations.filter(payment_mode='premium').filter(is_archived__ne=True).sum('amount')
-    total_payment = registrations.sum('amount')
+    total_payment = registrations.filter(is_archived__ne=True).sum('amount')
 
     response = {
         'draw': draw,
