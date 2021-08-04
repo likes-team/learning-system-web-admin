@@ -76,14 +76,14 @@ def get_dtbl_members():
     schedule = request.args.get('schedule')
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(is_archived__ne=True).filter(status='registered').skip(start).limit(length)
+        registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
         # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='registered').filter(is_archived__ne=True).filter(branch__in=current_user.branches).skip(start).limit(length)
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
             # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).filter(branch__in=current_user.branches).sum('amount')
         else:
-            registrations = Registration.objects(status='registered').filter(is_archived__ne=True).skip(start).limit(length)
+            registrations = Registration.objects(status='registered').skip(start).limit(length)
             # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
 
     sales_today = 0
@@ -199,9 +199,9 @@ def get_dtbl_members():
         ])
 
     # TODO: add promos
-    total_installment = registrations.filter(payment_mode='installment').sum('amount')
-    total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
-    total_premium_payment = registrations.filter(payment_mode='premium').sum('amount')
+    total_installment = registrations.filter(payment_mode='installment').filter(is_archived__ne=True).sum('amount')
+    total_full_payment = registrations.filter(payment_mode='full_payment').filter(is_archived__ne=True).sum('amount')
+    total_premium_payment = registrations.filter(payment_mode='premium').filter(is_archived__ne=True).sum('amount')
     total_payment = registrations.sum('amount')
 
     response = {
