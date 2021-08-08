@@ -48,6 +48,9 @@ def members():
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects()
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects()        
 
     return admin_table(
         Member,
@@ -82,6 +85,8 @@ def get_dtbl_members():
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
             # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).filter(branch__in=current_user.branches).sum('amount')
+        elif current_user.role.name == "Partner":
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
         else:
             registrations = Registration.objects(status='registered').skip(start).limit(length)
             # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
@@ -428,6 +433,20 @@ def new_payment():
 
     custom_id = client.full_registration_number + str(get_date_now())
 
+    payment = Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date,
+            payment_by=client,
+            earnings=Decimal128(str(earnings)),
+            savings=Decimal128(str(savings)),
+        )
+
+    client.payments.append(payment)
+
     client.contact_person.earnings.append(
         Earning(
             custom_id=custom_id,
@@ -437,18 +456,8 @@ def new_payment():
             branch=client.branch,
             client=client,
             date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id))
-        )
-    )
-
-    client.payments.append(
-        Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date
+            registered_by=User.objects.get(id=str(current_user.id)),
+            payment_id=payment.id
         )
     )
 
@@ -527,6 +536,20 @@ def upgrade_to_premium():
 
     custom_id = client.full_registration_number + str(get_date_now())
 
+    payment = Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date,
+            payment_by=client,
+            earnings=Decimal128(str(earnings)),
+            savings=Decimal128(str(savings)),
+        )
+
+    client.payments.append(payment)
+
     client.contact_person.earnings.append(
         Earning(
             custom_id=custom_id,
@@ -536,18 +559,8 @@ def upgrade_to_premium():
             branch=client.branch,
             client=client,
             date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id))
-        )
-    )
-
-    client.payments.append(
-        Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date
+            registered_by=User.objects.get(id=str(current_user.id)),
+            payment_id=payment.id
         )
     )
 

@@ -28,6 +28,8 @@ class Earning(db.EmbeddedDocument):
     client = db.ReferenceField('Registration')
     date = db.DateTimeField()
     registered_by = db.ReferenceField('User')
+    status = db.StringField()
+    payment_id = db.StringField()
 
 
 # AUTH.MODEL.USER

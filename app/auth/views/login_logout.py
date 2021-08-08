@@ -51,6 +51,8 @@ def login():
         return redirect(url_for('lms.members'))
     elif current_user.role.name == "Marketer":
         return redirect(url_for('lms.members'))
+    elif current_user.role.name == "Partner":
+        return redirect(url_for('lms.members'))
 
     if not next_page or url_parse(next_page).netloc != '':
         next_page = url_for(current_app.config['AUTH']['LOGIN_REDIRECT_URL'])

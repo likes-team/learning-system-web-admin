@@ -222,8 +222,15 @@ $(document).ready(function () {
         }
 
         if (this.checked) {
+            var last_total_val = parseFloat($("#pre_deposit_amount").val());
+            var new_total_val = last_total_val + parseFloat(data[6]);
+            $("#pre_deposit_amount").val(new_total_val);
+
             $row.addClass('selected');
         } else {
+            var last_total_val = parseFloat($("#pre_deposit_amount").val()); 
+            var new_total_val = last_total_val - parseFloat(data[6]);
+            $("#pre_deposit_amount").val(new_total_val);
             $row.removeClass('selected');
         }
 

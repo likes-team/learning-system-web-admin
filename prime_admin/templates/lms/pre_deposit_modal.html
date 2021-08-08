@@ -11,6 +11,21 @@
             <div class="modal-body">
                 <div class="main-card mb-3 card">
                     <div class="card-body">
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="position-relative form-group">
+                                    <label for="amount"
+                                            class="">Total Amount</label>
+                                        <input readonly id="pre_deposit_amount" placeholder="Total Amount" step="1" type="number" name="amount" value="0.00" class="form-control">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid amount
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
                         <table id="tbl_mdl_pre_deposit" style="width:100%; cursor:pointer;" class="table-responsive mb-0 table">
                         <thead>
                             <tr>

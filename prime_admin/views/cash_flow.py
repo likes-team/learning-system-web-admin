@@ -107,13 +107,21 @@ def deposit():
                         client.save()
 
             elif new_deposit.from_what == "Student Loan Payment":
-
                 if accounting.final_fund1:
                     accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
                 else:
                     accounting.final_fund1 = new_deposit.amount
 
                 new_deposit.balance = accounting.final_fund1
+
+            elif new_deposit.from_what == "Emergency Fund":
+                if accounting.final_fund2:
+                    accounting.final_fund2 = accounting.final_fund2 + new_deposit.amount
+                else:
+                    accounting.final_fund2 = new_deposit.amount
+
+                new_deposit.balance = accounting.final_fund2
+            
         else:
             accounting = Accounting()
             accounting.branch = current_user.branch
@@ -139,6 +147,9 @@ def deposit():
 
             elif new_deposit.from_what == "Student Loan Payment":
                 accounting.final_fund1 = new_deposit.amount
+            elif new_deposit.from_what == "Emergency Fund":
+                accounting.final_fund2 = new_deposit.amount
+            
             new_deposit.balance = new_deposit.amount
 
         new_deposit.payments = payments
@@ -175,12 +186,23 @@ def withdraw():
 
         if accounting:
             if new_withdraw.from_what == "Sales":
+                if new_withdraw.amount > accounting.total_gross_sale:
+                    flash("Withdraw amount is greater than the total gross sale",'error')
+                    return redirect(url_for('lms.cash_flow'))
+
                 accounting.total_gross_sale = accounting.total_gross_sale - new_withdraw.amount
                 new_withdraw.balance = accounting.total_gross_sale
             elif new_withdraw.from_what == "Fund 1":
+                if new_withdraw.amount > accounting.final_fund1:
+                    flash("Withdraw amount is greater than the fund",'error')
+                    return redirect(url_for('lms.cash_flow'))
                 accounting.final_fund1 = accounting.final_fund1 - new_withdraw.amount
                 new_withdraw.balance = accounting.final_fund1
             elif new_withdraw.from_what == "Fund 2":
+                if new_withdraw.amount > accounting.final_fund2:
+                    flash("Withdraw amount is greater than the fund",'error')
+                    return redirect(url_for('lms.cash_flow'))
+
                 accounting.final_fund2 = accounting.final_fund2 - new_withdraw.amount
                 new_withdraw.balance = accounting.final_fund2
         else:
