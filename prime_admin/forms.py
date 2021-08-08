@@ -133,16 +133,18 @@ class InventoryForm(AdminTableForm):
 class BatchForm(AdminTableForm):
     from prime_admin.models import Branch
 
-    __table_columns__ = ['Status', 'Number', 'Branch', 'created by','Created at', 'updated by','updated at']
+    __table_columns__ = ['Status', 'Number', 'Branch', 'Start Date', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Batches"
 
     number = AdminField(label="Number", validators=[DataRequired()])
     branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    start_date = AdminField(label="Start Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
-            [self.number, self.branch]
+            [self.number, self.branch],
+            [self.start_date]
             ]
 
 
@@ -153,11 +155,12 @@ class BatchEditForm(AdminEditForm):
 
     number = AdminField(label="Number", validators=[DataRequired()])
     # branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    start_date = AdminField(label="Start Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
-            [self.number]
+            [self.number, self.start_date]
             ]
 
 

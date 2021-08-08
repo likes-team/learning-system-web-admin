@@ -189,16 +189,19 @@ def register():
             client.fle = decimal.Decimal(0.00)
             client.sle = decimal.Decimal(0.00)
 
-        client.payments.append(
-            Payment(
+        payment = Payment(
                 deposited="No",
                 payment_mode=client.payment_mode,
                 amount=Decimal128(str(client.amount)),
                 current_balance=Decimal128(str(client.balance)),
                 confirm_by=User.objects.get(id=str(current_user.id)),
-                date=get_date_now()
+                date=get_date_now(),
+                payment_by=client,
+                earnings=Decimal128(str(earnings)),
+                savings=Decimal128(str(savings)),
             )
-        )
+
+        client.payments.append(payment)
 
         if client_id == '': # NO SELECTED CLIENT
             client.contact_person.earnings.append(
@@ -210,7 +213,8 @@ def register():
                     branch=client.branch,
                     client=client,
                     date=get_date_now(),
-                    registered_by=User.objects.get(id=str(current_user.id))
+                    registered_by=User.objects.get(id=str(current_user.id)),
+                    payment_id=payment.id
                 )
             )
 
@@ -227,7 +231,8 @@ def register():
                     branch=client.branch,
                     client=client,
                     date=get_date_now(),
-                    registered_by=User.objects.get(id=str(current_user.id))
+                    registered_by=User.objects.get(id=str(current_user.id)),
+                    payment_id=payment.id
                 )
             )
 

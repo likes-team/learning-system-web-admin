@@ -71,7 +71,7 @@ def register():
         user.contact_no = form.contact_no.data
         user.address = form.address.data
 
-        if user.role.name == "Marketer":
+        if user.role.name == "Marketer" or user.role.name == "Partner":
             user.branches.append(form.branch.data)
         else:    
             user.branch = Branch.objects.get(id=form.branch.data)

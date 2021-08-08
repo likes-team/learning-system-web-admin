@@ -19,6 +19,10 @@ class Payment(db.EmbeddedDocument):
     current_balance = db.DecimalField()
     confirm_by = db.ReferenceField('User')
     date = db.DateTimeField()
+    payment_by = db.ReferenceField('Registration')
+    earnings = db.DecimalField()
+    savings = db.DecimalField()
+    status = db.StringField()
 
     @property
     def id(self):
@@ -123,7 +127,8 @@ class Registration(Base, Admin):
 
 class Branch(Base, Admin):
     meta = {
-        'collection': 'lms_branches'
+        'collection': 'lms_branches',
+        'strict': False,
     }
 
     __tablename__ = 'lms_branches'
@@ -138,7 +143,8 @@ class Branch(Base, Admin):
 
 class Batch(Base, Admin):
     meta = {
-        'collection': 'lms_batches'
+        'collection': 'lms_batches',
+        'strict': False,
     }
 
     __tablename__ = 'lms_batches'
@@ -149,6 +155,7 @@ class Batch(Base, Admin):
 
     number = db.StringField(unique=True)
     branch = db.ReferenceField('Branch')
+    start_date = db.DateTimeField()
 
 
 class Partner(Admin):
@@ -160,7 +167,8 @@ class Partner(Admin):
 
 class Orientator(Base, Admin):
     meta = {
-        'collection': 'lms_orientators'
+        'collection': 'lms_orientators',
+        'strict': False,
     }
 
     __tablename__ = 'lms_orientators'
@@ -179,7 +187,8 @@ class Orientator(Base, Admin):
 
 class Inventory(Base, Admin):
     meta = {
-        'collection': 'lms_inventories'
+        'collection': 'lms_inventories',
+        'strict': False,
     }
     __amname__ = 'inventory'
     __amdescription__ = 'Inventory'
@@ -240,7 +249,8 @@ class OrientationAttendance(Admin):
 
 class Expenses(Base, Admin):
     meta = {
-        'collection': 'lms_expenses'
+        'collection': 'lms_expenses',
+        'strict': False,
     }
     
     __tablename__ = 'lms_expenses'
@@ -274,7 +284,9 @@ class Equipment(Admin):
 
 class CashFlow(Base, Admin):
     meta = {
-        'collection': 'lms_bank_statements'
+        'collection': 'lms_bank_statements',
+        'strict': False,
+
     }
     
     __tablename__ = 'lms_bank_statements'
@@ -296,10 +308,36 @@ class CashFlow(Base, Admin):
     group = db.IntField()
     payments = db.EmbeddedDocumentListField(Payment)
 
+    def set_deposit_date(self):
+        date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
+        naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        local_dt = TIMEZONE.localize(naive, is_dst=None)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        self.date_deposit = utc_dt
+
+    @property
+    def deposit_date_local_string(self):
+        local_datetime = ''
+        if self.date_deposit is not None:
+            local_datetime = self.date_deposit.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+            return local_datetime.strftime("%B %d, %Y %I:%M %p")
+            
+        return local_datetime
+
+    # @property
+    # def registration_date_local_date(self):
+    #     if self.registration_date is not None:
+    #         local_datetime = self.registration_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+    #         date_string = local_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    #         registration_date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+    #         return registration_date
+
+    #     return None
 
 class Accounting(Base):
     meta = {
-        'collection': 'lms_accounting'
+        'collection': 'lms_accounting',
+        'strict': False,
     }
     
     branch = db.ReferenceField('Branch')
