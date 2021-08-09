@@ -44,7 +44,7 @@ def register():
 
     role = Role.objects.get(id=form.position.data)
 
-    if role.name not in ['Secretary', 'Admin', 'Marketer']:
+    if role.name not in ['Secretary', 'Admin', 'Marketer', 'Partner']:
         flash('Sorry, only Secretaries and Marketers can be registered at the moment','error')
         return redirect(url_for('bp_auth.register'))
 

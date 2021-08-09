@@ -19,7 +19,6 @@ $(document).ready(function(){
                 $("#module_header_admin").hide();
                 $("#header_Dashboard").hide();
                 $("#header_Inventory").hide();
-                $("#header_Accounting").hide();
             } else if(response.roleName == "Marketer"){
                 $("#header_Dashboard").hide();
                 $("#header_Inventory").hide();

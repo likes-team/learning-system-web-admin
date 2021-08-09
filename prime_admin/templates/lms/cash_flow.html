@@ -139,7 +139,7 @@
 
         </div>
         <div class="card-body">
-            {% if current_user.role.name == "Admin" %}
+            {% if current_user.role.name == "Admin" or current_user.role.name == "Partner" %}
             <div class="row">
                 <div class="col-lg-6 col-xl-6">
                     <div class="card mb-3 widget-content">
