@@ -38,6 +38,10 @@ def earnings():
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
+        marketers = User.objects(id=current_user.id)
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()

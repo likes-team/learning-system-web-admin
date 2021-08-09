@@ -33,6 +33,8 @@ def cash_flow():
 
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
     else:
         branches = Branch.objects
 
