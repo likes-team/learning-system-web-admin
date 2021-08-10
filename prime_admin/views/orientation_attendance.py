@@ -86,6 +86,8 @@ def get_dtbl_orientation_attendance_members():
             registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
         elif current_user.role.name == "Secretary":
             registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).skip(start).limit(length)
+        elif current_user.role.name == "Partner":
+            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
         else:
             registrations = Registration.objects(status='oriented').skip(start).limit(length)
 
