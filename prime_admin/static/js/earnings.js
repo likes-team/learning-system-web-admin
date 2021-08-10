@@ -64,7 +64,9 @@ $(document).ready(function(){
 
                 $("#total_earnings").html("₱" + totalEarnings);
                 $("#total_savings").html("₱" + json.totalSavings);
-                
+                $("#total_earnings_claimed").html("₱" + json.totalEarningsClaimed);
+                $("#total_savings_claimed").html("₱" + json.totalSavingsClaimed);
+
                 $("#list_branches_total_earnings").children().remove();
 
                 if (json.branchesTotalEarnings.length > 0){
