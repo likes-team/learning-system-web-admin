@@ -76,6 +76,8 @@ def get_dtbl_earnings_members():
 
     total_earnings = 0
     total_savings = 0
+    total_earnings_claimed = 0
+    total_savings_claimed = 0
     branches_total_earnings = []
 
     if contact_person_id == 'all':
@@ -88,6 +90,8 @@ def get_dtbl_earnings_members():
         with decimal.localcontext(D128_CTX):
             total_earnings = Decimal128('0.00')
             total_savings = Decimal128('0.00')
+            total_earnings_claimed = Decimal128('0.00')
+            total_savings_claimed = Decimal128('0.00')
             
             for contact_person in contact_persons:
                 for earning in contact_person.earnings:
@@ -110,6 +114,9 @@ def get_dtbl_earnings_members():
                                         x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
                                     else:
                                         x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                    elif earning.status == "approved":
+                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
     else:
         registrations = Registration.objects(contact_person=contact_person_id).filter(status="registered").skip(start).limit(length)
         contact_person = User.objects.get(id=contact_person_id)
@@ -117,6 +124,8 @@ def get_dtbl_earnings_members():
         with decimal.localcontext(D128_CTX):
             total_earnings = Decimal128('0.00')
             total_savings = Decimal128('0.00')
+            total_earnings_claimed = Decimal128('0.00')
+            total_savings_claimed = Decimal128('0.00')
 
             for earning in contact_person.earnings:
                 if earning.status is not None and earning.status == "for_approval":
@@ -138,6 +147,9 @@ def get_dtbl_earnings_members():
                                         x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
                                     else:
                                         x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                elif earning.status == "approved":
+                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
 
     if branch_id != 'all':
         registrations = registrations.filter(branch=branch_id)
@@ -217,6 +229,8 @@ def get_dtbl_earnings_members():
         'data': _table_data,
         'totalEarnings': str(total_earnings),
         'totalSavings': str(total_savings),
+        'totalEarningsClaimed': str(total_earnings_claimed),
+        'totalSavingsClaimed': str(total_savings_claimed),
         'branchesTotalEarnings': branches_total_earnings
     }
 

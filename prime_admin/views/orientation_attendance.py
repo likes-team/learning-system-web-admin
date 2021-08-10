@@ -37,6 +37,9 @@ def orientation_attendance():
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         contact_persons = User.objects(id=current_user.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+        contact_persons = User.objects(Q(branches__in=current_user.branches) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
     else:
         branches = Branch.objects
         contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
@@ -229,7 +232,7 @@ def get_referrals():
 
 @bp_lms.route('/api/get-branch-contact-persons/<string:branch_id>', methods=['GET'])
 def get_branch_contact_persons(branch_id):
-    contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
+    contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
 
     if contact_persons is None:
         response = {
