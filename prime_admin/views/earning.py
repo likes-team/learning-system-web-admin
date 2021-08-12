@@ -312,3 +312,53 @@ def approve_claim_earning():
     }
 
     return jsonify(response)
+
+
+@bp_lms.route('/api/get-profit-sharing-earnings/<string:partner_id>', methods=['GET'])
+def get_profit_sharing(partner_id):
+    if partner_id == 'all' or partner_id == '':
+        return jsonify({'result': False})
+
+    partner = User.objects.get(id=partner_id)
+
+    total_earnings = 0
+    branches_total_earnings = []
+
+    with decimal.localcontext(D128_CTX):
+        total_earnings = Decimal128('0.00')
+
+        for earning in partner.earnings:
+            if earning.payment_mode != "profit_sharing":
+                continue
+
+            total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+            
+            if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
+                branches_total_earnings.append(
+                    {
+                        'id': str(earning.branch.id),
+                        'name': earning.branch.name,
+                        'totalEarnings': earning.earnings
+                    }
+                )
+            else:
+                for x in branches_total_earnings:
+                    if x['id'] == str(earning['branch'].id):
+                            if type(x['totalEarnings']) == decimal.Decimal:
+                                x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                            else:
+                                x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+
+
+    for branch in branches_total_earnings:
+        branch['totalEarnings'] = str(branch['totalEarnings'])
+
+    print(branches_total_earnings)
+
+    response = {
+        'result': True,
+        'totalEarningsProfit': str(total_earnings),
+        'branchesTotalEarningsProfit': branches_total_earnings
+    }
+
+    return jsonify(response)

@@ -86,6 +86,7 @@ $(document).ready(function(){
                     if(!data){
                         return `
                         <button type="button" class="btn btn-primary btn-sm btn-approve">Approve</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-decline">Decline</button>
                         `
                     }
                     return `
@@ -138,4 +139,44 @@ $(document).ready(function(){
         });
     });
 
+    $("#tbl_user_status tbody").on('click', '.btn-decline', function(){
+        var data = dtbl_user_status.row( $(this).parents('tr')).data();
+        
+        console.log(data[0]);
+
+        $.confirm({
+            title: 'User Approval',
+            content: 'Decline user?',
+            buttons: {
+                confirm: {
+                    text: 'Decline',
+                    btnClass: 'btn-red',
+                    keys: ['enter', 'shift'],
+                    action: function(){
+
+                        $.ajax({
+                            url: "/admin/dashboard/reject-user",
+                            type: "POST",
+                            dataType: "json",
+                            data: JSON.stringify({
+                                "user_id": data[0]
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            success: function(response){
+                                if(response){
+                                    dtbl_user_status.ajax.reload();
+                                    toastr.success("User Declined Successfully!");
+                                }else{
+                                    toastr.error("Error Occured!, Declining Failed");
+                                }
+                            }
+                        });
+                    }
+                },
+                cancel: function () {
+                    $.alert('Canceled!');
+                },
+            }
+        });
+    });
 });

@@ -12,8 +12,6 @@
 
 {% block content %}
 <div class="app-main__inner">
-
-
     <div class="app-page-title" style="background-color: skyblue">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
@@ -29,7 +27,6 @@
 
             <div class="page-title-actions">
                 {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                    <!-- {% if current_user.role.name == "Secretary" or current_user.role.name == "Partner" %} -->
                     {% if current_user.role.name == "Secretary" %}
                     <button type="button" data-toggle="modal" data-target="#mdl_pre_deposit" data-placement="bottom"
                             class="btn-shadow mr-3 btn btn-primary">
@@ -37,7 +34,6 @@
                     </button>
                     {% endif %}
 
-                    <!-- {% if current_user.role.name == "Secretary" or current_user.role.name == "Partner" %} -->
                     {% if current_user.role.name == "Secretary" %}
                     <button type="button" data-toggle="modal" data-target="#mdl_deposit" data-placement="bottom"
                             class="btn-shadow mr-3 btn btn-primary">
@@ -373,14 +369,14 @@
 
 {% block modals %}
 
-{% include "lms/search_client_last_name_modal.html" %}
+    {% include "lms/search_client_last_name_modal.html" %}
 
-{% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-{% include TABLE_OPTIONS['create_modal_template'] %}
-{% endif %}
+    {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
+    {% include TABLE_OPTIONS['create_modal_template'] %}
+    {% endif %}
 
-{% if TABLE_OPTIONS['view_modal'] %}
-{% include TABLE_OPTIONS['view_modal_template'] %}
-{% endif %}
+    {% if TABLE_OPTIONS['view_modal'] %}
+    {% include TABLE_OPTIONS['view_modal_template'] %}
+    {% endif %}
 
 {% endblock %}

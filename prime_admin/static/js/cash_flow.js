@@ -354,5 +354,86 @@ $(document).ready(function () {
             $("#amount").prop('readonly', false);
             $("#tbl_deposit").hide();
         }
-    })
+    });
+
+    var dtbl_partners_percent = $('#tbl_partners_percent').DataTable({
+        "dom": 'rtip',
+        "pageLength": 100,
+        "order": [[1, 'asc']],
+        "ordering": false,
+        "columnDefs": [
+            {
+                'targets': 0,
+                'visible': false
+            },
+            {
+                'targets': 2,
+                "render": function(data, type, row){
+                    return `<td>
+                    <input type="number" min="0" max="100" class="form-control" placeholder="Input partner's percent">
+                    </td>`;
+                }
+            }
+        ],
+        "ajax": {
+            "url": "/learning-management/api/get-partners-percent",
+            "data": function (d) {
+                d.branch = $("#branch_profit").val();
+            },
+            "dataSrc": function (json) {
+                return json.data;
+            }
+        }
+    });
+
+    $("#branch_profit").change(function(){
+        dtbl_partners_percent.ajax.reload();
+    });
+
+    $("#btn_confirm_profit").click(function(){
+        if($("#branch_profit").val() == ''){
+            alert("Please select branch");
+            return;
+        }
+
+        if($("#password").val() == ''){
+            alert("Please input your password");
+            return;
+        }
+
+        var partners_percent_list = [];
+
+        dtbl_partners_percent.rows().data().each(function(value, index){
+            partners_percent_list.push(
+                {
+                    'partner_id': value[0],
+                    'percent': dtbl_partners_percent.cell(index,2).nodes().to$().find('input').val(),
+                }
+            )
+        });
+        
+        $.ajax({
+            url: "/learning-management/profit",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify({
+                'partners_percent': partners_percent_list,
+                'branch': $("#branch_profit").val(),
+                'password': $("#password").val()
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function(response){
+                if(response.result == "invalid_password"){
+                    toastr.error("Please try again","Invalid Password!");
+                } else if(response.result == "no_transaction"){
+                    toastr.error("Please deposit first to this branch","No cash flow transaction found");
+                } else if(response.result == "error"){
+                    toastr.error("Please contact system administrator ","Error Occured!");
+                } else if(response.result == "success"){
+                    location.reload();
+                    toastr.success("Proccessed Successfully!");
+                }
+            }
+        });
+    });
 });

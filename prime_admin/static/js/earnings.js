@@ -209,4 +209,50 @@ $(document).ready(function(){
             }
         });
     });
+
+    getProfitSharingEarnings();
 });
+
+function getProfitSharingEarnings(){
+    var partner_id = $("#btn_marketer_label").val();
+
+    $.ajax({
+        url: "/learning-management/api/get-profit-sharing-earnings/" + partner_id,
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        success: function(response){
+            if(response.result){
+                $("#total_earnings_profit").html("₱" + response.totalEarningsProfit);
+
+                $("#list_branches_total_earnings_profit").children().remove();
+
+                if (response.branchesTotalEarningsProfit.length > 0){
+                    var newBranchesTotalEarningsList = '';
+                    
+                    for (i=0; i < response.branchesTotalEarningsProfit.length; i++){
+                        var totalEarnings = parseFloat(response.branchesTotalEarningsProfit[i]['totalEarnings']).toFixed(2);
+
+                        newBranchesTotalEarningsList = newBranchesTotalEarningsList + `<li class="list-group-item">
+                        <div class="widget-content p-0">
+                            <div class="widget-content-outer">
+                                <div class="widget-content-wrapper">
+                                    <div class="widget-content-left">
+                                        <div class="widget-heading">${response.branchesTotalEarningsProfit[i]['name']}</div>
+                                        <div class="widget-subheading">Total Earnings</div>
+                                    </div>
+                                    <div class="widget-content-right">
+                                        <div class="widget-numbers text-primary">₱ ${totalEarnings}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>`
+                    }
+
+                    $("#list_branches_total_earnings_profit").html(newBranchesTotalEarningsList);
+                }
+            }else{
+            }
+        }
+    });
+}

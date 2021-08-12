@@ -232,7 +232,10 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-lg-6 col-xl-6">
+                <div class="col-lg-4 col-xl-4">
+                </div>
+
+                <div class="col-lg-4 col-xl-4">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -240,28 +243,17 @@
                                 <div class="widget-subheading"></div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span id="total_earnings">₱ 0.00</span></div>
+                                <div class="widget-numbers text-success"><span id="total_earnings_profit">₱ 0.00</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-6 col-xl-6">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">SAVINGS</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-warning"><span id="total_savings">₱ 0.00</span></div>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div class="col-lg-4 col-xl-4">
                 </div>
             </div>
 
-            <ul id="list_branches_total_earnings" class="list-group">
+            <ul id="list_branches_total_earnings_profit" class="list-group">
                 {% for branch in TABLE_OPTIONS['branches'] %}
                 <li class="list-group-item">
                     <div class="widget-content p-0">

@@ -3,8 +3,8 @@ import pytz
 from config import TIMEZONE
 import decimal
 from hashlib import new
-from prime_admin.globals import SECRETARYREFERENCE, get_date_now
-from app.auth.models import User
+from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, get_date_now
+from app.auth.models import Earning, User
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
@@ -346,61 +346,84 @@ def get_cash_flow():
 @bp_lms.route('/profit', methods=['POST'])
 @login_required
 def profit():
-    password = request.form['password']
-    branch = request.form['branch']
+    password = request.json['password']
+    branch = request.json['branch']
+    partners_percent_list = request.json['partners_percent']
 
     if not current_user.check_password(password):
-        flash('Invalid password','error')
-        return redirect(url_for('lms.cash_flow'))
+        return jsonify({"result": "invalid_password"})
 
     accounting = Accounting.objects(branch=branch).first()
 
     if accounting is None:
-        flash('No cash flow transaction found','error')
-        return redirect(url_for('lms.cash_flow'))
-
-    remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
-    net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
-    fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-    fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-    previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
-    previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
-    previous_total_gross_sale = accounting.total_gross_sale
+        return jsonify({"result": "no_transaction"})
     
-    accounting.total_gross_sale = remaining
+    try:
+        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
+        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
+        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
+        previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
+        previous_total_gross_sale = accounting.total_gross_sale
+        
+        accounting.total_gross_sale = remaining
 
-    if accounting.final_fund1:
-        accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
-    else: 
-        accounting.final_fund1 = fund1
+        if accounting.final_fund1:
+            accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
+        else: 
+            accounting.final_fund1 = fund1
 
-    if accounting.final_fund2:
-        accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
-    else:
-        accounting.final_fund2 = fund2
-    
-    accounting.profits.append(
-        {
-            'date': get_date_now(),
-            'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
-            'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
-            'net': Decimal128(net),
-            'remaining': Decimal128(remaining),
-            'fund1': Decimal128(fund1),
-            'fund2': Decimal128(fund2),
-            'previous_final_fund1': Decimal128(previous_final_fund1),
-            'previous_final_fund2': Decimal128(previous_final_fund2),
-            'new_final_fund1': Decimal128(accounting.final_fund1),
-            'new_final_fund2': Decimal128(accounting.final_fund2),
-        }
-    )
+        if accounting.final_fund2:
+            accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
+        else:
+            accounting.final_fund2 = fund2
+        
+        accounting.profits.append(
+            {
+                'date': get_date_now(),
+                'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
+                'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
+                'net': Decimal128(net),
+                'remaining': Decimal128(remaining),
+                'fund1': Decimal128(fund1),
+                'fund2': Decimal128(fund2),
+                'previous_final_fund1': Decimal128(previous_final_fund1),
+                'previous_final_fund2': Decimal128(previous_final_fund2),
+                'new_final_fund1': Decimal128(accounting.final_fund1),
+                'new_final_fund2': Decimal128(accounting.final_fund2),
+                'partners_percent': partners_percent_list
+            }
+        )
 
-    accounting.active_group += 1
-    accounting.save()
+        accounting.active_group += 1
 
-    flash('Proccessed Successfully!','success')
+        for _partner in partners_percent_list:
+            partner = User.objects.get(id=_partner['partner_id'])
 
-    return redirect(url_for('lms.cash_flow'))
+            earnings = (net * decimal.Decimal(_partner['percent'])) / 100
+
+            partner.earnings.append(
+                Earning(
+                    custom_id=str(datetime.now().timestamp),
+                    payment_mode="profit_sharing",
+                    earnings=Decimal128(str(earnings)),
+                    branch=Branch.objects.get(id=branch),
+                    date=get_date_now(),
+                    registered_by=User.objects.get(id=str(current_user.id)),
+                )
+            )
+
+            partner.save()
+
+        accounting.save()
+
+    except Exception as exc:
+        print(str(exc))
+        return jsonify({"result": "error"})
+
+    return jsonify({"result": "success"})
+
 
 
 @bp_lms.route('/api/dtbl/mdl-pre-deposit', methods=['GET'])
@@ -515,4 +538,30 @@ def to_pre_deposit():
     }
 
     return jsonify(response)
+
+
+@bp_lms.route('/api/get-partners-percent', methods=['GET'])
+def get_partners_percent():
+    branch = request.args.get('branch')
+
+    if branch == '':
+        return jsonify({"data": []})
+
+    partners = User.objects(branches__in=[branch]).filter(role=PARTNERREFERENCE)
+
+    if len(partners) == 0:
+        return jsonify({"data": []})
+
+    data = []
+
+    for partner in partners:
+        data.append((
+            str(partner.id),
+            partner.full_name,
+            ''
+        ))
+
+    response = jsonify({'data': data})
+
+    return response
 

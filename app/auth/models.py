@@ -67,6 +67,7 @@ class User(UserMixin, Base, Admin):
     address = db.StringField()
     full_employee_id = db.StringField()
     employee_id_no = db.IntField()
+    status = db.StringField()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
