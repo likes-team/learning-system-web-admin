@@ -20,6 +20,10 @@ from mongoengine.document import Document
 
 
 class Earning(db.EmbeddedDocument):
+    meta = {
+        'strict': False
+    }
+    
     custom_id = db.StringField(primary_key=True)
     payment_mode = db.StringField()
     savings = db.DecimalField()
