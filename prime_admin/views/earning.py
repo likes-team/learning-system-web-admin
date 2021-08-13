@@ -260,6 +260,9 @@ def claim_earning():
     contact_person = User.objects.get(id=current_user.id)
 
     for earning in contact_person.earnings:
+        if earning.payment_mode == "profit_sharing":
+            continue
+
         if earning.client.id == student.id:
             if earning.earnings == _payment_earning:
                 earning.status = "for_approval"
