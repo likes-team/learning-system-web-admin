@@ -269,12 +269,11 @@ def claim_earning():
             if earning.client.id == student.id:
                 if earning.earnings == _payment_earning:
                     earning.status = "for_approval"
-    
+                    contact_person.save()
+                    student.save()
+
     except Exception as exc:
         pass
-    
-    student.save()
-    contact_person.save()
 
     response = {
         'result': True
