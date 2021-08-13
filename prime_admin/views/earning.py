@@ -260,10 +260,9 @@ def claim_earning():
     contact_person = User.objects.get(id=current_user.id)
 
     print("EARNING",_payment_earning)
-    try:
-        for earning in contact_person.earnings:
+    for earning in contact_person.earnings:
+        try:
             print(earning.payment_mode, earning.client)
-
             if earning.payment_mode == "profit_sharing":
                 continue
 
@@ -271,11 +270,11 @@ def claim_earning():
                 if earning.earnings == _payment_earning:
                     print("PASOK",_payment_earning)
                     earning.status = "for_approval"
+        except Exception as exc:
+            continue
 
-        contact_person.save()
-        student.save()
-    except Exception as exc:
-        pass
+    contact_person.save()
+    student.save()
 
     response = {
         'result': True
