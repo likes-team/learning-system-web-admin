@@ -309,9 +309,16 @@ def approve_claim_earning():
     contact_person = User.objects.get(id=marketer_id)
 
     for earning in contact_person.earnings:
-        if earning.client.id == student.id:
-            if earning.earnings == _payment_earning:
-                earning.status = "approved"
+        try:
+            print(earning.payment_mode, earning.client)
+            if earning.payment_mode == "profit_sharing":
+                continue
+
+            if earning.client.id == student.id:
+                if earning.earnings == _payment_earning:
+                    earning.status = "approved"
+        except Exception as exc:
+            continue
 
     student.save()
     contact_person.save()
