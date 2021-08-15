@@ -111,18 +111,18 @@
         {{student[17]}}
       </td>
       <td>
-        {% if student[7] == "Installment" %}
-            <span style="font-size: large;">&#10003;</span>
+        {% if student[7] == "Installment" or student[7] == "Installment - Promo" %}
+            {{student[8]}}
         {% endif %}
       </td>
       <td>
-        {% if student[7] == "Full Payment" %}
-            <span style="font-size: large;">&#10003;</span>
+        {% if student[7] == "Full Payment" or student[7] == "Full Payment - Promo" %}
+          {{student[8]}}
         {% endif %}
       </td>
       <td>
-        {% if student[7] == "Premium Payment" %}
-            <span style="font-size: large;">&#10003;</span>
+        {% if student[7] == "Premium Payment" or student[7] == "Premium - Promo" %}
+          {{student[8]}}
         {% endif %}
       </td>
       <td>

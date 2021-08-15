@@ -78,20 +78,24 @@ def get_dtbl_members():
     batch_no = request.args.get('batch_no')
     schedule = request.args.get('schedule')
 
+    sales_today = 0
+
+    print(get_sales_today_date())
+    print(get_date_now())
+
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
-        # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
+        registrations = Registration.objects(branch=branch_id).filter(status='registered').order_by("-registration_date").skip(start).limit(length)
+        sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
-            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).filter(branch__in=current_user.branches).sum('amount')
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
+            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).filter(branch__in=current_user.branches).sum('amount')
         elif current_user.role.name == "Partner":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
         else:
-            registrations = Registration.objects(status='registered').skip(start).limit(length)
-            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
+            registrations = Registration.objects(status='registered').order_by("-registration_date").skip(start).limit(length)
+            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
-    sales_today = 0
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -115,16 +119,19 @@ def get_dtbl_members():
 
         if registration.balance <= 0.00:
             paid = 'PAID'
-
-        if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
-            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
-                <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
         
+        if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
+            if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+            elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+            elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                    <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        else: # Marketers
+            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+
         branch = registration.branch
         contact_person = registration.contact_person
 
@@ -174,9 +181,9 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium_promo':
             payment_mode = "Premium Payment - Promo"
 
-        if registration.registration_date_local_date:
-            if get_sales_today_date().date() == registration.registration_date_local_date.date():
-                sales_today += registration.amount
+        # if registration.registration_date_local_date:
+        #     if get_sales_today_date().date() == registration.registration_date_local_date.date():
+        #         sales_today += registration.amount
 
         if registration.amount == registration.amount_deposit:
             deposit = "Yes"
@@ -587,8 +594,8 @@ def upgrade_to_premium():
     id_materials = request.form.getlist('upgrade_others')
 
     client.id_materials = {
-        'id_card': True if 'id_card' in id_materials else False,
-        'id_lace': True if 'id_lace' in id_materials else False,
+        'id_card': True if 'upgrade_id_card' in id_materials else False,
+        'id_lace': True if 'upgrade_id_lace' in id_materials else False,
     }
 
     client.save()
@@ -699,7 +706,12 @@ def print_students_pdf():
             payment_mode = "Installment"
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
-
+        elif registration.payment_mode == "full_payment_promo":
+            payment_mode = "Full Payment - Promo"
+        elif registration.payment_mode == "installment_promo":
+            payment_mode = "Installment - Promo"
+        elif registration.payment_mode == "premium_promo":
+            payment_mode = "Premium - Promo"
 
         _table_data.append([
             str(registration.id), # 0

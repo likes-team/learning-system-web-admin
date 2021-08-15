@@ -81,7 +81,7 @@ def get_dtbl_earnings_members():
     branches_total_earnings = []
 
     if contact_person_id == 'all':
-        registrations = Registration.objects(status="registered").skip(start).limit(length)
+        registrations = Registration.objects(status="registered").order_by("-registration_date").order_by("registration_number").skip(start).limit(length)
         if current_user.role.name == "Secretary":
             contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
         else:
@@ -95,7 +95,11 @@ def get_dtbl_earnings_members():
             
             for contact_person in contact_persons:
                 for earning in contact_person.earnings:
-                    if earning.status is not None and earning.status == "for_approval":
+                    if earning.payment_mode == "profit_sharing":
+                        continue
+
+                    # if earning.status is not None and earning.status == "for_approval":
+                    if earning.status is None or earning.status == "for_approval":
                         total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
                         total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                         
@@ -118,7 +122,7 @@ def get_dtbl_earnings_members():
                         total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
                         total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
     else:
-        registrations = Registration.objects(contact_person=contact_person_id).filter(status="registered").skip(start).limit(length)
+        registrations = Registration.objects(contact_person=contact_person_id).order_by("-registration_date").order_by("registration_number").filter(status="registered").skip(start).limit(length)
         contact_person = User.objects.get(id=contact_person_id)
 
         with decimal.localcontext(D128_CTX):
@@ -128,7 +132,11 @@ def get_dtbl_earnings_members():
             total_savings_claimed = Decimal128('0.00')
 
             for earning in contact_person.earnings:
-                if earning.status is not None and earning.status == "for_approval":
+                # if earning.status is not None and earning.status == "for_approval":
+                if earning.payment_mode == "profit_sharing":
+                    continue
+
+                if earning.status is None or earning.status == "for_approval":
                     total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
                     total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                     

@@ -163,7 +163,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button id="btn_print_student_info" type="button" class="btn btn-info">Print Student Information</button>
+                {% if current_user.role.name in ['Secretary', 'Admin', 'Partner'] %}
                 <button id="btn_edit" type="button" class="btn btn-primary">Edit</button>
+                {% endif %}
             </div>
         </div>
     </div>

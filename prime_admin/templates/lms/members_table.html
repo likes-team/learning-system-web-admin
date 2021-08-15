@@ -215,6 +215,16 @@
                     </div>
                 </div>
                 <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="address" class="">Date From</label>
+                        <input disabled name="address" id="address" type="date" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid date of birth
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
@@ -239,12 +249,16 @@
                     <div class="position-relative form-group">
                         <label for="batch_no" class="">Batch No.</label>
                         <select name="batch_no" id="batch_no" class="form-control" required>
-                            <option value="all">All</option>
-                            {% for batch in TABLE_OPTIONS['batch_numbers'] %}
-                            <option value="{{ batch.id }}">
-                                {{ batch.number }}
-                            </option>
-                            {% endfor %}
+                            {% if current_user.role.name == "Secretary" %}
+                                <option value="all">All</option>
+                                {% for batch in TABLE_OPTIONS['batch_numbers'] %}
+                                <option value="{{ batch.id }}">
+                                    {{ batch.number }}
+                                </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="all">Please select branch first</option>
+                            {% endif %}
                         </select>
                         <div class="valid-feedback">
                             Looks good!

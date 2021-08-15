@@ -78,21 +78,25 @@ def get_dtbl_orientation_attendance_members():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
     contact_person_id = request.args.get('contact_person')
+    search_value = request.args.get("search[value]")
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='oriented').skip(start).limit(length)
+        registrations = Registration.objects(branch=branch_id).filter(status='oriented').order_by("-date_oriented").skip(start).limit(length)
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
+            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).order_by("-date_oriented").skip(start).limit(length)
         elif current_user.role.name == "Secretary":
-            registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).skip(start).limit(length)
+            registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).order_by("-date_oriented").skip(start).limit(length)
         elif current_user.role.name == "Partner":
-            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).skip(start).limit(length)
+            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).order_by("-date_oriented").skip(start).limit(length)
         else:
-            registrations = Registration.objects(status='oriented').skip(start).limit(length)
+            registrations = Registration.objects(status='oriented').order_by("-date_oriented").skip(start).limit(length)
 
     if contact_person_id != 'all':
         registrations = registrations.filter(contact_person=contact_person_id)
+
+    if search_value != "":
+        registrations = registrations.filter(lname__icontains=search_value)
 
     _table_data = []
 
@@ -234,7 +238,11 @@ def get_referrals():
 
 @bp_lms.route('/api/get-branch-contact-persons/<string:branch_id>', methods=['GET'])
 def get_branch_contact_persons(branch_id):
-    contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
+    print(branch_id)
+    if branch_id == "all":
+        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
+    else:
+        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
 
     if contact_persons is None:
         response = {

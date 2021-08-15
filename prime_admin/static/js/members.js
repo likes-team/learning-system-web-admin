@@ -72,6 +72,7 @@ $(document).ready(function(){
         "serverSide": true,
         "autoWidth": false,
         "columnDefs": columnDefs,
+        "ordering": false,
         "ajax": {
             "url": "/learning-management/dtbl/members",
             "data": function (d) {
@@ -393,7 +394,8 @@ $(document).ready(function(){
     });
 
     $("#btn_clear_entry").click(function(){
-        table.search($("#search_input").val("")).draw();
+        $("#search_input").val("")
+        table.search("").draw();    
     });
 
     $("#chkbox_upgrade").click(function(){
@@ -613,7 +615,42 @@ $(document).ready(function(){
 
     $("#branch").change(function(){
         BRANCH = $(this).val();
-        table.ajax.reload();
+
+        $.ajax({
+        url: `/learning-management/api/branches/${BRANCH}/batches`,
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                $('#batch_no').find('option').remove();
+
+                
+                if (BRANCH == 'all'){
+                    var newOption = $('<option value="all">Please select branch first</option>');
+                    $('#batch_no').append(newOption);
+                    $('#batch_no').val('all');
+                    table.ajax.reload();
+                    return;
+                }
+                
+                if (response.data.length > 0) {
+                    var newOption = $('<option value="all">All</option>');
+                    $('#batch_no').append(newOption);
+
+                    for (i = 0; i < response.data.length; i++) {
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].number}</option>`);
+                        $('#batch_no').append(newOption);
+                    }
+                } else {
+                    var newOption = $('<option value="all">No batch number available</option>');
+                    $('#batch_no').append(newOption);
+                }
+
+
+                $('#batch_no').val('all');
+        
+                table.ajax.reload();
+            }
+        });
     });
 
     $("#batch_no").change(function(){

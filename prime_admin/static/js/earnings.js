@@ -122,6 +122,28 @@ $(document).ready(function(){
     });
 
     $("#branch").change(function(){
+        
+        $.ajax({
+            url: `/learning-management/api/branches/${$(this).val()}/batches`,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    $('#batch_no').find('option').remove();
+    
+                    if (response.data.length > 0) {
+                        var newOption = $('<option value="all">All</option>');
+                        $('#batch_no').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].number}</option>`);
+                            $('#batch_no').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="all">No batch number available</option>');
+                        $('#batch_no').append(newOption);
+                    }
+                }
+            });
         table.ajax.reload();
     });
 
