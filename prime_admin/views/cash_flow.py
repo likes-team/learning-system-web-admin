@@ -83,6 +83,7 @@ def deposit():
         new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
         new_deposit.branch = current_user.branch
         new_deposit.type = "deposit"
+        new_deposit.remarks = form.remarks.data
 
         accounting = Accounting.objects(branch=current_user.branch.id).first()
         
@@ -183,6 +184,7 @@ def withdraw():
         new_withdraw.created_by = "{} {}".format(current_user.fname,current_user.lname)
         new_withdraw.branch = Branch.objects.get(id=form.branch.data)
         new_withdraw.type = "withdraw"
+        new_withdraw.remarks = form.remarks.data
 
         accounting = Accounting.objects(branch=form.branch.data).first()
 

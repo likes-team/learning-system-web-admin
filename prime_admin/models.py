@@ -307,6 +307,7 @@ class CashFlow(Base, Admin):
     balance = db.DecimalField()
     group = db.IntField()
     payments = db.EmbeddedDocumentListField(Payment)
+    remarks = db.StringField()
 
     def set_deposit_date(self):
         date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))

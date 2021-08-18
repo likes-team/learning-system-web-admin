@@ -96,7 +96,7 @@ class DepositForm(FlaskForm):
     amount = DecimalField()
     from_what = StringField()
     by_who = StringField()
-
+    remarks = StringField()
 
 class WithdrawForm(FlaskForm):
     date_deposit = DateField()
@@ -107,6 +107,7 @@ class WithdrawForm(FlaskForm):
     from_what = StringField()
     by_who = StringField()    
     branch = StringField()    
+    remarks = StringField()
 
 
 class InventoryForm(AdminTableForm):
