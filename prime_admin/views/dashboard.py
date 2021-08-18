@@ -1,4 +1,5 @@
 from datetime import datetime
+import decimal
 from prime_admin.globals import get_date_now
 from flask import redirect, url_for
 from flask.json import jsonify
@@ -7,7 +8,7 @@ from flask_login import login_required, current_user
 from werkzeug.wrappers import ResponseStream
 from app.core.models import CoreModule, CoreModel
 from prime_admin import bp_lms
-from prime_admin.models import Dashboard, Registration
+from prime_admin.models import Branch, CashFlow, Dashboard, Registration
 from app.admin.templating import admin_dashboard, DashboardBox
 from mongoengine.queryset.visitor import Q
 from config import TIMEZONE
@@ -53,6 +54,7 @@ def dashboard():
     from app.auth.models import User
     
     options = {
+        'branches': Branch.objects(),
         'box1': DashboardBox("Number of enrollees","Current", 0),
         'box2': DashboardBox("Total Sales","Montly", 0),
         'box3': DashboardBox("Gross Income","Total users", 0),
@@ -68,55 +70,85 @@ def dashboard():
     )
 
 
-@bp_lms.route('/api/dashboard/get-chart-data', methods=['GET'])
+@bp_lms.route('/api/dashboard/get-chart-data/<string:branch_id>', methods=['GET'])
 @login_required
-def get_chart_data():
+def get_chart_data(branch_id):
     gross_sales = []
     expenses = []
     maintaining_sales = []
     net = []
     no_of_students = []
 
+    sale_jan = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=JANSTART) & Q(date_deposit__lte=JANEND)).order_by("-date_deposit").first()
+    sale_feb = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=FEBSTART) & Q(date_deposit__lte=FEBEND)).order_by("-date_deposit").first()
+    sale_mar = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=MARSTART) & Q(date_deposit__lte=MAREND)).order_by("-date_deposit").first()
+    sale_apr = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=APRSTART) & Q(date_deposit__lte=APREND)).order_by("-date_deposit").first()
+    sale_may = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=MAYSTART) & Q(date_deposit__lte=MAYEND)).order_by("-date_deposit").first()
+    sale_jun = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=JUNSTART) & Q(date_deposit__lte=JUNEND)).order_by("-date_deposit").first()
+    sale_jul = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=JULSTART) & Q(date_deposit__lte=JULEND)).order_by("-date_deposit").first()
+    sale_aug = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=AUGSTART) & Q(date_deposit__lte=AUGEND)).order_by("-date_deposit").first()
+    sale_sep = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=SEPSTART) & Q(date_deposit__lte=SEPEND)).order_by("-date_deposit").first()
+    sale_oct = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=OCTSTART) & Q(date_deposit__lte=OCTEND)).order_by("-date_deposit").first()
+    sale_nov = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=NOVSTART) & Q(date_deposit__lte=NOVEND)).order_by("-date_deposit").first()
+    sale_dec = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=DECSTART) & Q(date_deposit__lte=DECEND)).order_by("-date_deposit").first()
+
     gross_sales_per_month = {
-        'jan': Registration.objects(status='registered').filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).sum('amount'),
-        'feb': Registration.objects(status='registered').filter(Q(created_at__gte=FEBSTART) & Q(created_at__lte=FEBEND)).sum('amount'),
-        'mar': Registration.objects(status='registered').filter(Q(created_at__gte=MARSTART) & Q(created_at__lte=MAREND)).sum('amount'),
-        'apr': Registration.objects(status='registered').filter(Q(created_at__gte=APRSTART) & Q(created_at__lte=APREND)).sum('amount'),
-        'may': Registration.objects(status='registered').filter(Q(created_at__gte=MAYSTART) & Q(created_at__lte=MAYEND)).sum('amount'),
-        'jun': Registration.objects(status='registered').filter(Q(created_at__gte=JUNSTART) & Q(created_at__lte=JUNEND)).sum('amount'),
-        'jul': Registration.objects(status='registered').filter(Q(created_at__gte=JULSTART) & Q(created_at__lte=JULEND)).sum('amount'),
-        'aug': Registration.objects(status='registered').filter(Q(created_at__gte=AUGSTART) & Q(created_at__lte=AUGEND)).sum('amount'),
-        'sep': Registration.objects(status='registered').filter(Q(created_at__gte=SEPSTART) & Q(created_at__lte=SEPEND)).sum('amount'),
-        'oct': Registration.objects(status='registered').filter(Q(created_at__gte=OCTSTART) & Q(created_at__lte=OCTEND)).sum('amount'),
-        'nov': Registration.objects(status='registered').filter(Q(created_at__gte=NOVSTART) & Q(created_at__lte=NOVEND)).sum('amount'),
-        'dec': Registration.objects(status='registered').filter(Q(created_at__gte=DECSTART) & Q(created_at__lte=DECEND)).sum('amount'),
+        'jan': str(sale_jan.balance) if sale_jan is not None else 0,
+        'feb': str(sale_feb.balance) if sale_feb is not None else 0,
+        'mar': str(sale_mar.balance) if sale_mar is not None else 0,
+        'apr': str(sale_apr.balance) if sale_apr is not None else 0,
+        'may': str(sale_may.balance) if sale_may is not None else 0,
+        'jun': str(sale_jun.balance) if sale_jun is not None else 0,
+        'jul': str(sale_jul.balance) if sale_jul is not None else 0,
+        'aug': str(sale_aug.balance) if sale_aug is not None else 0,
+        'sep': str(sale_sep.balance) if sale_sep is not None else 0,
+        'oct': str(sale_oct.balance) if sale_oct is not None else 0,
+        'nov': str(sale_nov.balance) if sale_nov is not None else 0,
+        'dec': str(sale_dec.balance) if sale_dec is not None else 0,
     }
 
-    # gross_sales.append(gross_sales_per_month['jan'])
-    # gross_sales.append(gross_sales_per_month['feb'])
-    # gross_sales.append(gross_sales_per_month['mar'])
-    # gross_sales.append(gross_sales_per_month['apr'])
-    # gross_sales.append(gross_sales_per_month['may'])
-    # gross_sales.append(gross_sales_per_month['jun'])
-    # gross_sales.append(gross_sales_per_month['jul'])
-    # gross_sales.append(gross_sales_per_month['aug'])
-    # gross_sales.append(gross_sales_per_month['sep'])
-    # gross_sales.append(gross_sales_per_month['oct'])
-    # gross_sales.append(gross_sales_per_month['nov'])
-    # gross_sales.append(gross_sales_per_month['dec'])
+    gross_sales.append(gross_sales_per_month['jan'])
+    gross_sales.append(gross_sales_per_month['feb'])
+    gross_sales.append(gross_sales_per_month['mar'])
+    gross_sales.append(gross_sales_per_month['apr'])
+    gross_sales.append(gross_sales_per_month['may'])
+    gross_sales.append(gross_sales_per_month['jun'])
+    gross_sales.append(gross_sales_per_month['jul'])
+    gross_sales.append(gross_sales_per_month['aug'])
+    gross_sales.append(gross_sales_per_month['sep'])
+    gross_sales.append(gross_sales_per_month['oct'])
+    gross_sales.append(gross_sales_per_month['nov'])
+    gross_sales.append(gross_sales_per_month['dec'])
 
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
-    gross_sales.append(0)
+    net_percent = decimal.Decimal(".55")
+
+    net_per_month = {
+        'jan': str(sale_jan.balance * net_percent) if sale_jan is not None else 0,
+        'feb': str(sale_feb.balance * net_percent) if sale_feb is not None else 0,
+        'mar': str(sale_mar.balance * net_percent) if sale_mar is not None else 0,
+        'apr': str(sale_apr.balance * net_percent) if sale_apr is not None else 0,
+        'may': str(sale_may.balance * net_percent) if sale_may is not None else 0,
+        'jun': str(sale_jun.balance * net_percent) if sale_jun is not None else 0,
+        'jul': str(sale_jul.balance * net_percent) if sale_jul is not None else 0,
+        'aug': str(sale_aug.balance * net_percent) if sale_aug is not None else 0,
+        'sep': str(sale_sep.balance * net_percent) if sale_sep is not None else 0,
+        'oct': str(sale_oct.balance * net_percent) if sale_oct is not None else 0,
+        'nov': str(sale_nov.balance * net_percent) if sale_nov is not None else 0,
+        'dec': str(sale_dec.balance * net_percent) if sale_dec is not None else 0,
+    }
+
+    net.append(net_per_month['jan'])
+    net.append(net_per_month['feb'])
+    net.append(net_per_month['mar'])
+    net.append(net_per_month['apr'])
+    net.append(net_per_month['may'])
+    net.append(net_per_month['jun'])
+    net.append(net_per_month['jul'])
+    net.append(net_per_month['aug'])
+    net.append(net_per_month['sep'])
+    net.append(net_per_month['oct'])
+    net.append(net_per_month['nov'])
+    net.append(net_per_month['dec'])
 
     expenses_per_month = {
         'jan': Registration.objects(status='registered').filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).sum('amount'),
@@ -187,18 +219,15 @@ def get_chart_data():
     no_of_students.append(no_of_students_per_month['nov'])
     no_of_students.append(no_of_students_per_month['dec'])
 
-    # maintaining_sales = [
-    #     85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,
-    # ]
-
     maintaining_sales = [
-        0,0,0,0,0,0,0,0,0,0,0,0,
+        85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,
     ]
 
     month_count = get_date_now().month
 
     response = {
         'gross_sales': gross_sales[:month_count],
+        'net': net[:month_count],
         'maintaining_sales': maintaining_sales[: month_count],
         'expenses': expenses[:month_count],
         'no_of_students': no_of_students

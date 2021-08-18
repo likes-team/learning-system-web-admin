@@ -139,6 +139,7 @@ class Branch(Base, Admin):
 
     name = db.StringField()
     address = db.StringField()
+    maintaining_balance = db.DecimalField()
 
 
 class Batch(Base, Admin):

@@ -109,8 +109,8 @@ def get_dtbl_members():
         registrations = registrations.filter(lname__icontains=search_value)
 
     if date_from !="":
-        print("date_from: ", convert_to_utc(date_from))
-        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from))
+        print("date_from: ", convert_to_utc(date_from, 'date_from'))
+        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
 
     if date_to != "":
         print("date_to: ", convert_to_utc(date_to))

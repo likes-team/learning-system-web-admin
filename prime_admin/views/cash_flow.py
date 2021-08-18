@@ -84,6 +84,7 @@ def deposit():
         new_deposit.branch = current_user.branch
         new_deposit.type = "deposit"
         new_deposit.remarks = form.remarks.data
+        new_deposit.set_created_at()
 
         accounting = Accounting.objects(branch=current_user.branch.id).first()
         
@@ -185,6 +186,7 @@ def withdraw():
         new_withdraw.branch = Branch.objects.get(id=form.branch.data)
         new_withdraw.type = "withdraw"
         new_withdraw.remarks = form.remarks.data
+        new_withdraw.set_created_at()
 
         accounting = Accounting.objects(branch=form.branch.data).first()
 
@@ -311,7 +313,7 @@ def get_cash_flow():
                 str(statement.amount),
                 statement.from_what,
                 statement.by_who,
-                '',
+                statement.remarks,
                 statement.group
             ))
     else:
@@ -324,7 +326,7 @@ def get_cash_flow():
                 str(statement.balance) if statement.balance is not None else '',
                 '' if statement.type == "deposit" else statement.from_what,
                 statement.by_who,
-                '',
+                statement.remarks,
                 statement.group
             ))
 
