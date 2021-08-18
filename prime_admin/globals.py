@@ -17,6 +17,14 @@ def get_date_now():
     return utc_dt
 
 
+def convert_to_utc(date):
+    date_string = date + " 23:59:59"
+    naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+    local_dt = TIMEZONE.localize(naive, is_dst=None)
+    utc_dt = local_dt.astimezone(pytz.utc)
+    return utc_dt
+
+
 def get_sales_today_date():
     local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
     # return local_datetime.strftime("%B %d, %Y %I:%M %p")

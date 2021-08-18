@@ -79,6 +79,8 @@ $(document).ready(function(){
                 d.branch = $("#branch").val();
                 d.batch_no = $("#batch_no").val();
                 d.schedule = $("#schedule").val();
+                d.date_from = $("#date_from").val();
+                d.date_to = $("#date_to").val();
             },
             "dataSrc": function(json){
                 $("#total_installment").html("₱" + json.totalInstallment);
@@ -660,6 +662,14 @@ $(document).ready(function(){
 
     $("#schedule").change(function(){
         SCHEDULE = $(this).val();
+        table.ajax.reload();
+    });
+
+    $('#date_from').change(function() {
+        table.ajax.reload();
+    });
+
+    $('#date_to').change(function() {
         table.ajax.reload();
     });
 });

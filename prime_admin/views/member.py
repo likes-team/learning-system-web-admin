@@ -1,6 +1,6 @@
 import decimal
 import pytz
-from prime_admin.globals import get_date_now, get_sales_today_date
+from prime_admin.globals import convert_to_utc, get_date_now, get_sales_today_date
 from random import uniform
 from pymongo.common import clean_node
 from prime_admin.functions import generate_number
@@ -77,7 +77,9 @@ def get_dtbl_members():
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
     schedule = request.args.get('schedule')
-
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    
     sales_today = 0
 
     print(get_sales_today_date())
@@ -105,6 +107,14 @@ def get_dtbl_members():
 
     if search_value != "":
         registrations = registrations.filter(lname__icontains=search_value)
+
+    if date_from !="":
+        print("date_from: ", convert_to_utc(date_from))
+        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from))
+
+    if date_to != "":
+        print("date_to: ", convert_to_utc(date_to))
+        registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
 
     _table_data = []
 
