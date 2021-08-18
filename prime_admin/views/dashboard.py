@@ -192,18 +192,18 @@ def get_chart_data(branch_id):
     expenses.append(0)
 
     no_of_students_per_month = {
-        'jan': Registration.objects(status='registered').filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).count(),
-        'feb': Registration.objects(status='registered').filter(Q(created_at__gte=FEBSTART) & Q(created_at__lte=FEBEND)).count(),
-        'mar': Registration.objects(status='registered').filter(Q(created_at__gte=MARSTART) & Q(created_at__lte=MAREND)).count(),
-        'apr': Registration.objects(status='registered').filter(Q(created_at__gte=APRSTART) & Q(created_at__lte=APREND)).count(),
-        'may': Registration.objects(status='registered').filter(Q(created_at__gte=MAYSTART) & Q(created_at__lte=MAYEND)).count(),
-        'jun': Registration.objects(status='registered').filter(Q(created_at__gte=JUNSTART) & Q(created_at__lte=JUNEND)).count(),
-        'jul': Registration.objects(status='registered').filter(Q(created_at__gte=JULSTART) & Q(created_at__lte=JULEND)).count(),
-        'aug': Registration.objects(status='registered').filter(Q(created_at__gte=AUGSTART) & Q(created_at__lte=AUGEND)).count(),
-        'sep': Registration.objects(status='registered').filter(Q(created_at__gte=SEPSTART) & Q(created_at__lte=SEPEND)).count(),
-        'oct': Registration.objects(status='registered').filter(Q(created_at__gte=OCTSTART) & Q(created_at__lte=OCTEND)).count(),
-        'nov': Registration.objects(status='registered').filter(Q(created_at__gte=NOVSTART) & Q(created_at__lte=NOVEND)).count(),
-        'dec': Registration.objects(status='registered').filter(Q(created_at__gte=DECSTART) & Q(created_at__lte=DECEND)).count(),
+        'jan': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=JANSTART) & Q(created_at__lte=JANEND)).count(),
+        'feb': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=FEBSTART) & Q(created_at__lte=FEBEND)).count(),
+        'mar': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=MARSTART) & Q(created_at__lte=MAREND)).count(),
+        'apr': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=APRSTART) & Q(created_at__lte=APREND)).count(),
+        'may': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=MAYSTART) & Q(created_at__lte=MAYEND)).count(),
+        'jun': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=JUNSTART) & Q(created_at__lte=JUNEND)).count(),
+        'jul': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=JULSTART) & Q(created_at__lte=JULEND)).count(),
+        'aug': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=AUGSTART) & Q(created_at__lte=AUGEND)).count(),
+        'sep': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=SEPSTART) & Q(created_at__lte=SEPEND)).count(),
+        'oct': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=OCTSTART) & Q(created_at__lte=OCTEND)).count(),
+        'nov': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=NOVSTART) & Q(created_at__lte=NOVEND)).count(),
+        'dec': Registration.objects(status='registered').filter(branch=branch_id).filter(Q(created_at__gte=DECSTART) & Q(created_at__lte=DECEND)).count(),
     }
 
     no_of_students.append(no_of_students_per_month['jan'])
