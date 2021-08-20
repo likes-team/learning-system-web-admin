@@ -412,6 +412,7 @@ def new_payment():
     client = Registration.objects.get_or_404(id=client_id)
 
     is_premium = request.form.get('chkbox_upgrade', False)
+    is_upgrade_full_payment = request.form.get('chkbox_upgrade_full_payment', False)
 
     if is_premium != 'on':
         if amount > client.balance:
@@ -423,12 +424,18 @@ def new_payment():
     else:
         client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
 
+    if is_upgrade_full_payment == 'on':
+        client.payment_mode = "full_payment" if client.payment_mode == "installment" else 'full_payment_promo'
+
     client.amount += amount
     
     if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
         client.balance = ((client.balance + 700) - amount)
     else:
-        client.balance = client.balance - amount
+        if is_upgrade_full_payment == 'on':
+            client.balance = client.balance - (amount + 800)
+        else:
+            client.balance = client.balance - amount
     
     if client.level == "first":
         earnings_percent = decimal.Decimal(0.14)
