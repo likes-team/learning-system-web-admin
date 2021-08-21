@@ -108,23 +108,33 @@ def supplies():
     _equipments = Inventory.objects(type="supplies")
 
     for equipment in _equipments:
+        actions = """"""
         _table_data.append((
             equipment.id,
-            equipment.maintaining,
             equipment.description,
+            equipment.uom, equipment.qty,
+            equipment.maintaining,
+            '','','','','','','','','','','','','','','',
             equipment.released,
             equipment.remaining,
             equipment.total_replacement,
+            equipment.price,
+            '',
+            "actions"
         ))
 
     return admin_table(
         Supplies,
         fields=[],
         form=form,
+        table_template="lms/supplies_table.html",
         table_data=_table_data,
         create_url='lms.create_supplies',
-        edit_url='lms.edit_secretary',
-        view_modal_url='/learning-management/get-view-supplies-data'
+        edit_url=False,
+        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],
+        # edit_url='lms.edit_secretary',
+        view_modal=False,
+        # view_modal_url='/learning-management/get-view-supplies-data'
         )
 
 

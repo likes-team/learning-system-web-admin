@@ -113,20 +113,29 @@ class WithdrawForm(FlaskForm):
 class InventoryForm(AdminTableForm):
     from prime_admin.models import Branch
 
-    __table_columns__ = ['Maintaining Materials', 'Description', 'Released Materials', 'Remaining Materials','Total of replacement Materials']
+    __table_columns__ = [
+        'Description', 'UOM', 'QTY', "Maintaining Materials",
+        '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17',
+        'total used', 'Remaining Materials','Total replacement', 'Price', 'Amount', 'Actions'
+    ]
+
     __heading__ = "Inventories"
 
     description = AdminField(label="Description", validators=[DataRequired()])
-    maintaining = AdminField(label="Maintaining Materials", required=False, type='number')
-    remaining = AdminField(label="Stocks", required=False, type='number')
+    maintaining = AdminField(label="Maintaining Materials", validators=[DataRequired()], type='number')
+    remaining = AdminField(label="Quantity", validators=[DataRequired()], type='number')
     price = AdminField(label="Price", validators=[DataRequired()], type='decimal')
+    uom = AdminField(label="UOM", validators=[DataRequired()])
     branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    purchase_date = AdminField(label="Purchase Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
             [self.branch, self.description],
-            [self.price, self.maintaining, self.remaining]
+            [self.price, self.uom],
+            [self.maintaining, self.remaining],
+            [self.purchase_date]
             ]
 
 

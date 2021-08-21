@@ -203,6 +203,9 @@ class Inventory(Base, Admin):
     total_replacement = db.IntField()
     type = db.StringField()
     branch = db.ReferenceField('Branch')
+    uom = db.StringField()
+    qty = db.StringField()
+    purchase_date = db.DateTimeField()
 
     @property
     def name(self):
