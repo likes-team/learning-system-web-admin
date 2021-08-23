@@ -63,18 +63,18 @@ $(document).ready(function(){
                 $('#tbl_dashboard > tbody:first').append(
                     `<tr>
                     <th scope="row">NET</th>
-                    <td>${response.gross_sales[0] || ""}</td>
-                    <td>${response.gross_sales[1] || ""}</td>
-                    <td>${response.gross_sales[2] || ""}</td>
-                    <td>${response.gross_sales[3] || ""}</td>
-                    <td>${response.gross_sales[4] || ""}</td>
-                    <td>${""}</td>
-                    <td>${response.gross_sales[6] || ""}</td>
-                    <td>${response.gross_sales[7] || ""}</td>
-                    <td>${response.gross_sales[8] || ""}</td>
-                    <td>${response.gross_sales[9] || ""}</td>
-                    <td>${response.gross_sales[10] || ""}</td>
-                    <td>${response.gross_sales[11] || ""}</td>
+                    <td>${net_data[0] || ""}</td>
+                    <td>${net_data[1] || ""}</td>
+                    <td>${net_data[2] || ""}</td>
+                    <td>${net_data[3] || ""}</td>
+                    <td>${net_data[4] || ""}</td>
+                    <td>${net_data[5] || ""}</td>
+                    <td>${net_data[6] || ""}</td>
+                    <td>${net_data[7] || ""}</td>
+                    <td>${net_data[8] || ""}</td>
+                    <td>${net_data[9] || ""}</td>
+                    <td>${net_data[10] || ""}</td>
+                    <td>${net_data[11] || ""}</td>
                     </tr>`
                     );
     
