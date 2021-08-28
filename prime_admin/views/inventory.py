@@ -1,4 +1,5 @@
 import decimal
+from prime_admin.globals import get_date_now
 from flask.json import jsonify
 from app.auth.models import Role, User
 from prime_admin.forms import InventoryForm, PartnerForm, SecretaryEditForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
@@ -109,15 +110,89 @@ def supplies():
     _equipments = Inventory.objects(type="supplies")
 
     for equipment in _equipments:
-        actions = """"""
+        for x in equipment.transactions:
+            one, two, three, four, five = '', '', '', '', ''
+            six, seven, eight, nine, ten = '', '', '', '', ''
+            eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
+            sixteen, seventeen, eighteen, nineteen, twenty = '', '', '', '', ''
+            tone, ttwo, tthree, tfour, tfive = '', '', '', '', ''
+            tsix,tseven,teight, tnine, thirty = '', '', '', '', ''
+            thone = ''
+            
+            if x.date is None:
+                continue
+
+            if x.date.day == 1:
+                one = x.quantity
+            elif x.date.day == 2:
+                two = x.quantity
+            elif x.date.day == 3:
+                three = x.quantity
+            elif x.date.day == 4:
+                four = x.quantity
+            elif x.date.day == 5:
+                five = x.quantity
+            elif x.date.day == 6:
+                six = x.quantity
+            elif x.date.day == 7:
+                seven = x.quantity
+            elif x.date.day == 8:
+                eight = x.quantity
+            elif x.date.day == 9:
+                nine = x.quantity
+            elif x.date.day == 10:
+                ten = x.quantity
+            elif x.date.day == 11:
+                eleven = x.quantity
+            if x.date.day == 12:
+                twelve = x.quantity
+            elif x.date.day == 13:
+                thirteen = x.quantity
+            if x.date.day == 14:
+                fourteen = x.quantity
+            elif x.date.day == 15:
+                fifteen = x.quantity
+            if x.date.day == 16:
+                sixteen = x.quantity
+            elif x.date.day == 17:
+                seventeen = x.quantity
+            if x.date.day == 18:
+                eighteen = x.quantity
+            elif x.date.day == 19:
+                nineteen = x.quantity
+            if x.date.day == 20:
+                twenty = x.quantity
+            elif x.date.day == 21:
+                tone = x.quantity
+            if x.date.day == 22:
+                ttwo = x.quantity
+            elif x.date.day == 23:
+                tthree = x.quantity
+            if x.date.day == 24:
+                tfour = x.quantity
+            elif x.date.day == 25:
+                tfive = x.quantity
+            elif x.date.day == 26:
+                tsix = x.quantity
+            elif x.date.day == 27:
+                tseven = x.quantity
+            elif x.date.day == 28:
+                teight = x.quantity
+            elif x.date.day == 29:
+                tnine = x.quantity
+            elif x.date.day == 30:
+                thirty = x.quantity
+            elif x.date.day == 31:
+                thone = x.quantity
+        
         _table_data.append((
             equipment.id,
             "actions",
             equipment.description,
             equipment.uom, equipment.qty,
             equipment.maintaining,
-            '','','','','','','','','','','','','','','','','',
-            '','','','','','','','','','','','','','',
+            one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+            eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
             equipment.released,
             equipment.remaining,
             equipment.total_replacement,
@@ -187,25 +262,62 @@ def create_supplies():
 @bp_lms.route('/supplies/inbound', methods=["POST"])
 @login_required
 def inbound_supply():
+    try:
+        supply_id = request.form['supply_id']
+        brand = request.form['brand']
+        price = decimal.Decimal(request.form['price'])
+        quantity = int(request.form['quantity'])
+
+        supply : Inventory = Inventory.objects.get(id=supply_id)
+
+        if supply is None:
+            raise Exception("Product cannot be found")
+
+        supply.remaining = supply.remaining + quantity
+
+        supply.transactions.append(
+            InboundOutbound(
+                brand=brand,
+                price=price,
+                quantity=quantity,
+                total_amount=price * quantity,
+                confirm_by=User.objects.get(id=current_user.id)
+            )
+        )
+
+        supply.save()
+
+        flash('Process Successfully!','success')
+    except Exception as e:
+        flash(str(e),'error')
+    
+    return redirect(url_for('lms.supplies'))
+
+
+@bp_lms.route('/supplies/outbound', methods=["POST"])
+@login_required
+def outbound_supply():
     # try:
-    supply_id = request.form['supply_id']
-    brand = request.form['brand']
-    price = decimal.Decimal(request.form['price'])
+    supply_id = request.form['outbound_supply_id']
+    withdraw_by = request.form['withdraw_by']
+    date = request.form['date']
     quantity = int(request.form['quantity'])
+    remarks = request.form['remarks']
     
     supply : Inventory = Inventory.objects.get(id=supply_id)
 
     if supply is None:
         raise Exception("Product cannot be found")
     
-    supply.remaining = supply.remaining + quantity
+    supply.remaining = supply.remaining - quantity 
+    supply.released = supply.released + quantity if supply.released is not None else quantity
 
     supply.transactions.append(
         InboundOutbound(
-            brand=brand,
-            price=price,
             quantity=quantity,
-            total_amount=price * quantity,
+            date=date,
+            remarks=remarks,
+            withdraw_by=withdraw_by,
             confirm_by=User.objects.get(id=current_user.id)
         )
     )

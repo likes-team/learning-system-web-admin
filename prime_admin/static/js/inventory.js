@@ -9,6 +9,13 @@ $(document).ready(function(){
         $("#supply_id").val(data);
     });
 
+    $('#index_table tbody').on('click', '.btn-outbound', function () {
+        var data =  $(this).parents('tr').attr('id');
+        
+        console.log(data);
+        $("#outbound_supply_id").val(data);
+    });
+
     var js_fields_array = JS_FIELDS.split(",");
 
     for (i=0; i < js_fields_array.length; i++){

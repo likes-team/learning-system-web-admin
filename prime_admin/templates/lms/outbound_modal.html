@@ -9,36 +9,35 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="" method="POST">
+                <form action="{{url_for('lms.outbound_supply')}}" method="POST" class="needs-validation" novalidate>
                     <div class="main-card mb-3 card">
                         <div class="card-body">
                         <h5 class="card-title">Material Information</h5>
-
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id"
+                            <input type="hidden" class="form-control" id="outbound_supply_id" name="outbound_supply_id"
                             value="">
                             <div class="form-row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="edit_middle_name">Withdraw by</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_middle_name" name="edit_middle_name"
+                                    <label for="withdraw_by">Withdraw by</label>
+                                    <input required style="font-weight: bold;" type="text" class="form-control" id="withdraw_by" name="withdraw_by"
                                         value="">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="edit_suffix">Date</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_suffix" name="edit_suffix"
+                                    <label for="date">Date</label>
+                                    <input required style="font-weight: bold;" type="date" class="form-control" id="date" name="date"
                                         value="">
                                 </div>
                                 <div class="col-md-2 mb-3">
-                                    <label for="edit_middle_name">Qty</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_middle_name" name="edit_middle_name"
+                                    <label for="quantity">Quantity</label>
+                                    <input required style="font-weight: bold;" type="number" class="form-control" id="quantity" name="quantity"
                                         value="">
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="edit_middle_name">Reasons/Remarks</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_middle_name" name="edit_middle_name"
+                                    <label for="remarks">Reasons/Remarks</label>
+                                    <input required style="font-weight: bold;" type="text" class="form-control" id="remarks" name="remarks"
                                         value="">
                                 </div>
                             </div>
@@ -48,7 +47,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button disabled type="submit" class="btn btn-success">Confirm</button>
+                        <button type="submit" class="btn btn-success">Confirm</button>
                     </div>
                 </form>
             </div>

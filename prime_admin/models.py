@@ -193,6 +193,9 @@ class InboundOutbound(db.EmbeddedDocument):
     price = db.DecimalField()
     quantity = db.IntField()
     total_amount = db.DecimalField()
+    remarks = db.StringField()
+    date = db.DateTimeField()
+    withdraw_by =db.StringField()
     confirm_by = db.ReferenceField('User')
 
     @property
