@@ -9,34 +9,39 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="" method="POST">
+                <form action="{{url_for('lms.inbound_supply')}}" method="POST" class="needs-validation" novalidate>
                     <div class="main-card mb-3 card">
                         <div class="card-body">
                         <h5 class="card-title">Material Information</h5>
 
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id"
+                            <input type="hidden" class="form-control" id="supply_id" name="supply_id"
                             value="">
                             <div class="form-row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="edit_last_name">Brand</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_last_name" name="edit_last_name"
+                                    <label for="brand">Brand</label>
+                                    <input required style="font-weight: bold;" type="text" class="form-control" id="brand" name="brand"
                                         value="">
                                 </div>
                                 
                                 <div class="col-md-4 mb-3">
-                                    <label for="edit_suffix">Total Price</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_suffix" name="edit_suffix"
-                                        value="">
+                                    <div class="position-relative form-group"><label for="amount"
+                                        class="">Price</label>
+                                        <input required id="price" placeholder="Price" step="1" type="number" name="price" class="form-control">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
                                 </div>
+                                </div>
+
+                                
                                 <div class="col-md-2 mb-3">
-                                    <label for="edit_middle_name">Quantity</label>
-                                    <input style="font-weight: bold;" disabled type="text" class="form-control" id="edit_middle_name" name="edit_middle_name"
+                                    <label for="quantity">Quantity</label>
+                                    <input required style="font-weight: bold;" type="number" class="form-control" id="quantity" name="quantity"
                                         value="">
                                 </div>
                             </div>
                         </div>
-                        
                     </div>
 
                     <div class="modal-footer">

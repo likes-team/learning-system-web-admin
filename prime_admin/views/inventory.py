@@ -1,10 +1,11 @@
+import decimal
 from flask.json import jsonify
 from app.auth.models import Role, User
 from prime_admin.forms import InventoryForm, PartnerForm, SecretaryEditForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Equipment, Inventory, Secretary, Supplies, Utilities
+from prime_admin.models import Branch, Equipment, InboundOutbound, Inventory, Secretary, Supplies, Utilities
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -111,6 +112,7 @@ def supplies():
         actions = """"""
         _table_data.append((
             equipment.id,
+            "actions",
             equipment.description,
             equipment.uom, equipment.qty,
             equipment.maintaining,
@@ -121,7 +123,6 @@ def supplies():
             equipment.total_replacement,
             equipment.price,
             '',
-            "actions"
         ))
 
     return admin_table(
@@ -132,8 +133,8 @@ def supplies():
         table_data=_table_data,
         create_url='lms.create_supplies',
         edit_url=False,
-        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],
-        # edit_url='lms.edit_secretary',
+        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
+        scripts=[{'lms.static': 'js/inventory.js'}],
         view_modal=False,
         # view_modal_url='/learning-management/get-view-supplies-data'
         )
@@ -179,6 +180,41 @@ def create_supplies():
 
     except Exception as e:
         flash(str(e),'error')
+    
+    return redirect(url_for('lms.supplies'))
+
+
+@bp_lms.route('/supplies/inbound', methods=["POST"])
+@login_required
+def inbound_supply():
+    # try:
+    supply_id = request.form['supply_id']
+    brand = request.form['brand']
+    price = decimal.Decimal(request.form['price'])
+    quantity = int(request.form['quantity'])
+    
+    supply : Inventory = Inventory.objects.get(id=supply_id)
+
+    if supply is None:
+        raise Exception("Product cannot be found")
+    
+    supply.remaining = supply.remaining + quantity
+
+    supply.transactions.append(
+        InboundOutbound(
+            brand=brand,
+            price=price,
+            quantity=quantity,
+            total_amount=price * quantity,
+            confirm_by=User.objects.get(id=current_user.id)
+        )
+    )
+
+    supply.save()
+
+    flash('Process Successfully!','success')
+    # except Exception as e:
+    #     flash(str(e),'error')
     
     return redirect(url_for('lms.supplies'))
 

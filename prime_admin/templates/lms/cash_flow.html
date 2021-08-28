@@ -338,24 +338,27 @@
                         </tr>
                     </thead>
                     <tbody>
+                    </tbody>
+                </table>
+            </div>
 
-                        {% for row_data in TABLE_OPTIONS['table_data'] %}
-                 
-                        <tr class="item row_object" id="{{row_data[0]}}">
-                            {% for value in row_data %}
-
-                            <td class="text-center">
-                                {% if value == none %}
-                                <!-- pass -->
-                                {% else %}
-                                {{value}}
-                                {% endif %}
-                            </td>
-
-                            {% endfor %}
+            <h5 style="margin-top: 20px;">Profits history</h5>
+            <div class="table-responsive">
+                <table id="tbl_profits_history" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">DATE</th>
+                            <th class="text-center">NEW TOTAL GROSS SALES</th>
+                            <th class="text-center">PREV TOTAL GROSS SALES</th>
+                            <th class="text-center">NET</th>
+                            <th class="text-center">REMAINING</th>
+                            <th class="text-center">NEW FINAL FUND 1</th>
+                            <th class="text-center">PREV FINAL FUND 1</th>
+                            <th class="text-center">NEW FINAL FUND 2</th>
+                            <th class="text-center">PREV FINAL FUND 2</th>
                         </tr>
-                        {% endfor %}
-
+                    </thead>
+                    <tbody>
                     </tbody>
                 </table>
             </div>

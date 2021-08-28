@@ -124,6 +124,20 @@ $(document).ready(function () {
         }
     });
 
+    var dtbl_profits_history = $('#tbl_profits_history').DataTable({
+        "dom": 'rtip',
+        "pageLength": 100,
+        "processing": true,
+        "order": [[1, 'asc']],
+        "ordering": false,
+        "ajax": {
+            "url": "/learning-management/dtbl/get-profits-history",
+            "data": function (d) {
+                d.branch = $("#btn_branch_label").val();
+            },
+        }
+    });
+
     $("#div_branch_buttons").on('click', '.btn-branch', function () {
         var branch_name = $(this).html();
 
@@ -141,6 +155,7 @@ $(document).ready(function () {
     $("#btn_branch_label").change(function () {
         dtbl_statement.ajax.reload();
         dtbl_fund_statement.ajax.reload();
+        dtbl_profits_history.ajax.reload();
     });
 
     var groupColumn = 1;

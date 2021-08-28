@@ -2,7 +2,7 @@ import pytz
 from config import TIMEZONE
 from datetime import datetime
 from enum import unique
-from mongoengine.fields import DateField
+from mongoengine.fields import DateField, EmbeddedDocumentListField
 from app import db
 from app.admin.models import Admin
 from app.core.models import Base
@@ -186,6 +186,22 @@ class Orientator(Base, Admin):
         return self.fname
 
 
+class InboundOutbound(db.EmbeddedDocument):
+    # custom_id = db.StringField(primary_key=True)
+    _id = db.ObjectIdField( required=True, default=lambda: ObjectId())
+    brand = db.StringField()
+    price = db.DecimalField()
+    quantity = db.IntField()
+    total_amount = db.DecimalField()
+    confirm_by = db.ReferenceField('User')
+
+    @property
+    def id(self):
+        if not self._id:
+            return ''
+
+        return str(self._id)
+
 class Inventory(Base, Admin):
     meta = {
         'collection': 'lms_inventories',
@@ -206,6 +222,7 @@ class Inventory(Base, Admin):
     uom = db.StringField()
     qty = db.StringField()
     purchase_date = db.DateTimeField()
+    transactions = db.EmbeddedDocumentListField(InboundOutbound)
 
     @property
     def name(self):

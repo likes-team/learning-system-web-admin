@@ -114,9 +114,9 @@ class InventoryForm(AdminTableForm):
     from prime_admin.models import Branch
 
     __table_columns__ = [
-        'Description', 'UOM', 'QTY', "Maintaining Materials",
+        'Actions','Description', 'UOM', 'QTY', "Maintaining Materials",
         '1' ,'2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20','21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31',
-        'total used', 'Remaining Materials','Total replacement', 'Price', 'Amount', 'Actions'
+        'total used', 'Remaining Materials','Total replacement', 'Price', 'Amount'
     ]
 
     __heading__ = "Inventories"

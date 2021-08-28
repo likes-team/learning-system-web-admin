@@ -347,6 +347,42 @@ def get_cash_flow():
     return jsonify(response)
 
 
+@bp_lms.route('/dtbl/get-profits-history')
+def get_profits_history():
+    branch_id = request.args.get('branch')
+
+    if branch_id == 'all':
+        return jsonify({'data': []})
+        
+    if current_user.role.name == "Secretary":
+        accounting = Accounting.objects(branch=current_user.branch.id).first()
+    else:
+        accounting = Accounting.objects(branch=branch_id).first()
+
+    if accounting is None:
+        return jsonify({'data': []})
+
+    data = []
+
+    for x in accounting.profits:
+        data.append((
+            x['date'],
+            str(round(x['new_total_gross_sale'].to_decimal(), 2)),
+            str(round(x['previous_total_gross_sale'].to_decimal(), 2)),
+            str(round(x['net'].to_decimal(), 2)),
+            str(round(x['remaining'].to_decimal(), 2)),
+            str(round(x['new_final_fund1'].to_decimal(), 2)),
+            str(round(x['previous_final_fund1'].to_decimal(), 2)),
+            str(round(x['new_final_fund2'].to_decimal(), 2)),
+            str(round(x['previous_final_fund2'].to_decimal(), 2))
+        ))
+
+    response = {
+        'data': data
+    }
+
+    return jsonify(response)
+
 @bp_lms.route('/profit', methods=['POST'])
 @login_required
 def profit():
