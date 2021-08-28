@@ -91,6 +91,15 @@ $(document).ready(function(){
 
                 return json.data;
             }
+        },
+        "createdRow": function(row, data, dataIndex){
+            if(data[11] == "No"){
+                $(row).addClass('row-not-deposit');
+            }
+
+            if(data[10] == "NOT PAID"){
+                $(row).addClass('row-not-paid');
+            }
         }
     });
 
