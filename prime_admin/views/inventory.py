@@ -110,15 +110,15 @@ def supplies():
     _equipments = Inventory.objects(type="supplies")
 
     for equipment in _equipments:
+        one, two, three, four, five = '', '', '', '', ''
+        six, seven, eight, nine, ten = '', '', '', '', ''
+        eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
+        sixteen, seventeen, eighteen, nineteen, twenty = '', '', '', '', ''
+        tone, ttwo, tthree, tfour, tfive = '', '', '', '', ''
+        tsix,tseven,teight, tnine, thirty = '', '', '', '', ''
+        thone = ''
+
         for x in equipment.transactions:
-            one, two, three, four, five = '', '', '', '', ''
-            six, seven, eight, nine, ten = '', '', '', '', ''
-            eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
-            sixteen, seventeen, eighteen, nineteen, twenty = '', '', '', '', ''
-            tone, ttwo, tthree, tfour, tfive = '', '', '', '', ''
-            tsix,tseven,teight, tnine, thirty = '', '', '', '', ''
-            thone = ''
-            
             if x.date is None:
                 continue
 
