@@ -17,12 +17,10 @@ class AdminModule(CoreModule):
     sidebar = {
         'Control Panels': [
             AdminDashboard,
-            Batch
+            Batch,
+            Branch,
         ],
         'SYSTEM': [
             User, Role
         ],
-        'CONFIGURATION':[
-            Branch,
-        ]
     }

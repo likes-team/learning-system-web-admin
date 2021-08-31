@@ -5,7 +5,7 @@ from prime_admin.forms import BranchEditForm, BranchForm, PartnerForm, Secretary
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch
+from prime_admin.models import Batch, Branch
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -114,3 +114,31 @@ def edit_branch(oid,**kwargs):
         flash(str(e),'error')
     
     return redirect(url_for('lms.branches'))
+
+
+@bp_lms.route('/api/branches/<string:branch_id>/batches')
+def get_branch_batches(branch_id):
+    data = []
+
+    if branch_id == "all":
+        response = jsonify({
+            'data': data
+        })
+
+        return response
+    else:
+        batches = Batch.objects(branch=branch_id)
+
+    for batch in batches:
+        data.append(
+            {
+                'id': str(batch.id),
+                'number': batch.number
+            }
+        )        
+
+    response = jsonify({
+        'data': data
+    })
+
+    return response

@@ -1,6 +1,6 @@
 import decimal
 import pytz
-from prime_admin.globals import get_date_now, get_sales_today_date
+from prime_admin.globals import convert_to_utc, get_date_now, get_sales_today_date
 from random import uniform
 from pymongo.common import clean_node
 from prime_admin.functions import generate_number
@@ -48,6 +48,9 @@ def members():
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects()
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects()        
 
     return admin_table(
         Member,
@@ -74,19 +77,27 @@ def get_dtbl_members():
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
     schedule = request.args.get('schedule')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    
+    sales_today = 0
+
+    print(get_sales_today_date())
+    print(get_date_now())
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered').skip(start).limit(length)
-        # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
+        registrations = Registration.objects(branch=branch_id).filter(status='registered').order_by("-registration_date").skip(start).limit(length)
+        sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).skip(start).limit(length)
-            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).filter(branch__in=current_user.branches).sum('amount')
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
+            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).filter(branch__in=current_user.branches).sum('amount')
+        elif current_user.role.name == "Partner":
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
         else:
-            registrations = Registration.objects(status='registered').skip(start).limit(length)
-            # sales_today = registrations.filter(registration_date__gte=get_sales_today_date().date()).sum('amount')
+            registrations = Registration.objects(status='registered').order_by("-registration_date").skip(start).limit(length)
+            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
-    sales_today = 0
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -96,6 +107,14 @@ def get_dtbl_members():
 
     if search_value != "":
         registrations = registrations.filter(lname__icontains=search_value)
+
+    if date_from !="":
+        print("date_from: ", convert_to_utc(date_from, 'date_from'))
+        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+
+    if date_to != "":
+        print("date_to: ", convert_to_utc(date_to))
+        registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
 
     _table_data = []
 
@@ -110,16 +129,19 @@ def get_dtbl_members():
 
         if registration.balance <= 0.00:
             paid = 'PAID'
-
-        if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
-            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
-                <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
         
+        if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
+            if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+            elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+            elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
+                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                    <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+        else: # Marketers
+            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
+
         branch = registration.branch
         contact_person = registration.contact_person
 
@@ -169,9 +191,9 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium_promo':
             payment_mode = "Premium Payment - Promo"
 
-        if registration.registration_date_local_date:
-            if get_sales_today_date().date() == registration.registration_date_local_date.date():
-                sales_today += registration.amount
+        # if registration.registration_date_local_date:
+        #     if get_sales_today_date().date() == registration.registration_date_local_date.date():
+        #         sales_today += registration.amount
 
         if registration.amount == registration.amount_deposit:
             deposit = "Yes"
@@ -390,6 +412,7 @@ def new_payment():
     client = Registration.objects.get_or_404(id=client_id)
 
     is_premium = request.form.get('chkbox_upgrade', False)
+    is_upgrade_full_payment = request.form.get('chkbox_upgrade_full_payment', False)
 
     if is_premium != 'on':
         if amount > client.balance:
@@ -401,12 +424,18 @@ def new_payment():
     else:
         client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
 
+    if is_upgrade_full_payment == 'on':
+        client.payment_mode = "full_payment" if client.payment_mode == "installment" else 'full_payment_promo'
+
     client.amount += amount
     
     if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
         client.balance = ((client.balance + 700) - amount)
     else:
-        client.balance = client.balance - amount
+        if is_upgrade_full_payment == 'on':
+            client.balance = client.balance - (amount + 800)
+        else:
+            client.balance = client.balance - amount
     
     if client.level == "first":
         earnings_percent = decimal.Decimal(0.14)
@@ -428,6 +457,20 @@ def new_payment():
 
     custom_id = client.full_registration_number + str(get_date_now())
 
+    payment = Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date,
+            payment_by=client,
+            earnings=Decimal128(str(earnings)),
+            savings=Decimal128(str(savings)),
+        )
+
+    client.payments.append(payment)
+
     client.contact_person.earnings.append(
         Earning(
             custom_id=custom_id,
@@ -437,18 +480,8 @@ def new_payment():
             branch=client.branch,
             client=client,
             date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id))
-        )
-    )
-
-    client.payments.append(
-        Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date
+            registered_by=User.objects.get(id=str(current_user.id)),
+            payment_id=payment.id
         )
     )
 
@@ -527,6 +560,20 @@ def upgrade_to_premium():
 
     custom_id = client.full_registration_number + str(get_date_now())
 
+    payment = Payment(
+            deposited="No",
+            payment_mode=client.payment_mode,
+            amount=Decimal128(str(amount)),
+            current_balance=Decimal128(str(client.balance)),
+            confirm_by=User.objects.get(id=str(current_user.id)),
+            date=date,
+            payment_by=client,
+            earnings=Decimal128(str(earnings)),
+            savings=Decimal128(str(savings)),
+        )
+
+    client.payments.append(payment)
+
     client.contact_person.earnings.append(
         Earning(
             custom_id=custom_id,
@@ -536,18 +583,8 @@ def upgrade_to_premium():
             branch=client.branch,
             client=client,
             date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id))
-        )
-    )
-
-    client.payments.append(
-        Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date
+            registered_by=User.objects.get(id=str(current_user.id)),
+            payment_id=payment.id
         )
     )
 
@@ -574,8 +611,8 @@ def upgrade_to_premium():
     id_materials = request.form.getlist('upgrade_others')
 
     client.id_materials = {
-        'id_card': True if 'id_card' in id_materials else False,
-        'id_lace': True if 'id_lace' in id_materials else False,
+        'id_card': True if 'upgrade_id_card' in id_materials else False,
+        'id_lace': True if 'upgrade_id_lace' in id_materials else False,
     }
 
     client.save()
@@ -686,7 +723,12 @@ def print_students_pdf():
             payment_mode = "Installment"
         elif registration.payment_mode == 'premium':
             payment_mode = "Premium Payment"
-
+        elif registration.payment_mode == "full_payment_promo":
+            payment_mode = "Full Payment - Promo"
+        elif registration.payment_mode == "installment_promo":
+            payment_mode = "Installment - Promo"
+        elif registration.payment_mode == "premium_promo":
+            payment_mode = "Premium - Promo"
 
         _table_data.append([
             str(registration.id), # 0

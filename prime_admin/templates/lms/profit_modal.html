@@ -21,8 +21,8 @@
                             <div class="form-row">
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
-                                        <label for="branch" class="">Branch</label>
-                                        <select name="branch" id="branch" class="form-control" required>
+                                        <label for="branch_profit" class="">Branch</label>
+                                        <select name="branch_profit" id="branch_profit" class="form-control" required>
                                             <option value="">Choose...</option>
                                             {% for branch in TABLE_OPTIONS['branches'] %}
                                             <option value="{{ branch.id }}">
@@ -52,6 +52,20 @@
                                         </div>
                                 </div>
                             </div>
+                            
+                            <h5 class="card-title">Partners</h5>
+                            <table id="tbl_partners_percent" style="width:100%; cursor:pointer;" class="mb-0 table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>NAME</th>
+                                        <th>PERCENT</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                         <!-- load with ajax -->
+                                    </tbody>
+                            </table>
                         </div>
                     </div>
                     <script>
@@ -77,7 +91,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success">Confirm</button>
+                        <button id="btn_confirm_profit" type="button" class="btn btn-success">Confirm</button>
                     </div>
                 </form>
             </div>

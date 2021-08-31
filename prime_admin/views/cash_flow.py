@@ -3,8 +3,8 @@ import pytz
 from config import TIMEZONE
 import decimal
 from hashlib import new
-from prime_admin.globals import SECRETARYREFERENCE, get_date_now
-from app.auth.models import User
+from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, get_date_now
+from app.auth.models import Earning, User
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
@@ -33,6 +33,8 @@ def cash_flow():
 
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
     else:
         branches = Branch.objects
 
@@ -81,6 +83,8 @@ def deposit():
         new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
         new_deposit.branch = current_user.branch
         new_deposit.type = "deposit"
+        new_deposit.remarks = form.remarks.data
+        new_deposit.set_created_at()
 
         accounting = Accounting.objects(branch=current_user.branch.id).first()
         
@@ -107,13 +111,21 @@ def deposit():
                         client.save()
 
             elif new_deposit.from_what == "Student Loan Payment":
-
                 if accounting.final_fund1:
                     accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
                 else:
                     accounting.final_fund1 = new_deposit.amount
 
                 new_deposit.balance = accounting.final_fund1
+
+            elif new_deposit.from_what == "Emergency Fund":
+                if accounting.final_fund2:
+                    accounting.final_fund2 = accounting.final_fund2 + new_deposit.amount
+                else:
+                    accounting.final_fund2 = new_deposit.amount
+
+                new_deposit.balance = accounting.final_fund2
+            
         else:
             accounting = Accounting()
             accounting.branch = current_user.branch
@@ -139,6 +151,9 @@ def deposit():
 
             elif new_deposit.from_what == "Student Loan Payment":
                 accounting.final_fund1 = new_deposit.amount
+            elif new_deposit.from_what == "Emergency Fund":
+                accounting.final_fund2 = new_deposit.amount
+            
             new_deposit.balance = new_deposit.amount
 
         new_deposit.payments = payments
@@ -170,17 +185,30 @@ def withdraw():
         new_withdraw.created_by = "{} {}".format(current_user.fname,current_user.lname)
         new_withdraw.branch = Branch.objects.get(id=form.branch.data)
         new_withdraw.type = "withdraw"
+        new_withdraw.remarks = form.remarks.data
+        new_withdraw.set_created_at()
 
         accounting = Accounting.objects(branch=form.branch.data).first()
 
         if accounting:
             if new_withdraw.from_what == "Sales":
+                if new_withdraw.amount > accounting.total_gross_sale:
+                    flash("Withdraw amount is greater than the total gross sale",'error')
+                    return redirect(url_for('lms.cash_flow'))
+
                 accounting.total_gross_sale = accounting.total_gross_sale - new_withdraw.amount
                 new_withdraw.balance = accounting.total_gross_sale
             elif new_withdraw.from_what == "Fund 1":
+                if new_withdraw.amount > accounting.final_fund1:
+                    flash("Withdraw amount is greater than the fund",'error')
+                    return redirect(url_for('lms.cash_flow'))
                 accounting.final_fund1 = accounting.final_fund1 - new_withdraw.amount
                 new_withdraw.balance = accounting.final_fund1
             elif new_withdraw.from_what == "Fund 2":
+                if new_withdraw.amount > accounting.final_fund2:
+                    flash("Withdraw amount is greater than the fund",'error')
+                    return redirect(url_for('lms.cash_flow'))
+
                 accounting.final_fund2 = accounting.final_fund2 - new_withdraw.amount
                 new_withdraw.balance = accounting.final_fund2
         else:
@@ -285,7 +313,7 @@ def get_cash_flow():
                 str(statement.amount),
                 statement.from_what,
                 statement.by_who,
-                '',
+                statement.remarks,
                 statement.group
             ))
     else:
@@ -298,7 +326,7 @@ def get_cash_flow():
                 str(statement.balance) if statement.balance is not None else '',
                 '' if statement.type == "deposit" else statement.from_what,
                 statement.by_who,
-                '',
+                statement.remarks,
                 statement.group
             ))
 
@@ -319,64 +347,123 @@ def get_cash_flow():
     return jsonify(response)
 
 
+@bp_lms.route('/dtbl/get-profits-history')
+def get_profits_history():
+    branch_id = request.args.get('branch')
+
+    if branch_id == 'all':
+        return jsonify({'data': []})
+        
+    if current_user.role.name == "Secretary":
+        accounting = Accounting.objects(branch=current_user.branch.id).first()
+    else:
+        accounting = Accounting.objects(branch=branch_id).first()
+
+    if accounting is None:
+        return jsonify({'data': []})
+
+    data = []
+
+    for x in accounting.profits:
+        data.append((
+            x['date'],
+            str(round(x['new_total_gross_sale'].to_decimal(), 2)),
+            str(round(x['previous_total_gross_sale'].to_decimal(), 2)),
+            str(round(x['net'].to_decimal(), 2)),
+            str(round(x['remaining'].to_decimal(), 2)),
+            str(round(x['new_final_fund1'].to_decimal(), 2)),
+            str(round(x['previous_final_fund1'].to_decimal(), 2)),
+            str(round(x['new_final_fund2'].to_decimal(), 2)),
+            str(round(x['previous_final_fund2'].to_decimal(), 2))
+        ))
+
+    response = {
+        'data': data
+    }
+
+    return jsonify(response)
+
 @bp_lms.route('/profit', methods=['POST'])
 @login_required
 def profit():
-    password = request.form['password']
-    branch = request.form['branch']
+    password = request.json['password']
+    branch = request.json['branch']
+    partners_percent_list = request.json['partners_percent']
 
     if not current_user.check_password(password):
-        flash('Invalid password','error')
-        return redirect(url_for('lms.cash_flow'))
+        return jsonify({"result": "invalid_password"})
 
     accounting = Accounting.objects(branch=branch).first()
 
     if accounting is None:
-        flash('No cash flow transaction found','error')
-        return redirect(url_for('lms.cash_flow'))
-
-    remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
-    net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
-    fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-    fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-    previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
-    previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
-    previous_total_gross_sale = accounting.total_gross_sale
+        return jsonify({"result": "no_transaction"})
     
-    accounting.total_gross_sale = remaining
+    try:
+        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
+        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
+        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
+        previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
+        previous_total_gross_sale = accounting.total_gross_sale
+        
+        accounting.total_gross_sale = remaining
 
-    if accounting.final_fund1:
-        accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
-    else: 
-        accounting.final_fund1 = fund1
+        if accounting.final_fund1:
+            accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
+        else: 
+            accounting.final_fund1 = fund1
 
-    if accounting.final_fund2:
-        accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
-    else:
-        accounting.final_fund2 = fund2
-    
-    accounting.profits.append(
-        {
-            'date': get_date_now(),
-            'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
-            'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
-            'net': Decimal128(net),
-            'remaining': Decimal128(remaining),
-            'fund1': Decimal128(fund1),
-            'fund2': Decimal128(fund2),
-            'previous_final_fund1': Decimal128(previous_final_fund1),
-            'previous_final_fund2': Decimal128(previous_final_fund2),
-            'new_final_fund1': Decimal128(accounting.final_fund1),
-            'new_final_fund2': Decimal128(accounting.final_fund2),
-        }
-    )
+        if accounting.final_fund2:
+            accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
+        else:
+            accounting.final_fund2 = fund2
+        
+        accounting.profits.append(
+            {
+                'date': get_date_now(),
+                'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
+                'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
+                'net': Decimal128(net),
+                'remaining': Decimal128(remaining),
+                'fund1': Decimal128(fund1),
+                'fund2': Decimal128(fund2),
+                'previous_final_fund1': Decimal128(previous_final_fund1),
+                'previous_final_fund2': Decimal128(previous_final_fund2),
+                'new_final_fund1': Decimal128(accounting.final_fund1),
+                'new_final_fund2': Decimal128(accounting.final_fund2),
+                'partners_percent': partners_percent_list
+            }
+        )
 
-    accounting.active_group += 1
-    accounting.save()
+        accounting.active_group += 1
 
-    flash('Proccessed Successfully!','success')
+        for _partner in partners_percent_list:
+            partner = User.objects.get(id=_partner['partner_id'])
 
-    return redirect(url_for('lms.cash_flow'))
+            earnings = (net * decimal.Decimal(_partner['percent'])) / 100
+
+            partner.earnings.append(
+                Earning(
+                    custom_id=str(datetime.now().timestamp),
+                    payment_mode="profit_sharing",
+                    earnings=Decimal128(str(earnings)),
+                    branch=Branch.objects.get(id=branch),
+                    date=get_date_now(),
+                    registered_by=User.objects.get(id=str(current_user.id)),
+                )
+            )
+
+            partner.save()
+
+        accounting.save()
+
+    except Exception as exc:
+        print(str(exc))
+        return jsonify({"result": "error"})
+
+    return jsonify({"result": "success"})
+
 
 
 @bp_lms.route('/api/dtbl/mdl-pre-deposit', methods=['GET'])
@@ -491,4 +578,30 @@ def to_pre_deposit():
     }
 
     return jsonify(response)
+
+
+@bp_lms.route('/api/get-partners-percent', methods=['GET'])
+def get_partners_percent():
+    branch = request.args.get('branch')
+
+    if branch == '':
+        return jsonify({"data": []})
+
+    partners = User.objects(branches__in=[branch]).filter(role=PARTNERREFERENCE)
+
+    if len(partners) == 0:
+        return jsonify({"data": []})
+
+    data = []
+
+    for partner in partners:
+        data.append((
+            str(partner.id),
+            partner.full_name,
+            ''
+        ))
+
+    response = jsonify({'data': data})
+
+    return response
 

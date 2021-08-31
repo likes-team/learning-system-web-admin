@@ -45,9 +45,9 @@ class LearningManagementModule(CoreModule):
         'Accounting': [
             CashFlow
         ],
-        # 'Inventory': [
-        #     Equipment,
-        #     Supplies,
-        #     Utilities
-        # ]
+        'Inventory': [
+            Supplies,
+            # Equipment,
+            # Utilities
+        ]
     }

@@ -72,12 +72,15 @@ $(document).ready(function(){
         "serverSide": true,
         "autoWidth": false,
         "columnDefs": columnDefs,
+        "ordering": false,
         "ajax": {
             "url": "/learning-management/dtbl/members",
             "data": function (d) {
                 d.branch = $("#branch").val();
                 d.batch_no = $("#batch_no").val();
                 d.schedule = $("#schedule").val();
+                d.date_from = $("#date_from").val();
+                d.date_to = $("#date_to").val();
             },
             "dataSrc": function(json){
                 $("#total_installment").html("₱" + json.totalInstallment);
@@ -87,6 +90,15 @@ $(document).ready(function(){
                 $("#sales_today").html("₱" + json.salesToday);
 
                 return json.data;
+            }
+        },
+        "createdRow": function(row, data, dataIndex){
+            if(data[11] == "No"){
+                $(row).addClass('row-not-deposit');
+            }
+
+            if(data[10] == "NOT PAID"){
+                $(row).addClass('row-not-paid');
             }
         }
     });
@@ -393,14 +405,82 @@ $(document).ready(function(){
     });
 
     $("#btn_clear_entry").click(function(){
-        table.search($("#search_input").val("")).draw();
+        $("#search_input").val("")
+        table.search("").draw();    
     });
+
+    $("#chkbox_upgrade_full_payment").click(function(){
+        if(ISLOADING){
+            $("#chkbox_upgrade_full_payment").attr('onclick', "return false;");
+            return;
+        }
+
+        $('#chkbox_upgrade').prop('checked', false); // Unchecks it
+
+        var is_checked = $(this).is(":checked");
+
+        if(is_checked){
+            ISLOADING = true;
+
+            $.ajax({
+                url: '/learning-management/api/members/' + CLIENTID,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    var new_amount = parseInt(response.data.balance) - 800;
+
+                    $("#new_amount").val(new_amount);
+                    $("#new_amount").prop('readonly', true);
+                    $('#book_none').prop('checked', false);
+                    $('#book1').prop('checked', true);
+                    $('#book2').prop('checked', false);
+
+                    $("#uniform_m").prop("checked", true);
+
+                    $('#id_card').prop('checked', false);
+                    $('#id_lace').prop('checked', false);
+
+                    $("#id_lace").attr('onclick', "return false;");
+                    $("#id_card").attr('onclick', "return false;");
+                    $("#book_none").attr('onclick', "return false;");
+                    $("#book1").attr('onclick', "return false;");
+                    $("#book2").attr('onclick', "return false;");
+                    
+                    ISLOADING = false;
+                    $("#chkbox_upgrade_full_payment").attr('onclick', "");
+                }
+            });
+
+            return;
+        }
+
+        $("#new_amount").val('');
+        $("#new_amount").prop('readonly', false);
+        $('#book_none').prop('checked', true);
+        $('#book1').prop('checked', false);
+        $('#book2').prop('checked', false);
+
+        $("#uniform_m").prop("checked", false);
+        $("#uniform_none").prop("checked", true);
+
+        $('#id_card').prop('checked', false);
+        $('#id_lace').prop('checked', false);
+
+        $("#id_lace").attr('onclick', "");
+        $("#id_card").attr('onclick', "");
+        $("#book_none").attr('onclick', "");
+        $("#book1").attr('onclick', "");
+        $("#book2").attr('onclick', "");
+    });
+
 
     $("#chkbox_upgrade").click(function(){
         if(ISLOADING){
             $("#chkbox_upgrade").attr('onclick', "return false;");
             return;
         }
+
+        $('#chkbox_upgrade_full_payment').prop('checked', false); // Unchecks it
 
         var is_checked = $(this).is(":checked");
 
@@ -613,7 +693,42 @@ $(document).ready(function(){
 
     $("#branch").change(function(){
         BRANCH = $(this).val();
-        table.ajax.reload();
+
+        $.ajax({
+        url: `/learning-management/api/branches/${BRANCH}/batches`,
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                $('#batch_no').find('option').remove();
+
+                
+                if (BRANCH == 'all'){
+                    var newOption = $('<option value="all">Please select branch first</option>');
+                    $('#batch_no').append(newOption);
+                    $('#batch_no').val('all');
+                    table.ajax.reload();
+                    return;
+                }
+                
+                if (response.data.length > 0) {
+                    var newOption = $('<option value="all">All</option>');
+                    $('#batch_no').append(newOption);
+
+                    for (i = 0; i < response.data.length; i++) {
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].number}</option>`);
+                        $('#batch_no').append(newOption);
+                    }
+                } else {
+                    var newOption = $('<option value="all">No batch number available</option>');
+                    $('#batch_no').append(newOption);
+                }
+
+
+                $('#batch_no').val('all');
+        
+                table.ajax.reload();
+            }
+        });
     });
 
     $("#batch_no").change(function(){
@@ -623,6 +738,14 @@ $(document).ready(function(){
 
     $("#schedule").change(function(){
         SCHEDULE = $(this).val();
+        table.ajax.reload();
+    });
+
+    $('#date_from').change(function() {
+        table.ajax.reload();
+    });
+
+    $('#date_to').change(function() {
         table.ajax.reload();
     });
 });

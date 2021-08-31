@@ -20,6 +20,10 @@ from mongoengine.document import Document
 
 
 class Earning(db.EmbeddedDocument):
+    meta = {
+        'strict': False
+    }
+    
     custom_id = db.StringField(primary_key=True)
     payment_mode = db.StringField()
     savings = db.DecimalField()
@@ -28,6 +32,8 @@ class Earning(db.EmbeddedDocument):
     client = db.ReferenceField('Registration')
     date = db.DateTimeField()
     registered_by = db.ReferenceField('User')
+    status = db.StringField()
+    payment_id = db.StringField()
 
 
 # AUTH.MODEL.USER
@@ -65,6 +71,7 @@ class User(UserMixin, Base, Admin):
     address = db.StringField()
     full_employee_id = db.StringField()
     employee_id_no = db.IntField()
+    status = db.StringField()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

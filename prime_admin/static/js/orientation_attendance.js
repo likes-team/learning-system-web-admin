@@ -16,6 +16,7 @@ $(document).ready(function () {
         "processing": true,
         "serverSide": true,
         "autoWidth": false,
+        "ordering": false,
         "columnDefs": [
             { "visible": false, "targets": 0 },
         ],
@@ -29,7 +30,30 @@ $(document).ready(function () {
     });
 
     $("#branch_filter").change(function () {
-        dtbl_members.ajax.reload();
+        $.ajax({
+            url: '/learning-management/api/get-branch-contact-persons/' + $(this).val(),
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                $('#contact_person_filter').find('option').remove();
+
+                if (response.data.length > 0) {
+                    var newOption = $('<option value="all">All</option>');
+                    $('#contact_person_filter').append(newOption);
+
+                    for (i = 0; i < response.data.length; i++) {
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                        $('#contact_person_filter').append(newOption);
+                    }
+                } else {
+                    var newOption = $('<option value="all">No Contact Persons available</option>');
+                    $('#contact_person_filter').append(newOption);
+                }
+            
+                dtbl_members.ajax.reload();
+            }
+        });
+        
     });
 
     $("#contact_person_filter").change(function () {
@@ -264,4 +288,12 @@ $(document).ready(function () {
         }
     });
 
+    $("#btn_search").click(function(){
+        dtbl_members.search($("#search_input").val()).draw();
+    });
+
+    $("#btn_clear_entry").click(function(){
+        $("#search_input").val("")
+        dtbl_members.search("").draw();
+    });
 });

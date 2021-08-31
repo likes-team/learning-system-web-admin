@@ -13,6 +13,14 @@
     ROLE = "{{current_user.role.name}}";
 </script>
 <style>
+    .row-not-deposit{
+        color:#806013 !important;
+        background-color: #fdebc2 !important;
+    }
+    .row-not-paid {
+        color:#71132a !important;
+        background-color: #f4c2ce !important;
+    }
     .modal-dialog {
         overflow-y: initial !important
     }
@@ -199,7 +207,7 @@
     <div class="main-card mb-3 card">
         <div class="card-body">
             <div class="form-row">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="lname" class="">Search</label>
                         <div class="input-group">
@@ -215,6 +223,28 @@
                     </div>
                 </div>
                 <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="date_from" class="">Date From</label>
+                        <input id="date_from" type="date" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid date of birth
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="date_to" class="">Date To</label>
+                        <input id="date_to" type="date" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid date of birth
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
@@ -239,12 +269,16 @@
                     <div class="position-relative form-group">
                         <label for="batch_no" class="">Batch No.</label>
                         <select name="batch_no" id="batch_no" class="form-control" required>
-                            <option value="all">All</option>
-                            {% for batch in TABLE_OPTIONS['batch_numbers'] %}
-                            <option value="{{ batch.id }}">
-                                {{ batch.number }}
-                            </option>
-                            {% endfor %}
+                            {% if current_user.role.name == "Secretary" %}
+                                <option value="all">All</option>
+                                {% for batch in TABLE_OPTIONS['batch_numbers'] %}
+                                <option value="{{ batch.id }}">
+                                    {{ batch.number }}
+                                </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="all">Please select branch first</option>
+                            {% endif %}
                         </select>
                         <div class="valid-feedback">
                             Looks good!

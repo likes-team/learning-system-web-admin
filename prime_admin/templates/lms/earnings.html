@@ -52,7 +52,7 @@
                 <div class="nav">
 
                     <div class="dropleft btn-group">
-                        {% if current_user.role.name == "Marketer" %}
+                        {% if current_user.role.name == "Marketer" or current_user.role.name == "Partner" %}
                         <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
                             data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
                             {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
@@ -90,7 +90,7 @@
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
                                 <div class="widget-heading">TOTAL EARNINGS</div>
-                                <div class="widget-subheading"></div>
+                                <div class="widget-subheading">Current Earnings</div>
                             </div>
                             <div class="widget-content-right">
                                 <div class="widget-numbers text-success"><span id="total_earnings">₱ 0.00</span></div>
@@ -104,10 +104,40 @@
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
                                 <div class="widget-heading">SAVINGS</div>
-                                <div class="widget-subheading"></div>
+                                <div class="widget-subheading">Current Savings</div>
                             </div>
                             <div class="widget-content-right">
                                 <div class="widget-numbers text-warning"><span id="total_savings">₱ 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 col-xl-6">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL EARNINGS CLAIMED</div>
+                                <div class="widget-subheading">Past Earnings</div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-info"><span id="total_earnings_claimed">₱ 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-xl-6">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL SAVINGS CLAIMED</div>
+                                <div class="widget-subheading">Past Savings</div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-info"><span id="total_savings_claimed">₱ 0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -122,7 +152,7 @@
                             <div class="widget-content-wrapper">
                                 <div class="widget-content-left">
                                     <div class="widget-heading">{{branch.name}}</div>
-                                    <div class="widget-subheading">Total Earnings</div>
+                                    <div class="widget-subheading">Current Earnings</div>
                                 </div>
                                 <div class="widget-content-right">
                                     <div class="widget-numbers text-primary">₱ 0.00</div>
@@ -164,12 +194,7 @@
                     <div class="position-relative form-group">
                         <label for="batch_no" class="">Batch No.</label>
                         <select name="batch_no" id="batch_no" class="form-control" required>
-                            <option value="all">All</option>
-                            {% for batch in TABLE_OPTIONS['batch_numbers'] %}
-                            <option value="{{ batch.id }}">
-                                {{ batch.number }}
-                            </option>
-                            {% endfor %}
+                            <option value="all">Please select branch first</option>
                         </select>
                     </div>
                 </div>
@@ -191,6 +216,61 @@
             </div>
         </div>
     </div>
+
+        
+    {% if current_user.role.name == "Partner" %}
+    <div class="main-card mb-3 card">
+        <div class="card-header">
+            <div>
+                PROFIT SHARING
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4 col-xl-4">
+                </div>
+
+                <div class="col-lg-4 col-xl-4">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">TOTAL EARNINGS</div>
+                                <div class="widget-subheading"></div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-success"><span id="total_earnings_profit">₱ 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-xl-4">
+                </div>
+            </div>
+
+            <ul id="list_branches_total_earnings_profit" class="list-group">
+                {% for branch in TABLE_OPTIONS['branches'] %}
+                <li class="list-group-item">
+                    <div class="widget-content p-0">
+                        <div class="widget-content-outer">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">{{branch.name}}</div>
+                                    <div class="widget-subheading">Total Earnings</div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-primary">₱ 0.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
 </div>
 {% endblock %}
 

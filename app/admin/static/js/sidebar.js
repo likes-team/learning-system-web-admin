@@ -17,6 +17,8 @@ $(document).ready(function(){
                 $("#module_header_admin").hide();
             } else if(response.roleName == "Partner"){
                 $("#module_header_admin").hide();
+                $("#header_Dashboard").hide();
+                $("#header_Inventory").hide();
             } else if(response.roleName == "Marketer"){
                 $("#header_Dashboard").hide();
                 $("#header_Inventory").hide();

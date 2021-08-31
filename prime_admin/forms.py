@@ -96,7 +96,7 @@ class DepositForm(FlaskForm):
     amount = DecimalField()
     from_what = StringField()
     by_who = StringField()
-
+    remarks = StringField()
 
 class WithdrawForm(FlaskForm):
     date_deposit = DateField()
@@ -107,25 +107,35 @@ class WithdrawForm(FlaskForm):
     from_what = StringField()
     by_who = StringField()    
     branch = StringField()    
+    remarks = StringField()
 
 
 class InventoryForm(AdminTableForm):
     from prime_admin.models import Branch
 
-    __table_columns__ = ['Maintaining Materials', 'Description', 'Released Materials', 'Remaining Materials','Total of replacement Materials']
+    __table_columns__ = [
+        'Actions','Description', 'UOM', 'QTY', "Maintaining Materials",
+        '1' ,'2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20','21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31',
+        'total used', 'Remaining Materials','Total replacement', 'Price', 'Amount'
+    ]
+
     __heading__ = "Inventories"
 
     description = AdminField(label="Description", validators=[DataRequired()])
-    maintaining = AdminField(label="Maintaining Materials", required=False, type='number')
-    remaining = AdminField(label="Stocks", required=False, type='number')
+    maintaining = AdminField(label="Maintaining Materials", validators=[DataRequired()], type='number')
+    remaining = AdminField(label="Quantity", validators=[DataRequired()], type='number')
     price = AdminField(label="Price", validators=[DataRequired()], type='decimal')
+    uom = AdminField(label="UOM", validators=[DataRequired()])
     branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    purchase_date = AdminField(label="Purchase Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
             [self.branch, self.description],
-            [self.price, self.maintaining, self.remaining]
+            [self.price, self.uom],
+            [self.maintaining, self.remaining],
+            [self.purchase_date]
             ]
 
 
@@ -133,16 +143,18 @@ class InventoryForm(AdminTableForm):
 class BatchForm(AdminTableForm):
     from prime_admin.models import Branch
 
-    __table_columns__ = ['Status', 'Number', 'Branch', 'created by','Created at', 'updated by','updated at']
+    __table_columns__ = ['Status', 'Number', 'Branch', 'Start Date', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Batches"
 
     number = AdminField(label="Number", validators=[DataRequired()])
     branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    start_date = AdminField(label="Start Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
-            [self.number, self.branch]
+            [self.number, self.branch],
+            [self.start_date]
             ]
 
 
@@ -153,11 +165,12 @@ class BatchEditForm(AdminEditForm):
 
     number = AdminField(label="Number", validators=[DataRequired()])
     # branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    start_date = AdminField(label="Start Date", validators=[DataRequired()], type='date')
 
     @property
     def fields(self):
         return [
-            [self.number]
+            [self.number, self.start_date]
             ]
 
 

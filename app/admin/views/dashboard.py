@@ -37,7 +37,7 @@ def get_dashboard_users():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-    users = User.objects().order_by('active').skip(start).limit(length)
+    users = User.objects(is_deleted__ne=True).order_by('active').skip(start).limit(length)
 
     _table_data = []
 
@@ -91,4 +91,22 @@ def approve_user():
     user.save()
 
     return jsonify(True)
+
+
+@bp_admin.route('/dashboard/reject-user', methods=['POST'])
+def reject_user():
+    from app.auth.models import User
+
+    user_id = request.json['user_id']
+
+    user = User.objects.get_or_404(id=user_id)
+
+    user.is_deleted = True
+    user.is_archived = True
+    user.status = "rejected"
+
+    user.save()
+
+    return jsonify(True)
+
 
