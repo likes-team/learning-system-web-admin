@@ -81,6 +81,7 @@ $(document).ready(function(){
                 d.schedule = $("#schedule").val();
                 d.date_from = $("#date_from").val();
                 d.date_to = $("#date_to").val();
+                d.payment_status = $("#payment_status").val();
             },
             "dataSrc": function(json){
                 $("#total_installment").html("₱" + json.totalInstallment);
@@ -746,6 +747,10 @@ $(document).ready(function(){
     });
 
     $('#date_to').change(function() {
+        table.ajax.reload();
+    });
+
+    $('#payment_status').change(function() {
         table.ajax.reload();
     });
 });

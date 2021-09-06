@@ -78,6 +78,7 @@ def get_dtbl_members():
     schedule = request.args.get('schedule')
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
+    payment_status = request.args.get('payment_status')
     
     sales_today = 0
 
@@ -128,6 +129,10 @@ def get_dtbl_members():
 
         if registration.balance <= 0.00:
             paid = 'PAID'
+
+        # filter
+        if payment_status != 'all' and payment_status != paid:
+            continue
         
         if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
             if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
