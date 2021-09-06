@@ -1,9 +1,10 @@
+from bson.decimal128 import create_decimal128_context
+from bson.objectid import ObjectId
 from flask_mongoengine import json
 import pytz
 from config import TIMEZONE
 import decimal
-from hashlib import new
-from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, get_date_now
+from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, convert_to_utc, get_date_now
 from app.auth.models import Earning, User
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
 from flask.helpers import flash, url_for
@@ -16,7 +17,11 @@ from flask import jsonify, request
 from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
 from bson import Decimal128
+from app import mongo
 
+
+
+D128_CTX = create_decimal128_context()
 
 
 @bp_lms.route('/cash-flow')
@@ -73,7 +78,7 @@ def deposit():
     
     try:
         new_deposit = CashFlow()
-        new_deposit.date_deposit = form.date_deposit.data
+        new_deposit.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
         new_deposit.bank_name = form.bank_name.data
         new_deposit.account_no = form.account_no.data
         new_deposit.account_name = form.account_name.data
@@ -86,80 +91,151 @@ def deposit():
         new_deposit.remarks = form.remarks.data
         new_deposit.set_created_at()
 
-        accounting = Accounting.objects(branch=current_user.branch.id).first()
-        
         payments = []
 
-        if accounting:
-            if new_deposit.from_what == "Sales":
-                new_deposit.balance = accounting.total_gross_sale + new_deposit.amount
-                accounting.total_gross_sale = accounting.total_gross_sale + new_deposit.amount
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                with decimal.localcontext(D128_CTX):
+                    accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
 
-                clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
+                    if accounting:
+                        new_deposit.group = accounting['active_group']
 
-                for client in clients:
-                    if client.amount != client.amount_deposit:
-                        for payment in client.payments:
-                            if payment.deposited is not None and payment.deposited == "Pre Deposit":
-                                payment.deposited = "Yes"
-                                if client.amount_deposit is not None:
-                                    client.amount_deposit += payment.amount
-                                else:
-                                    client.amount_deposit = payment.amount
+                        if form.from_what.data == "Sales":
+                            new_deposit.balance = Decimal128(accounting["total_gross_sale"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                            accounting["total_gross_sale"] = Decimal128(accounting["total_gross_sale"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
 
-                                payments.append(payment)
-                        client.save()
+                            clients = mongo.db.lms_registrations.find({
+                                "status": "registered",
+                                "branch": current_user.branch.id
+                                }, session=session)
 
-            elif new_deposit.from_what == "Student Loan Payment":
-                if accounting.final_fund1:
-                    accounting.final_fund1 = accounting.final_fund1 + new_deposit.amount
-                else:
-                    accounting.final_fund1 = new_deposit.amount
+                            for client in clients:
+                                for payment in client['payments']:
+                                    if payment['deposited'] is not None and payment["deposited"] == "Pre Deposit":
+                                        mongo.db.lms_registrations.update_one({
+                                            "_id": client['_id'],
+                                            "payments._id": payment['_id'],
+                                        },
+                                        {"$set": {
+                                            "payments.$.deposited": "Yes"
+                                        }},session=session)
 
-                new_deposit.balance = accounting.final_fund1
+                                        if 'amount_deposit' in client:
+                                            client['amount_deposit'] = Decimal128(client['amount_deposit'].to_decimal() + payment['amount'].to_decimal())
+                                        else:
+                                            client['amount_deposit'] = payment['amount']
+                                        
+                                        payments.append(payment)
 
-            elif new_deposit.from_what == "Emergency Fund":
-                if accounting.final_fund2:
-                    accounting.final_fund2 = accounting.final_fund2 + new_deposit.amount
-                else:
-                    accounting.final_fund2 = new_deposit.amount
+                                mongo.db.lms_registrations.update_one(
+                                    {"_id": client["_id"]},
+                                    {"$set": {
+                                        "amount_deposit": client['amount_deposit']
+                                    }}, session=session)
 
-                new_deposit.balance = accounting.final_fund2
-            
-        else:
-            accounting = Accounting()
-            accounting.branch = current_user.branch
-            accounting.active_group = 1
-            
-            if new_deposit.from_what == "Sales":
-                accounting.total_gross_sale = new_deposit.amount
+                            mongo.db.lms_accounting.update_one({
+                                "_id": accounting["_id"]},
+                                {"$set": {
+                                    "total_gross_sale": accounting["total_gross_sale"],
+                                }}, session=session)
+                        elif new_deposit.from_what == "Student Loan Payment":
+                            if accounting["final_fund1"]:
+                                accounting["final_fund1"] = Decimal128(accounting["final_fund1"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                            else:
+                                accounting["final_fund1"] = Decimal128(str(new_deposit.amount))
 
-                clients = Registration.objects(status="registered").filter(branch=current_user.branch.id)
+                            new_deposit.balance = accounting["final_fund1"]
 
-                for client in clients:
-                    if client.amount != client.amount_deposit:
-                        for payment in client.payments:
-                            if payment.deposited is not None and payment.deposited == "Pre Deposit":
-                                payment.deposited = "Yes"
-                                if client.amount_deposit is not None:
-                                    client.amount_deposit += payment.amount
-                                else:
-                                    client.amount_deposit = payment.amount
+                            mongo.db.lms_accounting.update_one({
+                                "_id": accounting["_id"]},
+                                {"$set": {
+                                    "final_fund1": accounting["final_fund1"],
+                                }}, session=session)
 
-                                payments.append(payment)
-                        client.save()
+                        elif new_deposit.from_what == "Emergency Fund":
+                            if accounting["final_fund2"]:
+                                accounting["final_fund2"] = Decimal128(accounting["final_fund2"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                            else:
+                                accounting["final_fund2"] = Decimal128(str(new_deposit.amount))
 
-            elif new_deposit.from_what == "Student Loan Payment":
-                accounting.final_fund1 = new_deposit.amount
-            elif new_deposit.from_what == "Emergency Fund":
-                accounting.final_fund2 = new_deposit.amount
-            
-            new_deposit.balance = new_deposit.amount
+                            new_deposit.balance = accounting["final_fund2"]
 
-        new_deposit.payments = payments
-        new_deposit.group = accounting.active_group
-        new_deposit.save()
-        accounting.save()
+                            mongo.db.lms_accounting.update_one({
+                                "_id": accounting["_id"]},
+                                {"$set": {
+                                    "final_fund2": accounting["final_fund2"],
+                                }}, session=session)
+                    else:
+                        accounting = Accounting()
+                        accounting.branch = current_user.branch
+                        accounting.active_group = 1
+                        
+                        if new_deposit.from_what == "Sales":
+                            accounting.total_gross_sale = new_deposit.amount
+
+                            clients = mongo.db.lms_registrations.find({"status": "registered", "branch": current_user.branch.id}, session=session)
+
+                            for client in clients:
+                                if client["amount"] != client["amount_deposit"]:
+                                    for payment in client['payments']:
+                                        if payment["deposited"] is not None and payment["deposited"] == "Pre Deposit":
+                                            payment["deposited"] = "Yes"
+                                            if client["amount_deposit"] is not None:
+                                                client["amount_deposit"] += payment["amount"]
+                                            else:
+                                                client["amount_deposit"] = payment["amount"]
+
+                                            payments.append(payment)
+
+                                            mongo.db.lms_registrations.update_one(
+                                                {"_id": client.id, "payments._id": payment.id},
+                                                {"$set": {"payments.$.deposited": "Yes"}},
+                                                session=session)
+
+                                    mongo.db.lms_registrations.update_one(
+                                        {"_id": client["_id"]},
+                                        {"$set": {
+                                            "amount_deposit": Decimal128(str(client.amount_deposit))
+                                        }}, session=session)
+
+                        elif new_deposit.from_what == "Student Loan Payment":
+                            accounting.final_fund1 = new_deposit.amount
+                        elif new_deposit.from_what == "Emergency Fund":
+                            accounting.final_fund2 = new_deposit.amount
+
+                        new_deposit.balance = new_deposit.amount
+                        new_deposit.group = accounting.active_group
+
+                        mongo.db.lms_accounting.insert_one({
+                            "_id": ObjectId(),
+                            "branch": accounting.branch.id,
+                            "active_group": accounting.active_group,
+                            "total_gross_sale": Decimal128(str(accounting.total_gross_sale)) if accounting.total_gross_sale is not None else Decimal128("0.00"),
+                            "final_fund1": Decimal128(str(accounting.final_fund1)) if accounting.final_fund1 is not None else Decimal128("0.00"),
+                            "final_fund2": Decimal128(str(accounting.final_fund2)) if accounting.final_fund2 is not None else Decimal128("0.00"),
+                        }, session=session)
+                        
+                    new_deposit.payments = payments
+
+                    mongo.db.lms_bank_statements.insert_one({
+                        "_id": ObjectId(),
+                        "date_deposit": new_deposit.date_deposit,
+                        "bank_name": new_deposit.bank_name,
+                        "account_no": new_deposit.account_no,
+                        "account_name": new_deposit.account_name,
+                        "amount": Decimal128(str(new_deposit.amount)),
+                        "from_what": new_deposit.from_what,
+                        "by_who": new_deposit.by_who,
+                        "created_by": new_deposit.created_by,
+                        "branch": new_deposit.branch.id,
+                        "type": new_deposit.type,
+                        "remarks": new_deposit.remarks,
+                        "payments": new_deposit.payments,
+                        "balance": Decimal128(str(new_deposit.balance)),
+                        "group": new_deposit.group,
+                        "created_at": new_deposit.created_at,
+                    }, session=session)
 
         flash('Deposit Successfully!','success')
     except Exception as exc:
@@ -175,7 +251,7 @@ def withdraw():
     
     try:
         new_withdraw = CashFlow()
-        new_withdraw.date_deposit = form.date_deposit.data
+        new_withdraw.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
         new_withdraw.bank_name = form.bank_name.data
         new_withdraw.account_no = form.account_no.data
         new_withdraw.account_name = form.account_name.data
@@ -188,46 +264,71 @@ def withdraw():
         new_withdraw.remarks = form.remarks.data
         new_withdraw.set_created_at()
 
-        accounting = Accounting.objects(branch=form.branch.data).first()
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                accounting = Accounting.objects(branch=form.branch.data).first()
 
-        if accounting:
-            if new_withdraw.from_what == "Sales":
-                if new_withdraw.amount > accounting.total_gross_sale:
-                    flash("Withdraw amount is greater than the total gross sale",'error')
+                if not accounting:
+                    flash("No transaction in this branch yet!",'error')
                     return redirect(url_for('lms.cash_flow'))
 
-                accounting.total_gross_sale = accounting.total_gross_sale - new_withdraw.amount
-                new_withdraw.balance = accounting.total_gross_sale
-            elif new_withdraw.from_what == "Fund 1":
-                if new_withdraw.amount > accounting.final_fund1:
-                    flash("Withdraw amount is greater than the fund",'error')
-                    return redirect(url_for('lms.cash_flow'))
-                accounting.final_fund1 = accounting.final_fund1 - new_withdraw.amount
-                new_withdraw.balance = accounting.final_fund1
-            elif new_withdraw.from_what == "Fund 2":
-                if new_withdraw.amount > accounting.final_fund2:
-                    flash("Withdraw amount is greater than the fund",'error')
-                    return redirect(url_for('lms.cash_flow'))
+                if new_withdraw.from_what == "Sales":
+                    if new_withdraw.amount > accounting.total_gross_sale:
+                        flash("Withdraw amount is greater than the total gross sale",'error')
+                        return redirect(url_for('lms.cash_flow'))
 
-                accounting.final_fund2 = accounting.final_fund2 - new_withdraw.amount
-                new_withdraw.balance = accounting.final_fund2
-        else:
-            accounting = Accounting()
-            accounting.branch = new_withdraw.branch
-            accounting.active_group = 1
+                    accounting.total_gross_sale = accounting.total_gross_sale - new_withdraw.amount
+                    new_withdraw.balance = accounting.total_gross_sale
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting.id},
+                        {"$set": {
+                            "total_gross_sale": Decimal128(str(accounting.total_gross_sale)),
+                        }}, session=session)
 
-            if new_withdraw.from_what == "Sales":
-                accounting.total_gross_sale = 0 - new_withdraw.amount
-            elif new_withdraw.from_what == "Fund 1":
-                accounting.final_fund1 = 0 - new_withdraw.amount
-            elif new_withdraw.from_what == "Fund 2":
-                accounting.final_fund2 = 0 - new_withdraw.amount
-            
-            new_withdraw.balance = 0 - new_withdraw.amount
+                elif new_withdraw.from_what == "Fund 1":
+                    if new_withdraw.amount > accounting.final_fund1:
+                        flash("Withdraw amount is greater than the fund",'error')
+                        return redirect(url_for('lms.cash_flow'))
+                    accounting.final_fund1 = accounting.final_fund1 - new_withdraw.amount
+                    new_withdraw.balance = accounting.final_fund1
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting.id},
+                        {"$set": {
+                            "final_fund1": Decimal128(str(accounting.final_fund1)),
+                        }}, session=session)
+                    
+                elif new_withdraw.from_what == "Fund 2":
+                    if new_withdraw.amount > accounting.final_fund2:
+                        flash("Withdraw amount is greater than the fund",'error')
+                        return redirect(url_for('lms.cash_flow'))
 
-        new_withdraw.group = accounting.active_group
-        new_withdraw.save()
-        accounting.save()
+                    accounting.final_fund2 = accounting.final_fund2 - new_withdraw.amount
+                    new_withdraw.balance = accounting.final_fund2
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting.id},
+                        {"$set": {
+                            "final_fund2": Decimal128(str(accounting.final_fund2)),
+                        }}, session=session)
+                        
+                new_withdraw.group = accounting.active_group
+                
+                mongo.db.lms_bank_statements.insert_one({
+                    "_id": ObjectId(),
+                    "date_deposit": new_withdraw.date_deposit,
+                    "bank_name": new_withdraw.bank_name,
+                    "account_no": new_withdraw.account_no,
+                    "account_name": new_withdraw.account_name,
+                    "amount": Decimal128(str(new_withdraw.amount)),
+                    "from_what": new_withdraw.from_what,
+                    "by_who": new_withdraw.by_who,
+                    "created_by": new_withdraw.created_by,
+                    "branch": new_withdraw.branch.id,
+                    "type": new_withdraw.type,
+                    "remarks": new_withdraw.remarks,
+                    "balance": Decimal128(str(new_withdraw.balance)),
+                    "group": new_withdraw.group,
+                    "created_at": new_withdraw.created_at,
+                }, session=session)
 
         flash('Withdraw Successfully!','success')
     except Exception as exc:
@@ -393,73 +494,88 @@ def profit():
     if not current_user.check_password(password):
         return jsonify({"result": "invalid_password"})
 
-    accounting = Accounting.objects(branch=branch).first()
-
-    if accounting is None:
-        return jsonify({"result": "no_transaction"})
-    
     try:
-        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
-        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
-        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-        previous_final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else '0.00'
-        previous_final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else '0.00'
-        previous_total_gross_sale = accounting.total_gross_sale
-        
-        accounting.total_gross_sale = remaining
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                with decimal.localcontext(D128_CTX):
 
-        if accounting.final_fund1:
-            accounting.final_fund1 = decimal.Decimal(accounting.final_fund1) + fund1
-        else: 
-            accounting.final_fund1 = fund1
+                    accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch)},session=session)
+                    
+                    if accounting is None:
+                        return jsonify({"result": "no_transaction"})
+                
+                    remaining = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".05").to_decimal())
+                    net = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".55").to_decimal())
+                    fund1 = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".20").to_decimal())
+                    fund2 = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".20").to_decimal())
+                    previous_final_fund1 = accounting["final_fund1"] if accounting["final_fund1"] is not None else Decimal128('0.00')
+                    previous_final_fund2 = accounting["final_fund2"] if accounting["final_fund2"] is not None else Decimal128('0.00')
+                    previous_total_gross_sale = accounting["total_gross_sale"]
+                    
+                    accounting["total_gross_sale"] = remaining
 
-        if accounting.final_fund2:
-            accounting.final_fund2 = decimal.Decimal(accounting.final_fund2) + fund2
-        else:
-            accounting.final_fund2 = fund2
-        
-        accounting.profits.append(
-            {
-                'date': get_date_now(),
-                'previous_total_gross_sale': Decimal128(previous_total_gross_sale),
-                'new_total_gross_sale': Decimal128(accounting.total_gross_sale),
-                'net': Decimal128(net),
-                'remaining': Decimal128(remaining),
-                'fund1': Decimal128(fund1),
-                'fund2': Decimal128(fund2),
-                'previous_final_fund1': Decimal128(previous_final_fund1),
-                'previous_final_fund2': Decimal128(previous_final_fund2),
-                'new_final_fund1': Decimal128(accounting.final_fund1),
-                'new_final_fund2': Decimal128(accounting.final_fund2),
-                'partners_percent': partners_percent_list
-            }
-        )
+                    if accounting["final_fund1"]:
+                        accounting["final_fund1"] = Decimal128(accounting["final_fund1"].to_decimal() + fund1.to_decimal())
+                    else: 
+                        accounting["final_fund1"] = fund1
 
-        accounting.active_group += 1
+                    if accounting["final_fund2"]:
+                        accounting["final_fund2"] = Decimal128(accounting['final_fund2'].to_decimal() + fund2.to_decimal())
+                    else:
+                        accounting["final_fund2"] = fund2
+                    
+                    profit_history = {
+                        'date': get_date_now(),
+                        'previous_total_gross_sale': previous_total_gross_sale,
+                        'new_total_gross_sale': accounting["total_gross_sale"],
+                        'net': net,
+                        'remaining': remaining,
+                        'fund1': fund1,
+                        'fund2': fund2,
+                        'previous_final_fund1': previous_final_fund1,
+                        'previous_final_fund2': previous_final_fund2,
+                        'new_final_fund1': accounting['final_fund1'],
+                        'new_final_fund2': accounting["final_fund2"],
+                        'partners_percent': partners_percent_list
+                    }
 
-        for _partner in partners_percent_list:
-            partner = User.objects.get(id=_partner['partner_id'])
+                    for _partner in partners_percent_list:
+                        partner = mongo.db.auth_users.find_one({"_id": ObjectId(_partner['partner_id'])})
 
-            earnings = (net * decimal.Decimal(_partner['percent'])) / 100
+                        earnings = Decimal128((net.to_decimal() * Decimal128(_partner['percent']).to_decimal()) / Decimal128("100").to_decimal())
 
-            partner.earnings.append(
-                Earning(
-                    custom_id=str(datetime.now().timestamp),
-                    payment_mode="profit_sharing",
-                    earnings=Decimal128(str(earnings)),
-                    branch=Branch.objects.get(id=branch),
-                    date=get_date_now(),
-                    registered_by=User.objects.get(id=str(current_user.id)),
-                )
-            )
+                        contact_person_earning = {
+                            "_id": ObjectId(),
+                            "payment_mode": "profit_sharing",
+                            "earnings": earnings,
+                            "branch": ObjectId(branch),
+                            "date": get_date_now(),
+                            "registered_by": current_user.id,
+                            }
 
-            partner.save()
+                        mongo.db.auth_users.update_one({
+                            "_id": partner["_id"]
+                            },
+                            {"$push": {
+                                "earnings": contact_person_earning
+                            }},session=session)
 
-        accounting.save()
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting['_id'],
+                    },
+                    {"$set": {
+                        "total_gross_sale": accounting["total_gross_sale"],
+                        "final_fund1": accounting["final_fund1"],
+                        "final_fund2": accounting["final_fund2"]
+                    },
+                    "$push": {
+                        "profits": profit_history
+                    },
+                    "$inc": {
+                        "active_group": 1
+                    }},session=session)
 
     except Exception as exc:
-        print(str(exc))
         return jsonify({"result": "error"})
 
     return jsonify({"result": "success"})
@@ -481,7 +597,6 @@ def get_mdl_pre_deposit():
 
     for client in clients:
         if client.amount != client.amount_deposit:
-            print(client.payments)
             for payment in client.payments:
                 if payment.deposited is None or payment.deposited == "No":
                     if type(payment.date) == datetime:
@@ -564,18 +679,20 @@ def get_mdl_deposit():
 def to_pre_deposit():
     payments_selected = request.json['payments_selected']
 
-    for selected_payment in payments_selected:
-        student = Registration.objects(full_registration_number=selected_payment['full_registration_number']).first()
-
-        for student_payment in student.payments:
-            if student_payment.id == selected_payment['payment_id']:
-                student_payment.deposited = "Pre Deposit"
-
-        student.save()
-
-    response = {
-        'result': True
-    }
+    try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                for selected_payment in payments_selected:
+                    mongo.db.lms_registrations.update_one({
+                        "full_registration_number": selected_payment['full_registration_number'],
+                        "payments._id": ObjectId(selected_payment['payment_id'])
+                    },
+                    {"$set": {
+                        "payments.$.deposited": "Pre Deposit"
+                    }}, session=session)
+        response = {'result': True}
+    except Exception:
+        response = {'result': False}
 
     return jsonify(response)
 

@@ -17,8 +17,8 @@ def get_date_now():
     return utc_dt
 
 
-def convert_to_utc(date, type='date_to'):
-    if type == 'date_to':
+def convert_to_utc(date, t='date_to'):
+    if t == 'date_to':
         date_string = date + " 23:59:59"
     else:
         date_string = date + " 00:00:00"

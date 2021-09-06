@@ -340,6 +340,8 @@ def approve_claim_earning():
 
 @bp_lms.route('/api/get-profit-sharing-earnings/<string:partner_id>', methods=['GET'])
 def get_profit_sharing(partner_id):
+    print("TESTSETSE")
+
     if partner_id == 'all' or partner_id == '':
         return jsonify({'result': False})
 
@@ -377,7 +379,7 @@ def get_profit_sharing(partner_id):
     for branch in branches_total_earnings:
         branch['totalEarnings'] = str(branch['totalEarnings'])
 
-    print(branches_total_earnings)
+    print("TESTT",branches_total_earnings)
 
     response = {
         'result': True,

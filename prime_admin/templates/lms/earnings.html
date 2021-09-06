@@ -218,7 +218,7 @@
     </div>
 
         
-    {% if current_user.role.name == "Partner" %}
+    {% if current_user.role.name == "Partner" or current_user.role.name == "Admin" %}
     <div class="main-card mb-3 card">
         <div class="card-header">
             <div>

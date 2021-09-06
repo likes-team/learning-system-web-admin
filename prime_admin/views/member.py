@@ -1,16 +1,15 @@
 import decimal
+from bson.objectid import ObjectId
 import pytz
 from prime_admin.globals import convert_to_utc, get_date_now, get_sales_today_date
 from random import uniform
-from pymongo.common import clean_node
-from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, Payment, Registration, Member
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template
-from app import db, csrf
+from app import mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128
 from app.auth.models import Earning, User
@@ -231,10 +230,10 @@ def get_dtbl_members():
         'recordsTotal': registrations.count(),
         'recordsFiltered': registrations.count(),
         'data': _table_data,
-        'totalInstallment': total_installment,
-        'totalFullPayment': total_full_payment,
-        'totalPremiumPayment': total_premium_payment,
-        'totalPayment': total_payment,
+        'totalInstallment': str(total_installment),
+        'totalFullPayment': str(total_full_payment),
+        'totalPremiumPayment': str(total_premium_payment),
+        'totalPayment': str(total_payment),
         'salesToday': str(sales_today)
     }
 
@@ -455,36 +454,6 @@ def new_payment():
     elif client.level == "second":
         client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(get_date_now())
-
-    payment = Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date,
-            payment_by=client,
-            earnings=Decimal128(str(earnings)),
-            savings=Decimal128(str(savings)),
-        )
-
-    client.payments.append(payment)
-
-    client.contact_person.earnings.append(
-        Earning(
-            custom_id=custom_id,
-            payment_mode=client.payment_mode,
-            savings=Decimal128(str(savings)),
-            earnings=Decimal128(str(earnings)),
-            branch=client.branch,
-            client=client,
-            date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id)),
-            payment_id=payment.id
-        )
-    )
-
     books = request.form.getlist('books')
     
     client.books = {
@@ -512,9 +481,53 @@ def new_payment():
         'id_lace': True if 'id_lace' in id_materials else False,
     }
 
-    client.save()
-    client.contact_person.save()
-    
+    payment = {
+        "_id": ObjectId(),
+        "deposited": "No",
+        "payment_mode": client.payment_mode,
+        "amount": Decimal128(str(amount)),
+        "current_balance": Decimal128(str(client.balance)),
+        "confirm_by": current_user.id,
+        "date": convert_to_utc(date, "date_from"),
+        "payment_by": ObjectId(client_id),
+        "earnings": Decimal128(str(earnings)),
+        "savings": Decimal128(str(savings)),
+    }
+
+    contact_person_earning = {
+        "_id": ObjectId(),
+        "payment_mode": client.payment_mode,
+        "savings": Decimal128(str(savings)),
+        "earnings": Decimal128(str(earnings)),
+        "branch": client.branch.id,
+        "client": ObjectId(client_id),
+        "date": convert_to_utc(date, "date_from"),
+        "registered_by": current_user.id,
+        "payment": payment["_id"]
+    }
+
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
+            {"$set": {
+                "payment_mode": client.payment_mode,
+                "amount": Decimal128(str(client.amount)),
+                "balance": Decimal128(str(client.balance)),
+                "level": client.level,
+                "fle": Decimal128(str(client.fle)),
+                "sle": Decimal128(str(client.sle)),
+                "books": client.books,
+                "uniforms": client.uniforms,
+                "id_materials": client.id_materials,
+            },
+            "$push": {
+                "payments": payment,
+            }}, session=session)
+            mongo.db.auth_users.update_one({"_id": client.contact_person.id},
+            {"$push": {
+                "earnings": contact_person_earning,
+            }}, session=session)
+
     if is_premium == 'on':
         flash("Client's payment upgraded successfully!", 'success')
     else:

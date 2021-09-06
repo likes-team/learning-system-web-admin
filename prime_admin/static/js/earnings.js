@@ -119,6 +119,7 @@ $(document).ready(function(){
 
     $("#btn_marketer_label").change(function(){
         table.ajax.reload();
+        getProfitSharingEarnings();
     });
 
     $("#branch").change(function(){

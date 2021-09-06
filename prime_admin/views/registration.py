@@ -1,5 +1,7 @@
 import decimal
-from prime_admin.globals import SECRETARYREFERENCE, get_date_now
+import uuid
+from bson.objectid import ObjectId
+from prime_admin.globals import SECRETARYREFERENCE, convert_to_utc, get_date_now
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
@@ -79,31 +81,13 @@ def register():
         earnings = 0
         savings = 0
 
-        if client_id == '': # NO SELECTED CLIENT
-            client = Registration()
-            client.contact_person = User.objects.get(id=form.contact_person.data)
-            client.fname = form.fname.data
-            client.mname = form.mname.data
-            client.lname = form.lname.data
-            client.suffix = form.suffix.data
-            client.address = form.address.data
-            client.contact_number = form.contact_number.data
-            client.email = form.email.data
-            client.birth_date = form.birth_date.data
-        else: # HAS SELECTED CLIENT
-            client = Registration.objects.get(id=client_id)
-
-            if client.status == "pre_registered" and client.is_oriented is False :
-                client.contact_person = User.objects.get(id=form.contact_person.data)
-
-            elif client.status == "oriented":
-                client.mname = form.mname.data
-                client.suffix = form.suffix.data
-                client.address = form.address.data
-                client.contact_number = form.contact_number.data
-                client.email = form.email.data
-                client.birth_date = form.birth_date.data
-
+        client = Registration.objects.get(id=client_id)
+        client.mname = form.mname.data
+        client.suffix = form.suffix.data
+        client.address = form.address.data
+        client.contact_number = form.contact_number.data
+        client.email = form.email.data
+        client.birth_date = form.birth_date.data
         client.e_registration = form.e_registration.data
         client.registration_number = last_registration_number.registration_number + 1 if last_registration_number is not None else 1
         client.full_registration_number = registration_generated_number
@@ -189,58 +173,71 @@ def register():
             client.fle = decimal.Decimal(0.00)
             client.sle = decimal.Decimal(0.00)
 
-        payment = Payment(
-                deposited="No",
-                payment_mode=client.payment_mode,
-                amount=Decimal128(str(client.amount)),
-                current_balance=Decimal128(str(client.balance)),
-                confirm_by=User.objects.get(id=str(current_user.id)),
-                date=get_date_now(),
-                payment_by=client,
-                earnings=Decimal128(str(earnings)),
-                savings=Decimal128(str(savings)),
-            )
+        payment = {
+            "_id": ObjectId(),
+            "deposited": "No",
+            "payment_mode": client.payment_mode,
+            "amount": Decimal128(str(client.amount)),
+            "current_balance": Decimal128(str(client.balance)),
+            "confirm_by": current_user.id,
+            "date": get_date_now(),
+            "payment_by": client_id,
+            "earnings": Decimal128(str(earnings)),
+            "savings": Decimal128(str(savings)),
+        }
 
-        client.payments.append(payment)
+        contact_person_earning = {
+            "_id": ObjectId(),
+            "payment_mode": client.payment_mode,
+            "savings": Decimal128(str(savings)),
+            "earnings": Decimal128(str(earnings)),
+            "branch": client.branch.id,
+            "client": client.id,
+            "date": get_date_now(),
+            "registered_by": current_user.id,
+            "payment": payment["_id"]
+        }
 
-        if client_id == '': # NO SELECTED CLIENT
-            client.contact_person.earnings.append(
-                Earning(
-                    custom_id=client.full_registration_number,
-                    payment_mode=client.payment_mode,
-                    savings=Decimal128(str(savings)),
-                    earnings=Decimal128(str(earnings)),
-                    branch=client.branch,
-                    client=client,
-                    date=get_date_now(),
-                    registered_by=User.objects.get(id=str(current_user.id)),
-                    payment_id=payment.id
-                )
-            )
-
-            client.save()
-            client.contact_person.save()
-        else:
-            contact_person = User.objects.get(id=str(client.contact_person.id))
-            contact_person.earnings.append(
-                Earning(
-                    custom_id=client.full_registration_number,
-                    payment_mode=client.payment_mode,
-                    savings=Decimal128(str(savings)),
-                    earnings=Decimal128(str(earnings)),
-                    branch=client.branch,
-                    client=client,
-                    date=get_date_now(),
-                    registered_by=User.objects.get(id=str(current_user.id)),
-                    payment_id=payment.id
-                )
-            )
-
-            client.save()
-            contact_person.save()
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                mongo.db.lms_registrations.update_one({
+                    '_id': ObjectId(client_id),
+                },
+                {"$set": {
+                    "mname": client.mname,
+                    "suffix": client.suffix,
+                    "address": client.address,
+                    "contact_number": client.contact_number,
+                    "email": client.email,
+                    "birth_date": convert_to_utc(str(client.birth_date), "date_from") if client.birth_date is not None else None,
+                    "e_registration": client.e_registration,
+                    "registration_number": client.registration_number,
+                    "full_registration_number": client.full_registration_number,
+                    "schedule": client.schedule,
+                    "batch_number": form.batch_number.data,
+                    "passport": client.passport,
+                    "status": client.status,
+                    "amount": Decimal128(str(client.amount)),
+                    "payment_mode": client.payment_mode,
+                    "created_by": client.created_by,
+                    "registration_date": client.registration_date,
+                    "books": client.books,
+                    "uniforms": client.uniforms,
+                    "id_materials": client.id_materials,
+                    "level": client.level,
+                    "balance": Decimal128(str(client.balance)),
+                    "fle": Decimal128(str(client.fle)),
+                    "sle": Decimal128(str(client.sle))
+                    },
+                "$push": {
+                    "payments": payment
+                }}, session=session)
+                mongo.db.auth_users.update_one({"_id": client.contact_person.id},
+                {"$push": {
+                    "earnings": contact_person_earning
+                }}, session=session)
 
         flash("Registered added successfully!", 'success')
-
     except Exception as e:
         flash(str(e), 'error')
 
