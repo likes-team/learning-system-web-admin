@@ -103,6 +103,17 @@ $(document).ready(function(){
         }
     });
 
+    var dtbl_transaction_history = $('#tbl_transaction_history').DataTable({
+        "dom": 'rtip',
+        "pageLength": 25,
+        "processing": true,
+        "order": [[1, 'asc']],
+        "ordering": false,
+        "ajax": {
+            "url": "/learning-management/api/get-earning-transaction-history",
+        }
+    });
+
     $("#div_marketer_buttons").on('click', '.btn-marketer', function () {
         var marketer_name = $(this).html();
 
@@ -218,6 +229,7 @@ $(document).ready(function(){
                             success: function(response){
                                 if(response.result){
                                     table.ajax.reload();
+                                    dtbl_transaction_history.reload();
                                     toastr.success("Marketers request claim","Claim request successfully approved!");
                                 }else{
                                     toastr.error("Approving claim request failed", "Error Occured!");
@@ -232,6 +244,8 @@ $(document).ready(function(){
             }
         });
     });
+
+
 
     getProfitSharingEarnings();
 });

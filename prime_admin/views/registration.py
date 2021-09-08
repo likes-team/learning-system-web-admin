@@ -195,7 +195,7 @@ def register():
             "client": client.id,
             "date": get_date_now(),
             "registered_by": current_user.id,
-            "payment": payment["_id"]
+            "payment_id": payment["_id"]
         }
 
         with mongo.cx.start_session() as session:

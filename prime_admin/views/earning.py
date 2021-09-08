@@ -1,5 +1,6 @@
+from bson.objectid import ObjectId
 from flask_mongoengine import json
-from prime_admin.globals import SECRETARYREFERENCE, get_date_now
+from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 from app.auth.models import User
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
@@ -8,7 +9,7 @@ from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Earning, Registration, Batch
 from flask import redirect, url_for, request, current_app, flash, jsonify
-from app import db
+from app import mongo
 from datetime import datetime, timedelta
 from bson.decimal128 import Decimal128, create_decimal128_context
 import decimal
@@ -253,40 +254,53 @@ def claim_earning():
 
     print("student id: ", student_id)
     print('payment_id: ', payment_id)
-    student = Registration.objects.get(id=student_id)
 
-    if student is None:
-        return jsonify({'result': False})
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            mongo.db.lms_registrations.update_one(
+                {"_id": ObjectId(student_id),
+                "payments._id": ObjectId(payment_id)},
+                {"$set": {
+                    "payments.$.status": "for_approval"
+                }}, session=session)
 
-    _payment_earning = 0
+            mongo.db.auth_users.update_one(
+                {"_id": current_user.id,
+                "earnings.payment_id": payment_id
+                },
+                {"$set": {
+                    "earnings.$.status": "for_approval"
+                }}, session=session)
 
-    for student_payment in student.payments:
-        if student_payment.id == payment_id:
-            student_payment.status = "for_approval"
-            _payment_earning = student_payment.earnings
+            mongo.db.auth_users.update_one(
+                {"_id": current_user.id,
+                "earnings.payment_id": ObjectId(payment_id)
+                },
+                {"$set": {
+                    "earnings.$.status": "for_approval"
+                }}, session=session)
 
-    contact_person = User.objects.get(id=current_user.id)
+            mongo.db.auth_users.update_one(
+                {"_id": current_user.id,
+                "earnings.payment": ObjectId(payment_id)
+                },
+                {"$set": {
+                    "earnings.$.status": "for_approval"
+                }}, session=session)
+            
+            current_user_details =  mongo.db.auth_users.find_one({"_id": current_user.id})
 
-    print("EARNING",_payment_earning)
-    for earning in contact_person.earnings:
-        try:
-            print(earning.payment_mode, earning.client)
-            if earning.payment_mode == "profit_sharing":
-                continue
+            mongo.db.lms_system_transactions.insert_one({
+                "_id": ObjectId(),
+                "date": get_date_now(),
+                "current_user": current_user.id,
+                "description": current_user_details['fname'] + "- Request for claim",
+                "from_module": "Earnings"
+            }, session=session)
 
-            if earning.client.id == student.id:
-                if earning.earnings == _payment_earning:
-                    print("PASOK",_payment_earning)
-                    earning.status = "for_approval"
-        except Exception as exc:
-            continue
-
-    contact_person.save()
-    student.save()
-
-    response = {
-        'result': True
-    }
+            response = {
+                'result': True
+            }
 
     return jsonify(response)
 
@@ -302,89 +316,73 @@ def approve_claim_earning():
     print('payment_id: ', payment_id)
     print('contact person id: ', marketer_id)
 
-    student = Registration.objects.get(id=student_id)
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            with decimal.localcontext(D128_CTX):
+                mongo.db.lms_registrations.update_one(
+                {"_id": ObjectId(student_id),
+                "payments._id": ObjectId(payment_id)},
+                {"$set": {
+                    "payments.$.status": "approved"
+                }}, session=session)
 
-    if student is None:
-        return jsonify({'result': False})
+                mongo.db.auth_users.update_one(
+                    {"_id": ObjectId(marketer_id),
+                    "earnings.payment_id": payment_id
+                    },
+                    {"$set": {
+                        "earnings.$.status": "approved"
+                    }}, session=session)
 
-    _payment_earning = 0
+                mongo.db.auth_users.update_one(
+                    {"_id": ObjectId(marketer_id),
+                    "earnings.payment_id": ObjectId(payment_id)
+                    },
+                    {"$set": {
+                        "earnings.$.status": "approved"
+                    }}, session=session)
 
-    for student_payment in student.payments:
-        if student_payment.id == payment_id:
-            student_payment.status = "approved"
-            _payment_earning = student_payment.earnings
+                mongo.db.auth_users.update_one(
+                    {"_id": ObjectId(marketer_id),
+                    "earnings.payment": ObjectId(payment_id)
+                    },
+                    {"$set": {
+                        "earnings.$.status": "approved"
+                    }}, session=session)
 
-    contact_person = User.objects.get(id=marketer_id)
+                marketer_details =  mongo.db.auth_users.find_one({"_id": ObjectId(marketer_id)})
 
-    for earning in contact_person.earnings:
-        try:
-            print(earning.payment_mode, earning.client)
-            if earning.payment_mode == "profit_sharing":
-                continue
+                payment_details = mongo.db.auth_users.find_one(
+                    {"_id": ObjectId(marketer_id),
+                    "earnings.payment": ObjectId(payment_id)
+                    }, session=session)
 
-            if earning.client.id == student.id:
-                if earning.earnings == _payment_earning:
-                    earning.status = "approved"
-        except Exception as exc:
-            continue
-
-    student.save()
-    contact_person.save()
-
-    response = {
-        'result': True
-    }
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": "Approve claim -" + marketer_details['fname'],
+                    "from_module": "Earnings"
+                }, session=session)
+                response = {
+                    'result': True
+                }
 
     return jsonify(response)
 
 
-@bp_lms.route('/api/get-profit-sharing-earnings/<string:partner_id>', methods=['GET'])
-def get_profit_sharing(partner_id):
-    print("TESTSETSE")
+@bp_lms.route('/api/get-earning-transaction-history', methods=['GET'])
+def get_earning_transaction_history():
+    _transaction_data = []
 
-    if partner_id == 'all' or partner_id == '':
-        return jsonify({'result': False})
-
-    partner = User.objects.get(id=partner_id)
-
-    total_earnings = 0
-    branches_total_earnings = []
-
-    with decimal.localcontext(D128_CTX):
-        total_earnings = Decimal128('0.00')
-
-        for earning in partner.earnings:
-            if earning.payment_mode != "profit_sharing":
-                continue
-
-            total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-            
-            if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                branches_total_earnings.append(
-                    {
-                        'id': str(earning.branch.id),
-                        'name': earning.branch.name,
-                        'totalEarnings': earning.earnings
-                    }
-                )
-            else:
-                for x in branches_total_earnings:
-                    if x['id'] == str(earning['branch'].id):
-                            if type(x['totalEarnings']) == decimal.Decimal:
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                            else:
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-
-
-    for branch in branches_total_earnings:
-        branch['totalEarnings'] = str(branch['totalEarnings'])
-
-    print("TESTT",branches_total_earnings)
+    transactions = mongo.db.lms_system_transactions.find({"from_module": "Earnings"})
+    for trans in transactions:
+        _transaction_data.append((
+            convert_to_local(trans["date"]),
+            trans['description']
+        ))
 
     response = {
-        'result': True,
-        'totalEarningsProfit': str(total_earnings),
-        'branchesTotalEarningsProfit': branches_total_earnings
+        'data': _transaction_data
     }
-
     return jsonify(response)

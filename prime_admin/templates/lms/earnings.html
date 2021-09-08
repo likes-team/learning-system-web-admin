@@ -27,14 +27,55 @@
                 </div>
             </div>
 
-            {% block actions %}
+            <div class="page-title-actions">
+                {% if current_user.role.name in ['Admin', "Secretary"] %}
+                    <button type="button" disabled
+                            class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-eject"></i> Release Claims
+                    </button>
+                {% endif %}
 
-            {% if TABLE_OPTIONS['actions'] %}
-            {% include TABLE_OPTIONS['action_template'] %}
-            {% endif %}
-
-            {% endblock %}
-
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -217,7 +258,6 @@
         </div>
     </div>
 
-        
     {% if current_user.role.name == "Partner" or current_user.role.name == "Admin" %}
     <div class="main-card mb-3 card">
         <div class="card-header">
@@ -271,6 +311,29 @@
     </div>
     {% endif %}
     
+    {% if current_user.role.name == "Admin" %}
+    <div class="main-card mb-3 card">
+        <div class="card-header">
+            <div>
+                Transaction History
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tbl_transaction_history" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">DATE</th>
+                            <th class="text-center">DESCRIPTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 

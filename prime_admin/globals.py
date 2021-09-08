@@ -28,9 +28,19 @@ def convert_to_utc(date, t='date_to'):
     utc_dt = local_dt.astimezone(pytz.utc)
     return utc_dt
 
+def convert_to_local(date):
+    local_datetime = ''
+    if date is not None:
+        local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+        return local_datetime.strftime("%B %d, %Y %I:%M %p")
+        
+    return local_datetime
+
 
 def get_sales_today_date():
     local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
     # return local_datetime.strftime("%B %d, %Y %I:%M %p")
         
     return local_datetime
+
+

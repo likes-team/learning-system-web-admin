@@ -413,125 +413,128 @@ def new_payment():
     amount = decimal.Decimal(request.form['new_amount'])
     date = request.form['date']
 
-    client = Registration.objects.get_or_404(id=client_id)
+    try:
+        client = Registration.objects.get_or_404(id=client_id)
 
-    is_premium = request.form.get('chkbox_upgrade', False)
-    is_upgrade_full_payment = request.form.get('chkbox_upgrade_full_payment', False)
+        is_premium = request.form.get('chkbox_upgrade', False)
+        is_upgrade_full_payment = request.form.get('chkbox_upgrade_full_payment', False)
 
-    if is_premium != 'on':
-        if amount > client.balance:
-            flash("New payment is greater than the student balance!", 'error')
-            return redirect(url_for('lms.members'))
+        if is_premium != 'on':
+            if amount > client.balance:
+                flash("New payment is greater than the student balance!", 'error')
+                return redirect(url_for('lms.members'))
 
-    if client.payment_mode == "installment_promo":
-        client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium_promo'
-    else:
-        client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
-
-    if is_upgrade_full_payment == 'on':
-        client.payment_mode = "full_payment" if client.payment_mode == "installment" else 'full_payment_promo'
-
-    client.amount += amount
-    
-    if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
-        client.balance = ((client.balance + 700) - amount)
-    else:
-        if is_upgrade_full_payment == 'on':
-            client.balance = client.balance - (amount + 800)
+        if client.payment_mode == "installment_promo":
+            client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium_promo'
         else:
-            client.balance = client.balance - amount
-    
-    if client.level == "first":
-        earnings_percent = decimal.Decimal(0.14)
-        savings_percent = decimal.Decimal(0.00286)
-    elif client.level == "second":
-        earnings_percent = decimal.Decimal(0.0286)
-        savings_percent = decimal.Decimal(0.00)
-    else:
-        earnings_percent = decimal.Decimal(0.00)
-        savings_percent = decimal.Decimal(0.00)
+            client.payment_mode = client.payment_mode if is_premium != 'on' else 'premium'
 
-    earnings = amount * earnings_percent
-    savings = amount * savings_percent
+        if is_upgrade_full_payment == 'on':
+            client.payment_mode = "full_payment" if client.payment_mode == "installment" else 'full_payment_promo'
 
-    if client.level == "first":
-        client.fle = client.fle + earnings
-    elif client.level == "second":
-        client.sle = client.sle + earnings
+        client.amount += amount
+        
+        if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
+            client.balance = ((client.balance + 700) - amount)
+        else:
+            if is_upgrade_full_payment == 'on':
+                client.balance = client.balance - (amount + 800)
+            else:
+                client.balance = client.balance - amount
+        
+        if client.level == "first":
+            earnings_percent = decimal.Decimal(0.14)
+            savings_percent = decimal.Decimal(0.00286)
+        elif client.level == "second":
+            earnings_percent = decimal.Decimal(0.0286)
+            savings_percent = decimal.Decimal(0.00)
+        else:
+            earnings_percent = decimal.Decimal(0.00)
+            savings_percent = decimal.Decimal(0.00)
 
-    books = request.form.getlist('books')
-    
-    client.books = {
-        'book_none': True if 'book_none' in books else False,
-        'volume1': True if 'volume1' in books else False,
-        'volume2': True if 'volume2' in books else False,
-    }
+        earnings = amount * earnings_percent
+        savings = amount * savings_percent
 
-    uniforms = request.form.getlist('uniforms')
+        if client.level == "first":
+            client.fle = client.fle + earnings
+        elif client.level == "second":
+            client.sle = client.sle + earnings
 
-    client.uniforms = {
-        'uniform_none': True if 'uniform_none' in uniforms else False,
-        'uniform_xs': True if 'uniform_xs' in uniforms else False,
-        'uniform_s': True if 'uniform_s' in uniforms else False,
-        'uniform_m': True if 'uniform_m' in uniforms else False,
-        'uniform_l': True if 'uniform_l' in uniforms else False,
-        'uniform_xl': True if 'uniform_xl' in uniforms else False,
-        'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-    }
+        books = request.form.getlist('books')
+        
+        client.books = {
+            'book_none': True if 'book_none' in books else False,
+            'volume1': True if 'volume1' in books else False,
+            'volume2': True if 'volume2' in books else False,
+        }
 
-    id_materials = request.form.getlist('others')
+        uniforms = request.form.getlist('uniforms')
 
-    client.id_materials = {
-        'id_card': True if 'id_card' in id_materials else False,
-        'id_lace': True if 'id_lace' in id_materials else False,
-    }
+        client.uniforms = {
+            'uniform_none': True if 'uniform_none' in uniforms else False,
+            'uniform_xs': True if 'uniform_xs' in uniforms else False,
+            'uniform_s': True if 'uniform_s' in uniforms else False,
+            'uniform_m': True if 'uniform_m' in uniforms else False,
+            'uniform_l': True if 'uniform_l' in uniforms else False,
+            'uniform_xl': True if 'uniform_xl' in uniforms else False,
+            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+        }
 
-    payment = {
-        "_id": ObjectId(),
-        "deposited": "No",
-        "payment_mode": client.payment_mode,
-        "amount": Decimal128(str(amount)),
-        "current_balance": Decimal128(str(client.balance)),
-        "confirm_by": current_user.id,
-        "date": convert_to_utc(date, "date_from"),
-        "payment_by": ObjectId(client_id),
-        "earnings": Decimal128(str(earnings)),
-        "savings": Decimal128(str(savings)),
-    }
+        id_materials = request.form.getlist('others')
 
-    contact_person_earning = {
-        "_id": ObjectId(),
-        "payment_mode": client.payment_mode,
-        "savings": Decimal128(str(savings)),
-        "earnings": Decimal128(str(earnings)),
-        "branch": client.branch.id,
-        "client": ObjectId(client_id),
-        "date": convert_to_utc(date, "date_from"),
-        "registered_by": current_user.id,
-        "payment": payment["_id"]
-    }
+        client.id_materials = {
+            'id_card': True if 'id_card' in id_materials else False,
+            'id_lace': True if 'id_lace' in id_materials else False,
+        }
 
-    with mongo.cx.start_session() as session:
-        with session.start_transaction():
-            mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
-            {"$set": {
-                "payment_mode": client.payment_mode,
-                "amount": Decimal128(str(client.amount)),
-                "balance": Decimal128(str(client.balance)),
-                "level": client.level,
-                "fle": Decimal128(str(client.fle)),
-                "sle": Decimal128(str(client.sle)),
-                "books": client.books,
-                "uniforms": client.uniforms,
-                "id_materials": client.id_materials,
-            },
-            "$push": {
-                "payments": payment,
-            }}, session=session)
-            mongo.db.auth_users.update_one({"_id": client.contact_person.id},
-            {"$push": {
-                "earnings": contact_person_earning,
-            }}, session=session)
+        payment = {
+            "_id": ObjectId(),
+            "deposited": "No",
+            "payment_mode": client.payment_mode,
+            "amount": Decimal128(str(amount)),
+            "current_balance": Decimal128(str(client.balance)),
+            "confirm_by": current_user.id,
+            "date": convert_to_utc(date, "date_from"),
+            "payment_by": ObjectId(client_id),
+            "earnings": Decimal128(str(earnings)),
+            "savings": Decimal128(str(savings)),
+        }
+
+        contact_person_earning = {
+            "_id": ObjectId(),
+            "payment_mode": client.payment_mode,
+            "savings": Decimal128(str(savings)),
+            "earnings": Decimal128(str(earnings)),
+            "branch": client.branch.id,
+            "client": ObjectId(client_id),
+            "date": convert_to_utc(date, "date_from"),
+            "registered_by": current_user.id,
+            "payment_id": payment["_id"]
+        }
+
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
+                {"$set": {
+                    "payment_mode": client.payment_mode,
+                    "amount": Decimal128(str(client.amount)),
+                    "balance": Decimal128(str(client.balance)),
+                    "fle": Decimal128(str(client.fle)),
+                    "sle": Decimal128(str(client.sle)),
+                    "books": client.books,
+                    "uniforms": client.uniforms,
+                    "id_materials": client.id_materials,
+                },
+                "$push": {
+                    "payments": payment,
+                }}, session=session)
+
+                mongo.db.auth_users.update_one({"_id": client.contact_person.id},
+                {"$push": {
+                    "earnings": contact_person_earning,
+                }}, session=session)
+    except Exception as err:
+        flash(str(err), 'error')
 
     if is_premium == 'on':
         flash("Client's payment upgraded successfully!", 'success')
@@ -549,94 +552,110 @@ def upgrade_to_premium():
     amount = decimal.Decimal(request.form['upgrade_new_amount'])
     date = request.form['upgrade_date']
 
-    client = Registration.objects.get_or_404(id=client_id)
-    
-    if client.payment_mode == "full_payment_promo" or client.payment_mode == "installment_promo":
-        client.payment_mode = 'premium_promo'
-    else:
-        client.payment_mode = 'premium'
-    
-    client.amount += amount
-    
-    if client.level == "first":
-        earnings_percent = decimal.Decimal(0.14)
-        savings_percent = decimal.Decimal(0.00286)
-    elif client.level == "second":
-        earnings_percent = decimal.Decimal(0.0286)
-        savings_percent = decimal.Decimal(0.00)
-    else:
-        earnings_percent = decimal.Decimal(0.00)
-        savings_percent = decimal.Decimal(0.00)
+    try:
+        client = Registration.objects.get_or_404(id=client_id)
+        
+        if client.payment_mode == "full_payment_promo" or client.payment_mode == "installment_promo":
+            client.payment_mode = 'premium_promo'
+        else:
+            client.payment_mode = 'premium'
+        
+        client.amount += amount
+        
+        if client.level == "first":
+            earnings_percent = decimal.Decimal(0.14)
+            savings_percent = decimal.Decimal(0.00286)
+        elif client.level == "second":
+            earnings_percent = decimal.Decimal(0.0286)
+            savings_percent = decimal.Decimal(0.00)
+        else:
+            earnings_percent = decimal.Decimal(0.00)
+            savings_percent = decimal.Decimal(0.00)
 
-    earnings = amount * earnings_percent
-    savings = amount * savings_percent
+        earnings = amount * earnings_percent
+        savings = amount * savings_percent
 
-    if client.level == "first":
-        client.fle = client.fle + earnings
-    elif client.level == "second":
-        client.sle = client.sle + earnings
+        if client.level == "first":
+            client.fle = client.fle + earnings
+        elif client.level == "second":
+            client.sle = client.sle + earnings
 
-    custom_id = client.full_registration_number + str(get_date_now())
+        books = request.form.getlist('upgrade_books')
+        
+        client.books = {
+            'book_none': True if 'book_none' in books else False,
+            'volume1': True if 'volume1' in books else False,
+            'volume2': True if 'volume2' in books else False,
+        }
 
-    payment = Payment(
-            deposited="No",
-            payment_mode=client.payment_mode,
-            amount=Decimal128(str(amount)),
-            current_balance=Decimal128(str(client.balance)),
-            confirm_by=User.objects.get(id=str(current_user.id)),
-            date=date,
-            payment_by=client,
-            earnings=Decimal128(str(earnings)),
-            savings=Decimal128(str(savings)),
-        )
+        uniforms = request.form.getlist('upgrade_uniforms')
 
-    client.payments.append(payment)
+        client.uniforms = {
+            'uniform_none': True if 'uniform_none' in uniforms else False,
+            'uniform_xs': True if 'uniform_xs' in uniforms else False,
+            'uniform_s': True if 'uniform_s' in uniforms else False,
+            'uniform_m': True if 'uniform_m' in uniforms else False,
+            'uniform_l': True if 'uniform_l' in uniforms else False,
+            'uniform_xl': True if 'uniform_xl' in uniforms else False,
+            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+        }
 
-    client.contact_person.earnings.append(
-        Earning(
-            custom_id=custom_id,
-            payment_mode=client.payment_mode,
-            savings=Decimal128(str(savings)),
-            earnings=Decimal128(str(earnings)),
-            branch=client.branch,
-            client=client,
-            date=get_date_now(),
-            registered_by=User.objects.get(id=str(current_user.id)),
-            payment_id=payment.id
-        )
-    )
+        id_materials = request.form.getlist('upgrade_others')
 
-    books = request.form.getlist('upgrade_books')
-    
-    client.books = {
-        'book_none': True if 'book_none' in books else False,
-        'volume1': True if 'volume1' in books else False,
-        'volume2': True if 'volume2' in books else False,
-    }
+        client.id_materials = {
+            'id_card': True if 'upgrade_id_card' in id_materials else False,
+            'id_lace': True if 'upgrade_id_lace' in id_materials else False,
+        }
 
-    uniforms = request.form.getlist('upgrade_uniforms')
+        payment = {
+            "_id": ObjectId(),
+            "deposited": "No",
+            "payment_mode": client.payment_mode,
+            "amount": Decimal128(str(amount)),
+            "current_balance": Decimal128(str(client.balance)),
+            "confirm_by": current_user.id,
+            "date": convert_to_utc(date, "date_from"),
+            "payment_by": ObjectId(client_id),
+            "earnings": Decimal128(str(earnings)),
+            "savings": Decimal128(str(savings)),
+        }
 
-    client.uniforms = {
-        'uniform_none': True if 'uniform_none' in uniforms else False,
-        'uniform_xs': True if 'uniform_xs' in uniforms else False,
-        'uniform_s': True if 'uniform_s' in uniforms else False,
-        'uniform_m': True if 'uniform_m' in uniforms else False,
-        'uniform_l': True if 'uniform_l' in uniforms else False,
-        'uniform_xl': True if 'uniform_xl' in uniforms else False,
-        'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-    }
+        contact_person_earning = {
+            "_id": ObjectId(),
+            "payment_mode": client.payment_mode,
+            "savings": Decimal128(str(savings)),
+            "earnings": Decimal128(str(earnings)),
+            "branch": client.branch.id,
+            "client": ObjectId(client_id),
+            "date": convert_to_utc(date, "date_from"),
+            "registered_by": current_user.id,
+            "payment_id": payment["_id"]
+        }
 
-    id_materials = request.form.getlist('upgrade_others')
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
+                {"$set": {
+                    "payment_mode": client.payment_mode,
+                    "amount": Decimal128(str(client.amount)),
+                    "fle": Decimal128(str(client.fle)),
+                    "sle": Decimal128(str(client.sle)),
+                    "books": client.books,
+                    "uniforms": client.uniforms,
+                    "id_materials": client.id_materials,
+                },
+                "$push": {
+                    "payments": payment
+                }}, session=session)
 
-    client.id_materials = {
-        'id_card': True if 'upgrade_id_card' in id_materials else False,
-        'id_lace': True if 'upgrade_id_lace' in id_materials else False,
-    }
+                mongo.db.auth_users.update_one({"_id": client.contact_person.id},
+                {"$push": {
+                    "earnings": contact_person_earning
+                }}, session=session)
 
-    client.save()
-    client.contact_person.save()
-    
-    flash("Client's payment upgraded successfully!", 'success')
+        flash("Client's payment upgraded successfully!", 'success')
+    except Exception as err:
+        flash(str(err), 'error')
 
     return redirect(url_for('lms.members'))
 
