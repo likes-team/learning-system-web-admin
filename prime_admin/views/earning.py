@@ -364,6 +364,7 @@ def approve_claim_earning():
                     "description": "Approve claim -" + marketer_details['fname'],
                     "from_module": "Earnings"
                 }, session=session)
+                
                 response = {
                     'result': True
                 }

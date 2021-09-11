@@ -56,3 +56,11 @@ class AdminApp(Admin):
     __amicon__ = 'pe-7s-graph1'
     __view_url__ = 'bp_admin.apps'
 
+
+class SystemLogs(Admin):
+    __tablename__ = 'lms_system_logs'
+    __amname__ = 'system_logs'
+    __amdescription__ = 'System Logs'
+    __amicon__ = 'pe-7s-tools'
+
+

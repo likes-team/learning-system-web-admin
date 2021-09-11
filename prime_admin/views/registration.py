@@ -232,10 +232,27 @@ def register():
                 "$push": {
                     "payments": payment
                 }}, session=session)
+
                 mongo.db.auth_users.update_one({"_id": client.contact_person.id},
                 {"$push": {
                     "earnings": contact_person_earning
                 }}, session=session)
+                
+                trans_description = "New student {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
+                    lname=client.lname,
+                    fname=client.fname,
+                    batch=client.batch.number,
+                    branch=client.branch.name,
+                    contact_person=client.contact_person.fname,
+                    )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": trans_description,
+                    "from_module": "Registration"
+                }, session=session)
 
         flash("Registered added successfully!", 'success')
     except Exception as e:

@@ -102,8 +102,8 @@ def deposit():
                     new_deposit.group = accounting['active_group']
 
                     if form.from_what.data == "Sales":
-                        new_deposit.balance = Decimal128(accounting["total_gross_sale"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
-                        accounting["total_gross_sale"] = Decimal128(accounting["total_gross_sale"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                        new_deposit.balance = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                        accounting["total_gross_sale"] = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
 
                         clients = mongo.db.lms_registrations.find({
                             "status": "registered",
@@ -122,7 +122,7 @@ def deposit():
                                     }},session=session)
 
                                     if 'amount_deposit' in client:
-                                        client['amount_deposit'] = Decimal128(client['amount_deposit'].to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
+                                        client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
                                     
@@ -141,7 +141,7 @@ def deposit():
                             }}, session=session)
                     elif new_deposit.from_what == "Student Loan Payment":
                         if accounting["final_fund1"]:
-                            accounting["final_fund1"] = Decimal128(accounting["final_fund1"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                            accounting["final_fund1"] = Decimal128(Decimal128(str(accounting["final_fund1"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         else:
                             accounting["final_fund1"] = Decimal128(str(new_deposit.amount))
 
@@ -155,7 +155,7 @@ def deposit():
 
                     elif new_deposit.from_what == "Emergency Fund":
                         if accounting["final_fund2"]:
-                            accounting["final_fund2"] = Decimal128(accounting["final_fund2"].to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
+                            accounting["final_fund2"] = Decimal128(Decimal128(str(accounting["final_fund2"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         else:
                             accounting["final_fund2"] = Decimal128(str(new_deposit.amount))
 
@@ -180,7 +180,7 @@ def deposit():
                             for payment in client['payments']:
                                 if payment["deposited"] is not None and payment["deposited"] == "Pre Deposit":
                                     if 'amount_deposit' in client:
-                                        client['amount_deposit'] = Decimal128(client['amount_deposit'].to_decimal() + payment['amount'].to_decimal())
+                                        client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
                                     
@@ -502,10 +502,10 @@ def profit():
                     if accounting is None:
                         return jsonify({"result": "no_transaction"})
                 
-                    remaining = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".05").to_decimal())
-                    net = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".55").to_decimal())
-                    fund1 = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".20").to_decimal())
-                    fund2 = Decimal128(accounting["total_gross_sale"].to_decimal() * Decimal128(".20").to_decimal())
+                    remaining = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() * Decimal128(".05").to_decimal())
+                    net = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() * Decimal128(".55").to_decimal())
+                    fund1 = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() * Decimal128(".20").to_decimal())
+                    fund2 = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() * Decimal128(".20").to_decimal())
                     previous_final_fund1 = accounting["final_fund1"] if accounting["final_fund1"] is not None else Decimal128('0.00')
                     previous_final_fund2 = accounting["final_fund2"] if accounting["final_fund2"] is not None else Decimal128('0.00')
                     previous_total_gross_sale = accounting["total_gross_sale"]
@@ -513,12 +513,12 @@ def profit():
                     accounting["total_gross_sale"] = remaining
 
                     if accounting["final_fund1"]:
-                        accounting["final_fund1"] = Decimal128(accounting["final_fund1"].to_decimal() + fund1.to_decimal())
+                        accounting["final_fund1"] = Decimal128(Decimal128(str(accounting["final_fund1"])).to_decimal() + fund1.to_decimal())
                     else: 
                         accounting["final_fund1"] = fund1
 
                     if accounting["final_fund2"]:
-                        accounting["final_fund2"] = Decimal128(accounting['final_fund2'].to_decimal() + fund2.to_decimal())
+                        accounting["final_fund2"] = Decimal128(Decimal128(str(accounting['final_fund2'])).to_decimal() + fund2.to_decimal())
                     else:
                         accounting["final_fund2"] = fund2
                     
