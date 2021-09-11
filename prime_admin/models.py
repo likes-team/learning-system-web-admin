@@ -386,3 +386,39 @@ class Utilities(Admin):
     __amdescription__ = 'Utilities'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.utilities'
+
+
+class CashOnHand(Admin):
+    __tablename__ = 'lms_cash_on_hand'
+    __amname__ = 'cash_on_hand'
+    __amdescription__ = 'Cash On Hand'
+    __amicon__ = 'pe-7s-tools'
+
+
+class FundWallet(Admin):
+    __tablename__ = 'lms_fund_wallet'
+    __amname__ = 'fund_wallet'
+    __amdescription__ = 'Fund Wallet'
+    __amicon__ = 'pe-7s-tools'
+
+
+
+class StoreRecords(Admin):
+    __tablename__ = 'lms_store_records'
+    __amname__ = 'store_records'
+    __amdescription__ = 'Store Records'
+    __amicon__ = 'pe-7s-tools'
+
+
+class BuyItems(Admin):
+    __tablename__ = 'lms_buy_items'
+    __amname__ = 'buy_items'
+    __amdescription__ = 'Buy Items'
+    __amicon__ = 'pe-7s-tools'
+
+
+class Accomodation(Admin):
+    __tablename__ = 'lms_accomodation'
+    __amname__ = 'accomodation'
+    __amdescription__ = 'Accomodation'
+    __amicon__ = 'pe-7s-tools'

@@ -1,7 +1,7 @@
 from app.core import CoreModule
 from .models import (
-    CashFlow, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
-    OrientationAttendance, Registration, Secretary, Supplies, Utilities
+    Accomodation, BuyItems, CashFlow, CashOnHand, FundWallet, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
+    OrientationAttendance, Registration, Secretary, StoreRecords, Supplies, Utilities
 )
 
 
@@ -25,7 +25,12 @@ class LearningManagementModule(CoreModule):
         Supplies,
         Utilities,
         Marketer,
-        CashFlow
+        CashFlow,
+        CashOnHand,
+        FundWallet,
+        BuyItems,
+        Accomodation,
+        StoreRecords
     ]
     version = '1.0'
     sidebar = {
@@ -43,7 +48,14 @@ class LearningManagementModule(CoreModule):
             # Expenses,
         ],
         'Accounting': [
-            CashFlow
+            CashFlow,
+            CashOnHand,
+            FundWallet
+        ],
+        'Store': [
+            BuyItems,
+            Accomodation,
+            StoreRecords,
         ],
         'Inventory': [
             Supplies,
