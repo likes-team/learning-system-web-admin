@@ -111,6 +111,8 @@ def deposit():
                             }, session=session)
 
                         for client in clients:
+                            has_payment_updated = False
+
                             for payment in client['payments']:
                                 if "deposited" in payment and payment["deposited"] == "Pre Deposit":
                                     mongo.db.lms_registrations.update_one({
@@ -126,16 +128,17 @@ def deposit():
                                     else:
                                         client['amount_deposit'] = payment['amount']
                                     print("Payment updated", client['amount_deposit'])
-                                    
+
+                                    has_payment_updated = True
                                     payments.append(payment)
 
-                            print(str(client["_id"]))
-
-                            mongo.db.lms_registrations.update_one(
-                                {"_id": client["_id"]},
-                                {"$set": {
-                                    "amount_deposit": client['amount_deposit']
-                                }}, session=session)
+                            if has_payment_updated:
+                                print(str(client["_id"]))
+                                mongo.db.lms_registrations.update_one(
+                                    {"_id": client["_id"]},
+                                    {"$set": {
+                                        "amount_deposit": client['amount_deposit']
+                                    }}, session=session)
 
                         mongo.db.lms_accounting.update_one({
                             "_id": accounting["_id"]},
@@ -180,6 +183,8 @@ def deposit():
                         clients = mongo.db.lms_registrations.find({"status": "registered", "branch": current_user.branch.id}, session=session)
 
                         for client in clients:
+                            has_payment_updated = False
+
                             for payment in client['payments']:
                                 if "deposited" in payment and payment["deposited"] == "Pre Deposit":
                                     if 'amount_deposit' in client:
@@ -188,18 +193,21 @@ def deposit():
                                         client['amount_deposit'] = payment['amount']
 
                                     print("Payment updated", client['amount_deposit'])
+                                    has_payment_updated = True
                                     payments.append(payment)
 
                                     mongo.db.lms_registrations.update_one(
                                         {"_id": client['_id'], "payments._id": payment["_id"]},
                                         {"$set": {"payments.$.deposited": "Yes"}},
                                         session=session)
-                            print(str(client["_id"]))
-                            mongo.db.lms_registrations.update_one(
-                                {"_id": client["_id"]},
-                                {"$set": {
-                                    "amount_deposit": client['amount_deposit']
-                                }}, session=session)
+
+                            if has_payment_updated:
+                                print(str(client["_id"]))
+                                mongo.db.lms_registrations.update_one(
+                                    {"_id": client["_id"]},
+                                    {"$set": {
+                                        "amount_deposit": client['amount_deposit']
+                                    }}, session=session)
 
                     elif new_deposit.from_what == "Student Loan Payment":
                         accounting.final_fund1 = new_deposit.amount
