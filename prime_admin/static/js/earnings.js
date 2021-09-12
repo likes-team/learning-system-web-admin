@@ -81,7 +81,7 @@ $(document).ready(function(){
                                 <div class="widget-content-wrapper">
                                     <div class="widget-content-left">
                                         <div class="widget-heading">${json.branchesTotalEarnings[i]['name']}</div>
-                                        <div class="widget-subheading">Total Earnings</div>
+                                        <div class="widget-subheading">Current Earnings</div>
                                     </div>
                                     <div class="widget-content-right">
                                         <div class="widget-numbers text-primary">₱ ${totalEarnings}</div>

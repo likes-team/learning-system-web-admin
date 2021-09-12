@@ -269,6 +269,7 @@ def claim_earning():
                 "earnings.payment_id": payment_id
                 },
                 {"$set": {
+                    "earnings.$.payment_id": ObjectId(payment_id),
                     "earnings.$.status": "for_approval"
                 }}, session=session)
 
@@ -277,6 +278,7 @@ def claim_earning():
                 "earnings.payment_id": ObjectId(payment_id)
                 },
                 {"$set": {
+                    "earnings.$.payment_id": ObjectId(payment_id),
                     "earnings.$.status": "for_approval"
                 }}, session=session)
 
@@ -285,6 +287,7 @@ def claim_earning():
                 "earnings.payment": ObjectId(payment_id)
                 },
                 {"$set": {
+                    "earnings.$.payment_id": ObjectId(payment_id),
                     "earnings.$.status": "for_approval"
                 }}, session=session)
             
