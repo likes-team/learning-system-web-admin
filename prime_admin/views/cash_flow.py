@@ -112,7 +112,7 @@ def deposit():
 
                         for client in clients:
                             for payment in client['payments']:
-                                if payment["deposited"] == "Pre Deposit":
+                                if "deposited" in payment and payment["deposited"] == "Pre Deposit":
                                     mongo.db.lms_registrations.update_one({
                                         "_id": client['_id'],
                                         "payments._id": payment['_id'],
@@ -125,8 +125,11 @@ def deposit():
                                         client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
+                                    print("Payment updated", client['amount_deposit'])
                                     
                                     payments.append(payment)
+
+                            print(str(client["_id"]))
 
                             mongo.db.lms_registrations.update_one(
                                 {"_id": client["_id"]},
@@ -178,19 +181,20 @@ def deposit():
 
                         for client in clients:
                             for payment in client['payments']:
-                                if payment["deposited"] == "Pre Deposit":
+                                if "deposited" in payment and payment["deposited"] == "Pre Deposit":
                                     if 'amount_deposit' in client:
                                         client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
-                                    
+
+                                    print("Payment updated", client['amount_deposit'])
                                     payments.append(payment)
 
                                     mongo.db.lms_registrations.update_one(
                                         {"_id": client['_id'], "payments._id": payment["_id"]},
                                         {"$set": {"payments.$.deposited": "Yes"}},
                                         session=session)
-
+                            print(str(client["_id"]))
                             mongo.db.lms_registrations.update_one(
                                 {"_id": client["_id"]},
                                 {"$set": {
