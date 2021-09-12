@@ -241,9 +241,10 @@ def register():
                 trans_description = "New student {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
                     lname=client.lname,
                     fname=client.fname,
-                    batch=client.batch.number,
+                    batch=client.batch_number.number,
                     branch=client.branch.name,
                     contact_person=client.contact_person.fname,
+                    mode_of_payment=client.payment_mode
                     )
 
                 mongo.db.lms_system_transactions.insert_one({

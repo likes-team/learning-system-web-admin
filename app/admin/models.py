@@ -61,6 +61,6 @@ class SystemLogs(Admin):
     __tablename__ = 'lms_system_logs'
     __amname__ = 'system_logs'
     __amdescription__ = 'System Logs'
-    __amicon__ = 'pe-7s-tools'
-
+    __amicon__ = 'pe-7s-note2'
+    __view_url__ = 'bp_admin.system_logs'
 

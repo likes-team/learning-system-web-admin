@@ -112,7 +112,7 @@ def deposit():
 
                         for client in clients:
                             for payment in client['payments']:
-                                if payment['deposited'] is not None and payment["deposited"] == "Pre Deposit":
+                                if 'deposited' in payment and payment["deposited"] == "Pre Deposit":
                                     mongo.db.lms_registrations.update_one({
                                         "_id": client['_id'],
                                         "payments._id": payment['_id'],
@@ -178,7 +178,7 @@ def deposit():
 
                         for client in clients:
                             for payment in client['payments']:
-                                if payment["deposited"] is not None and payment["deposited"] == "Pre Deposit":
+                                if "deposited" in payment and payment["deposited"] == "Pre Deposit":
                                     if 'amount_deposit' in client:
                                         client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
