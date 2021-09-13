@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from flask_mongoengine import json
 from werkzeug.exceptions import abort
 from prime_admin.globals import SECRETARYREFERENCE, get_date_now
@@ -13,7 +14,7 @@ from flask import jsonify, request
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
 from config import TIMEZONE
-
+from app import mongo
 
 
 @bp_lms.route('/orientation-attendance')
@@ -196,6 +197,23 @@ def orient():
                     new_client.level = str(int(referred_student.level) + 1)
 
             new_client.save()
+
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                orient_description = "New oriented - {lname} {fname} {branch} {contact_person}".format(
+                    lname=new_client.lname,
+                    fname=new_client.fname,
+                    branch=new_client.branch.name,
+                    contact_person=new_client.contact_person.fname,
+                    )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": orient_description,
+                    "from_module": "Orientation Attendance"
+                }, session=session)
 
         flash("Added successfully!", 'success')
 

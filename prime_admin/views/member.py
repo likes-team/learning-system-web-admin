@@ -266,6 +266,23 @@ def edit_member(client_id):
 
         client.save()
 
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                edit_student_description = "Update oriented - {lname} {fname} {branch} by {user}".format(
+                    lname=client.lname,
+                    fname=client.fname,
+                    branch=client.branch.name,
+                    user=current_user.fname + " " + current_user.lname
+                    )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": edit_student_description,
+                    "from_module": "Orientation"
+                }, session=session)
+
         response = {
             'result': True
         }
@@ -296,6 +313,23 @@ def edit_member(client_id):
     client.e_registration = e_registration
 
     client.save()
+
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            edit_student_description = "Update student - {lname} {fname} {branch} by {user}".format(
+                lname=client.lname,
+                fname=client.fname,
+                branch=client.branch.name,
+                user=current_user.fname + " " + current_user.lname
+                )
+
+            mongo.db.lms_system_transactions.insert_one({
+                "_id": ObjectId(),
+                "date": get_date_now(),
+                "current_user": current_user.id,
+                "description": edit_student_description,
+                "from_module": "Student Records"
+            }, session=session)
 
     response = {
         'result': True
@@ -533,6 +567,41 @@ def new_payment():
                 {"$push": {
                     "earnings": contact_person_earning,
                 }}, session=session)
+
+                payment_description = "Update payment - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
+                    id=client.full_registration_number,
+                    lname=client.lname,
+                    fname=client.fname,
+                    branch=client.branch.name,
+                    batch=client.batch_number.number,
+                    amount=str(amount)
+                )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": payment_description,
+                    "from_module": "Student Records"
+                }, session=session)
+
+                earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
+                    earnings="{:.2f}".format(earnings),
+                    savings="{:.2f}".format(savings),
+                    contact_person=client.contact_person.fname + " " + client.contact_person.lname,
+                    student=client.lname + " " + client.fname,
+                    payment_mode=client.payment_mode,
+                    amount=str(amount)
+                )
+                
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": earning_description,
+                    "from_module": "Student Records"
+                }, session=session)
+
     except Exception as err:
         flash(str(err), 'error')
 
@@ -652,6 +721,41 @@ def upgrade_to_premium():
                 {"$push": {
                     "earnings": contact_person_earning
                 }}, session=session)
+
+
+                payment_description = "Upgrade to premium - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
+                    id=client.full_registration_number,
+                    lname=client.lname,
+                    fname=client.fname,
+                    branch=client.branch.name,
+                    batch=client.batch_number.number,
+                    amount=str(amount)
+                )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": payment_description,
+                    "from_module": "Student Records"
+                }, session=session)
+
+                earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
+                    earnings="{:.2f}".format(earnings),
+                    savings="{:.2f}".format(savings),
+                    contact_person=client.contact_person.fname + " " + client.contact_person.lname,
+                    student=client.lname + " " + client.fname,
+                    payment_mode=client.payment_mode,
+                    amount=str(amount)
+                )
+                
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": earning_description,
+                    "from_module": "Student Records"
+                }, session=session)
 
         flash("Client's payment upgraded successfully!", 'success')
     except Exception as err:

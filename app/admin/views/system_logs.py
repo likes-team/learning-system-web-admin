@@ -1,3 +1,5 @@
+from flask_pymongo import ASCENDING
+import pymongo
 from app.admin.models import SystemLogs
 from flask_mongoengine import json
 from werkzeug.exceptions import abort
@@ -38,7 +40,7 @@ def get_dtbl_system_logs():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
 
-    logs = mongo.db.lms_system_transactions.find().skip(start).limit(length)
+    logs = mongo.db.lms_system_transactions.find().skip(start).sort([("date", pymongo.DESCENDING)]).limit(length)
 
     _table_data = []
 

@@ -238,7 +238,7 @@ def register():
                     "earnings": contact_person_earning
                 }}, session=session)
                 
-                trans_description = "New student {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
+                register_description = "New student - {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
                     lname=client.lname,
                     fname=client.fname,
                     batch=client.batch_number.number,
@@ -251,7 +251,42 @@ def register():
                     "_id": ObjectId(),
                     "date": get_date_now(),
                     "current_user": current_user.id,
-                    "description": trans_description,
+                    "description": register_description,
+                    "from_module": "Registration"
+                }, session=session)
+
+                payment_description = "New payment - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
+                    id=client.full_registration_number,
+                    lname=client.lname,
+                    fname=client.fname,
+                    branch=client.branch.name,
+                    batch=client.batch_number.number,
+                    amount=str(client.amount)
+                )
+
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": payment_description,
+                    "from_module": "Registration"
+                }, session=session)
+
+
+                earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
+                    earnings="{:.2f}".format(earnings),
+                    savings="{:.2f}".format(savings),
+                    contact_person=client.contact_person.fname + " " + client.contact_person.lname,
+                    student=client.lname + " " + client.fname,
+                    payment_mode=client.payment_mode,
+                    amount=str(client.amount)
+                )
+                
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": earning_description,
                     "from_module": "Registration"
                 }, session=session)
 
