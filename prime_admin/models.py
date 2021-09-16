@@ -393,7 +393,7 @@ class CashOnHand(Admin):
     __amname__ = 'cash_on_hand'
     __amdescription__ = 'Cash On Hand'
     __amicon__ = 'pe-7s-tools'
-
+    __view_url__ = 'lms.cash_on_hand'
 
 class FundWallet(Admin):
     __tablename__ = 'lms_fund_wallet'

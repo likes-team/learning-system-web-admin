@@ -14,6 +14,21 @@
                         <div class="form-row">
                             <div class="col-md-6">
                                 <div class="position-relative form-group">
+                                    <label for="source" class="">Source</label>
+                                    <select name="source" id="source" class="form-control" required>
+                                        <option value="">Please select source...</option>
+                                        <option value="student_enrollees_payment">Student Enrollees Payment</option>
+                                        <option disabled value="store_items_sold">Store Items Sold</option>
+                                        <option disabled value="accomodation">Accomodation</option>
+                                        <option disabled value="fund">Fund from Head Office/Accounting</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid value
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="position-relative form-group">
                                     <label for="amount"
                                             class="">Total Amount</label>
                                         <input readonly id="pre_deposit_amount" placeholder="Total Amount" step="1" type="number" name="amount" value="0.00" class="form-control">
@@ -26,7 +41,7 @@
                                 </div>
                             </div>
                         </div>
-                        <table id="tbl_mdl_pre_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
+                        <table style="display: none;" id="tbl_mdl_pre_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
                         <thead>
                             <tr>
                                 <th>ADD</th>

@@ -89,17 +89,25 @@
 <script type="text/javascript" src="{{ url_for('bp_admin.static', filename='js/sidebar.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
-<!-- <script>
-    (function() {
-      var header_color = document.getElementById("header_color29");
-      var sidebar_color = document.getElementById("sidebar_color29");
-      var fixed_footer = document.getElementById("chkbox_fixed_footer");
-      setTimeout(function() {
-        header_color.click();
-        sidebar_color.click();
-      }, 50);
-    })();
-</script> -->
+<script>
+            toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "3000",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+            }
+</script>
 {% endblock %}
 
 
