@@ -227,7 +227,7 @@ def deposit():
                         "final_fund2": Decimal128(str(accounting.final_fund2)) if accounting.final_fund2 is not None else Decimal128("0.00"),
                     }, session=session)
                     
-                new_deposit.payments = payments
+                # new_deposit.payments = payments
 
                 mongo.db.lms_bank_statements.insert_one({
                     "_id": ObjectId(),
@@ -242,7 +242,7 @@ def deposit():
                     "branch": new_deposit.branch.id,
                     "type": new_deposit.type,
                     "remarks": new_deposit.remarks,
-                    "payments": new_deposit.payments,
+                    "payments": payments,
                     "balance": Decimal128(str(new_deposit.balance)),
                     "group": new_deposit.group,
                     "created_at": new_deposit.created_at,
