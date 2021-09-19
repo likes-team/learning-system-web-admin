@@ -415,6 +415,7 @@ class BuyItems(Admin):
     __amname__ = 'buy_items'
     __amdescription__ = 'Buy Items'
     __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.buy_items'
 
 
 class Accomodation(Admin):

@@ -1,0 +1,147 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="app-main__inner">
+        <input id="client_id" name="client_id" type="hidden" class="form-control">
+        <div class="app-page-title" style="background-color: skyblue">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="text-success pe-7s-tools">
+                        </i>
+                    </div>
+                    <div>Buy Items
+                        <div class="page-title-subheading">Store
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title">Buyer Information</h5>
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="registration_no" class="">Search Registration No.</label>
+                            <div class="input-group"><input id="registration_no" name="registration_no" type="text"
+                                    class="form-control" required readonly>
+                                <div class="input-group-append">
+                                    <button
+                                        type="button" 
+                                        data-toggle="modal"
+                                        data-target="#mdl_search_client_last_name"
+                                        data-placement="bottom"
+                                        class="btn btn-primary pe-7s-search">
+                                    </button>
+                                </div>
+                            </div>
+                          
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="fname" class="">Branch</label>
+                            <input readonly required name="fname" id="fname" type="text" class="form-control">
+                          
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="mname" class="">Full name</label>
+                            <input readonly name="mname" id="mname" type="text" class="form-control">
+                       
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="suffix" class="">Batch</label>
+                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="position-relative form-group">
+                            <label for="suffix" class="">Schedule</label>
+                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
+                      
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="position-relative form-group">
+                            <label for="suffix" class="">Status</label>
+                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="card-title"></h5>
+                <div class="table-responsive">
+                    <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">MAINTAINING MATERIALS</th>
+                                <th class="text-center">DESCRIPTION</th>
+                                <th class="text-center">UNIT PRICE</th>
+                                <th class="text-center">QTY</th>
+                                <th class="text-center">SUB TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName('needs-validation');
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
+        </script>
+</div>
+{% endblock %}
+
+
+{% block inner_footer %}
+<div class="app-footer-right">
+    <!-- <button type="button" class="btn btn-secondary" onclick="history.back(-1)"
+        style="margin-right: 10px;">Cancel</button> -->
+    <!-- <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry" style="margin-right: 10px;">Clear Entries</button> -->
+    <input form="register_form" type="submit" class="btn btn-primary" name='btn_submit' value="Confirm">
+    <!-- <input form="register_form" type="submit" style="margin-right: 10px;" name='btn_submit' 
+    class="btn btn-primary" value="Save and Print" style="margin-right: 10px;"> -->
+</div>
+{% endblock %}
+
+
+{% block extra_head %}
+<style>
+    .myHiddenColumn {
+        display: none;
+    }
+</style>
+{% endblock %}
