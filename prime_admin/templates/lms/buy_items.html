@@ -2,102 +2,138 @@
 
 {% block content %}
 <div class="app-main__inner">
-        <input id="client_id" name="client_id" type="hidden" class="form-control">
-        <div class="app-page-title" style="background-color: skyblue">
-            <div class="page-title-wrapper">
-                <div class="page-title-heading">
-                    <div class="page-title-icon">
-                        <i class="text-success pe-7s-tools">
-                        </i>
-                    </div>
-                    <div>Buy Items
-                        <div class="page-title-subheading">Store
-                        </div>
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="text-success pe-7s-tools">
+                    </i>
+                </div>
+                <div>Buy Items
+                    <div class="page-title-subheading">Store
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="main-card mb-3 card">
-            <div class="card-body">
-                <h5 class="card-title">Buyer Information</h5>
-                <div class="form-row">
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="registration_no" class="">Search Registration No.</label>
-                            <div class="input-group"><input id="registration_no" name="registration_no" type="text"
-                                    class="form-control" required readonly>
-                                <div class="input-group-append">
-                                    <button
-                                        type="button" 
-                                        data-toggle="modal"
-                                        data-target="#mdl_search_client_last_name"
-                                        data-placement="bottom"
-                                        class="btn btn-primary pe-7s-search">
-                                    </button>
-                                </div>
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <h5 class="card-title">Buyer Information</h5>
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="registration_no" class="">Search Registration No.</label>
+                        <div class="input-group"><input id="registration_no" name="registration_no" type="text"
+                                class="form-control" required readonly>
+                            <div class="input-group-append">
+                                <button type="button" data-toggle="modal" data-target="#mdl_search_client_last_name"
+                                    data-placement="bottom" class="btn btn-primary pe-7s-search">
+                                </button>
                             </div>
-                          
                         </div>
+
                     </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="fname" class="">Branch</label>
-                            <input readonly required name="fname" id="fname" type="text" class="form-control">
-                          
-                        </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="branch" class="">Branch</label>
+                        <input readonly id="branch" type="text" class="form-control">
+
                     </div>
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="mname" class="">Full name</label>
-                            <input readonly name="mname" id="mname" type="text" class="form-control">
-                       
-                        </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="full_name" class="">Full name</label>
+                        <input readonly name="full_name" id="full_name" type="text" class="form-control">
+
                     </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
-                            <label for="suffix" class="">Batch</label>
-                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
-                        </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="batch" class="">Batch</label>
+                        <input readonly name="batch" id="batch" type="text" class="form-control">
                     </div>
-                    <div class="col-md-1">
-                        <div class="position-relative form-group">
-                            <label for="suffix" class="">Schedule</label>
-                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
-                      
-                        </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="schedule" class="">Schedule</label>
+                        <input readonly name="suffix" id="schedule" type="text" class="form-control">
                     </div>
-                    <div class="col-md-1">
-                        <div class="position-relative form-group">
-                            <label for="suffix" class="">Status</label>
-                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
-                        
-                        </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="status" class="">Status</label>
+                        <input readonly id="status" type="text" class="form-control">
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
+    <form action="{{ url_for('lms.buy_items') }}" id="frm_create" class="needs-validation" method="POST" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input id="client_id" name="client_id" type="hidden" class="form-control">
+        <input id="branch_id" name="branch_id" type="hidden" class="form-control">
+        
         <div class="main-card mb-3 card">
             <div class="card-body">
                 <h5 class="card-title"></h5>
                 <div class="table-responsive">
-                    <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <table id="tbl_items" class="align-middle mb-0 table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
+                                <th style="display:none;" class="text-center">ID</th>
                                 <th class="text-center">MAINTAINING MATERIALS</th>
                                 <th class="text-center">DESCRIPTION</th>
                                 <th class="text-center">UNIT PRICE</th>
-                                <th class="text-center">QTY</th>
+                                <th style="width: 300px;" class="text-center">QTY</th>
                                 <th class="text-center">SUB TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for item in items %}
                             <tr>
-                                <td></td>
+                                <td style="display:none;"><input name="items[]" type="hidden" value="{{item.id}}"></td>
+                                <td>{{item.maintaining}}</td>
+                                <td>{{item.description}}</td>
+                                <td>
+                                    <input name="price_{{item.id}}" style="font-weight: bold;" type="number"
+                                        class="form-control price" value="{{item.price}}">
+                                </td>
+                                <td>
+                                    <input name="qty_{{item.id}}" style="font-weight: bold;" type="number"
+                                        class="form-control qty" value="0">
+                                </td>
+                                <td><input style="font-weight: bold;" readonly type="text"
+                                        class="form-control sub_total" value=""></td>
                             </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-3">
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                    </div>
+
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="total" class="">Total</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                                <input value="0" readonly id="total" placeholder="Total" step="1" type="number"
+                                    class="form-control">
+                                <div class="input-group-append"><span class="input-group-text">.00</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,7 +167,7 @@
     <!-- <button type="button" class="btn btn-secondary" onclick="history.back(-1)"
         style="margin-right: 10px;">Cancel</button> -->
     <!-- <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry" style="margin-right: 10px;">Clear Entries</button> -->
-    <input form="register_form" type="submit" class="btn btn-primary" name='btn_submit' value="Confirm">
+    <input form="frm_create" type="submit" class="btn btn-primary" name='btn_submit' value="Submit">
     <!-- <input form="register_form" type="submit" style="margin-right: 10px;" name='btn_submit' 
     class="btn btn-primary" value="Save and Print" style="margin-right: 10px;"> -->
 </div>
@@ -144,4 +180,71 @@
         display: none;
     }
 </style>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        var dtbl_search = $("#tbl_mdl_clients").DataTable({
+            "pageLength": 10,
+            "columnDefs": [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            "ajax": {
+                "url": "/learning-management/api/dtbl/registered-students",
+            }
+        });
+    
+        $('#btn_confirm').click( function () {
+            var selected = dtbl_search.row('.selected').data();
+            
+            $.ajax({
+                url: '/learning-management/api/clients/' + selected[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    console.log(response)
+                    $("#client_id").val(response.data.id);
+                    $("#branch_id").val(response.data.branch);
+                    $("#registration_no").val(response.data.registration_no);
+                    $("#branch").val(response.data.branch_name);
+                    $("#full_name").val(response.data.fname + " " + response.data.mname + " " + response.data.lname);
+                    $("#batch").val(response.data.batch_number);
+                    $("#schedule").val(response.data.schedule);
+                    $("#status").val(response.data.payment_status);
+                }
+            });
+        });
+
+        $('#tbl_mdl_clients tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtbl_search.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+    
+        $('#tbl_items').on('change', 'input', function () {
+            var row = $(this).closest("tr");
+            var cost = row.find('.price').val();
+            var qty = row.find('.qty').val();
+            var amount = parseFloat(qty) * parseFloat(cost);
+            row.find('.sub_total').val(amount.toFixed(2));
+    
+            var total = 0;
+            $('#tbl_items > tbody > tr').each(function () {
+                var sub_total = parseFloat($(this).find(".sub_total").val());
+                total += sub_total;
+            });
+    
+            $("#total").val(total);
+        });
+    });
+</script>
 {% endblock %}

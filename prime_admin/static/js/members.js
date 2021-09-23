@@ -298,8 +298,7 @@ $(document).ready(function(){
                 }
             }
         });
-
-    } );
+    });
 
     $("#btn_edit").click(function(){
         if($(this).html() == "Edit"){

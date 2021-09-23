@@ -45,15 +45,16 @@ def cash_flow():
 
     orientators = Orientator.objects()
 
-    scripts = [
-        {'lms.static': 'js/cash_flow.js'},
-    ]
+    # scripts = [
+    #     {'lms.static': 'js/cash_flow.js'},
+    # ]
 
     modals = [
         'lms/deposit_modal.html',
         'lms/withdraw_modal.html',
         'lms/profit_modal.html',
         'lms/pre_deposit_modal.html',
+        'lms/cash_flow_view_modal.html',
     ]
 
     return admin_table(
@@ -65,7 +66,7 @@ def cash_flow():
         subheading="Bank Transfer",
         title="Cash Flow",
         table_template="lms/cash_flow.html",
-        scripts=scripts,
+        # scripts=scripts,
         modals=modals,
         branches=branches,
         orientators=orientators
@@ -418,6 +419,7 @@ def get_cash_flow():
     if current_user.role.name == "Secretary":
         for statement in bank_statements:
             _table_data.append((
+                str(statement.id),
                 statement.date_deposit,
                 statement.bank_name,
                 statement.account_no,
@@ -426,11 +428,13 @@ def get_cash_flow():
                 statement.from_what,
                 statement.by_who,
                 statement.remarks,
-                statement.group
+                statement.group,
+                ''
             ))
     else:
         for statement in bank_statements:
             _table_data.append((
+                str(statement.id),
                 statement.date_deposit,
                 '' if statement.type == 'withdraw' else str(statement.amount),
                 '' if statement.type == 'withdraw' else statement.from_what,
@@ -439,7 +443,8 @@ def get_cash_flow():
                 '' if statement.type == "deposit" else statement.from_what,
                 statement.by_who,
                 statement.remarks,
-                statement.group
+                statement.group,
+                ''
             ))
 
     response = {
@@ -665,3 +670,41 @@ def get_partners_percent():
 
     return response
 
+
+
+@bp_lms.route('/api/cash-flow/<string:cash_flow_id>', methods=['GET'])
+def get_cash_flow_by_id(cash_flow_id):
+    
+    bank_statement = CashFlow.objects.get_or_404(id=cash_flow_id)
+
+    payments = []
+
+    for payment in bank_statement.payments:
+        if type(payment.date) == datetime:
+            local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(payment.date == str):
+            to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+        
+        print("TESTETS",payment.payment_by)
+        payment_by = Registration.objects(id=payment.payment_by.id).get()
+
+        payments.append({
+            'date': local_datetime,
+            'payment_by': payment_by.full_name,
+            'amount': str(payment.amount),
+            'payment_mode': payment.payment_mode,
+        })
+
+    data = {
+        'id': str(bank_statement.id),
+        'payments': payments,
+    }
+
+    response = {
+        'data': data
+        }
+
+    return jsonify(response)

@@ -602,6 +602,17 @@ def new_payment():
                     "from_module": "Student Records"
                 }, session=session)
 
+                # minus stocks
+                # if client.uniforms['uniform_xs'] or client.uniforms['uniform_s'] or client.uniforms['uniform_m'] \
+                #     or client.uniforms['uniform_l'] or client.uniforms['uniform_xl'] or client.uniforms['uniform_xxl']:
+
+                #     mongo.db.lms_inventories.update_one({
+                #         "description": "UNIFORM"
+                #     },
+                #     {"$inc": {
+                #         "remaining": -1
+                #     }}, session=session)
+
     except Exception as err:
         flash(str(err), 'error')
 

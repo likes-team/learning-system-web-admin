@@ -290,6 +290,17 @@ def register():
                     "from_module": "Registration"
                 }, session=session)
 
+                # minus stocks
+                # if client.uniforms['uniform_xs'] or client.uniforms['uniform_s'] or client.uniforms['uniform_m'] \
+                #     or client.uniforms['uniform_l'] or client.uniforms['uniform_xl'] or client.uniforms['uniform_xxl']:
+
+                #     mongo.db.lms_inventories.update_one({
+                #         "description": "UNIFORM"
+                #     },
+                #     {"$inc": {
+                #         "remaining": -1
+                #     }}, session=session)
+
         flash("Registered added successfully!", 'success')
     except Exception as e:
         flash(str(e), 'error')
@@ -328,6 +339,39 @@ def get_pre_registered_clients_registration():
 
     return jsonify(response)
 
+
+@bp_lms.route('/api/dtbl/registered-students', methods=['GET'])
+def get_pre_registered_students():
+
+    if current_user.role.name == "Secretary":
+        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
+    elif current_user.role.name == "Admin":
+        clients = Registration.objects(status="registered")
+    elif current_user.role.name == "Partner":
+        clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
+    else:
+        return abort(404)
+
+    _data = []
+
+    for client in clients:
+        _data.append([
+            str(client.id),
+            client.lname,
+            client.fname,
+            client.mname,
+            client.suffix,
+            client.contact_number,
+            client.status
+        ])
+
+    response = {
+        'data': _data
+        }
+
+    return jsonify(response)
+
+
 @bp_lms.route('/api/clients/<string:client_id>', methods=['GET'])
 def get_client(client_id):
     
@@ -365,6 +409,10 @@ def get_client(client_id):
             'is_oriented': client.is_oriented
         }
     else:
+        payment_status = "PAID"
+        if client.balance > 0:
+            payment_status = "NOT PAID"
+
         _data = {
             'id': str(client.id),
             'fname': client.fname,
@@ -374,7 +422,12 @@ def get_client(client_id):
             'status': client.status,
             'contact_person': str(client.contact_person.id),
             'is_oriented': client.is_oriented,
-            'branch': str(client.branch.id) if client.branch is not None else ''
+            'branch': str(client.branch.id) if client.branch is not None else '',
+            'branch_name': str(client.branch.name) if client.branch is not None else '',
+            'registration_no': client.full_registration_number,
+            'batch_number': client.batch_number.number if client.batch_number is not None else '',
+            'schedule': client.schedule,
+            'payment_status': payment_status
         }
 
     batch_numbers = Batch.objects(branch=client.branch.id).filter(active=True)

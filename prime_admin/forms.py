@@ -52,6 +52,7 @@ class OrientationAttendanceForm(AdminTableForm):
 
 class CashFlowSecretaryForm(AdminTableForm):
     __table_columns__ = [
+        'id',
         'Date',
         'Bank name',
         'account no.',
@@ -61,6 +62,7 @@ class CashFlowSecretaryForm(AdminTableForm):
         'by who',
         'remarks',
         'group',
+        'actions'
     ]
 
     __heading__ = "Cash Flow"
@@ -72,6 +74,7 @@ class CashFlowSecretaryForm(AdminTableForm):
 
 class CashFlowAdminForm(AdminTableForm):
     __table_columns__ = [
+        'id',
         'Date',
         'Deposit',
         'from',
@@ -80,7 +83,8 @@ class CashFlowAdminForm(AdminTableForm):
         'withdraw from',
         'by who',
         'remarks',
-        'group'
+        'group',
+        'actions'
     ]
 
     __heading__ = "Cash Flow"

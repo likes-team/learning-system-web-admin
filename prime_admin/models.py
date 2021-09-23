@@ -226,6 +226,7 @@ class Inventory(Base, Admin):
     qty = db.StringField()
     purchase_date = db.DateTimeField()
     transactions = db.EmbeddedDocumentListField(InboundOutbound)
+    is_for_sale = db.BooleanField()
 
     @property
     def name(self):
