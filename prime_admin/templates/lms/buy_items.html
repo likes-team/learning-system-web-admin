@@ -17,6 +17,11 @@
         </div>
     </div>
 
+    <form action="{{ url_for('lms.buy_items') }}" id="frm_create" class="needs-validation" method="POST" novalidate>
+        <input required type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input id="client_id" name="client_id" type="hidden" class="form-control">
+        <input id="branch_id" name="branch_id" type="hidden" class="form-control">
+
     <div class="main-card mb-3 card">
         <div class="card-body">
             <h5 class="card-title">Buyer Information</h5>
@@ -38,44 +43,39 @@
                 <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="branch" class="">Branch</label>
-                        <input readonly id="branch" type="text" class="form-control">
+                        <input required readonly id="branch" type="text" class="form-control">
 
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="position-relative form-group">
                         <label for="full_name" class="">Full name</label>
-                        <input readonly name="full_name" id="full_name" type="text" class="form-control">
+                        <input required readonly name="full_name" id="full_name" type="text" class="form-control">
 
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="batch" class="">Batch</label>
-                        <input readonly name="batch" id="batch" type="text" class="form-control">
+                        <input required readonly name="batch" id="batch" type="text" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-1">
                     <div class="position-relative form-group">
                         <label for="schedule" class="">Schedule</label>
-                        <input readonly name="suffix" id="schedule" type="text" class="form-control">
+                        <input required readonly name="suffix" id="schedule" type="text" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-1">
                     <div class="position-relative form-group">
                         <label for="status" class="">Status</label>
-                        <input readonly id="status" type="text" class="form-control">
+                        <input required readonly id="status" type="text" class="form-control">
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <form action="{{ url_for('lms.buy_items') }}" id="frm_create" class="needs-validation" method="POST" novalidate>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input id="client_id" name="client_id" type="hidden" class="form-control">
-        <input id="branch_id" name="branch_id" type="hidden" class="form-control">
-        
         <div class="main-card mb-3 card">
             <div class="card-body">
                 <h5 class="card-title"></h5>
@@ -158,6 +158,7 @@
                 }, false);
             })();
         </script>
+    </form>
 </div>
 {% endblock %}
 

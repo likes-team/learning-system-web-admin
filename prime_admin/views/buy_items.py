@@ -39,45 +39,82 @@ def buy_items():
     elif request.method == "POST":
         form = request.form
 
+        if form.get('client_id') == "":
+            flash("Please select student first", 'error')
+            return redirect(url_for('lms.buy_items'))
+
         items = []
 
         item_list = form.getlist('items[]')
 
-        try:
-            with mongo.cx.start_session() as session:
-                with session.start_transaction():
-                    if item_list:
-                        for item_id in form.getlist('items[]'):
-                            item = ObjectId(item_id)
-                            qty = int(form.get("qty_{}".format(item_id)))
-                            price = decimal.Decimal(form.get("price_{}".format(item_id)))
-                            amount = qty * price
+        uniforms = 0
+        id_lace = 0
+        id_card = 0
+        module_1 = 0
+        module_2 = 0
+        reviewer_l = 0
+        reviewer_r = 0
+        # try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                if item_list:
+                    for item_id in form.getlist('items[]'):
+                        item = mongo.db.lms_inventories.find_one({"_id": ObjectId(item_id)})
+                        qty = int(form.get("qty_{}".format(item_id)))
+                        price = decimal.Decimal(form.get("price_{}".format(item_id)))
+                        amount = qty * price
+                        print(item)
+                        items.append({
+                            'item': ObjectId(item_id),
+                            'qty': Decimal128(str(qty)),
+                            'price': Decimal128(str(price)),
+                            'amount': Decimal128(str(amount))
+                        })
+                        
+                        mongo.db.lms_inventories.update_one({
+                            "_id": ObjectId(item_id)
+                        },
+                        {"$inc": {
+                            "remaining": 0 - qty
+                        }}, session=session)
 
-                            items.append({
-                                'item': item,
-                                'qty': Decimal128(str(qty)),
-                                'price': Decimal128(str(price)),
-                                'amount': Decimal128(str(amount))
-                            })
-                            
-                            mongo.db.lms_inventories.update_one({
-                                "_id": item
-                            },
-                            {"$inc": {
-                                "remaining": 0 - qty
-                            }}, session=session)
+                        if item['description'] == "UNIFORM":
+                            uniforms = qty
+                        elif item['description'] == "ID LACE":
+                            id_lace = qty
+                        elif item['description'] == "ID CARD":
+                            id_card = qty
+                        elif item['description'] == "MODULE 1":
+                            module_1 = qty
+                        elif item['description'] == "MODULE 2":
+                            module_2 = qty
+                        elif item['description'] == "REVIEWER L":
+                            reviewer_l = qty
+                        elif item['description'] == "REVIEWER R":
+                            reviewer_r = qty
 
-                    mongo.db.lms_store_buyed_items.insert_one({
-                        "_id": ObjectId(),
-                        "created_at": get_date_now(),
-                        "cashier": current_user.id,
-                        "client_id": form.get('client_id'),
-                        "items": items
-                    }, session=session)
+                client = Registration.objects.get(id=form.get('client_id'))
 
-                    flash("Proccess successfully!", 'success')
 
-        except Exception as e:
-            flash(str(e), 'error')
+                mongo.db.lms_store_buyed_items.insert_one({
+                    "_id": ObjectId(),
+                    "created_at": get_date_now(),
+                    "cashier": current_user.id,
+                    'branch': client.branch.id, 
+                    "client_id": client.id,
+                    "items": items,
+                    "uniforms": uniforms,
+                    "id_lace": id_lace,
+                    "id_card": id_card,
+                    "module_1": module_1,
+                    "module_2": module_2,
+                    "reviewer_l": reviewer_l,
+                    "reviewer_r": reviewer_r
+                }, session=session)
 
-        return redirect(url_for('lms.buy_items'))
+                flash("Proccess successfully!", 'success')
+
+        # except Exception as e:
+        #     flash(str(e), 'error')
+
+        return redirect(url_for('lms.store_records'))

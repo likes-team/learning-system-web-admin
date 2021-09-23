@@ -409,6 +409,7 @@ class StoreRecords(Admin):
     __amname__ = 'store_records'
     __amdescription__ = 'Store Records'
     __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.store_records'
 
 
 class BuyItems(Admin):
