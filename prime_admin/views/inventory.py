@@ -209,7 +209,7 @@ def supplies():
         create_url='lms.create_supplies',
         edit_url=False,
         modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
-        scripts=[{'lms.static': 'js/inventory.js'}],
+        scripts=[],
         view_modal=False,
         # view_modal_url='/learning-management/get-view-supplies-data'
         )

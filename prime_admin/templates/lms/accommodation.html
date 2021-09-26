@@ -9,7 +9,7 @@
                     <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    Accomodation
+                    Accommodation
                     <div class="page-title-subheading">
                     </div>
                 </div>
@@ -62,6 +62,11 @@
 
 
     <div class="main-card mb-3 card">
+        <form action="{{ url_for('lms.accomodate') }}" id="frm_create" class="needs-validation" method="POST" novalidate>
+            <input required type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input id="client_id" name="client_id" type="hidden" class="form-control">
+            <input id="branch_id" name="branch_id" type="hidden" class="form-control">
+    
         <div class="card-body">
             <h5 class="card-title">Form</h5>
             <div class="form-row"> 
@@ -116,7 +121,7 @@
                 <div class="col-md-4">
                     <div class="position-relative form-group">
                         <label for="date_from" class="">Date From</label>
-                        <input id="date_from" type="date" class="form-control">
+                        <input required name="date_from" id="date_from" type="date" class="form-control">
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -128,7 +133,7 @@
                 <div class="col-md-4">
                     <div class="position-relative form-group">
                         <label for="date_to" class="">Date To</label>
-                        <input id="date_to" type="date" class="form-control">
+                        <input required name="date_to" id="date_to" type="date" class="form-control">
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -139,11 +144,11 @@
                 </div>
                 <div class="col-md-4">
                     <div class="position-relative form-group">
-                        <label for="branch_filter" class="">Remarks</label>
-                        <select name="branch_filter" id="branch_filter" class="form-control" required>
+                        <label for="remarks" class="">Remarks</label>
+                        <select name="remarks" id="remarks" class="form-control" required>
                             <option value="">Choose...</option>
-                            <option value="review">Review</option>
-                            <option value="basic">Basic</option>
+                            <option value="Review">Review</option>
+                            <option value="Basic">Basic</option>
                         </select>
                         <div class="valid-feedback">
                             Looks good!
@@ -155,12 +160,12 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <div class="position-relative form-group">
-                        <label for="amount" class="">Price Per Day</label>
+                        <label for="price_per_day" class="">Price Per Day</label>
                         <div class="input-group">
                             <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                            <input required="" id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                            <input readonly required name="price_per_day" id="price_per_day" placeholder="Amount" step="1" type="number" class="form-control" value="50.00">
                         </div>
                         <div class="valid-feedback">
                             Looks good!
@@ -172,10 +177,10 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <div class="position-relative form-group">
-                        <label for="date_to" class="">No of Days</label>
-                        <input readonly id="date_to" type="number" class="form-control">
+                        <label for="no_of_days" class="">No of Days</label>
+                        <input required readonly value="0" id="no_of_days" type="number" class="form-control">
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -186,12 +191,12 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <div class="position-relative form-group">
-                        <label for="amount" class="">Total</label>
+                        <label for="total" class="">Total</label>
                         <div class="input-group">
                             <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
-                            <input readonly required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                            <input required  readonly required id="total" placeholder="Total Amount" step="1" type="number" class="form-control">
                         </div>
                         <div class="valid-feedback">
                             Looks good!
@@ -205,12 +210,33 @@
         </div>
         
         <div class="d-block text-right card-footer">
-            <input form="orientation_form" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="CONFIRM">
+            <input class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="CONFIRM">
         </div>
+
+        <script>
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName('needs-validation');
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
+        </script>
+    </form>
     </div>
 
-
-    <div class="main-card mb-3 card"><h5 class="card-header">Members</h5>
+    <div class="main-card mb-3 card"><h5 class="card-header">Accommodations</h5>
         <div class="card-body">
             <div class="form-row">
                 <div class="col-md-4">
@@ -231,6 +257,8 @@
                 <div class="col-md-4">
                 </div>
                 <div class="col-md-2">
+                </div>
+                <div class="col-md-2">
                     <div class="position-relative form-group">
                         <label for="branch_filter" class="">Branch</label>
                         <select name="branch_filter" id="branch_filter" class="form-control" required>
@@ -249,32 +277,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="position-relative form-group">
-                        <label for="contact_person_filter" class="">Contact Person</label>
-                        <select name="contact_person_filter" id="contact_person_filter" class="form-control" required>
-                            <option value="all">All</option>
-                            {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
-                            <option value="{{ contact_person.id }}">
-                                {{contact_person.fname}}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
-                        <div class="invalid-feedback">
-                            Please provide a schedule
-                        </div>
-                    </div>
-                </div>
+            
             </div>
 
             <div class="table-responsive">
-                <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                <table id="tbl_accommodations" class="align-middle mb-0 table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
-                            <th class="text-center"></th>
                             {% for column in TABLE_OPTIONS['table_columns'] %}
                             <th class="text-center">{{ column.upper() }}</th>
                             {% endfor %}
@@ -296,7 +305,102 @@
 {% block scripts %}
 <script>
     $(document).ready(function(){
+        var dtbl_search = $("#tbl_mdl_clients").DataTable({
+            "pageLength": 10,
+            "columnDefs": [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            "ajax": {
+                "url": "/learning-management/api/dtbl/registered-students",
+            }
+        });
+    
+        $('#btn_confirm').click( function () {
+            var selected = dtbl_search.row('.selected').data();
+            
+            $.ajax({
+                url: '/learning-management/api/clients/' + selected[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    console.log(response)
+                    $("#client_id").val(response.data.id);
+                    $("#branch_id").val(response.data.branch);
+                    $("#registration_no").val(response.data.registration_no);
+                    $("#branch").val(response.data.branch_name);
+                    $("#full_name").val(response.data.fname + " " + response.data.mname + " " + response.data.lname);
+                    $("#batch").val(response.data.batch_number);
+                    $("#schedule").val(response.data.schedule);
+                    $("#status").val(response.data.payment_status);
+                }
+            });
+        });
 
+        $('#tbl_mdl_clients tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtbl_search.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+
+        $("#date_from").change(function(){
+            computeNoOfDaysAmount();
+        });
+
+        $("#date_to").change(function(){
+            computeNoOfDaysAmount();
+        });
+
+        function computeNoOfDaysAmount() {
+            var start = new Date($('#date_from').val());
+            var end = new Date($('#date_to').val());
+            
+            // end - start returns difference in milliseconds 
+            var diff = new Date(end - start);
+            
+            // get days
+            var days = diff/1000/60/60/24;
+
+            if(days < 0){
+                alert("Invalid no of days");
+                $("#no_of_days").val(0);
+                return;
+            }
+
+            $("#no_of_days").val(days);
+
+            var total = parseFloat($("#price_per_day").val()) * parseFloat($("#no_of_days").val());
+            $("#total").val(total);
+        }
+
+        var dtbl_accommodations = $('#tbl_accommodations').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0},
+            ],
+            "ajax": {
+                "url": "/learning-management/dtbl/accommodations",
+                "data": function (d) {
+                    d.branch = $("#branch_filter").val();
+                },
+            }
+        });
+
+        $("#branch_filter").change(function(){
+            dtbl_accommodations.ajax.reload();
+        });
     });
 </script>
 {% endblock %}

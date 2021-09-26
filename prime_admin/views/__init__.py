@@ -15,4 +15,4 @@ from .cash_on_hand import *
 from .fund_wallet import *
 from .buy_items import *
 from .store_records import *
-from .accomodation import *
+from .accommodation import *

@@ -112,7 +112,7 @@ def buy_items():
                     "reviewer_r": reviewer_r
                 }, session=session)
 
-                flash("Proccess successfully!", 'success')
+                flash("Process successfully!", 'success')
 
         # except Exception as e:
         #     flash(str(e), 'error')

@@ -420,9 +420,9 @@ class BuyItems(Admin):
     __view_url__ = 'lms.buy_items'
 
 
-class Accomodation(Admin):
-    __tablename__ = 'lms_accomodation'
-    __amname__ = 'accomodation'
-    __amdescription__ = 'Accomodation'
+class Accommodation(Admin):
+    __tablename__ = 'lms_accommodation'
+    __amname__ = 'accommodation'
+    __amdescription__ = 'Accommodation'
     __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'lms.accomodation'
+    __view_url__ = 'lms.accommodation'

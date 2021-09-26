@@ -39,7 +39,6 @@
                             </tr>
                             </thead>
                             <tbody>
-                                
                                 {% for row_data in TABLE_OPTIONS['table_data'] %}
     
                                     {% if TABLE_OPTIONS['view_modal'] %}
@@ -78,4 +77,64 @@
                     </div>
             </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var dtbl_table;
+
+$(document).ready(function(){
+
+    $('#index_table tbody').on('click', '.btn-inbound', function () {
+        var data =  $(this).parents('tr').attr('id');
+        
+        console.log(data);
+        $("#supply_id").val(data);
+    });
+
+    $('#index_table tbody').on('click', '.btn-outbound', function () {
+        var data =  $(this).parents('tr').attr('id');
+        
+        console.log(data);
+        $("#outbound_supply_id").val(data);
+    });
+
+    var js_fields_array = JS_FIELDS.split(",");
+
+    for (i=0; i < js_fields_array.length; i++){
+        js_fields_array[i] = js_fields_array[i].replace('[', '');
+        js_fields_array[i] = js_fields_array[i].replace(']', '');
+        js_fields_array[i] = js_fields_array[i].replace('"', '');
+        js_fields_array[i] = js_fields_array[i].replace('"', '');
+        js_fields_array[i] = js_fields_array[i].replace(/\s/g, '');
+    }
+
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+    dtbl_table = $('#index_table').DataTable({
+        "dom": 'rti',
+        "pageLength": 20,
+        "order": [[ 1, 'asc' ]]
+    });
+
+
+    dtbl_table.on( 'order.dt search.dt', function () {
+        dtbl_table.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+            cell.innerHTML = i+1;
+        } );
+    } ).draw();
+
+
+    $('.search-input').on('keyup', function () {
+        dtbl_table.search(this.value).draw();
+    } );
+});
+</script>
 {% endblock %}

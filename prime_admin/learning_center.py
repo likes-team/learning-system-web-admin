@@ -1,6 +1,6 @@
 from app.core import CoreModule
 from .models import (
-    Accomodation, BuyItems, CashFlow, CashOnHand, FundWallet, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
+    Accommodation, BuyItems, CashFlow, CashOnHand, FundWallet, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
     OrientationAttendance, Registration, Secretary, StoreRecords, Supplies, Utilities
 )
 
@@ -29,7 +29,7 @@ class LearningManagementModule(CoreModule):
         CashOnHand,
         FundWallet,
         BuyItems,
-        Accomodation,
+        Accommodation,
         StoreRecords
     ]
     version = '1.0'
@@ -54,7 +54,7 @@ class LearningManagementModule(CoreModule):
         ],
         'Store': [
             BuyItems,
-            Accomodation,
+            Accommodation,
             StoreRecords,
         ],
         'Inventory': [
