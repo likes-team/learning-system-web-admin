@@ -425,3 +425,4 @@ class Accomodation(Admin):
     __amname__ = 'accomodation'
     __amdescription__ = 'Accomodation'
     __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.accomodation'

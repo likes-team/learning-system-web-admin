@@ -410,7 +410,7 @@ def get_client(client_id):
         }
     else:
         payment_status = "PAID"
-        if client.balance > 0:
+        if client.balance is not None and client.balance > 0:
             payment_status = "NOT PAID"
 
         _data = {

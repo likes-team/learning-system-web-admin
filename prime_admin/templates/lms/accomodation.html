@@ -1,0 +1,302 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Accomodation
+                    <div class="page-title-subheading">
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-title-actions">
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <h5 class="card-title">Form</h5>
+            <div class="form-row"> 
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="registration_no" class="">Search Registration No.</label>
+                        <div class="input-group"><input id="registration_no" name="registration_no" type="text"
+                                class="form-control" required readonly>
+                            <div class="input-group-append">
+                                <button type="button" data-toggle="modal" data-target="#mdl_search_client_last_name"
+                                    data-placement="bottom" class="btn btn-primary pe-7s-search">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="branch" class="">Branch</label>
+                        <input required readonly id="branch" type="text" class="form-control">
+
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="full_name" class="">Full name</label>
+                        <input required readonly name="full_name" id="full_name" type="text" class="form-control">
+
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="batch" class="">Batch</label>
+                        <input required readonly name="batch" id="batch" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="schedule" class="">Schedule</label>
+                        <input required readonly name="suffix" id="schedule" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="status" class="">Status</label>
+                        <input required readonly id="status" type="text" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="date_from" class="">Date From</label>
+                        <input id="date_from" type="date" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid date of birth
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="date_to" class="">Date To</label>
+                        <input id="date_to" type="date" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid date of birth
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="branch_filter" class="">Remarks</label>
+                        <select name="branch_filter" id="branch_filter" class="form-control" required>
+                            <option value="">Choose...</option>
+                            <option value="review">Review</option>
+                            <option value="basic">Basic</option>
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a schedule
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="amount" class="">Price Per Day</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                            <input required="" id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                        </div>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid amount
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="date_to" class="">No of Days</label>
+                        <input readonly id="date_to" type="number" class="form-control">
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid value
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="amount" class="">Total</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text">₱</span></div>
+                            <input readonly required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
+                        </div>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a valid amount
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>
+        
+        <div class="d-block text-right card-footer">
+            <input form="orientation_form" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="CONFIRM">
+        </div>
+    </div>
+
+
+    <div class="main-card mb-3 card"><h5 class="card-header">Members</h5>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="lname" class="">Search</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <input disabled id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                <button disabled id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                    </i></button>
+                                <button disabled id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
+                                        class="pe-7s-close">
+                                    </i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="branch_filter" class="">Branch</label>
+                        <select name="branch_filter" id="branch_filter" class="form-control" required>
+                            <option value="all">All</option>
+                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            <option value="{{ branch.id }}">
+                                {{ branch.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a schedule
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="contact_person_filter" class="">Contact Person</label>
+                        <select name="contact_person_filter" id="contact_person_filter" class="form-control" required>
+                            <option value="all">All</option>
+                            {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
+                            <option value="{{ contact_person.id }}">
+                                {{contact_person.fname}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide a schedule
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            {% for column in TABLE_OPTIONS['table_columns'] %}
+                            <th class="text-center">{{ column.upper() }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Load with ajax request -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block outer_footer %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+
+    });
+</script>
+{% endblock %}
