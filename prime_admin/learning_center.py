@@ -38,19 +38,19 @@ class LearningManagementModule(CoreModule):
             Dashboard
         ],
         'System': [
+            OrientationAttendance,
             Registration,
             Member,
             Earning,
             Partner,
             Marketer,
             Secretary,
-            OrientationAttendance,
             # Expenses,
         ],
         'Accounting': [
-            CashFlow,
             CashOnHand,
-            FundWallet
+            FundWallet,
+            CashFlow,
         ],
         'Store': [
             BuyItems,
