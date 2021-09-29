@@ -396,12 +396,13 @@ class CashOnHand(Admin):
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.cash_on_hand'
 
+
 class FundWallet(Admin):
     __tablename__ = 'lms_fund_wallet'
     __amname__ = 'fund_wallet'
     __amdescription__ = 'Fund Wallet'
     __amicon__ = 'pe-7s-tools'
-
+    __view_url__ = 'lms.fund_wallet'
 
 
 class StoreRecords(Admin):
