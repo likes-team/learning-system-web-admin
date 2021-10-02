@@ -272,25 +272,6 @@ class OrientationAttendance(Admin):
     __view_url__ = 'lms.orientation_attendance'
 
 
-class Expenses(Base, Admin):
-    meta = {
-        'collection': 'lms_expenses',
-        'strict': False,
-    }
-    
-    __tablename__ = 'lms_expenses'
-    __amname__ = 'expenses'
-    __amdescription__ = 'Operating Expenses'
-    __amicon__ = 'pe-7s-tools'
-    __view_url__ = 'lms.expenses'
-
-    quantity = db.IntField()
-    inventory = db.ReferenceField('Inventory')
-    uom = db.StringField()
-    price = db.DecimalField()
-    total = db.DecimalField()
-    branch = db.ReferenceField('Branch')
-
 
 class Dashboard(Admin):
     __amname__ = 'dashboard'
@@ -397,12 +378,49 @@ class CashOnHand(Admin):
     __view_url__ = 'lms.cash_on_hand'
 
 
-class FundWallet(Admin):
-    __tablename__ = 'lms_fund_wallet'
+class FundWallet(Admin, Base):
+    meta = {
+        'collection': 'lms_fund_wallet_transactions',
+        'strict': False,
+    }
+
+    __tablename__ = 'lms_fund_wallet_transactions'
     __amname__ = 'fund_wallet'
     __amdescription__ = 'Fund Wallet'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.fund_wallet'
+
+    date = db.DateTimeField()
+    branch = db.ReferenceField('Branch')
+    bank_name = db.StringField()
+    transaction_no = db.StringField()
+    sender = db.StringField()
+    receiver = db.StringField()
+    amount_received = db.DecimalField()
+    remarks = db.StringField()
+
+
+
+class Expenses(Base, Admin):
+    meta = {
+        'collection': 'lms_expenses_transactions',
+        'strict': False,
+    }
+    
+    __tablename__ = 'lms_expenses_transactions'
+    __amname__ = 'expenses'
+    __amdescription__ = 'Operating Expenses'
+    __amicon__ = 'pe-7s-tools'
+    __view_url__ = 'lms.expenses'
+
+    date = db.DateTimeField()
+    branch = db.ReferenceField('Branch')
+    category = db.StringField()
+    account_no = db.StringField()
+    billing_month = db.StringField()
+    settled_by = db.StringField()
+    total_amount_due = db.DecimalField()
+    remarks = db.StringField()
 
 
 class StoreRecords(Admin):

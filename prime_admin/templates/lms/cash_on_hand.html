@@ -128,7 +128,7 @@
                                 <div class="widget-subheading"></div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span id="sales_today">₱ 0.00</span></div>
+                                <div class="widget-numbers text-success"><span id="total_cash_on_hand">₱ 0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-xl-6">
+                <div class="col-lg-12 col-xl-12">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -149,7 +149,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-xl-6">
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-xl-12">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -165,7 +168,7 @@
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-xl-6">
+                <div class="col-lg-12 col-xl-12">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -178,7 +181,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-xl-6">
+                <!-- <div class="col-lg-6 col-xl-6">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -190,7 +193,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <h5 style="margin-top: 20px;">Student Payments</h5>
@@ -444,7 +447,10 @@
                 contentType: "application/json; charset=utf-8",
                 success: function(response){
                     if(response.result){
+                        $("#pre_deposit_amount").val(0.00);
+                        $("#source").val('');
                         dtbl_pre_deposit.ajax.reload();
+                        dtbl_student_payments.ajax.reload();
                         toastr.success("Saved Successfully!");
                     }else{
                         toastr.error("Error Occured!, Saving Failed");
@@ -465,10 +471,17 @@
         });
 
         var dtbl_student_payments = $("#tbl_student_payments").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
             "ajax": {
                 "url": "/learning-management/api/dtbl/student-payments",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                },
                 "dataSrc": function(json){
                     $("#total_student_payments").html("₱" + json.totalStudentPayments);
+                    $("#total_cash_on_hand").html("₱" + json.totalCashOnHand);
                     return json.data;
                 }
             },
@@ -500,6 +513,24 @@
                     }
                 } );
             }
+        });
+
+        $("#btn_branch_label").change(function () {
+            dtbl_student_payments.ajax.reload();
+        });
+
+        $("#div_branch_buttons").on('click', '.btn-branch', function () {
+            var branch_name = $(this).html();
+    
+            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
+            $("#btn_branch_label").html(branch_name.toUpperCase());
+            $("#btn_branch_label").val($(this).val());
+            $("#card_header_label").html(branch_name);
+    
+            $('#btn_branch_label').trigger('change');
+            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
+            // }
+    
         });
 
     });

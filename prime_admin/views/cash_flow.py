@@ -383,10 +383,10 @@ def get_cash_flow():
 
     if accounting:
         total_gross_sales = accounting.total_gross_sale
-        remaining = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.05)
-        net = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.55)
-        fund1 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
-        fund2 = decimal.Decimal(accounting.total_gross_sale) * decimal.Decimal(.20)
+        remaining = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.05)
+        net = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.55)
+        fund1 = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.20)
+        fund2 = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.20)
         final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else 0.00
         final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else 0.00
 
