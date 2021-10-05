@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from flask_mongoengine import json
 from werkzeug.exceptions import abort
-from prime_admin.globals import SECRETARYREFERENCE, get_date_now
+from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, get_date_now
 from app.auth.models import User
 from prime_admin.forms import OrientationAttendanceForm
 from flask.helpers import flash, url_for
@@ -258,9 +258,9 @@ def get_referrals():
 def get_branch_contact_persons(branch_id):
     print(branch_id)
     if branch_id == "all":
-        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
+        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE))
     else:
-        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id))
+        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE))
 
     if contact_persons is None:
         response = {
