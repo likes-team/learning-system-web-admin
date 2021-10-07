@@ -1,5 +1,6 @@
 import decimal
 from bson.objectid import ObjectId
+from mongoengine.queryset.visitor import Q
 import pytz
 from prime_admin.globals import convert_to_utc, get_date_now, get_sales_today_date
 from random import uniform
@@ -11,11 +12,12 @@ from prime_admin.models import Batch, Branch, Payment, Registration, Member
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template
 from app import mongo
 from datetime import datetime
-from bson.decimal128 import Decimal128
+from bson.decimal128 import Decimal128, create_decimal128_context
 from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
 from config import TIMEZONE
 
+D128_CTX = create_decimal128_context()
 
 
 @bp_lms.route('/members', methods=['GET'])
@@ -27,10 +29,6 @@ def members():
         ]
 
     fields = []
-
-    scripts = [
-        {'lms.static': 'js/members.js'}
-    ]
 
     modals = [
         'lms/client_view_modal.html',
@@ -59,7 +57,6 @@ def members():
         heading='Student Records',
         subheading="",
         title='Student Records',
-        scripts=scripts,
         modals=modals,
         table_template="lms/members_table.html",
         branches=branches,
@@ -81,6 +78,10 @@ def get_dtbl_members():
     payment_status = request.args.get('payment_status')
     
     sales_today = 0
+    # TODO: add promos
+    installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
+    full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
+    premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
 
     print(get_sales_today_date())
     print(get_date_now())
@@ -88,6 +89,10 @@ def get_dtbl_members():
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(status='registered').order_by("-registration_date").skip(start).limit(length)
         sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
+
+        installment_registrations = installment_registrations.filter(branch=branch_id)
+        full_payment_registrations = full_payment_registrations.filter(branch=branch_id)
+        premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
     else:
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
@@ -98,23 +103,47 @@ def get_dtbl_members():
             registrations = Registration.objects(status='registered').order_by("-registration_date").skip(start).limit(length)
             sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
-
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
+        installment_registrations = installment_registrations.filter(batch_number=batch_no)
+        full_payment_registrations = full_payment_registrations.filter(batch_number=batch_no)
+        premium_payment_registrations = premium_payment_registrations.filter(batch_number=batch_no)
 
     if schedule != 'all':
         registrations = registrations.filter(schedule=schedule)
+        installment_registrations = installment_registrations.filter(schedule=schedule)
+        full_payment_registrations = full_payment_registrations.filter(schedule=schedule)
+        premium_payment_registrations = premium_payment_registrations.filter(schedule=schedule)
 
     if search_value != "":
         registrations = registrations.filter(lname__icontains=search_value)
+        installment_registrations = installment_registrations.filter(lname__icontains=search_value)
+        full_payment_registrations = full_payment_registrations.filter(lname__icontains=search_value)
+        premium_payment_registrations = premium_payment_registrations.filter(lname__icontains=search_value)
 
     if date_from !="":
-        print("date_from: ", convert_to_utc(date_from, 'date_from'))
         registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        installment_registrations = installment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        full_payment_registrations = full_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        premium_payment_registrations = premium_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
 
     if date_to != "":
-        print("date_to: ", convert_to_utc(date_to))
         registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        installment_registrations = installment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        full_payment_registrations = full_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        premium_payment_registrations = premium_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+
+    if payment_status == 'PAID':
+        registrations = registrations.filter(balance__lte=0)
+        installment_registrations = installment_registrations.filter(balance__lte=0)
+        full_payment_registrations = full_payment_registrations.filter(balance__lte=0)
+        premium_payment_registrations = premium_payment_registrations.filter(balance__lte=0)
+
+    elif payment_status == "NOT PAID":
+        registrations = registrations.filter(balance__gt=0)
+        installment_registrations = installment_registrations.filter(balance__gt=0)
+        full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
+        premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
 
     _table_data = []
 
@@ -129,10 +158,6 @@ def get_dtbl_members():
 
         if registration.balance <= 0.00:
             paid = 'PAID'
-
-        # filter
-        if payment_status != 'all' and payment_status != paid:
-            continue
         
         if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
             if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
@@ -195,10 +220,6 @@ def get_dtbl_members():
         elif registration.payment_mode == 'premium_promo':
             payment_mode = "Premium Payment - Promo"
 
-        # if registration.registration_date_local_date:
-        #     if get_sales_today_date().date() == registration.registration_date_local_date.date():
-        #         sales_today += registration.amount
-
         if registration.amount == registration.amount_deposit:
             deposit = "Yes"
         else: 
@@ -224,11 +245,13 @@ def get_dtbl_members():
             actions
         ])
 
-    # TODO: add promos
-    total_installment = registrations.filter(payment_mode='installment').filter(is_archived__ne=True).sum('amount')
-    total_full_payment = registrations.filter(payment_mode='full_payment').filter(is_archived__ne=True).sum('amount')
-    total_premium_payment = registrations.filter(payment_mode='premium').filter(is_archived__ne=True).sum('amount')
-    total_payment = registrations.filter(is_archived__ne=True).sum('amount')
+
+    total_installment = Decimal128(str(installment_registrations.sum('amount')))
+    total_full_payment = Decimal128(str(full_payment_registrations.sum('amount')))
+    total_premium_payment = Decimal128(str(premium_payment_registrations.sum('amount')))
+
+    with decimal.localcontext(D128_CTX):
+        total_payment = total_installment.to_decimal() + total_full_payment.to_decimal() + total_premium_payment.to_decimal()
 
     response = {
         'draw': draw,
@@ -777,22 +800,72 @@ def upgrade_to_premium():
 
 @bp_lms.route('/students.pdf')
 def print_students_pdf():
-    branch = request.args.get('branch', 'all')
+    branch_id = request.args.get('branch', 'all')
     batch_no = request.args.get('batch_no', 'all')
     schedule = request.args.get('schedule', 'all')
+    search_value = request.args.get('search_value', 'all')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    payment_status = request.args.get('payment_status')
     report = request.args.get('report', 'default')
+    print(search_value, date_from, date_to, payment_status)
     
-    if branch != 'all':
-        registrations = Registration.objects(branch=branch).filter(status='registered')
-        branch = Branch.objects.get_or_404(id=branch).name
+    installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
+    full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
+    premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
+
+    if branch_id != 'all':
+        registrations = Registration.objects(branch=branch_id).filter(status='registered')
+        installment_registrations = installment_registrations.filter(branch=branch_id)
+        full_payment_registrations = full_payment_registrations.filter(branch=branch_id)
+        premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
+
+        branch_id = Branch.objects.get_or_404(id=branch_id).name
     else:
         registrations = Registration.objects(status='registered')
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
+        installment_registrations = installment_registrations.filter(batch_number=batch_no)
+        full_payment_registrations = full_payment_registrations.filter(batch_number=batch_no)
+        premium_payment_registrations = premium_payment_registrations.filter(batch_number=batch_no)
 
     if schedule != 'all':
         registrations = registrations.filter(schedule=schedule)
+        installment_registrations = installment_registrations.filter(schedule=schedule)
+        full_payment_registrations = full_payment_registrations.filter(schedule=schedule)
+        premium_payment_registrations = premium_payment_registrations.filter(schedule=schedule)
+
+    if search_value != "undefined":
+        registrations = registrations.filter(lname__icontains=search_value)
+        installment_registrations = installment_registrations.filter(lname__icontains=search_value)
+        full_payment_registrations = full_payment_registrations.filter(lname__icontains=search_value)
+        premium_payment_registrations = premium_payment_registrations.filter(lname__icontains=search_value)
+
+
+    if date_from !="":
+        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        installment_registrations = installment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        full_payment_registrations = full_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+        premium_payment_registrations = premium_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
+
+    if date_to != "":
+        registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        installment_registrations = installment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        full_payment_registrations = full_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+        premium_payment_registrations = premium_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
+
+    if payment_status == 'PAID':
+        registrations = registrations.filter(balance__lte=0)
+        installment_registrations = installment_registrations.filter(balance__lte=0)
+        full_payment_registrations = full_payment_registrations.filter(balance__lte=0)
+        premium_payment_registrations = premium_payment_registrations.filter(balance__lte=0)
+
+    elif payment_status == "NOT PAID":
+        registrations = registrations.filter(balance__gt=0)
+        installment_registrations = installment_registrations.filter(balance__gt=0)
+        full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
+        premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
 
     _table_data = []
 
@@ -915,10 +988,13 @@ def print_students_pdf():
         ])
         print(books)
 
-    total_installment = registrations.filter(payment_mode='installment').sum('amount')
-    total_full_payment = registrations.filter(payment_mode='full_payment').sum('amount')
-    total_premium_payment = registrations.filter(payment_mode='premium').sum('amount')
-    total_payment = registrations.sum('amount')
+    total_installment = Decimal128(str(installment_registrations.sum('amount')))
+    total_full_payment = Decimal128(str(full_payment_registrations.sum('amount')))
+    total_premium_payment = Decimal128(str(premium_payment_registrations.sum('amount')))
+
+    with decimal.localcontext(D128_CTX):
+        total_payment = total_installment.to_decimal() + total_full_payment.to_decimal() + total_premium_payment.to_decimal()
+
     total_balance = registrations.sum('balance')
     
     template = ""
@@ -931,7 +1007,7 @@ def print_students_pdf():
     html = render_template(
         template,
         students=_table_data,
-        branch=branch.upper(),
+        branch=branch_id.upper(),
         batch_no=batch_no.upper(),
         schedule=schedule.upper(),
         total_installment=total_installment,
