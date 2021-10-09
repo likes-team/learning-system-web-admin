@@ -87,7 +87,7 @@ def get_dtbl_members():
     print(get_date_now())
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered').order_by("-registration_date").skip(start).limit(length)
+        registrations = Registration.objects(branch=branch_id).filter(status='registered').filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
         installment_registrations = installment_registrations.filter(branch=branch_id)
@@ -95,12 +95,12 @@ def get_dtbl_members():
         premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
             sales_today = registrations.filter(registration_date__gte=get_date_now().date()).filter(branch__in=current_user.branches).sum('amount')
         elif current_user.role.name == "Partner":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         else:
-            registrations = Registration.objects(status='registered').order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(status='registered').filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
             sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
     if batch_no != 'all':
@@ -815,14 +815,14 @@ def print_students_pdf():
     premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered')
+        registrations = Registration.objects(branch=branch_id).filter(is_archived__ne=True).filter(status='registered')
         installment_registrations = installment_registrations.filter(branch=branch_id)
         full_payment_registrations = full_payment_registrations.filter(branch=branch_id)
         premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
 
         branch_id = Branch.objects.get_or_404(id=branch_id).name
     else:
-        registrations = Registration.objects(status='registered')
+        registrations = Registration.objects(status='registered').filter(is_archived__ne=True)
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
