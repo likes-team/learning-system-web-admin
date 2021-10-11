@@ -55,6 +55,8 @@ def buy_items():
         reviewer_l = 0
         reviewer_r = 0
         # try:
+
+        total_amount = decimal.Decimal(0.00)
         with mongo.cx.start_session() as session:
             with session.start_transaction():
                 if item_list:
@@ -65,6 +67,7 @@ def buy_items():
                         amount = qty * price
                         print(item)
                         items.append({
+                            "_id": ObjectId(),
                             'item': ObjectId(item_id),
                             'qty': Decimal128(str(qty)),
                             'price': Decimal128(str(price)),
@@ -93,8 +96,9 @@ def buy_items():
                         elif item['description'] == "REVIEWER R":
                             reviewer_r = qty
 
-                client = Registration.objects.get(id=form.get('client_id'))
+                        total_amount += amount
 
+                client = Registration.objects.get(id=form.get('client_id'))
 
                 mongo.db.lms_store_buyed_items.insert_one({
                     "_id": ObjectId(),
@@ -103,6 +107,7 @@ def buy_items():
                     'branch': client.branch.id, 
                     "client_id": client.id,
                     "items": items,
+                    "total_amount": Decimal128(total_amount),
                     "uniforms": uniforms,
                     "id_lace": id_lace,
                     "id_card": id_card,

@@ -76,6 +76,7 @@ def get_dtbl_members():
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     payment_status = request.args.get('payment_status')
+    payment_mode = request.args.get('payment_mode')
     
     sales_today = 0
     # TODO: add promos
@@ -144,6 +145,12 @@ def get_dtbl_members():
         installment_registrations = installment_registrations.filter(balance__gt=0)
         full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
         premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
+    
+    if payment_mode != "all":
+        registrations = registrations.filter(payment_mode=payment_mode)
+        installment_registrations = installment_registrations.filter(payment_mode=payment_mode)
+        full_payment_registrations = full_payment_registrations.filter(payment_mode=payment_mode)
+        premium_payment_registrations = premium_payment_registrations.filter(payment_mode=payment_mode)
 
     _table_data = []
 
@@ -807,8 +814,8 @@ def print_students_pdf():
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     payment_status = request.args.get('payment_status')
+    payment_mode = request.args.get('payment_mode')
     report = request.args.get('report', 'default')
-    print(search_value, date_from, date_to, payment_status)
     
     installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
     full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
@@ -866,6 +873,12 @@ def print_students_pdf():
         installment_registrations = installment_registrations.filter(balance__gt=0)
         full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
         premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
+
+    if payment_mode != 'all':
+        registrations = registrations.filter(payment_mode=payment_mode)
+        installment_registrations = installment_registrations.filter(payment_mode=payment_mode)
+        full_payment_registrations = full_payment_registrations.filter(payment_mode=payment_mode)
+        premium_payment_registrations = premium_payment_registrations.filter(payment_mode=payment_mode)
 
     _table_data = []
 

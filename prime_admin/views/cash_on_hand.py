@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Accounting, Branch, CashFlow, CashOnHand, OrientationAttendance, Registration, Batch, Orientator
+from prime_admin.models import Accounting, Branch, CashFlow, CashOnHand, OrientationAttendance, Registration, Batch, Orientator, StoreRecords
 from flask import jsonify, request
 from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
@@ -111,12 +111,15 @@ def get_mdl_pre_deposit():
 @bp_lms.route('/api/to-pre-deposit', methods=['POST'])
 def to_pre_deposit():
     payments_selected = request.json['payments_selected']
-    amount = Decimal128('0.00')
+    source = request.json['source']
 
-    try:
-        with mongo.cx.start_session() as session:
-            with session.start_transaction():
-                with decimal.localcontext(D128_CTX):
+    amount : Decimal128 = Decimal128('0.00')
+
+    # try:
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            with decimal.localcontext(D128_CTX):
+                if source == "student_enrollees_payment":
                     for selected_payment in payments_selected:
                         mongo.db.lms_registrations.update_one({
                             "full_registration_number": selected_payment['full_registration_number'],
@@ -137,30 +140,47 @@ def to_pre_deposit():
                         
                         amount = Decimal128(amount.to_decimal() + payment['payments'][0]['amount'].to_decimal())
                         print(amount)
-
-                    accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
-
-                    if accounting:
-                        mongo.db.lms_accounting.update_one({
-                            "_id": accounting["_id"],
+                elif source == "store_items_sold":
+                    for selected_payment in payments_selected:
+                        mongo.db.lms_store_buyed_items.update_one({
+                            "_id": ObjectId(selected_payment['payment_id']),
                         },
-                        {"$inc": {
-                            "total_cash_on_hand": amount
+                        {"$set": {
+                            "deposited": "Pre Deposit"
                         }}, session=session)
-                    else:
-                        mongo.db.lms_accounting.insert_one({
-                                "_id": ObjectId(),
-                                "branch": current_user.branch.id,
-                                "active_group": 1,
-                                "total_cash_on_hand": amount,
-                                "total_gross_sale": Decimal128("0.00"),
-                                "final_fund1": Decimal128("0.00"),
-                                "final_fund2": Decimal128("0.00"),
-                            }, session=session)
-            
-        response = {'result': True}
-    except Exception:
-        response = {'result': False}
+
+                        payment = mongo.db.lms_store_buyed_items.find_one({
+                            "_id": ObjectId(selected_payment['payment_id']),
+                        }, session=session)
+
+                        print(payment)
+                        
+                        amount = Decimal128(amount.to_decimal() + payment['total_amount'].to_decimal())
+                        print(amount)
+
+                accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
+
+                if accounting:
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting["_id"],
+                    },
+                    {"$inc": {
+                        "total_cash_on_hand": amount
+                    }}, session=session)
+                else:
+                    mongo.db.lms_accounting.insert_one({
+                            "_id": ObjectId(),
+                            "branch": current_user.branch.id,
+                            "active_group": 1,
+                            "total_cash_on_hand": amount,
+                            "total_gross_sale": Decimal128("0.00"),
+                            "final_fund1": Decimal128("0.00"),
+                            "final_fund2": Decimal128("0.00"),
+                        }, session=session)
+        
+    response = {'result': True}
+    # except Exception:
+    #     response = {'result': False}
 
     return jsonify(response)
 
@@ -243,6 +263,105 @@ def get_dtbl_student_payments():
         'data': _data,
         'totalStudentPayments': str(total_student_payments),
         'totalCashOnHand': str(accounting['total_cash_on_hand']) if accounting['total_cash_on_hand'] is not None else ' 0.00'
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/dtbl/store-items-sold', methods=['GET'])
+def get_dtbl_store_items_sold():
+    draw = request.args.get('draw')
+    # start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch')
+    print("TESTETESTE",branch_id)
+    if branch_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'totalItemsSold': ' 0.00',
+        }
+
+        return jsonify(response)
+
+    if current_user.role.name == "Secretary":
+        store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+    elif current_user.role.name == "Admin":
+        store_records = StoreRecords.objects().filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+    elif current_user.role.name == "Partner":
+        store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+    else:
+        raise Exception("Wrong User Role")
+
+    _data = []
+
+    if accounting is None:
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': _data,
+            'totalItemsSold': ' 0.00',
+            }
+
+        return jsonify(response)
+
+    total_items_sold : decimal.Decimal = 0
+
+        
+    record : StoreRecords
+    for record in store_records:
+        total_items_sold += record.total_amount
+
+        _data.append([
+            record.local_datetime,
+            record.client_id.full_registration_number,
+            record.client_id.full_name,
+            record.client_id.batch_number.number,
+            record.client_id.schedule,
+            str(record.total_amount),
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': 0,
+        'recordsFiltered': 0,
+        'data': _data,
+        'totalItemsSold': str(total_items_sold)
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/dtbl/mdl-store-items-sold', methods=['GET'])
+def get_mdl_store_items_sold():
+    if current_user.role.name == "Secretary":
+        store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+    elif current_user.role.name == "Admin":
+        store_records = StoreRecords.objects().filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+    elif current_user.role.name == "Partner":
+        store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+
+    data = []
+
+    record : StoreRecords
+    for record in store_records:
+        data.append([
+            str(record.id),
+            record.local_datetime,
+            str(record.client_id.full_registration_number),
+            record.client_id.full_name,
+            record.branch.name,
+            record.client_id.batch_number.number,
+            str(record.total_amount)
+        ])
+
+    response = {
+        'data': data
         }
 
     return jsonify(response)

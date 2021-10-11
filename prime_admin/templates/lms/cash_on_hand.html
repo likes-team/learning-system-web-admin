@@ -28,32 +28,34 @@
             </div>
             <div class="page-title-actions">
                 {% if current_user.role.name == "Secretary" %}
-                        <button type="button" data-toggle="modal" data-target="#mdl_pre_deposit" data-placement="bottom"
-                        class="btn-shadow mr-3 btn btn-primary">
+                <button type="button" data-toggle="modal" data-target="#mdl_pre_deposit" data-placement="bottom"
+                    class="btn-shadow mr-3 btn btn-primary">
                     <i class="fa fa-plus"></i> Cash In
                 </button>
 
-                <button disabled type="button" data-toggle="modal" data-target="#mdl_pre_deposit" data-placement="bottom"
-                        class="btn-shadow mr-3 btn btn-primary">
+                <button disabled type="button" data-toggle="modal" data-target="#mdl_pre_deposit"
+                    data-placement="bottom" class="btn-shadow mr-3 btn btn-primary">
                     <i class="fa fa-minus"></i> Cash Out
                 </button>
                 {% endif %}
 
                 <div class="d-inline-block dropdown">
                     <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                            class="btn-shadow dropdown-toggle btn btn-info">
-                                    <span class="btn-icon-wrapper pr-2 opacity-7">
-                                        <i class="fa fa-list-alt fa-w-20"></i>
-                                    </span>
+                        class="btn-shadow dropdown-toggle btn btn-info">
+                        <span class="btn-icon-wrapper pr-2 opacity-7">
+                            <i class="fa fa-list-alt fa-w-20"></i>
+                        </span>
                         Actions
                     </button>
                     <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
                         <ul class="nav flex-column">
                             {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
+                            current_user.is_superuser %}
                             <li id="nav_action_btns" class="nav-item">
                                 {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                <button disabled id="btndelete" type="button" tabindex="0"
+                                    class="dropdown-item">Delete</button>
                                 {% endblock %}
                             </li>
                             {% else %}
@@ -85,9 +87,9 @@
     <div class="main-card mb-3 card">
         <div class="card-header">
             {% if current_user.role.name == "Secretary" %}
-                <div id="card_header_label">{{current_user.branch.name}} BRANCH</div>
+            <div id="card_header_label">{{current_user.branch.name}} BRANCH</div>
             {% else %}
-                <div id="card_header_label">BRANCH'S NAME</div>
+            <div id="card_header_label">BRANCH'S NAME</div>
             {% endif %}
 
             {% if current_user.role.name != "Secretary" %}
@@ -95,15 +97,17 @@
                 <div class="nav">
 
                     <div class="dropleft btn-group">
-                        <button value="all" id="btn_branch_label" type="button" aria-haspopup="true" aria-expanded="false"
-                            data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                        <button value="all" id="btn_branch_label" type="button" aria-haspopup="true"
+                            aria-expanded="false" data-toggle="dropdown"
+                            class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
                             Select Branch
                         </button>
-                        <div id="div_branch_buttons" tabindex="-1" role="menu" aria-hidden="true"
-                            class="dropdown-menu" x-placement="left-start"
+                        <div id="div_branch_buttons" tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu"
+                            x-placement="left-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
                             {% if current_user.role.name != "Secretary" %}
-                                <button disabled value="all" type="button" tabindex="0" class="dropdown-item btn-branch">All Branch</button>
+                            <button disabled value="all" type="button" tabindex="0" class="dropdown-item btn-branch">All
+                                Branch</button>
                             {% endif %}
 
                             {% for branch in TABLE_OPTIONS['branches'] %}
@@ -117,7 +121,7 @@
             {% endif %}
 
         </div>
-        
+
         <div class="card-body">
             <div class="row">
                 <div class="col-lg-12 col-xl-12">
@@ -128,7 +132,8 @@
                                 <div class="widget-subheading"></div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span id="total_cash_on_hand">₱ 0.00</span></div>
+                                <div class="widget-numbers text-success"><span id="total_cash_on_hand">₱ 0.00</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -144,7 +149,8 @@
                                 <div class="widget-subheading">Total Cash on Hand</div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_student_payments">₱ 0.00</span></div>
+                                <div class="widget-numbers text-primary"><span id="total_student_payments">₱ 0.00</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -196,45 +202,95 @@
                 </div> -->
             </div>
 
-            <h5 style="margin-top: 20px;">Student Payments</h5>
-            <div class="table-responsive">
-                <table id="tbl_student_payments" class="align-middle mb-0 table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th class="text-center">DATE OF PAYMENT</th>
-                            <th class="text-center">REGISTRATION NO.</th>
-                            <th class="text-center">NAME</th>
-                            <th class="text-center">BATCH NO</th>
-                            <th class="text-center">SCHEDULE</th>
-                            <th class="text-center">PAYMENT MODE</th>
-                            <th class="text-center">AMOUNT</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-<!-- 
+            <div class="mb-12 card">
+                <div class="card-body">
+                    <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
+                                href="#tab-animated1-0" aria-selected="false">
+                                <span class="nav-text">STUDENT PAYMENTS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
+                                aria-selected="false">
+                                <span class="nav-text">ITEMS SOLD</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                                aria-selected="true">
+                                <span class="nav-text">ACCOMODATIONS</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
+                            <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_student_payments"
+                                    class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE OF PAYMENT</th>
+                                            <th class="text-center">REGISTRATION NO.</th>
+                                            <th class="text-center">NAME OF STUDENT</th>
+                                            <th class="text-center">BATCH NO</th>
+                                            <th class="text-center">SCHEDULE</th>
+                                            <th class="text-center">PAYMENT MODE</th>
+                                            <th class="text-center">AMOUNT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane show" id="tab-animated1-1" role="tabpanel">
+                            <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_items_sold"
+                                    class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE</th>
+                                            <th class="text-center">REGISTRATION NO.</th>
+                                            <th class="text-center">NAME OF STUDENT</th>
+                                            <th class="text-center">BATCH NO</th>
+                                            <th class="text-center">SCHEDULE</th>
+                                            <th class="text-center">AMOUNT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-            <h5 style="margin-top: 20px;">Items Sold</h5>
-            <div class="table-responsive">
-                <table id="tbl_student_payments" class="align-middle mb-0 table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th class="text-center">DATE OF PAYMENT</th>
-                            <th class="text-center">REGISTRATION NO.</th>
-                            <th class="text-center">NAME</th>
-                            <th class="text-center">BATCH NO</th>
-                            <th class="text-center">SCHEDULE</th>
-                            <th class="text-center">PAYMENT MODE</th>
-                            <th class="text-center">AMOUNT</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                        <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+                            <p style="text-align: center;">Sorry this feature is currently unavailable</p>
+                            <!-- <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_accomodations" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE OF PAYMENT</th>
+                                            <th class="text-center">REGISTRATION NO.</th>
+                                            <th class="text-center">NAME</th>
+                                            <th class="text-center">BATCH NO</th>
+                                            <th class="text-center">SCHEDULE</th>
+                                            <th class="text-center">PAYMENT MODE</th>
+                                            <th class="text-center">AMOUNT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
+
+            <!-- 
             <h5 style="margin-top: 20px;">Accommodation</h5>
             <div class="table-responsive">
                 <table id="tbl_student_payments" class="align-middle mb-0 table table-bordered table-striped table-hover">
@@ -281,21 +337,21 @@
 {% endblock %}
 
 {% block modals %}
-    
-    {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-        {% include TABLE_OPTIONS['create_modal_template'] %}
-    {% endif %}
 
-    {% if TABLE_OPTIONS['view_modal'] %}
-        {% include TABLE_OPTIONS['view_modal_template'] %}
-    {% endif %}
+{% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
+{% include TABLE_OPTIONS['create_modal_template'] %}
+{% endif %}
+
+{% if TABLE_OPTIONS['view_modal'] %}
+{% include TABLE_OPTIONS['view_modal_template'] %}
+{% endif %}
 
 {% endblock %}
 
 
 {% block scripts %}
 <script>
-    $(document).ready(function(){            
+    $(document).ready(function () {
         var subscribers_selected = [];
         var groupColumn = 1;
 
@@ -305,7 +361,7 @@
             },
             pageLength: 100,
             ordering: false,
-            "order": [[ groupColumn, 'asc' ]],
+            "order": [[groupColumn, 'asc']],
             columnDefs: [
                 {
                     'targets': 1,
@@ -329,27 +385,27 @@
             'rowCallback': function (row, data, dataIndex) {
                 // Get row ID
                 var rowId = data[0];
-    
+
                 // If row ID is in the list of selected row IDs
                 if ($.inArray(rowId, subscribers_selected) !== -1) {
                     $(row).find('input[type="checkbox"]').prop('checked', true);
                     $(row).addClass('selected');
                 }
             },
-            "drawCallback": function ( settings ) {
+            "drawCallback": function (settings) {
                 var api = this.api();
-                var rows = api.rows( {page:'current'} ).nodes();
-                var last=null;
-     
-                api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-                    if ( last !== group ) {
-                        $(rows).eq( i ).before(
-                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: '+group+'</td></tr>'
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: ' + group + '</td></tr>'
                         );
-     
+
                         last = group;
                     }
-                } );
+                });
             }
         });
 
@@ -382,7 +438,7 @@
 
                 $row.addClass('selected');
             } else {
-                var last_total_val = parseFloat($("#pre_deposit_amount").val()); 
+                var last_total_val = parseFloat($("#pre_deposit_amount").val());
                 var new_total_val = last_total_val - parseFloat(data[6]);
                 $("#pre_deposit_amount").val(new_total_val);
                 $row.removeClass('selected');
@@ -420,20 +476,127 @@
             updateDataTableSelectAllCtrl(dtbl_pre_deposit);
         });
 
+
+        var dtbl_store_items_sold = $("#tbl_mdl_store_items_sold").DataTable({
+            ajax: {
+                url: "/learning-management/api/dtbl/mdl-store-items-sold",
+            },
+            pageLength: 100,
+            ordering: false,
+            "order": [[2, 'asc']],
+            columnDefs: [
+                {
+                    'targets': 0,
+                    'searchable': false,
+                    'orderable': false,
+                    'width': '1%',
+                    'className': 'dt-body-center',
+                    'checkboxes': {
+                        'selectRow': true
+                    }
+                },
+            ],
+            select: {
+                'style': 'multi'
+            },
+            order: [[1, 'asc']],
+        });
+
+        var store_items_sold_selected = [];
+
+        // Handle click on checkbox
+        $('#tbl_mdl_store_items_sold tbody').on('click', 'input[type="checkbox"]', function (e) {
+            var $row = $(this).closest('tr');
+
+            // Get row data
+            var data = dtbl_store_items_sold.row($row).data();
+
+            // Get row ID
+            var rowId = data[0];
+
+            // Determine whether row ID is in the list of selected row IDs
+            var index = $.inArray(rowId, store_items_sold_selected);
+
+            // If checkbox is checked and row ID is not in list of selected row IDs
+            if (this.checked && index === -1) {
+                store_items_sold_selected.push(rowId);
+
+                // Otherwise, if checkbox is not checked and row ID is in list of selected row IDs
+            } else if (!this.checked && index !== -1) {
+                store_items_sold_selected.splice(index, 1);
+            }
+
+            if (this.checked) {
+                var last_total_val = parseFloat($("#pre_deposit_amount").val());
+                var new_total_val = last_total_val + parseFloat(data[6]);
+                $("#pre_deposit_amount").val(new_total_val);
+
+                $row.addClass('selected');
+            } else {
+                var last_total_val = parseFloat($("#pre_deposit_amount").val());
+                var new_total_val = last_total_val - parseFloat(data[6]);
+                $("#pre_deposit_amount").val(new_total_val);
+                $row.removeClass('selected');
+            }
+
+            // Update state of "Select all" control
+            updateDataTableSelectAllCtrl(dtbl_store_items_sold);
+
+            // Prevent click event from propagating to parent
+            e.stopPropagation();
+        });
+
+        // Handle click on table cells with checkboxes
+        $('#tbl_mdl_store_items_sold').on('click', 'tbody td, thead th:first-child', function (e) {
+            $(this).parent().find('input[type="checkbox"]').trigger('click');
+        });
+
+
+        // Handle click on "Select all" control
+        $('thead input[type="checkbox"]', dtbl_store_items_sold.table().container()).on('click', function (e) {
+            if (this.checked) {
+                $('#tbl_mdl_store_items_sold tbody input[type="checkbox"]:not(:checked)').trigger('click');
+            } else {
+                $('#tbl_mdl_store_items_sold tbody input[type="checkbox"]:checked').trigger('click');
+            }
+
+            // Prevent click event from propagating to parent
+            e.stopPropagation();
+        });
+
+
+        // Handle table draw event
+        dtbl_store_items_sold.on('draw', function () {
+            // Update state of "Select all" control
+            updateDataTableSelectAllCtrl(dtbl_store_items_sold);
+        });
+
+
         $("#btn_confirm_pre_deposit").click(function () {
             var source = $("#source").val();
             var to_pre_deposit_list = [];
 
-            dtbl_pre_deposit.rows('.selected').data().each(function(value, index){
-                to_pre_deposit_list.push(
-                    {
-                        'payment_id': value[0],
-                        'full_registration_number': value[1],
-                    }
-                )
-            });
 
-            if(to_pre_deposit_list.length <= 0){
+            if (source == "student_enrollees_payment") {
+                dtbl_pre_deposit.rows('.selected').data().each(function (value, index) {
+                    to_pre_deposit_list.push(
+                        {
+                            'payment_id': value[0],
+                            'full_registration_number': value[1],
+                        }
+                    )
+                });
+            } else if (source == "store_items_sold") {
+                dtbl_store_items_sold.rows('.selected').data().each(function (value, index) {
+                    to_pre_deposit_list.push(
+                        {
+                            'payment_id': value[0],
+                        }
+                    )
+                });
+            }
+
+            if (to_pre_deposit_list.length <= 0) {
                 toastr.error("Please select atleast 1 value");
                 return;
             }
@@ -443,43 +606,61 @@
                 type: "POST",
                 dataType: "json",
                 data: JSON.stringify({
-                    'payments_selected': to_pre_deposit_list}),
+                    'source': source,
+                    'payments_selected': to_pre_deposit_list
+                }),
                 contentType: "application/json; charset=utf-8",
-                success: function(response){
-                    if(response.result){
+                success: function (response) {
+                    if (response.result) {
                         $("#pre_deposit_amount").val(0.00);
                         $("#source").val('');
                         dtbl_pre_deposit.ajax.reload();
                         dtbl_student_payments.ajax.reload();
                         toastr.success("Saved Successfully!");
-                    }else{
+                    } else {
                         toastr.error("Error Occured!, Saving Failed");
                     }
                 }
             });
         });
 
-        $("#source").change(function(){
+
+        $("#source").change(function () {
             var source = $(this).val();
-            
-            if(source == "student_enrollees_payment"){
-                $("#tbl_mdl_pre_deposit").show();
+
+            if (source == "student_enrollees_payment") {
+                $("#div_mdl_pre_deposit").show();
+                $("#div_mdl_store_items_sold").hide();
+                $("#div_mdl_accommodations").hide();
+                return;
+            } else if (source == "store_items_sold") {
+                $("#div_mdl_pre_deposit").hide();
+                $("#div_mdl_store_items_sold").show();
+                $("#div_mdl_accommodations").hide();
+                return;
+            } else if (source == "accommodation") {
+                $("#div_mdl_pre_deposit").hide();
+                $("#div_mdl_store_items_sold").hide();
+                $("#div_mdl_accommodations").show();
                 return;
             }
 
-            $("#tbl_mdl_pre_deposit").hide();
+            $("#div_mdl_pre_deposit").hide();
+            $("#div_mdl_store_items_sold").hide();
+            $("#div_mdl_accommodations").hide();
         });
 
         var dtbl_student_payments = $("#tbl_student_payments").DataTable({
             "dom": 'rtip',
             "processing": true,
             "serverSide": true,
+            "autoWidth": false,
             "ajax": {
                 "url": "/learning-management/api/dtbl/student-payments",
                 "data": function (d) {
                     d.branch = $("#btn_branch_label").val();
                 },
-                "dataSrc": function(json){
+                "dataSrc": function (json) {
                     $("#total_student_payments").html("₱" + json.totalStudentPayments);
                     $("#total_cash_on_hand").html("₱" + json.totalCashOnHand);
                     return json.data;
@@ -487,7 +668,7 @@
             },
             "pageLength": 25,
             "ordering": false,
-            "order": [[ groupColumn, 'asc' ]],
+            "order": [[groupColumn, 'asc']],
             "columnDefs": [
                 {
                     'targets': 1,
@@ -498,20 +679,65 @@
                 'style': 'multi'
             },
             "order": [[1, 'asc']],
-            "drawCallback": function ( settings ) {
+            "drawCallback": function (settings) {
                 var api = this.api();
-                var rows = api.rows( {page:'current'} ).nodes();
-                var last=null;
-    
-                api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-                    if ( last !== group ) {
-                        $(rows).eq( i ).before(
-                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: '+group+'</td></tr>'
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: ' + group + '</td></tr>'
                         );
-    
+
                         last = group;
                     }
-                } );
+                });
+            }
+        });
+
+        var dtbl_tbl_items_sold = $("#tbl_items_sold").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/api/dtbl/store-items-sold",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                },
+                "dataSrc": function (json) {
+                    $("#total_items_sold").html("₱" + json.totalItemsSold);
+                    return json.data;
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[1, 'asc']],
+            "columnDefs": [
+                {
+                    'targets': 1,
+                    'visible': false
+                },
+            ],
+            "select": {
+                'style': 'multi'
+            },
+            "order": [[1, 'asc']],
+            "drawCallback": function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(1, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: ' + group + '</td></tr>'
+                        );
+
+                        last = group;
+                    }
+                });
             }
         });
 
@@ -521,16 +747,16 @@
 
         $("#div_branch_buttons").on('click', '.btn-branch', function () {
             var branch_name = $(this).html();
-    
+
             // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
             $("#btn_branch_label").html(branch_name.toUpperCase());
             $("#btn_branch_label").val($(this).val());
             $("#card_header_label").html(branch_name);
-    
+
             $('#btn_branch_label').trigger('change');
             // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
             // }
-    
+
         });
 
     });
@@ -540,21 +766,21 @@
         var $chkbox_all = $('tbody input[type="checkbox"]', $table);
         var $chkbox_checked = $('tbody input[type="checkbox"]:checked', $table);
         var chkbox_select_all = $('thead input[type="checkbox"]', $table).get(0);
-    
+
         // If none of the checkboxes are checked
         if ($chkbox_checked.length === 0) {
             chkbox_select_all.checked = false;
             if ('indeterminate' in chkbox_select_all) {
                 chkbox_select_all.indeterminate = false;
             }
-    
+
             // If all of the checkboxes are checked
         } else if ($chkbox_checked.length === $chkbox_all.length) {
             chkbox_select_all.checked = true;
             if ('indeterminate' in chkbox_select_all) {
                 chkbox_select_all.indeterminate = false;
             }
-    
+
             // If some of the checkboxes are checked
         } else {
             chkbox_select_all.checked = true;

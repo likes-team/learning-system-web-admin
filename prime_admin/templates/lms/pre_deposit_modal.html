@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Pre Deposit</h5>
+                <h5 class="modal-title">Cash In</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -18,8 +18,8 @@
                                     <select name="source" id="source" class="form-control" required>
                                         <option value="">Please select source...</option>
                                         <option value="student_enrollees_payment">Student Enrollees Payment</option>
-                                        <option disabled value="store_items_sold">Store Items Sold</option>
-                                        <option disabled value="accommodation">Accommodation</option>
+                                        <option value="store_items_sold">Store Items Sold</option>
+                                        <option value="accommodation">Accommodation</option>
                                         <!-- <option disabled value="fund">Fund from Head Office/Accounting</option> -->
                                     </select>
                                     <div class="invalid-feedback">
@@ -41,25 +41,68 @@
                                 </div>
                             </div>
                         </div>
-                        <table style="display: none;" id="tbl_mdl_pre_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
-                        <thead>
-                            <tr>
-                                <th>ADD</th>
-                                <th>REGISTRATION NO.</th>
-                                <th>LAST NAME</th>
-                                <th>FIRST NAME</th>
-                                <th>MIDDLE NAME</th>
-                                <th>SUFFIX</th>
-                                <th>AMOUNT</th>
-                                <th>DATE OF PAYMENT</th>
-                                <!-- <th>BALANCE</th> -->
-                                <!-- <th>DEPOSIT</th> -->
-                            </tr>
-                            </thead>
-                            <tbody>
-                                 <!-- load with ajax -->
-                            </tbody>
-                        </table>
+                        
+                        <div id="div_mdl_pre_deposit" style="display: none;">
+                            <table id="tbl_mdl_pre_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
+                                <thead>
+                                    <tr>
+                                        <th>ADD</th>
+                                        <th>REGISTRATION NO.</th>
+                                        <th>LAST NAME</th>
+                                        <th>FIRST NAME</th>
+                                        <th>MIDDLE NAME</th>
+                                        <th>SUFFIX</th>
+                                        <th>AMOUNT</th>
+                                        <th>DATE OF PAYMENT</th>
+                                        <!-- <th>BALANCE</th> -->
+                                        <!-- <th>DEPOSIT</th> -->
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                         <!-- load with ajax -->
+                                    </tbody>
+                                </table>
+                        </div>
+                        <div id="div_mdl_store_items_sold" style="display: none;">
+                            <table id="tbl_mdl_store_items_sold" style="width:100%; cursor:pointer;" class="mb-0 table">
+                                <thead>
+                                    <tr>
+                                        <th>ADD</th>
+                                        <th>DATE</th>
+                                        <th>REGISTRATION NO.</th>
+                                        <th>FULL NAME</th>
+                                        <th>BRANCH</th>
+                                        <th>BATCH NO.</th>
+                                        <th>AMOUNT</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                         <!-- load with ajax -->
+                                    </tbody>
+                            </table>                  
+                        </div>
+
+                        <div id="div_mdl_accommodations" style="display: none;">
+                            <table id="tbl_mdl_accommodations" style="width:100%; cursor:pointer;" class="mb-0 table">
+                                <thead>
+                                    <tr>
+                                        <th>ADD</th>
+                                        <th>DATE</th>
+                                        <th>REGISTRATION NO.</th>
+                                        <th>FULL NAME</th>
+                                        <th>BRANCH</th>
+                                        <th>BATCH NO.</th>
+                                        <th>DATE FROM</th>
+                                        <th>DATE TO</th>
+                                        <th>DAYS</th>
+                                        <th>TOTAL AMOUNT</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                         <!-- load with ajax -->
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

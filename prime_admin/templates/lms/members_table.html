@@ -223,6 +223,30 @@
                     </div>
                 </div>
                 <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="payment_mode" class="">Payment Mode</label>
+                        <select name="payment_mode" id="payment_mode" class="form-control" required>
+                            <option value="all">All</option>
+                            <option value="full_payment">
+                                FULL PAYMENT
+                            </option>
+                            <option value="installment">
+                                INSTALLMENT
+                            </option>
+                            <option value="premium">
+                                PREMIUM PAYMENT
+                            </option>
+                            <option value="full_payment_promo">
+                                FULL PAYMENT - PROMO
+                            </option>
+                            <option value="installment_promo">
+                                INSTALLMENT - PROMO
+                            </option>
+                            <option value="premium_promo">
+                                PREMIUM PAYMENT -PROMO
+                            </option>
+                        </select>
+                    </div>
                 </div>
                 <div class="col-md-1">
                     <div class="position-relative form-group">
@@ -236,15 +260,9 @@
                                 NOT PAID
                             </option>
                         </select>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
-                        <div class="invalid-feedback">
-                            Please provide a schedule
-                        </div>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 col-xs-2">
                     <div class="position-relative form-group">
                         <label for="date_from" class="">Date From</label>
                         <input id="date_from" type="date" class="form-control">
@@ -256,7 +274,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 col-xs-2">
                     <div class="position-relative form-group">
                         <label for="date_to" class="">Date To</label>
                         <input id="date_to" type="date" class="form-control">
@@ -451,6 +469,7 @@
                     d.date_from = $("#date_from").val();
                     d.date_to = $("#date_to").val();
                     d.payment_status = $("#payment_status").val();
+                    d.payment_mode = $("#payment_mode").val();
                 },
                 "dataSrc": function(json){
                     $("#total_installment").html("₱" + json.totalInstallment);
@@ -759,10 +778,11 @@
             var date_from = $("#date_from").val();
             var date_to = $("#date_to").val();
             var payment_status = $("#payment_status").val();
+            var payment_mode = $("#payment_mode").val();
 
             window.open(
                 PDF_URL + 
-                `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}`
+                `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}&payment_mode=${payment_mode}`
             );
         });
     
@@ -774,10 +794,11 @@
             var date_from = $("#date_from").val();
             var date_to = $("#date_to").val();
             var payment_status = $("#payment_status").val();
+            var payment_mode = $("#payment_mode").val();
 
             window.open(
                 STUDENTS_AUDIT_PDF_URL + 
-                `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}&report=audit`
+                `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}&payment_mode=${payment_mode}&report=audit`
             );
         });
     
@@ -1135,6 +1156,10 @@
         });
     
         $('#payment_status').change(function() {
+            table.ajax.reload();
+        });
+
+        $('#payment_mode').change(function() {
             table.ajax.reload();
         });
     });

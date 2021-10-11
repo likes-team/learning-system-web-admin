@@ -1,3 +1,4 @@
+from threading import local
 import pytz
 from config import TIMEZONE
 from datetime import datetime
@@ -423,12 +424,54 @@ class Expenses(Base, Admin):
     remarks = db.StringField()
 
 
-class StoreRecords(Admin):
-    __tablename__ = 'lms_store_records'
+class Item(db.EmbeddedDocument):
+    meta = {
+        'strict': False,
+    }
+
+    item = db.ReferenceField("Inventory")
+    qty = db.IntField()
+    price = db.DecimalField()
+    amount = db.DecimalField()
+
+
+class StoreRecords(Base, Admin):
+    meta = {
+        'collection': 'lms_store_buyed_items',
+        'strict': False,
+    }
+
+    __tablename__ = 'lms_store_buyed_items'
     __amname__ = 'store_records'
     __amdescription__ = 'Store Records'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.store_records'
+
+    branch : Branch = db.ReferenceField('Branch')
+    client_id : Registration = db.ReferenceField('Registration')
+    items = db.EmbeddedDocumentListField(Item)
+    total_amount = db.DecimalField()
+    uniforms = db.IntField()
+    id_lace = db.IntField()
+    id_card =db.IntField()
+    module_1 = db.IntField()
+    module_2 = db.IntField()
+    reviewer_l = db.IntField()
+    reviewer_r = db.IntField()
+    deposited = db.StringField()
+
+    @property
+    def local_datetime(self):
+        if type(self.created_at) == datetime:
+            local_datetime = self.created_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(self.created_at == str):
+            to_date = datetime.strptime(self.created_at, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+
+        return local_datetime
+
 
 
 class BuyItems(Admin):
