@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Accounting, Branch, CashFlow, CashOnHand, OrientationAttendance, Registration, Batch, Orientator, StoreRecords
+from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, CashOnHand, OrientationAttendance, Registration, Batch, Orientator, StoreRecords
 from flask import jsonify, request
 from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
@@ -157,6 +157,25 @@ def to_pre_deposit():
                         
                         amount = Decimal128(amount.to_decimal() + payment['total_amount'].to_decimal())
                         print(amount)
+
+                elif source == "accommodation":
+                    for selected_payment in payments_selected:
+                        mongo.db.lms_accommodations.update_one({
+                            "_id": ObjectId(selected_payment['payment_id']),
+                        },
+                        {"$set": {
+                            "deposited": "Pre Deposit"
+                        }}, session=session)
+
+                        payment = mongo.db.lms_accommodations.find_one({
+                            "_id": ObjectId(selected_payment['payment_id']),
+                        }, session=session)
+
+                        print(payment)
+                        
+                        amount = Decimal128(amount.to_decimal() + payment['total_amount'].to_decimal())
+                        print(amount)
+
 
                 accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
 
@@ -337,6 +356,77 @@ def get_dtbl_store_items_sold():
     return jsonify(response)
 
 
+@bp_lms.route('/api/dtbl/accommodations', methods=['GET'])
+def get_dtbl_coh_accommodations():
+    draw = request.args.get('draw')
+    # start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch')
+    print("TESTETESTE",branch_id)
+    if branch_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'totalAccommodations': ' 0.00',
+        }
+
+        return jsonify(response)
+
+    if current_user.role.name == "Secretary":
+        accommodations = Accommodation.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+    elif current_user.role.name == "Admin":
+        accommodations = Accommodation.objects().filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+    elif current_user.role.name == "Partner":
+        accommodations = Accommodation.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
+        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+    else:
+        raise Exception("Wrong User Role")
+
+    _data = []
+
+    if accounting is None:
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': _data,
+            'totalAccommodations': ' 0.00',
+            }
+
+        return jsonify(response)
+
+    total_accommodations : decimal.Decimal = 0
+
+        
+    record : Accommodation
+    for record in accommodations:
+        total_accommodations += record.total_amount
+
+        _data.append([
+            record.local_datetime,
+            record.client_id.full_registration_number,
+            record.client_id.full_name,
+            record.client_id.batch_number.number,
+            record.date_from,
+            record.date_to,
+            record.days,
+            str(record.total_amount),
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': 0,
+        'recordsFiltered': 0,
+        'data': _data,
+        'totalAccommodations': str(total_accommodations)
+        }
+
+    return jsonify(response)
+
+
 @bp_lms.route('/api/dtbl/mdl-store-items-sold', methods=['GET'])
 def get_mdl_store_items_sold():
     if current_user.role.name == "Secretary":
@@ -357,6 +447,39 @@ def get_mdl_store_items_sold():
             record.client_id.full_name,
             record.branch.name,
             record.client_id.batch_number.number,
+            str(record.total_amount)
+        ])
+
+    response = {
+        'data': data
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/dtbl/mdl-accommodations', methods=['GET'])
+def get_mdl_accommmodations():
+    if current_user.role.name == "Secretary":
+        accomodations = Accommodation.objects(branch=current_user.branch).filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+    elif current_user.role.name == "Admin":
+        accomodations = Accommodation.objects().filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+    elif current_user.role.name == "Partner":
+        accomodations = Accommodation.objects(branch__in=current_user.branches).filter(deposited__ne="Pre Deposit").filter(deposited__ne="Deposited")
+
+    data = []
+
+    record : Accommodation
+    for record in accomodations:
+        data.append([
+            str(record.id),
+            record.local_datetime,
+            str(record.client_id.full_registration_number),
+            record.client_id.full_name,
+            record.branch.name,
+            record.client_id.batch_number.number,
+            record.date_from,
+            record.date_to,
+            record.days,
             str(record.total_amount)
         ])
 

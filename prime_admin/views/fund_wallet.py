@@ -191,7 +191,7 @@ def get_dtbl_add_funds_transactions():
             transactions = FundWallet.objects(branch__in=current_user.branches)
             accounting = mongo.db.lms_accounting.find()
 
-        # total_fund_wallet = accounting['fund_wallet']
+        total_fund_wallet = 0.00
 
     else:
         print(branch_id)

@@ -482,9 +482,35 @@ class BuyItems(Admin):
     __view_url__ = 'lms.buy_items'
 
 
-class Accommodation(Admin):
-    __tablename__ = 'lms_accommodation'
+class Accommodation(Base, Admin):
+    meta = {
+        'collection': 'lms_accommodations',
+        'strict': False
+    }
+
+    __tablename__ = 'lms_accommodations'
     __amname__ = 'accommodation'
     __amdescription__ = 'Accommodation'
     __amicon__ = 'pe-7s-tools'
     __view_url__ = 'lms.accommodation'
+
+    client_id = db.ReferenceField('Registration')
+    branch = db.ReferenceField('Branch')
+    date_from = db.DateField()
+    date_to = db.DateField()
+    days = db.IntField()
+    total_amount = db.DecimalField()
+    remarks = db.StringField()
+    deposited = db.StringField()
+
+    @property
+    def local_datetime(self):
+        if type(self.created_at) == datetime:
+            local_datetime = self.created_at.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(self.created_at == str):
+            to_date = datetime.strptime(self.created_at, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+
+        return local_datetime
