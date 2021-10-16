@@ -213,7 +213,7 @@ class Inventory(Base, Admin):
     }
     __amname__ = 'inventory'
     __amdescription__ = 'Inventory'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-back-2'
 
     price = db.DecimalField()
     description = db.StringField()
@@ -359,7 +359,7 @@ class Supplies(Admin):
     __tablename__ = 'lms_inventories'
     __amname__ = 'supplies'
     __amdescription__ = 'Supplies'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-back-2'
     __view_url__ = 'lms.supplies'
 
 
@@ -375,7 +375,7 @@ class CashOnHand(Admin):
     __tablename__ = 'lms_cash_on_hand'
     __amname__ = 'cash_on_hand'
     __amdescription__ = 'Cash On Hand'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-cash'
     __view_url__ = 'lms.cash_on_hand'
 
 
@@ -388,7 +388,7 @@ class FundWallet(Admin, Base):
     __tablename__ = 'lms_fund_wallet_transactions'
     __amname__ = 'fund_wallet'
     __amdescription__ = 'Fund Wallet'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-wallet'
     __view_url__ = 'lms.fund_wallet'
 
     date = db.DateTimeField()
@@ -444,7 +444,7 @@ class StoreRecords(Base, Admin):
     __tablename__ = 'lms_store_buyed_items'
     __amname__ = 'store_records'
     __amdescription__ = 'Store Records'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-notebook'
     __view_url__ = 'lms.store_records'
 
     branch : Branch = db.ReferenceField('Branch')
@@ -478,7 +478,7 @@ class BuyItems(Admin):
     __tablename__ = 'lms_buy_items'
     __amname__ = 'buy_items'
     __amdescription__ = 'Buy Items'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-calculator'
     __view_url__ = 'lms.buy_items'
 
 
@@ -491,7 +491,7 @@ class Accommodation(Base, Admin):
     __tablename__ = 'lms_accommodations'
     __amname__ = 'accommodation'
     __amdescription__ = 'Accommodation'
-    __amicon__ = 'pe-7s-tools'
+    __amicon__ = 'pe-7s-bookmarks'
     __view_url__ = 'lms.accommodation'
 
     client_id = db.ReferenceField('Registration')

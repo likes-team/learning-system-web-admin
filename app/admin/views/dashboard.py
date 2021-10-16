@@ -1,3 +1,4 @@
+from flask_migrate import current
 from config import TIMEZONE
 from datetime import datetime
 from flask import redirect, url_for, request, jsonify
@@ -12,6 +13,9 @@ from app.admin.templating import admin_dashboard, DashboardBox
 @bp_admin.route('/') # move to views
 @login_required
 def dashboard():
+    if current_user.is_authenticated and current_user.role.name != "Admin":
+        return redirect(url_for('lms.members'))
+
     if current_user.role.name != "Admin":
         return render_template('auth/authorization_error.html')
 
