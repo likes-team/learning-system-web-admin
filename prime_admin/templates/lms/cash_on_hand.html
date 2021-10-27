@@ -892,6 +892,8 @@
 
         $("#btn_branch_label").change(function () {
             dtbl_student_payments.ajax.reload();
+            dtbl_tbl_items_sold.ajax.reload();
+            dtbl_tbl_accommodations.ajax.reload();
         });
 
         $("#div_branch_buttons").on('click', '.btn-branch', function () {

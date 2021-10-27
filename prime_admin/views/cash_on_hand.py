@@ -226,7 +226,7 @@ def get_dtbl_student_payments():
         clients = Registration.objects(status="registered").filter(branch=current_user.branch)
         accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
     elif current_user.role.name == "Admin":
-        clients = Registration.objects(status="registered")
+        clients = Registration.objects(status="registered").filter(branch=ObjectId(branch_id))
         accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
     elif current_user.role.name == "Partner":
         clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)

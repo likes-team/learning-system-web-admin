@@ -4,7 +4,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
 from flask_cors import cross_origin
 from flask_mongoengine import json
-from app import db
+from app import db, mongo
 from app.core.models import CoreModel
 from app.core.logging import create_log
 from app.auth import bp_auth
@@ -13,6 +13,7 @@ from app.auth.forms import UserForm, UserEditForm, UserPermissionForm
 from app.auth import auth_urls
 from app.auth.permissions import load_permissions, check_create
 from app.admin.templating import admin_table, admin_edit
+from bson.objectid import ObjectId
 
 
 
@@ -191,7 +192,12 @@ def email_check():
 def change_password(oid):
     user = User.objects.get(id=oid)
     user.set_password(request.form.get('password'))
-    user.save()
+    
+    mongo.db.auth_users.update_one({'_id': ObjectId(oid)},
+        {"$set": {
+            'password_hash': user.password_hash
+        }})
+
     flash("Password change successfully!",'success')
     return redirect(request.referrer)
 
