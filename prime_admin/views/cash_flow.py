@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Accounting, Branch, CashFlow, OrientationAttendance, Registration, Batch, Orientator
+from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, OrientationAttendance, Registration, Batch, Orientator, StoreRecords
 from flask import jsonify, request
 from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
@@ -142,6 +142,14 @@ def deposit():
                                             "amount_deposit": client['amount_deposit']
                                         }}, session=session)
 
+                            mongo.db.lms_store_buyed_items.update_many(
+                                {"deposited": "Pre Deposit","branch": current_user.branch.id}, 
+                                {'$set': {'deposited': "Yes"}},session=session)
+
+                            mongo.db.lms_accommodations.update_many(
+                                {"deposited": "Pre Deposit","branch": current_user.branch.id},
+                                {'$set': {'deposited': "Yes"}},session=session)
+
                             mongo.db.lms_accounting.update_one({
                                 "_id": accounting["_id"]},
                                 {"$set": {
@@ -211,6 +219,14 @@ def deposit():
                                             "amount_deposit": client['amount_deposit']
                                         }}, session=session)
 
+                            mongo.db.lms_store_buyed_items.update_many(
+                                {"deposited": "Pre Deposit","branch": current_user.branch.id}, 
+                                {'$set': {'deposited': "Yes"}},session=session)
+
+                            mongo.db.lms_accommodations.update_many(
+                                {"deposited": "Pre Deposit","branch": current_user.branch.id},
+                                {'$set': {'deposited': "Yes"}},session=session)
+                                
                         elif new_deposit.from_what == "Student Loan Payment":
                             accounting.final_fund1 = new_deposit.amount
                         elif new_deposit.from_what == "Emergency Fund":
@@ -601,10 +617,16 @@ def profit():
 def get_mdl_deposit():
     if current_user.role.name == "Secretary":
         clients = Registration.objects(status="registered").filter(branch=current_user.branch)
+        store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
+        accommodations = Accommodation.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
     elif current_user.role.name == "Admin":
         clients = Registration.objects(status="registered")
+        store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
+        accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
     elif current_user.role.name == "Partner":
         clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
+        store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
+        accommodations = Accommodation.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
     else:
         return jsonify({'data': []})
 
@@ -625,17 +647,45 @@ def get_mdl_deposit():
                     
                     _data.append([
                         str(client.full_registration_number),
+                        "Student Payment",
                         client.lname,
                         client.fname,
                         client.mname,
                         client.suffix,
                         str(payment.amount),
                         local_datetime
-                        # str(payment['current_balance']),
-                        # str(payment['deposited']) if 'deposit' in payment else 'No'
                     ])
 
                     deposit_amount += decimal.Decimal(payment.amount)
+
+    record : StoreRecords
+    for record in store_records:
+        _data.append([
+            str(record.client_id.full_registration_number),
+            "Buy Item",
+            record.client_id.lname,
+            record.client_id.fname,
+            record.client_id.mname,
+            record.client_id.suffix,
+            str(record.total_amount),
+            record.created_at_local
+        ])
+        deposit_amount += decimal.Decimal(record.total_amount)
+
+    record : Accommodation
+    for record in accommodations:
+        _data.append([
+            str(record.client_id.full_registration_number),
+            "Accommodation",
+            record.client_id.lname,
+            record.client_id.fname,
+            record.client_id.mname,
+            record.client_id.suffix,
+            str(record.total_amount),
+            record.created_at_local
+        ])
+        deposit_amount += decimal.Decimal(record.total_amount)
+
 
     response = {
         'data': _data,

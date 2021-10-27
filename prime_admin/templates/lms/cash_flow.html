@@ -709,8 +709,8 @@
         });
     
         var dtbl_deposit = $("#tbl_mdl_deposit").DataTable({
-            ajax: {
-                url: "/learning-management/api/dtbl/mdl-deposit",
+            "ajax": {
+                "url": "/learning-management/api/dtbl/mdl-deposit",
                 "dataSrc": function(json){
                     if($("#from_what").val() == "Sales"){
                         $("#amount").val(json.deposit_amount);
@@ -719,10 +719,10 @@
                     return json.data;
                 }
             },
-            pageLength: 100,
-            ordering: false,
+            "pageLength": 100,
+            "ordering": false,
             "order": [[ 0, 'asc' ]],
-            columnDefs: [
+            "columnDefs": [
                 {
                     'targets': 0,
                     'visible': false,
@@ -732,10 +732,10 @@
                     'className': 'dt-body-center',
                 },
             ],
-            select: {
+            "select": {
                 'style': 'multi'
             },
-            order: [[1, 'asc']],
+            "order": [[2, 'asc']],
             "drawCallback": function ( settings ) {
                 var api = this.api();
                 var rows = api.rows( {page:'current'} ).nodes();
@@ -744,7 +744,7 @@
                 api.column(0, {page:'current'} ).data().each( function ( group, i ) {
                     if ( last !== group ) {
                         $(rows).eq( i ).before(
-                            '<tr style="background-color: lightcyan !important"><td colspan="6">REGISTRATION NO.: '+group+'</td></tr>'
+                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: '+group+'</td></tr>'
                         );
      
                         last = group;
