@@ -209,7 +209,7 @@ def get_dtbl_student_payments():
     draw = request.args.get('draw')
     # start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
-    print("TESTETESTE",branch_id)
+
     if branch_id == 'all':
         response = {
             'draw': draw,
@@ -217,6 +217,8 @@ def get_dtbl_student_payments():
             'recordsFiltered': 0,
             'totalStudentPayments': " 0.00",
             'totalCashOnHand': " 0.00",
+            'totalItemsSold': " 0.00",
+            'totalAccommodations': " 0.00",
             'data': [],
         }
 
@@ -224,30 +226,20 @@ def get_dtbl_student_payments():
 
     if current_user.role.name == "Secretary":
         clients = Registration.objects(status="registered").filter(branch=current_user.branch)
-        accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+        store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
+        accommodations = Accommodation.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
     elif current_user.role.name == "Admin":
         clients = Registration.objects(status="registered").filter(branch=ObjectId(branch_id))
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
+        accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
     elif current_user.role.name == "Partner":
         clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
+        accommodations = Accommodation.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
     else:
-        return jsonify({'data': []})
+        raise Exception("Wrong User Role")
 
     _data = []
-
-    if accounting is None:
-        response = {
-            'draw': draw,
-            'recordsTotal': 0,
-            'recordsFiltered': 0,
-            'data': _data,
-            'totalStudentPayments': ' 0.00',
-            'totalCashOnHand':  ' 0.00'
-            }
-
-        return jsonify(response)
-
     total_student_payments = 0
 
     with decimal.localcontext(D128_CTX):
@@ -274,6 +266,17 @@ def get_dtbl_student_payments():
                         str(payment.amount),
                     ])
 
+    total_items_sold : decimal.Decimal = 0
+    record : StoreRecords
+    for record in store_records:
+        total_items_sold += record.total_amount
+
+    total_accommodations : decimal.Decimal = 0
+    record : Accommodation
+    for record in accommodations:
+        total_accommodations += record.total_amount
+
+    total_cash_on_hand = total_student_payments + total_items_sold + total_accommodations
 
     response = {
         'draw': draw,
@@ -281,9 +284,10 @@ def get_dtbl_student_payments():
         'recordsFiltered': 0,
         'data': _data,
         'totalStudentPayments': str(total_student_payments),
-        'totalCashOnHand': str(accounting['total_cash_on_hand']) if accounting['total_cash_on_hand'] is not None else ' 0.00'
+        'totalCashOnHand': str(total_cash_on_hand),
+        'totalItemsSold': str(total_items_sold),
+        'totalAccommodations': str(total_accommodations)
         }
-
     return jsonify(response)
 
 
@@ -292,50 +296,27 @@ def get_dtbl_store_items_sold():
     draw = request.args.get('draw')
     # start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
-    print("TESTETESTE",branch_id)
     if branch_id == 'all':
         response = {
             'draw': draw,
             'recordsTotal': 0,
             'recordsFiltered': 0,
             'data': [],
-            'totalItemsSold': ' 0.00',
         }
-
         return jsonify(response)
 
     if current_user.role.name == "Secretary":
         store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
     elif current_user.role.name == "Admin":
-        store_records = StoreRecords.objects().filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
     elif current_user.role.name == "Partner":
         store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
     else:
         raise Exception("Wrong User Role")
 
     _data = []
-
-    if accounting is None:
-        response = {
-            'draw': draw,
-            'recordsTotal': 0,
-            'recordsFiltered': 0,
-            'data': _data,
-            'totalItemsSold': ' 0.00',
-            }
-
-        return jsonify(response)
-
-    total_items_sold : decimal.Decimal = 0
-
-        
     record : StoreRecords
     for record in store_records:
-        total_items_sold += record.total_amount
-
         _data.append([
             record.local_datetime,
             record.client_id.full_registration_number,
@@ -350,9 +331,7 @@ def get_dtbl_store_items_sold():
         'recordsTotal': 0,
         'recordsFiltered': 0,
         'data': _data,
-        'totalItemsSold': str(total_items_sold)
         }
-
     return jsonify(response)
 
 
@@ -361,50 +340,28 @@ def get_dtbl_coh_accommodations():
     draw = request.args.get('draw')
     # start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
-    print("TESTETESTE",branch_id)
+
     if branch_id == 'all':
         response = {
             'draw': draw,
             'recordsTotal': 0,
             'recordsFiltered': 0,
             'data': [],
-            'totalAccommodations': ' 0.00',
         }
-
         return jsonify(response)
 
     if current_user.role.name == "Secretary":
         accommodations = Accommodation.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
     elif current_user.role.name == "Admin":
-        accommodations = Accommodation.objects().filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
     elif current_user.role.name == "Partner":
         accommodations = Accommodation.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")
-        accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
     else:
         raise Exception("Wrong User Role")
 
     _data = []
-
-    if accounting is None:
-        response = {
-            'draw': draw,
-            'recordsTotal': 0,
-            'recordsFiltered': 0,
-            'data': _data,
-            'totalAccommodations': ' 0.00',
-            }
-
-        return jsonify(response)
-
-    total_accommodations : decimal.Decimal = 0
-
-        
     record : Accommodation
     for record in accommodations:
-        total_accommodations += record.total_amount
-
         _data.append([
             record.local_datetime,
             record.client_id.full_registration_number,
@@ -421,9 +378,7 @@ def get_dtbl_coh_accommodations():
         'recordsTotal': 0,
         'recordsFiltered': 0,
         'data': _data,
-        'totalAccommodations': str(total_accommodations)
         }
-
     return jsonify(response)
 
 

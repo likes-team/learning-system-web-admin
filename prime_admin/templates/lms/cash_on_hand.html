@@ -766,6 +766,8 @@
                 "dataSrc": function (json) {
                     $("#total_student_payments").html("₱" + json.totalStudentPayments);
                     $("#total_cash_on_hand").html("₱" + json.totalCashOnHand);
+                    $("#total_items_sold").html("₱" + json.totalItemsSold);
+                    $("#total_accommodations").html("₱" + json.totalAccommodations);
                     return json.data;
                 }
             },
@@ -809,10 +811,6 @@
                 "data": function (d) {
                     d.branch = $("#btn_branch_label").val();
                 },
-                "dataSrc": function (json) {
-                    $("#total_items_sold").html("₱" + json.totalItemsSold);
-                    return json.data;
-                }
             },
             "pageLength": 25,
             "ordering": false,
@@ -855,10 +853,6 @@
                 "data": function (d) {
                     d.branch = $("#btn_branch_label").val();
                 },
-                "dataSrc": function (json) {
-                    $("#total_accommodations").html("₱" + json.totalAccommodations);
-                    return json.data;
-                }
             },
             "pageLength": 25,
             "ordering": false,
