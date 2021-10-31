@@ -91,7 +91,7 @@ def buy_items():
                             module_1 = qty
                         elif item['description'] == "MODULE 2":
                             module_2 = qty
-                        elif item['description'] == "REVIEWER L":
+                        elif item['description'] == "REVIEWER L BOOKBIND":
                             reviewer_l = qty
                         elif item['description'] == "REVIEWER R":
                             reviewer_r = qty

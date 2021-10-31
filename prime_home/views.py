@@ -13,6 +13,11 @@ def index():
     return render_template('prime_home/index.html')
 
 
+@bp_prime_home.route('/branches')
+def branches():
+    return render_template('prime_home/branches_page.html')
+
+
 @bp_prime_home.route('/pre-register', methods=["GET", 'POST'])
 def pre_register():
     if request.method == "GET":

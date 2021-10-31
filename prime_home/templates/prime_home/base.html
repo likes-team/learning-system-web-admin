@@ -36,9 +36,65 @@
     </script>
     <script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
     <script src="{{ url_for('prime_home.static', filename='js/home_vue.js') }}"></script>
+    <script>
+        $(document).ready(function (){
+            $("#nav_contact_us").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_contact_us_section").offset().top
+                }, 2000);
+            });
 
+            $("#btn_contact_now").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_contact_us_section").offset().top
+                }, 2000);
+            });
+
+            $("#btn_proof_of_gallery").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_proof_of_gallery").offset().top
+                }, 2000);
+            });
+
+            $("#btn_orientation").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_orientation").offset().top
+                }, 2000);
+            })
+
+            $("#btn_actual_class").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_actual_class").offset().top
+                }, 2000);
+            })
+
+            $("#btn_actual_class").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_actual_class").offset().top
+                }, 2000);
+            })
+
+            $("#btn_graduation").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_graduation").offset().top
+                }, 2000);
+            })
+
+            $("#btn_skill_test").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_skill_test").offset().top
+                }, 2000);
+            })
+
+            $("#btn_departure").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_departure").offset().top
+                }, 2000);
+            })
+        });
+    </script>
     <!-- Block Extra Script -->
     {% block extra_script %}{% endblock %}
-</body>
 
+</body>
 </html>

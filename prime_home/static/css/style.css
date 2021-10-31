@@ -54,3 +54,7 @@
 .primary-color {
     background-color: rgb(0, 97, 168) !important;
 }
+
+.text-favorite {
+    color: rgb(0, 97, 168) !important;
+}
