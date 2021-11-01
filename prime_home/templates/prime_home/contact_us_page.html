@@ -1,0 +1,90 @@
+{% extends 'prime_home/base.html' %}
+
+{% block header %}
+    {% include "prime_home/navigation_header_2.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="primary-color pt-5 text-white">
+    <div class="container mb-4 py-5">
+        <h1 class="display-5 fw-bold">Contact Us</h1>
+        <p class="fs-3 mb-0">Say hello, we&apos;d love to hear from you.</p>
+    </div>
+    <svg viewBox="0 0 1440 185" preserveAspectRatio="none" fill="rgb(0, 97, 168)" version="1.1" xmlns="http://www.w3.org/2000/svg" class="bg-white d-block text-primary" width="100%" height="160">
+        <path d="M 0 0 H 1440 V 60 C 1114 355 700 35 516 35 C 333 35 246 199 0 60 V 0 Z"/>
+    </svg>
+</section>
+
+<section class="py-5">
+    <div id="div_contact_us_section" class="testimony container py-5">
+        <div class="row">
+            <div class="col-lg-6 col-xl-5">
+                <div class="bg-light p-5">
+                    <div class="py-3">
+                        <h2 class="h5 text-primary">Get in Touch</h2>
+                        <h3 class="display-4 fw-bold mb-5 text-dark">Want to study korean language?</h3>
+                        <h4 class="mb-3 text-dark">Visit us at</h4>
+                        <p>
+address<br>
+address<br>
+address</p>
+                        <h4 class="mb-3 text-dark">Connect at</h4>
+                        <ul class="list-unstyled mb-0"> 
+                            <li class="mb-1"> 
+                                <a href="mailto:info@company.com" class="link-secondary text-decoration-none">info@company.com</a> 
+                            </li>
+                            <li class="mb-1"> 
+                                <a href="tel:+0 123-456-789" class="link-secondary text-decoration-none">+0 123-456-789</a> 
+                            </li>                                         
+                            <li class="mb-1"> 
+                                <a href="tel:+0 123-456-789" class="link-secondary text-decoration-none">+0 123-456-789</a> 
+                            </li>                                         
+                        </ul>
+                    </div>
+                </div>                             
+            </div>
+            <div class="col-lg-6 col-xl-7">
+                <div class="px-4 px-xl-5 py-5">
+                    <h2 class="mb-4 text-dark">Send us a message</h2>
+                    <form>
+                        <div class="gx-3 row">
+                            <div class="col-md-6 mb-3">
+                                <input disabled type="text" class="form-control p-3" id="inputName" placeholder="Name" required> 
+                            </div>
+                            <div class="col-md-6 mb-3"> 
+                                <input disabled type="email" class="form-control p-3" id="inputEmail" placeholder="Email" required> 
+                            </div>
+                        </div>
+                        <div class="mb-3"> 
+                            <input disabled type="text" class="form-control p-3" id="inputSubject" placeholder="Subject" required> 
+                        </div>
+                        <div class="mb-3"> 
+                            <textarea disabled class="form-control p-3" rows="6" id="inputTextarea" placeholder="Message" required></textarea> 
+                        </div>
+                        <div class="form-check mb-4">
+                            <input disabled type="checkbox" class="form-check-input" id="exampleCheck1"/>
+                            <label class="form-check-label" for="exampleCheck1">I would also like to subscribe to weekly newsletter</label>
+                        </div>                                     
+                        <div class="text-end">
+                            <button disabled type="submit" class="btn btn-primary pe-4 ps-4 rounded-pill">
+                                <span>Submit</span>
+                            </button>
+                        </div>                                     
+                    </form>
+                </div>                             
+            </div>
+        </div>                     
+    </div>
+    <!-- <div class="container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3170.191198800076!2d-118.18046714839134!3d37.38531037973326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80be49e630bb0f4d%3A0x626d864ec13dbdba!2sAncient%20Bristlecone%20Pine%20Forest%20Visitor%20Center!5e0!3m2!1sen!2snp!4v1622962262896!5m2!1sen!2snp" height="450" frameborder="0" allowfullscreen="" aria-hidden="false" tabindex="0" width="100%" class="d-block" title="Pinegeow location map"></iframe>
+    </div>                  -->
+</section>
+
+
+<!-- Talk Section -->
+{% include "prime_home/index/talk_section.html" %}
+<!--End Of Talk Section-->
+
+{% include "prime_home/footer.html" %}
+
+{% endblock %}

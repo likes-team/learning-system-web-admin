@@ -28,8 +28,10 @@
 
 <body class="text-secondary">
     <!-- HEADER -->
-    {% include "prime_home/navigation_header.html" %}
-    
+    {% block header %}
+        {% include "prime_home/navigation_header.html" %}
+    {% endblock %}
+
     <!-- Block Content -->
     {% block content %}{% endblock %}
 

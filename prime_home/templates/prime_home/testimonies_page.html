@@ -1,6 +1,10 @@
 {% extends 'prime_home/base.html' %}
 
 
+{% block header %}
+    {% include "prime_home/navigation_header_2.html" %}
+{% endblock %}
+
 {% block content %}
 <section class="primary-color pt-5 text-white">
     <div class="container mb-4 py-5">
@@ -409,4 +413,11 @@
             </section>
     </div>                 
 </section>
+
+<!-- Talk Section -->
+{% include "prime_home/index/talk_section.html" %}
+<!--End Of Talk Section-->
+
+{% include "prime_home/footer.html" %}
+
 {% endblock %}

@@ -1,0 +1,47 @@
+<nav
+class="nav-background border border-left-0 border-right-0 border-top-0 navbar navbar-dark navbar-expand-lg py-lg-1">
+<div class="container" id="home">
+    <img width="70" height="70" class="embed-responsive-item" src="{{url_for('prime_home.static', filename='img/logo.png')}}"/>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown-4"
+        aria-controls="navbarNavDropdown-4" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse " id="navbarNavDropdown-4">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link px-lg-3 py-lg-4" href="{{ url_for('prime_home.index') }}">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="{{ url_for('prime_home.about') }}" class="nav-link px-lg-3 py-lg-4" aria-haspopup="true" aria-expanded="false">About Us</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link px-lg-3 py-lg-4 dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+                    role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Services</a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item">Learn Korean</a>
+                    <a class="dropdown-item">Work in South Korea</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown"> 
+                <a class="nav-link px-lg-3 py-lg-4 dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testimonies</a> 
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> 
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Our Proof of Gallery</a>
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Orientation</a>
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Actual Class</a>
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Graduation</a>
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Skill test</a>
+                    <a href="{{url_for('prime_home.testimonies')}}" class="dropdown-item">Departure in South Korea</a>
+                </div>                             
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link px-lg-3 py-lg-4" href="{{url_for('prime_home.contact_us')}}" aria-haspopup="true" aria-expanded="false">Contact
+                    Us</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="{{url_for('prime_home.branches')}}" class="nav-link px-lg-3 py-lg-4" aria-haspopup="true" aria-expanded="false">Branches</a>
+            </li>
+        </ul>
+        <!-- <a class="btn btn-light ml-lg-auto pl-4 pr-4 rounded-pill" href="#">Log In</a> -->
+    </div>
+</div>
+</nav>

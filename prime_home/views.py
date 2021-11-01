@@ -23,6 +23,16 @@ def testimonies():
     return render_template('prime_home/testimonies_page.html')
 
 
+@bp_prime_home.route('/about')
+def about():
+    return render_template('prime_home/about_page.html')
+
+
+@bp_prime_home.route('/contact-us')
+def contact_us():
+    return render_template('prime_home/contact_us_page.html')
+
+
 @bp_prime_home.route('/pre-register', methods=["GET", 'POST'])
 def pre_register():
     if request.method == "GET":
