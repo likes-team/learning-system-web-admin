@@ -17,6 +17,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/owl.theme.default.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css">
+    <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/carousel.css') }}">
     <!-- Block Extra Head -->
     {% block extra_head %}{% endblock %}
 </head>
@@ -36,6 +41,11 @@
     </script>
     <script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
     <script src="{{ url_for('prime_home.static', filename='js/home_vue.js') }}"></script>
+
+    <script src="{{ url_for('prime_home.static', filename='js/popper.js') }}"></script>
+    <script src="{{ url_for('prime_home.static', filename='js/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('prime_home.static', filename='js/carousel.js') }}"></script>
+
     <script>
         $(document).ready(function (){
             $("#nav_contact_us").click(function (){
@@ -47,6 +57,12 @@
             $("#btn_contact_now").click(function (){
                 $('html, body').animate({
                     scrollTop: $("#div_contact_us_section").offset().top
+                }, 2000);
+            });
+
+            $("#btn_branches").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#div_branches").offset().top
                 }, 2000);
             });
 
