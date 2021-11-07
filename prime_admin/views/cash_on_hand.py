@@ -138,7 +138,7 @@ def to_pre_deposit():
 
                         print(payment)
                         
-                        amount = Decimal128(amount.to_decimal() + payment['payments'][0]['amount'].to_decimal())
+                        amount = Decimal128(amount.to_decimal() + decimal.Decimal(str(payment['payments'][0]['amount'])))
                         print(amount)
                 elif source == "store_items_sold":
                     for selected_payment in payments_selected:
