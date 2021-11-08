@@ -76,48 +76,48 @@ def add_fund():
     receiver = request.form['receiver']
     remarks = request.form['remarks']
     
-    # try:
-    with mongo.cx.start_session() as session:
-        with session.start_transaction():
-            accounting = mongo.db.lms_accounting.find_one({
-                "branch": current_user.branch.id,
-            })
+    try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                accounting = mongo.db.lms_accounting.find_one({
+                    "branch": current_user.branch.id,
+                })
 
-            if accounting:
-                with decimal.localcontext(D128_CTX):
-                    print(accounting)
-                    previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                if accounting:
+                    with decimal.localcontext(D128_CTX):
+                        print(accounting)
+                        previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
 
-                    new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
+                        new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
 
-                    mongo.db.lms_accounting.update_one({
-                        "branch": current_user.branch.id
-                    },
-                    {'$set': {
-                        "total_fund_wallet": Decimal128(new_total_fund_wallet)
-                    }},session=session)
-            else:
-                pass
+                        mongo.db.lms_accounting.update_one({
+                            "branch": current_user.branch.id
+                        },
+                        {'$set': {
+                            "total_fund_wallet": Decimal128(new_total_fund_wallet)
+                        }},session=session)
+                else:
+                    pass
 
-            mongo.db.lms_fund_wallet_transactions.insert_one({
-                'branch': current_user.branch.id,
-                'date': convert_to_utc(date),
-                'bank_name': bank_name,
-                'transaction_no': transaction_no,
-                'sender': sender,
-                'amount_received': Decimal128(amount_received),
-                'receiver': receiver,
-                'remarks':remarks,
-                'previous_total_fund_wallet': previous_fund_wallet,
-                'new_total_fund_wallet': Decimal128(new_total_fund_wallet),
-                'created_at': get_date_now(),
-                'created_by': current_user.fname + " " + current_user.lname
-            },session=session)
+                mongo.db.lms_fund_wallet_transactions.insert_one({
+                    'branch': current_user.branch.id,
+                    'date': convert_to_utc(date),
+                    'bank_name': bank_name,
+                    'transaction_no': transaction_no,
+                    'sender': sender,
+                    'amount_received': Decimal128(amount_received),
+                    'receiver': receiver,
+                    'remarks':remarks,
+                    'previous_total_fund_wallet': previous_fund_wallet,
+                    'new_total_fund_wallet': Decimal128(new_total_fund_wallet),
+                    'created_at': get_date_now(),
+                    'created_by': current_user.fname + " " + current_user.lname
+                },session=session)
 
 
-    flash('Fund added successfully', 'success')
-    # except Exception as err:
-    #     flash(str(err), 'error')
+        flash('Fund added successfully', 'success')
+    except Exception as err:
+        flash(str(err), 'error')
     
     return redirect(url_for('lms.fund_wallet'))
 
@@ -127,53 +127,58 @@ def add_fund():
 def add_expenses():
     date = request.form['date']
     category = request.form['category']
-    account_no = request.form['account_no']
-    billing_month = request.form['billing_month']
+    description = request.form['description']
+    account_no = request.form.get('account_no', None)
+    billing_month_from = request.form.get('billing_month_from', None)
+    billing_month_to = request.form.get('billing_month_to', None)
+    qty = request.form.get('qty', None)
+    unit_price = request.form.get('unit_price', None)
     settled_by = request.form['settled_by']
     total_amount_due = request.form['total_amount_due']
     remarks = request.form['remarks']
     
-    # try:
-    with mongo.cx.start_session() as session:
-        with session.start_transaction():
-            accounting = mongo.db.lms_accounting.find_one({
-                "branch": current_user.branch.id,
-            })
+    try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                accounting = mongo.db.lms_accounting.find_one({
+                    "branch": current_user.branch.id,
+                })
 
-            # if accounting:
-            #     with decimal.localcontext(D128_CTX):
-            #         print(accounting)
-            #         previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                # if accounting:
+                #     with decimal.localcontext(D128_CTX):
+                #         print(accounting)
+                #         previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
 
-            #         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
+                #         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
 
-            #         mongo.db.lms_accounting.update_one({
-            #             "branch": current_user.branch.id
-            #         },
-            #         {'$set': {
-            #             "total_fund_wallet": Decimal128(new_total_fund_wallet)
-            #         }},session=session)
-            # else:
-            #     pass
+                #         mongo.db.lms_accounting.update_one({
+                #             "branch": current_user.branch.id
+                #         },
+                #         {'$set': {
+                #             "total_fund_wallet": Decimal128(new_total_fund_wallet)
+                #         }},session=session)
+                # else:
+                #     pass
 
-            mongo.db.lms_expenses_transactions.insert_one({
-                'branch': current_user.branch.id,
-                'date': convert_to_utc(date),
-                'category': category,
-                'account_no': account_no,
-                'billing_month': billing_month,
-                'total_amount_due': Decimal128(total_amount_due),
-                'settled_by': settled_by,
-                'remarks':remarks,
-                'created_at': get_date_now(),
-                'created_by': current_user.fname + " " + current_user.lname
-            },session=session)
-
-
-    flash('Process successfully', 'success')
-    # except Exception as err:
-    #     flash(str(err), 'error')
-    
+                mongo.db.lms_expenses_transactions.insert_one({
+                    'branch': current_user.branch.id,
+                    'date': convert_to_utc(date),
+                    'category': category,
+                    'description': description,
+                    'account_no': account_no,
+                    'billing_month_from': billing_month_from,
+                    'billing_month_to': billing_month_to,
+                    'qty': qty,
+                    'unit_price': unit_price,
+                    'total_amount_due': Decimal128(total_amount_due),
+                    'settled_by': settled_by,
+                    'remarks':remarks,
+                    'created_at': get_date_now(),
+                    'created_by': current_user.fname + " " + current_user.lname
+                },session=session)
+        flash('Process successfully', 'success')
+    except Exception as err:
+        flash(str(err), 'error')
     return redirect(url_for('lms.fund_wallet'))
 
 

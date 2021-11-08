@@ -11,6 +11,172 @@
 {% endblock %}
 
 
+{% block scripts %}
+<script>
+    $(document).ready(function(){            
+        var dtbl_fund_wallet_transactions = $("#tbl_fund_wallet_transactions").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/api/dtbl/add-funds-transactions",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                },
+                "dataSrc": function(json){
+                    $("#total_fund_wallet").html("₱" + json.totalFundWallet);
+                    return json.data;
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[ 0, 'asc' ]],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+        var dtbl_expenses_transactions = $("#tbl_expenses_transactions").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/api/dtbl/expenses-transactions",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                },
+                "dataSrc": function(json){
+                    $("#total_utilities").html("₱" + json.totalUtilities);
+                    $("#total_office_supplies").html("₱" + json.totalOfficeSupplies);
+                    $("#total_salaries_and_rebates").html("₱" + json.totalSalariesAndRebates);
+                    $("#total_other_expenses").html("₱" + json.totalOtherExpenses);
+                    return json.data;
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[ 0, 'asc' ]],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+         });
+
+        $("#btn_branch_label").change(function () {
+            dtbl_fund_wallet_transactions.ajax.reload();
+        });
+
+        $("#div_branch_buttons").on('click', '.btn-branch', function () {
+            var branch_name = $(this).html();
+    
+            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
+            $("#btn_branch_label").html(branch_name.toUpperCase());
+            $("#btn_branch_label").val($(this).val());
+            $("#card_header_label").html(branch_name);
+    
+            $('#btn_branch_label').trigger('change');
+            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
+            // }
+    
+        });
+
+
+        $("#category").change(function(){
+            var selectedCategory = $(this).val();
+            $("#description").empty()
+            $("#description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+            $("#qty").prop('disabled', false);
+            $("#unit_price").prop('disabled', false);
+            $("#account_no").prop('disabled', false);
+            $("#billing_month_from").prop('disabled', false);
+            $("#billing_month_to").prop('disabled', false);
+            $("#qty").prop('required', true);
+            $("#unit_price").prop('required', true);
+            $("#account_no").prop('required', true);
+            $("#billing_month_from").prop('required', true);
+            $("#billing_month_to").prop('required', true);
+            $("#label_description").html('Description');
+            $("#total_amount_due").prop('readonly', false);
+
+            if(selectedCategory == "utilities"){
+                $("#description").append($('<option></option>').attr("value", "building_rental").text("Building Rental"));
+                $("#description").append($('<option></option>').attr("value", "electricity_bill").text("Electricity Bill"));
+                $("#description").append($('<option></option>').attr("value", "water_bill").text("Water Bill"));
+                $("#description").append($('<option></option>').attr("value", "internet_bill").text("Internet And Communication Bill"));
+
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+                $("#qty").prop('required', false);
+                $("#unit_price").prop('required', false);
+            } else if(selectedCategory == "office_supply"){
+                $("#description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
+                $("#description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
+                $("#description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
+                $("#description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
+                $("#description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
+                $("#description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
+                $("#description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
+                $("#description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
+                $("#description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
+                $("#description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
+                $("#description").append($('<option></option>').attr("value", "Ball Pen").text("Parchment"));
+                $("#description").append($('<option></option>').attr("value", "Medal").text("Medal"));
+                $("#description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
+                $("#description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
+                $("#description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
+                $("#description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
+                $("#description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
+
+                $("#account_no").prop('disabled', true);
+                $("#billing_month_from").prop('disabled', true);
+                $("#billing_month_to").prop('disabled', true);
+                $("#account_no").prop('required', false);
+                $("#billing_month_from").prop('required', false);
+                $("#billing_month_to").prop('required', false);
+                $("#total_amount_due").prop('readonly', true);
+            } else if(selectedCategory == "salary_and_rebates") {
+                var userBranch = "{{current_user.branch.id}}";
+
+                $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
+                    if (response.data.length > 0) {
+                        $('#description').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                            $('#description').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="">No Contact Persons available</option>');
+                        $('#description').append(newOption);
+                    }
+                });
+
+                $("#label_description").html('Contact Person');
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+                $("#qty").prop('required', false);
+                $("#unit_price").prop('required', false);
+            } else if(selectedCategory == "other_expenses"){
+                $("#description").append($('<option></option>').attr("value", "Others").text("Others"));
+            }
+        });
+
+        $("#qty").change(function(){
+            $("#total_amount_due").val(
+                $(this).val() * $("#unit_price").val() 
+            );
+        });
+
+        $("#unit_price").change(function(){
+            $("#total_amount_due").val(
+                $(this).val() * $("#qty").val() 
+            );
+        });
+
+    });
+</script>
+{% endblock %}
+
+
 {% block content %}
 <div class="app-main__inner">
     <div class="app-page-title" style="background-color: skyblue">
@@ -248,78 +414,4 @@
         {% include TABLE_OPTIONS['view_modal_template'] %}
     {% endif %}
 
-{% endblock %}
-
-
-{% block scripts %}
-<script>
-    $(document).ready(function(){            
-        var dtbl_fund_wallet_transactions = $("#tbl_fund_wallet_transactions").DataTable({
-            "dom": 'rtip',
-            "processing": true,
-            "serverSide": true,
-            "ajax": {
-                "url": "/learning-management/api/dtbl/add-funds-transactions",
-                "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
-                },
-                "dataSrc": function(json){
-                    $("#total_fund_wallet").html("₱" + json.totalFundWallet);
-                    return json.data;
-                }
-            },
-            "pageLength": 25,
-            "ordering": false,
-            "order": [[ 0, 'asc' ]],
-            "columnDefs": [
-            ],
-            "order": [[1, 'asc']],
-        });
-
-        var dtbl_expenses_transactions = $("#tbl_expenses_transactions").DataTable({
-            "dom": 'rtip',
-            "processing": true,
-            "serverSide": true,
-            "ajax": {
-                "url": "/learning-management/api/dtbl/expenses-transactions",
-                "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
-                },
-                "dataSrc": function(json){
-                    $("#total_utilities").html("₱" + json.totalUtilities);
-                    $("#total_office_supplies").html("₱" + json.totalOfficeSupplies);
-                    $("#total_salaries_and_rebates").html("₱" + json.totalSalariesAndRebates);
-                    $("#total_other_expenses").html("₱" + json.totalOtherExpenses);
-                    return json.data;
-                }
-            },
-            "pageLength": 25,
-            "ordering": false,
-            "order": [[ 0, 'asc' ]],
-            "columnDefs": [
-            ],
-            "order": [[1, 'asc']],
-         });
-
-        $("#btn_branch_label").change(function () {
-            dtbl_fund_wallet_transactions.ajax.reload();
-        });
-
-        $("#div_branch_buttons").on('click', '.btn-branch', function () {
-            var branch_name = $(this).html();
-    
-            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
-            $("#btn_branch_label").html(branch_name.toUpperCase());
-            $("#btn_branch_label").val($(this).val());
-            $("#card_header_label").html(branch_name);
-    
-            $('#btn_branch_label').trigger('change');
-            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
-            // }
-    
-        });
-
-
-    });
-</script>
 {% endblock %}
