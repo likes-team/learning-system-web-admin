@@ -85,10 +85,10 @@ def add_fund():
 
                 if accounting:
                     with decimal.localcontext(D128_CTX):
-                        print(accounting)
                         previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
-
                         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
+                        balance = Decimal128(Decimal128(
+                            str(accounting["total_fund_wallet"] if 'total_fund_wallet' in accounting else 0.00)).to_decimal() + Decimal128(str(amount_received)).to_decimal())
 
                         mongo.db.lms_accounting.update_one({
                             "branch": current_user.branch.id
@@ -97,9 +97,11 @@ def add_fund():
                             "total_fund_wallet": Decimal128(new_total_fund_wallet)
                         }},session=session)
                 else:
-                    pass
+                    raise Exception("Likes Error: Accounting data not found")
 
                 mongo.db.lms_fund_wallet_transactions.insert_one({
+                    'type': 'add_fund',
+                    'running_balance': balance,
                     'branch': current_user.branch.id,
                     'date': convert_to_utc(date),
                     'bank_name': bank_name,
@@ -144,23 +146,25 @@ def add_expenses():
                     "branch": current_user.branch.id,
                 })
 
-                # if accounting:
-                #     with decimal.localcontext(D128_CTX):
-                #         print(accounting)
-                #         previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                if accounting:
+                    with decimal.localcontext(D128_CTX):
+                        previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                        new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
+                        print("balance", str(previous_fund_wallet.to_decimal()), str(total_amount_due))
+                        balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
 
-                #         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
+                        mongo.db.lms_accounting.update_one({
+                            "branch": current_user.branch.id
+                        },
+                        {'$set': {
+                            "total_fund_wallet": Decimal128(new_total_fund_wallet)
+                        }},session=session)
+                else:
+                    raise Exception("Likes Error: Accounting data not found")
 
-                #         mongo.db.lms_accounting.update_one({
-                #             "branch": current_user.branch.id
-                #         },
-                #         {'$set': {
-                #             "total_fund_wallet": Decimal128(new_total_fund_wallet)
-                #         }},session=session)
-                # else:
-                #     pass
-
-                mongo.db.lms_expenses_transactions.insert_one({
+                mongo.db.lms_fund_wallet_transactions.insert_one({
+                    'type': 'expenses',
+                    'running_balance': balance,
                     'branch': current_user.branch.id,
                     'date': convert_to_utc(date),
                     'category': category,
@@ -182,8 +186,8 @@ def add_expenses():
     return redirect(url_for('lms.fund_wallet'))
 
 
-@bp_lms.route('/api/dtbl/add-funds-transactions', methods=['GET'])
-def get_dtbl_add_funds_transactions():
+@bp_lms.route('/api/dtbl/fund-wallet-statements', methods=['GET'])
+def get_dtbl_fund_wallet_statements():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
@@ -208,6 +212,70 @@ def get_dtbl_add_funds_transactions():
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         elif current_user.role.name == "Partner":
             transactions = FundWallet.objects(branch=branch_id)
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+
+        total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
+
+    data = []
+    
+    transaction: FundWallet
+    for transaction in transactions:
+        if type(transaction.date) == datetime:
+            local_datetime = transaction.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(transaction.date == str):
+            to_date = datetime.strptime(transaction.date, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+
+        data.append([
+            local_datetime,
+            str(transaction.amount_received) if transaction.type == "add_fund" else '',
+            str(transaction.total_amount_due) if transaction.type == "expenses" else '',
+            str(transaction.running_balance),
+            transaction.created_by,
+            transaction.remarks,
+        ])
+
+    print(data)
+
+    response = {
+        'draw': draw,
+        'recordsTotal': transactions.count(),
+        'recordsFiltered': transactions.count(),
+        'data': data,
+        'totalFundWallet': str(total_fund_wallet)
+        }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/api/dtbl/add-funds-transactions', methods=['GET'])
+def get_dtbl_add_funds_transactions():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch')
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            transactions = FundWallet.objects(type="add_fund")
+            accounting = mongo.db.lms_accounting.find()
+        elif current_user.role.name == "Partner":
+            transactions = FundWallet.objects(branch__in=current_user.branches).filter(type="add_fund")
+            accounting = mongo.db.lms_accounting.find()
+
+        total_fund_wallet = 0.00
+
+    else:
+        print(branch_id)
+        if current_user.role.name == "Secretary":
+            transactions = FundWallet.objects()(branch=current_user.branch).filter(type="add_fund")
+            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+        elif current_user.role.name == "Admin":
+            transactions = FundWallet.objects(branch=branch_id).filter(type="add_fund")
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        elif current_user.role.name == "Partner":
+            transactions = FundWallet.objects(branch=branch_id).filter(type="add_fund")
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
 
         total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
@@ -246,8 +314,6 @@ def get_dtbl_add_funds_transactions():
     return jsonify(response)
 
 
-
-
 @bp_lms.route('/api/dtbl/expenses-transactions', methods=['GET'])
 def get_dtbl_expenses_transactions():
     draw = request.args.get('draw')
@@ -256,24 +322,23 @@ def get_dtbl_expenses_transactions():
 
     if branch_id == 'all':
         if current_user.role.name == "Admin":
-            transactions = Expenses.objects()
+            transactions = FundWallet.objects(type="expenses")
             accounting = mongo.db.lms_accounting.find()
         elif current_user.role.name == "Partner":
-            transactions = Expenses.objects(branch__in=current_user.branches)
+            transactions = FundWallet.objects(branch__in=current_user.branches).filter(type="expenses")
             accounting = mongo.db.lms_accounting.find()
 
         # total_fund_wallet = accounting['fund_wallet']
 
     else:
-        print(branch_id)
         if current_user.role.name == "Secretary":
-            transactions = Expenses.objects()(branch=current_user.branch)
+            transactions = FundWallet.objects()(branch=current_user.branch).filter(type="expenses")
             accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-        elif current_user.role.name == "Admin":
-            transactions = Expenses.objects(branch=branch_id)
+        elif current_user.FundWallet.name == "Admin":
+            transactions = FundWallet.objects(branch=branch_id).filter(type="expenses")
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         elif current_user.role.name == "Partner":
-            transactions = Expenses.objects(branch=branch_id)
+            transactions = FundWallet.objects(branch=branch_id).filter(type="expenses")
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
 
         # total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
@@ -284,6 +349,7 @@ def get_dtbl_expenses_transactions():
     total_salaries_and_rebates = decimal.Decimal(0)
     total_other_expenses = decimal.Decimal(0)
     
+    transaction: FundWallet
     for transaction in transactions:
         if type(transaction.date) == datetime:
             local_datetime = transaction.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
@@ -295,7 +361,7 @@ def get_dtbl_expenses_transactions():
 
         if transaction.category == "utilities":
             total_utilities = total_utilities + transaction.total_amount_due
-        elif transaction.category == "office_supplies":
+        elif transaction.category == "office_supply":
             total_office_supplies = total_office_supplies + transaction.total_amount_due
         elif transaction.category == "salary_and_rebates":
             total_salaries_and_rebates = total_salaries_and_rebates + transaction.total_amount_due
@@ -306,7 +372,7 @@ def get_dtbl_expenses_transactions():
             local_datetime,
             transaction.category,
             transaction.account_no,
-            transaction.billing_month,
+            str(transaction.billing_month_from if transaction.billing_month_from is not None else '') + " - " + str(transaction.billing_month_to if transaction.billing_month_to is not None else ''),
             transaction.settled_by,
             str(transaction.total_amount_due),
             transaction.remarks,
@@ -314,6 +380,7 @@ def get_dtbl_expenses_transactions():
 
     print(data)
 
+    print('total_office_supplies', total_office_supplies)
     response = {
         'draw': draw,
         'recordsTotal': transactions.count(),

@@ -13,10 +13,34 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(function(){            
+    $(document).ready(function(){
+        var dtbl_fund_wallet_statements = $("#tbl_fund_wallet_statements").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/api/dtbl/fund-wallet-statements",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                },
+                "dataSrc": function(json){
+                    $("#total_fund_wallet").html("₱" + json.totalFundWallet);
+                    return json.data;
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[ 0, 'asc' ]],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
         var dtbl_fund_wallet_transactions = $("#tbl_fund_wallet_transactions").DataTable({
             "dom": 'rtip',
             "processing": true,
+            "autoWidth": false,
             "serverSide": true,
             "ajax": {
                 "url": "/learning-management/api/dtbl/add-funds-transactions",
@@ -39,6 +63,7 @@
         var dtbl_expenses_transactions = $("#tbl_expenses_transactions").DataTable({
             "dom": 'rtip',
             "processing": true,
+            "autoWidth": false,
             "serverSide": true,
             "ajax": {
                 "url": "/learning-management/api/dtbl/expenses-transactions",
@@ -359,42 +384,89 @@
                 </div>
             </div>
 
-            <h5 style="margin-top: 20px;">Add Funds Transactions</h5>
-            <div class="table-responsive">
-                <table id="tbl_fund_wallet_transactions" class="align-middle mb-0 table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th class="text-center">DATE</th>
-                            <th class="text-center">BANK NAME / REMITTANCE CENTER</th>
-                            <th class="text-center">TRANSACTION NO.</th>
-                            <th class="text-center">SENDER</th>
-                            <th class="text-center">AMOUNT RECEIVED</th>
-                            <th class="text-center">RECEIVER</th>
-                            <th class="text-center">REMARKS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
 
-            <h5 style="margin-top: 20px;">Expenses Transactions</h5>
-            <div class="table-responsive">
-                <table id="tbl_expenses_transactions" class="align-middle mb-0 table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th class="text-center">DATE</th>
-                            <th class="text-center">CATEGORY</th>
-                            <th class="text-center">ACCOUNT NO. / PARTICULAR</th>
-                            <th class="text-center">BILLING MONTH</th>
-                            <th class="text-center">SETTLED BY</th>
-                            <th class="text-center">TOTAL AMOUNT DUE</th>
-                            <th class="text-center">REMARKS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+            <div class="mb-12 card">
+                <div class="card-body">
+                    <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
+                                href="#tab-animated1-0" aria-selected="false">
+                                <span class="nav-text">FUND WALLET STATEMENTS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
+                                aria-selected="false">
+                                <span class="nav-text">ADD FUNDS TRANSACTIONS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                                aria-selected="true">
+                                <span class="nav-text">EXPENSES TRANSACTIONS</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
+                            <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_fund_wallet_statements"
+                                    class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE</th>
+                                            <th class="text-center">ADD FUNDS</th>
+                                            <th class="text-center">EXPENSES</th>
+                                            <th class="text-center">RUNNING BALANCE</th>
+                                            <th class="text-center">WHO</th>
+                                            <th class="text-center">REMARKS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane show" id="tab-animated1-1" role="tabpanel">
+                            <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_fund_wallet_transactions" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE</th>
+                                            <th class="text-center">BANK NAME / REMITTANCE CENTER</th>
+                                            <th class="text-center">TRANSACTION NO.</th>
+                                            <th class="text-center">SENDER</th>
+                                            <th class="text-center">AMOUNT RECEIVED</th>
+                                            <th class="text-center">RECEIVER</th>
+                                            <th class="text-center">REMARKS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+                            <div style="margin-top: 10px;" class="table-responsive">
+                                <table id="tbl_expenses_transactions" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">DATE</th>
+                                            <th class="text-center">CATEGORY</th>
+                                            <th class="text-center">ACCOUNT NO. / PARTICULAR</th>
+                                            <th class="text-center">BILLING MONTH</th>
+                                            <th class="text-center">SETTLED BY</th>
+                                            <th class="text-center">TOTAL AMOUNT DUE</th>
+                                            <th class="text-center">REMARKS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

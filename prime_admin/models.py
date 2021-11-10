@@ -391,6 +391,8 @@ class FundWallet(Admin, Base):
     __amicon__ = 'pe-7s-wallet'
     __view_url__ = 'lms.fund_wallet'
 
+    type = db.StringField()
+    running_balance = db.DecimalField()
     date = db.DateTimeField()
     branch = db.ReferenceField('Branch')
     bank_name = db.StringField()
@@ -399,7 +401,13 @@ class FundWallet(Admin, Base):
     receiver = db.StringField()
     amount_received = db.DecimalField()
     remarks = db.StringField()
-
+    # Expenses
+    category = db.StringField()
+    account_no = db.StringField()
+    billing_month_from = db.DateTimeField()
+    billing_month_to = db.DateTimeField()
+    settled_by = db.StringField()
+    total_amount_due = db.DecimalField()
 
 
 class Expenses(Base, Admin):
