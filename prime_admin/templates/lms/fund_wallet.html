@@ -123,10 +123,10 @@
             $("#total_amount_due").prop('readonly', false);
 
             if(selectedCategory == "utilities"){
-                $("#description").append($('<option></option>').attr("value", "building_rental").text("Building Rental"));
-                $("#description").append($('<option></option>').attr("value", "electricity_bill").text("Electricity Bill"));
-                $("#description").append($('<option></option>').attr("value", "water_bill").text("Water Bill"));
-                $("#description").append($('<option></option>').attr("value", "internet_bill").text("Internet And Communication Bill"));
+                $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
 
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
@@ -453,6 +453,7 @@
                                         <tr>
                                             <th class="text-center">DATE</th>
                                             <th class="text-center">CATEGORY</th>
+                                            <th class="text-center">DESCRIPTION</th>
                                             <th class="text-center">ACCOUNT NO. / PARTICULAR</th>
                                             <th class="text-center">BILLING MONTH</th>
                                             <th class="text-center">SETTLED BY</th>

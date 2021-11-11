@@ -114,7 +114,8 @@ def buy_items():
                     "module_1": module_1,
                     "module_2": module_2,
                     "reviewer_l": reviewer_l,
-                    "reviewer_r": reviewer_r
+                    "reviewer_r": reviewer_r,
+                    'deposited': "Pre Deposit"
                 }, session=session)
 
                 flash("Process successfully!", 'success')

@@ -403,6 +403,7 @@ class FundWallet(Admin, Base):
     remarks = db.StringField()
     # Expenses
     category = db.StringField()
+    description = db.StringField()
     account_no = db.StringField()
     billing_month_from = db.DateTimeField()
     billing_month_to = db.DateTimeField()

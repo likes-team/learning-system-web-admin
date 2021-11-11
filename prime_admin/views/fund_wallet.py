@@ -371,6 +371,7 @@ def get_dtbl_expenses_transactions():
         data.append([
             local_datetime,
             transaction.category,
+            transaction.description,
             transaction.account_no,
             str(transaction.billing_month_from if transaction.billing_month_from is not None else '') + " - " + str(transaction.billing_month_to if transaction.billing_month_to is not None else ''),
             transaction.settled_by,

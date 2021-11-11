@@ -553,7 +553,7 @@ def new_payment():
 
         payment = {
             "_id": ObjectId(),
-            "deposited": "No",
+            "deposited": "Pre Deposit",
             "payment_mode": client.payment_mode,
             "amount": Decimal128(str(amount)),
             "current_balance": Decimal128(str(client.balance)),
@@ -719,7 +719,7 @@ def upgrade_to_premium():
 
         payment = {
             "_id": ObjectId(),
-            "deposited": "No",
+            "deposited": "Pre Deposit",
             "payment_mode": client.payment_mode,
             "amount": Decimal128(str(amount)),
             "current_balance": Decimal128(str(client.balance)),

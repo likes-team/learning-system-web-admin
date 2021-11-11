@@ -89,7 +89,8 @@ def accomodate():
                 'date_to': date_to,
                 'days': days,
                 'total_amount': Decimal128(str(total)),
-                'remarks': remarks
+                'remarks': remarks,
+                'deposited': "Pre Deposit"
             })
 
     flash("Process successfully!", 'success')
