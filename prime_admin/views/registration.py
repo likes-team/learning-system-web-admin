@@ -21,7 +21,6 @@ from config import TIMEZONE
 @bp_lms.route('/register', methods=['GET', 'POST'])
 @login_required
 def register():
-
     registration_generated_number = ""
     
     last_registration_number = Registration.objects(status="registered").order_by('-registration_number').first()
@@ -81,7 +80,7 @@ def register():
         earnings = 0
         savings = 0
 
-        client = Registration.objects.get(id=client_id)
+        client: Registration = Registration.objects.get(id=client_id)
         client.mname = form.mname.data
         client.suffix = form.suffix.data
         client.address = form.address.data
@@ -93,7 +92,7 @@ def register():
         client.full_registration_number = registration_generated_number
         client.schedule = form.schedule.data
         client.branch = Branch.objects.get(id=form.branch.data)
-        client.batch_number = Batch.objects.get(id=form.batch_number.data) 
+        client.batch_number = Batch.objects.get(id=form.batch_number.data)
         client.passport = form.passport.data
         client.status = "registered"
         client.amount = form.amount.data
@@ -214,7 +213,7 @@ def register():
                     "registration_number": client.registration_number,
                     "full_registration_number": client.full_registration_number,
                     "schedule": client.schedule,
-                    "batch_number": form.batch_number.data,
+                    "batch_number": client.batch_number.id,
                     "passport": client.passport,
                     "status": client.status,
                     "amount": Decimal128(str(client.amount)),
