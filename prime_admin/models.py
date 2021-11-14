@@ -409,6 +409,8 @@ class FundWallet(Admin, Base):
     billing_month_to = db.DateTimeField()
     settled_by = db.StringField()
     total_amount_due = db.DecimalField()
+    qty = db.IntField()
+    unit_price = db.DecimalField()
 
 
 class Expenses(Base, Admin):

@@ -230,6 +230,7 @@ def get_dtbl_fund_wallet_statements():
 
         data.append([
             local_datetime,
+            transaction.description,
             str(transaction.amount_received) if transaction.type == "add_fund" else '',
             str(transaction.total_amount_due) if transaction.type == "expenses" else '',
             str(transaction.running_balance),
@@ -327,21 +328,13 @@ def get_dtbl_expenses_transactions():
         elif current_user.role.name == "Partner":
             transactions = FundWallet.objects(branch__in=current_user.branches).filter(type="expenses")
             accounting = mongo.db.lms_accounting.find()
-
-        # total_fund_wallet = accounting['fund_wallet']
-
     else:
         if current_user.role.name == "Secretary":
             transactions = FundWallet.objects()(branch=current_user.branch).filter(type="expenses")
-            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
         elif current_user.FundWallet.name == "Admin":
             transactions = FundWallet.objects(branch=branch_id).filter(type="expenses")
-            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         elif current_user.role.name == "Partner":
             transactions = FundWallet.objects(branch=branch_id).filter(type="expenses")
-            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
-
-        # total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
 
     data = []
     total_utilities = decimal.Decimal(0)
@@ -373,15 +366,14 @@ def get_dtbl_expenses_transactions():
             transaction.category,
             transaction.description,
             transaction.account_no,
+            str(transaction.unit_price),
+            str(transaction.qty),
             str(transaction.billing_month_from if transaction.billing_month_from is not None else '') + " - " + str(transaction.billing_month_to if transaction.billing_month_to is not None else ''),
             transaction.settled_by,
             str(transaction.total_amount_due),
             transaction.remarks,
         ])
 
-    print(data)
-
-    print('total_office_supplies', total_office_supplies)
     response = {
         'draw': draw,
         'recordsTotal': transactions.count(),
