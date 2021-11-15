@@ -408,14 +408,14 @@ def get_cash_flow():
 
         if current_user.role.name == "Secretary":
             if from_what == "sales":
-                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what="Sales").skip(start).limit(length)
+                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
-                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").skip(start).limit(length)
+                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         else:
             if from_what == "sales":
-                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").skip(start).limit(length)
+                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
-                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").skip(start).limit(length)
+                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         recordsTotal = bank_statements.count(),
         recordsFiltered = bank_statements.count(),
     else:
@@ -604,6 +604,38 @@ def profit():
                         "profits": profit_history
                     },
                     "$inc": {
+                        "active_group": 1
+                    }},session=session)
+
+    except Exception as exc:
+        return jsonify({"result": "error"})
+
+    return jsonify({"result": "success"})
+
+
+@bp_lms.route('/archive', methods=['POST'])
+@login_required
+def archive():
+    password = request.json['password']
+    branch = request.json['branch']
+
+    if not current_user.check_password(password):
+        return jsonify({"result": "invalid_password"})
+
+    try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                with decimal.localcontext(D128_CTX):
+
+                    accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch)},session=session)
+                    
+                    if accounting is None:
+                        return jsonify({"result": "no_transaction"})
+
+                    mongo.db.lms_accounting.update_one({
+                        "_id": accounting['_id'],
+                    },
+                    {"$inc": {
                         "active_group": 1
                     }},session=session)
 

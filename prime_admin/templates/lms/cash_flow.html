@@ -64,7 +64,7 @@
                             {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
                             <li id="nav_action_btns" class="nav-item">
                                 {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                <button id="btn_archived" type="button" data-toggle="modal" data-target="#mdl_archive" data-placement="bottom" tabindex="0" class="dropdown-item">Archive</button>
                                 {% endblock %}
                             </li>
                             {% else %}
@@ -367,6 +367,7 @@
 {% block modals %}
 
     {% include "lms/search_client_last_name_modal.html" %}
+    {% include "lms/archive_modal.html" %}
 
     {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
     {% include TABLE_OPTIONS['create_modal_template'] %}
@@ -847,6 +848,43 @@
                 }
             });
         });
+
+
+        $("#btn_confirm_archive").click(function(){
+            if($("#branch_profit").val() == ''){
+                alert("Please select branch");
+                return;
+            }
+    
+            if($("#password").val() == ''){
+                alert("Please input your password");
+                return;
+            }
+    
+            $.ajax({
+                url: "/learning-management/archive",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify({
+                    'branch': $("#branch_profit").val(),
+                    'password': $("#password").val()
+                }),
+                contentType: "application/json; charset=utf-8",
+                success: function(response){
+                    if(response.result == "invalid_password"){
+                        toastr.error("Please try again","Invalid Password!");
+                    } else if(response.result == "no_transaction"){
+                        toastr.error("Please deposit first to this branch","No cash flow transaction found");
+                    } else if(response.result == "error"){
+                        toastr.error("Please contact system administrator ","Error Occured!");
+                    } else if(response.result == "success"){
+                        location.reload();
+                        toastr.success("Proccessed Successfully!");
+                    }
+                }
+            });
+        });
+
 
         $('#tbl_statement tbody').on('click', '.btn-view', function () {
             var data = dtbl_statement.row( $(this).parents('tr') ).data();
