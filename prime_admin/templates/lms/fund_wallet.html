@@ -88,6 +88,8 @@
 
         $("#btn_branch_label").change(function () {
             dtbl_fund_wallet_transactions.ajax.reload();
+            dtbl_fund_wallet_statements.ajax.reload();
+            dtbl_expenses_transactions.ajax.reload();
         });
 
         $("#div_branch_buttons").on('click', '.btn-branch', function () {
@@ -159,21 +161,7 @@
                 $("#billing_month_to").prop('required', false);
                 $("#total_amount_due").prop('readonly', true);
             } else if(selectedCategory == "salary_and_rebates") {
-                var userBranch = "{{current_user.branch.id}}";
-
-                $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
-                    if (response.data.length > 0) {
-                        $('#description').append(newOption);
-    
-                        for (i = 0; i < response.data.length; i++) {
-                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
-                            $('#description').append(newOption);
-                        }
-                    } else {
-                        var newOption = $('<option value="">No Contact Persons available</option>');
-                        $('#description').append(newOption);
-                    }
-                });
+                getContactPersons();
 
                 $("#label_description").html('Contact Person');
                 $("#qty").prop('disabled', true);
@@ -197,6 +185,30 @@
             );
         });
 
+        $("#branch_expenses").change(function(){
+            if($("#category").val() == "salary_and_rebates"){
+                getContactPersons();
+            }
+        });
+
+        function getContactPersons(){
+            var userBranch = $("#branch_expenses").val();
+
+            $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
+                if (response.data.length > 0) {
+                    $('#description').append(newOption);
+
+                    for (i = 0; i < response.data.length; i++) {
+                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                        $('#description').append(newOption);
+                    }
+                } else {
+                    var newOption = $('<option value="">No Contact Persons available</option>');
+                    $('#description').append(newOption);
+                }
+            });
+        }
+
     });
 </script>
 {% endblock %}
@@ -218,16 +230,16 @@
                 </div>
             </div>
             <div class="page-title-actions">
-                {% if current_user.role.name == "Secretary" %}
-                        <button type="button" data-toggle="modal" data-target="#mdl_add_funds" data-placement="bottom"
-                        class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-plus"></i> Add funds
-                </button>
+                {% if current_user.role.name in ["Admin"] %}
+                    <button type="button" data-toggle="modal" data-target="#mdl_add_funds" data-placement="bottom"
+                            class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-plus"></i> Add funds
+                    </button>
 
-                <button type="button" data-toggle="modal" data-target="#mdl_expenses" data-placement="bottom"
-                        class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-minus"></i> Expenses
-                </button>
+                    <button type="button" data-toggle="modal" data-target="#mdl_expenses" data-placement="bottom"
+                            class="btn-shadow mr-3 btn btn-primary">
+                        <i class="fa fa-minus"></i> Expenses
+                    </button>
                 {% endif %}
 
                 <div class="d-inline-block dropdown">

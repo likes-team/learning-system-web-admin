@@ -17,6 +17,22 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="form-row">
                                 <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label for="branch" class="">Branch</label>
+                                        <select name="branch" id="branch" class="form-control" required>
+                                            <option value="">Choose...</option>
+                                            {% for branch in TABLE_OPTIONS['branches'] %}
+                                                <option value="{{branch.id}}">{{branch.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid branch
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
                                     <div class="position-relative form-group"><label for="date_deposit"
                                             class="">Date</label>
                                             <input name="date" id="date"
