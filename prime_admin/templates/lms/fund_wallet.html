@@ -235,11 +235,13 @@
                             class="btn-shadow mr-3 btn btn-primary">
                         <i class="fa fa-plus"></i> Add funds
                     </button>
+                {% endif %}
 
-                    <button type="button" data-toggle="modal" data-target="#mdl_expenses" data-placement="bottom"
-                            class="btn-shadow mr-3 btn btn-primary">
-                        <i class="fa fa-minus"></i> Expenses
-                    </button>
+                {% if current_user.role.name in ['Secretary', 'Admin'] %}
+                <button type="button" data-toggle="modal" data-target="#mdl_expenses" data-placement="bottom"
+                    class="btn-shadow mr-3 btn btn-primary">
+                   <i class="fa fa-minus"></i> Expenses
+                </button>
                 {% endif %}
 
                 <div class="d-inline-block dropdown">

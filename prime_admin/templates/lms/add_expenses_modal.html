@@ -20,7 +20,10 @@
                                     <div class="position-relative form-group">
                                         <label for="branch_expenses" class="">Branch</label>
                                         <select name="branch" id="branch_expenses" class="form-control" required>
-                                            <option value="">Choose...</option>
+                                            {% if current_user.role.name != "Secretary" %}
+                                                <option value="">Choose...</option>
+                                            {% endif %}
+                                            
                                             {% for branch in TABLE_OPTIONS['branches'] %}
                                                 <option value="{{branch.id}}">{{branch.name}}</option>
                                             {% endfor %}
