@@ -240,10 +240,16 @@ def get_dtbl_fund_wallet_statements():
             local_datetime = to_date.strftime("%B %d, %Y")
         else: 
             local_datetime = ''
-
+        
+        description = transaction.description
+        
+        if transaction.category == "salary_and_rebates":
+            contact_person : User = User.objects.get(id=transaction.description)
+            description = contact_person.full_name
+            
         data.append([
             local_datetime,
-            transaction.description,
+            description,
             str(transaction.amount_received) if transaction.type == "add_fund" else '',
             str(transaction.total_amount_due) if transaction.type == "expenses" else '',
             str(transaction.running_balance),
