@@ -329,6 +329,7 @@ def edit_member(client_id):
     email = request.json['email']
     address = request.json['address']
     e_registration = request.json['e_registration']
+    e_reg_password = request.json['e_reg_password']
 
     client = Registration.objects.get_or_404(id=client_id)
     client.lname = lname
@@ -341,6 +342,7 @@ def edit_member(client_id):
     client.email = email
     client.address = address
     client.e_registration = e_registration
+    client.e_reg_password = e_reg_password
 
     client.save()
 
@@ -460,7 +462,8 @@ def get_member(client_id):
         'status': client.status,
         'is_oriented': client.is_oriented,
         'payments': payments,
-        'e_registration': client.e_registration
+        'e_registration': client.e_registration,
+        'e_reg_password': client.e_reg_password
     }
 
     response = {

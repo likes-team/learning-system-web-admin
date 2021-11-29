@@ -670,6 +670,7 @@
                     $("#view_id_materials").val(response.data.id_materials);
                     $("#view_amount").val(response.data.amount);
                     $("#view_balance").val(response.data.balance);
+                    $("#view_password").val(response.data.e_reg_password);
     
                     $("#tbl_payment_history > tbody").empty();
     
@@ -688,6 +689,7 @@
             });
         });
     
+        
         $("#btn_edit").click(function(){
             if($(this).html() == "Edit"){
                 $(this).html("Save");
@@ -702,6 +704,7 @@
                 $("#view_email").prop('disabled', false);
                 $("#view_address").prop('disabled', false);
                 $("#view_e_registration").prop('disabled', false);
+                $("#view_password").prop('disabled', false);
             }else if ($(this).html() == "Save"){
                 $(this).html("Edit");
                 $("#view_last_name").prop('disabled', true);
@@ -715,6 +718,7 @@
                 $("#view_email").prop('disabled', true);
                 $("#view_address").prop('disabled', true);
                 $("#view_e_registration").prop('disabled', true);
+                $("#view_password").prop('disabled', true);
     
                 var lname = $("#view_last_name").val();
                 var fname = $("#view_first_name").val();
@@ -726,6 +730,7 @@
                 var email = $("#view_email").val();
                 var address = $("#view_address").val();
                 var e_registration = $("#view_e_registration").val();
+                var e_reg_password = $("#view_password").val();
     
                 $.ajax({
                     url: "/learning-management/api/members/" + $("#client_id").val() + "/edit",
@@ -741,7 +746,8 @@
                         "contact_no": contact_no,
                         "email": email,
                         "address": address,
-                        "e_registration": e_registration
+                        "e_registration": e_registration,
+                        'e_reg_password': e_reg_password
                     }),
                     contentType: "application/json; charset=utf-8",
                     success: function(response){

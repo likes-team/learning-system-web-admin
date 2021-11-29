@@ -75,6 +75,7 @@ class Registration(Base, Admin):
     payments = db.EmbeddedDocumentListField(Payment)
     # payments = db.ListField(db.EmbeddedDocumentField(Payment))
     e_registration = db.StringField()
+    e_reg_password = db.StringField()
     referred_by = db.ReferenceField('Registration')
     level = db.StringField()
     fle = db.DecimalField()
