@@ -27,10 +27,6 @@ def earnings():
         'student_id','payment_id','Branch', 'Full Name', 'batch no.','fle', 'sle', 'schedule', 'remark', 'status','actions'
     ]
 
-    _scripts = [
-        {'lms.static': 'js/earnings.js'}
-    ]
-
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
@@ -57,7 +53,6 @@ def earnings():
         subheading='',
         title='Earnings',
         table_template='lms/earnings.html',
-        scripts=_scripts,
         marketers=marketers,
         branches=branches,
         batch_numbers=batch_numbers,
