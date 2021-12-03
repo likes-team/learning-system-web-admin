@@ -74,6 +74,7 @@
                     d.contact_person = $("#btn_marketer_label").val();
                     d.branch = $("#branch").val();
                     d.batch_no = $("#batch_no").val();
+                    d.status = $("#status").val();
                 },
                 "dataSrc": function(json){
                     var totalEarnings = parseFloat(json.totalEarnings).toFixed(2);
@@ -177,6 +178,10 @@
         });
     
         $("#batch_no").change(function(){
+            table.ajax.reload();
+        });
+        
+        $("#status").change(function(){
             table.ajax.reload();
         });
     
@@ -539,7 +544,18 @@
             <div class="tab-content">
                 <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
                     <div class="form-row">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-2">
+                            <div class="position-relative form-group">
+                                <label for="status" class="">Status</label>
+                                <select name="status" id="status" class="form-control" required>
+                                        <option value="all">All</option>
+                                        <option value="none">Not Yet Claim</option>
+                                        <option value="for_approval">For Approval</option>
+                                        <option value="approved">Claimed</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-md-2">
                             <div class="position-relative form-group">

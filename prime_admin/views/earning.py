@@ -69,6 +69,7 @@ def get_dtbl_earnings_members():
     print(contact_person_id)
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
+    filter_status = request.args.get('status')
 
     total_earnings = 0
     total_savings = 0
@@ -180,6 +181,12 @@ def get_dtbl_earnings_members():
         for payment in registration.payments:
             actions = ''
             status = ''
+
+            if filter_status != 'all':
+                if filter_status == "none":
+                    filter_status = None 
+                if payment.status != filter_status:
+                    continue
 
             if current_user.role.name == "Secretary" or current_user.role.name == "Admin":
                 if payment.status == "for_approval":
