@@ -44,6 +44,21 @@ def earnings():
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
 
+    if current_user.username == "likesadmin":
+        return admin_table(
+            Earning,
+            fields=[],
+            table_data=[],
+            table_columns=_table_columns,
+            heading="",
+            subheading='',
+            title='Earnings',
+            table_template='lms/earnings_admin.html',
+            marketers=marketers,
+            branches=branches,
+            batch_numbers=batch_numbers,
+        ) 
+
     return admin_table(
         Earning,
         fields=[],
@@ -66,17 +81,18 @@ def get_dtbl_earnings_members():
     # search_value = "%" + request.args.get("search[value]") + "%"
     # column_order = request.args.get('column_order')
     contact_person_id = request.args.get('contact_person')
-    print(contact_person_id)
     branch_id = request.args.get('branch')
     batch_no = request.args.get('batch_no')
     filter_status = request.args.get('status')
+    
+    print(start, length)
 
     total_earnings = 0
     total_savings = 0
     total_earnings_claimed = 0
     total_savings_claimed = 0
     branches_total_earnings = []
-
+    
     if contact_person_id == 'all':
         registrations = Registration.objects(status="registered").order_by("-registration_date").order_by("registration_number").skip(start).limit(length)
         if current_user.role.name == "Secretary":
@@ -156,6 +172,8 @@ def get_dtbl_earnings_members():
                     total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
                     total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
 
+    total_records = registrations.count()
+
     if branch_id != 'all':
         registrations = registrations.filter(branch=branch_id)
 
@@ -179,6 +197,7 @@ def get_dtbl_earnings_members():
             remarks = "Premium - Promo"
 
         for payment in registration.payments:
+            # total_records += 1
             actions = ''
             status = ''
 
@@ -233,10 +252,15 @@ def get_dtbl_earnings_members():
     for branch in branches_total_earnings:
         branch['totalEarnings'] = str(branch['totalEarnings'])
 
+    filtered_records = len(_table_data)
+
+    print("total_records: ", total_records)
+    print("filtered_records: ", filtered_records)
+
     response = {
         'draw': draw,
-        'recordsTotal': registrations.count(),
-        'recordsFiltered': registrations.count(),
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
         'data': _table_data,
         'totalEarnings': str(total_earnings),
         'totalSavings': str(total_savings),
