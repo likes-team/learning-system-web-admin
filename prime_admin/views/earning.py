@@ -44,20 +44,20 @@ def earnings():
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
 
-    if current_user.username == "likesadmin":
-        return admin_table(
-            Earning,
-            fields=[],
-            table_data=[],
-            table_columns=_table_columns,
-            heading="",
-            subheading='',
-            title='Earnings',
-            table_template='lms/earnings_admin.html',
-            marketers=marketers,
-            branches=branches,
-            batch_numbers=batch_numbers,
-        ) 
+    # if current_user.username == "likesadmin":
+    #     return admin_table(
+    #         Earning,
+    #         fields=[],
+    #         table_data=[],
+    #         table_columns=_table_columns,
+    #         heading="",
+    #         subheading='',
+    #         title='Earnings',
+    #         table_template='lms/earnings_admin.html',
+    #         marketers=marketers,
+    #         branches=branches,
+    #         batch_numbers=batch_numbers,
+    #     ) 
 
     return admin_table(
         Earning,
@@ -215,7 +215,7 @@ def get_dtbl_earnings_members():
                             btn-approve-claim">Approve Claim</button>""" if not contact_person_id == 'all' else ''
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
                 elif payment.status is None:
-                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NOT YET CLAIM</div>"""
+                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
                 elif payment.status == "approved":
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">CLAIMED/APPROVED</div>"""
             else:
@@ -228,10 +228,10 @@ def get_dtbl_earnings_members():
                     elif payment.status is None:
                         if start_date.date() <= get_date_now().date():
                             actions = """<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon 
-                                btn-icon-only btn btn-outline-warning btn-claim">Claim</button>""" if not contact_person_id == 'all' else ''
+                                btn-icon-only btn btn-outline-warning btn-claim">Request for Claim</button>""" if not contact_person_id == 'all' else ''
                             status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-warning">FOR CLAIM</div>"""
                         else:
-                            status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NOT YET CLAIM</div>"""
+                            status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
                     elif payment.status == "approved":
                         status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">CLAIMED/APPROVED</div>"""
 
