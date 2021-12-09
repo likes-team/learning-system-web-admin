@@ -44,20 +44,20 @@ def earnings():
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
 
-    # if current_user.username == "likesadmin":
-    #     return admin_table(
-    #         Earning,
-    #         fields=[],
-    #         table_data=[],
-    #         table_columns=_table_columns,
-    #         heading="",
-    #         subheading='',
-    #         title='Earnings',
-    #         table_template='lms/earnings_admin.html',
-    #         marketers=marketers,
-    #         branches=branches,
-    #         batch_numbers=batch_numbers,
-    #     ) 
+    if current_user.username == "likesadmin":
+        return admin_table(
+            Earning,
+            fields=[],
+            table_data=[],
+            table_columns=_table_columns,
+            heading="",
+            subheading='',
+            title='Earnings',
+            table_template='lms/earnings_admin.html',
+            marketers=marketers,
+            branches=branches,
+            batch_numbers=batch_numbers,
+        )
 
     return admin_table(
         Earning,

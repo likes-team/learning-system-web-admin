@@ -80,7 +80,7 @@ def deposit():
     
     try:
         new_deposit = CashFlow()
-        new_deposit.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_to")
+        # new_deposit.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_to")
         new_deposit.bank_name = form.bank_name.data
         new_deposit.account_no = form.account_no.data
         new_deposit.account_name = form.account_name.data
@@ -92,6 +92,7 @@ def deposit():
         new_deposit.type = "deposit"
         new_deposit.remarks = form.remarks.data
         new_deposit.set_created_at()
+        new_deposit.date_deposit = new_deposit.created_at
 
         payments = []
 
@@ -279,7 +280,7 @@ def withdraw():
     
     try:
         new_withdraw = CashFlow()
-        new_withdraw.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
+        # new_withdraw.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
         new_withdraw.bank_name = form.bank_name.data
         new_withdraw.account_no = form.account_no.data
         new_withdraw.account_name = form.account_name.data
@@ -291,6 +292,7 @@ def withdraw():
         new_withdraw.type = "withdraw"
         new_withdraw.remarks = form.remarks.data
         new_withdraw.set_created_at()
+        new_withdraw.date_deposit = new_withdraw.created_at
 
         with mongo.cx.start_session() as session:
             with session.start_transaction():
