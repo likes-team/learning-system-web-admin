@@ -2,12 +2,13 @@ from bson.objectid import ObjectId
 from flask_mongoengine import json
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 from app.auth.models import User
+from app.auth.models import Earning as auth_user_earning
 from prime_admin.functions import generate_number
 from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, Registration, Batch
+from prime_admin.models import Branch, Earning, Payment, Registration, Batch
 from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import mongo
 from datetime import datetime, timedelta
@@ -272,6 +273,146 @@ def get_dtbl_earnings_members():
     return jsonify(response)
 
 
+@bp_lms.route('/branches/<string:branch_id>/earnings/total')
+def get_branch_total_earnings(branch_id):
+    total_earnings = 0
+    total_savings = 0
+    total_earnings_claimed = 0
+    total_savings_claimed = 0
+    total_nyc = 0
+    branches_total_earnings = []
+    
+    if current_user.role.name == "Secretary":
+        contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
+    else:
+        if branch_id == "all":
+            contact_persons = User.objects()
+        else:
+            contact_persons = User.objects(branches__in=[branch_id])
+
+    with decimal.localcontext(D128_CTX):
+        total_earnings = Decimal128('0.00')
+        total_savings = Decimal128('0.00')
+        total_earnings_claimed = Decimal128('0.00')
+        total_savings_claimed = Decimal128('0.00')
+        total_nyc = Decimal128('0.00')
+        
+        contact_person: User
+        for contact_person in contact_persons:
+            earning: Payment
+            for earning in contact_person.earnings:
+                if earning.payment_mode == "profit_sharing":
+                    continue
+
+                # if earning.status is not None and earning.status == "for_approval":
+                if earning.status is None or earning.status == "for_approval":
+                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                    
+                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
+                        branches_total_earnings.append(
+                            {
+                                'id': str(earning.branch.id),
+                                'name': earning.branch.name,
+                                'totalEarnings': earning.earnings
+                            }
+                        )
+                    else:
+                        for x in branches_total_earnings:
+                            if x['id'] == str(earning['branch'].id):
+                                if type(x['totalEarnings']) == decimal.Decimal:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                else:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                elif earning.status is None:
+                    total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
+                
+                elif earning.status == "approved":
+                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
+
+    for branch in branches_total_earnings:
+        branch['totalEarnings'] = str(branch['totalEarnings'])
+
+    response = {
+        'totalEarnings': str(total_earnings),
+        'totalSavings': str(total_savings),
+        'totalEarningsClaimed': str(total_earnings_claimed),
+        'totalSavingsClaimed': str(total_savings_claimed),
+        'totalNYC': str(total_nyc),
+        'branchesTotalEarnings': branches_total_earnings
+    }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/branches/<string:branch_id>/earnings')
+def get_branch_earnings(branch_id):
+    total_earnings = 0
+    total_savings = 0
+    
+    data = []
+    
+    if current_user.role.name == "Secretary":
+        contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
+    else:
+        if branch_id == "all":
+            contact_persons = User.objects()
+        else:
+            contact_persons = User.objects(branches__in=[branch_id])
+
+    with decimal.localcontext(D128_CTX):
+        total_earnings = Decimal128('0.00')
+        total_savings = Decimal128('0.00')
+        
+        contact_person: User
+        for contact_person in contact_persons:
+            earning: auth_user_earning
+            for earning in contact_person.earnings:
+                if earning.payment_mode == "profit_sharing":
+                    continue
+
+                if earning.status is None or earning.status == "for_approval":
+                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+
+                    student: Registration = Registration.objects.get(id=earning.client.id)
+                    
+                    if earning.payment_mode == "full_payment":
+                            remarks = "Full Payment"
+                    elif earning.payment_mode == "premium":
+                        remarks = "Premium"
+                    elif earning.payment_mode == "installment":
+                        remarks = "Installment"
+                    elif earning.payment_mode == "full_payment_promo":
+                        remarks = "Full Payment - Promo"
+                    elif earning.payment_mode == "installment_promo":
+                        remarks = "Installment - Promo"
+                    elif earning.payment_mode == "premium_promo":
+                        remarks = "Premium - Promo"
+                        
+                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
+                        
+                    data.append([
+                        str(earning.client.id),
+                        str(earning.payment_id),
+                        contact_person.full_name,
+                        student.full_name,
+                        student.batch_number.number if student.batch_number is not None else '',
+                        str(earning.earnings),
+                        student.schedule,
+                        remarks,
+                        status,
+                    ])
+    response = {
+        'data': data,
+        'totalEarnings': str(total_earnings),
+        'totalSavings': str(total_savings),
+    }
+
+    return jsonify(response)
+
+
 @bp_lms.route('/api/claim-earning', methods=['POST'])
 @login_required
 def claim_earning():
@@ -333,6 +474,73 @@ def claim_earning():
 
     return jsonify(response)
 
+
+@bp_lms.route('/earnings/branches/<string:branch_id>/approve-earning', methods=['POST'])
+def approve_branch_earnings(branch_id):
+    try:
+        contact_persons = User.objects(branches__in=[branch_id])
+
+        contact_person: User
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                with decimal.localcontext(D128_CTX):
+                    for contact_person in contact_persons:
+                        earning: auth_user_earning
+                        for earning in contact_person.earnings:
+                            if earning.payment_mode == "profit_sharing":
+                                continue
+
+                            if earning.status is None or earning.status == "for_approval":
+                                mongo.db.lms_registrations.update_one(
+                                {"_id": earning.client.id,
+                                "payments._id": ObjectId(earning.payment_id)},
+                                {"$set": {
+                                    "payments.$.status": "approved"
+                                }}, session=session)
+
+                                mongo.db.auth_users.update_one(
+                                    {"_id": contact_person.id,
+                                    "earnings.payment_id": earning.payment_id
+                                    },
+                                    {"$set": {
+                                        "earnings.$.status": "approved"
+                                    }}, session=session)
+
+                                mongo.db.auth_users.update_one(
+                                    {"_id": contact_person.id,
+                                    "earnings.payment_id": ObjectId(earning.payment_id)
+                                    },
+                                    {"$set": {
+                                        "earnings.$.status": "approved"
+                                    }}, session=session)
+
+                                mongo.db.auth_users.update_one(
+                                    {"_id": contact_person.id,
+                                    "earnings.payment": ObjectId(earning.payment_id)
+                                    },
+                                    {"$set": {
+                                        "earnings.$.status": "approved"
+                                    }}, session=session)
+
+                                mongo.db.lms_system_transactions.insert_one({
+                                    "_id": ObjectId(),
+                                    "date": get_date_now(),
+                                    "current_user": current_user.id,
+                                    "description": "Approve claim -" + contact_person.fname,
+                                    "from_module": "Earnings"
+                                }, session=session)
+
+        response = {
+            'status': 'success',
+            'message': ""
+        }
+        return jsonify(response), 200
+    except Exception as err:
+        return jsonify({
+            'status': 'error',
+            'message': str(err)
+        }), 500
+    
 
 @bp_lms.route('/api/approve-claim-earning', methods=['POST'])
 @login_required
