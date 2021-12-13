@@ -81,6 +81,10 @@ def register():
         savings = 0
 
         client: Registration = Registration.objects.get(id=client_id)
+        
+        if client.status == "registered":
+            return redirect(url_for('lms.members'))
+        
         client.mname = form.mname.data
         client.suffix = form.suffix.data
         client.address = form.address.data

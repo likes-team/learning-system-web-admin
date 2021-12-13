@@ -8,7 +8,7 @@ from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Marketer, Partner
 from flask import redirect, url_for, request, current_app, flash
-from app import db
+from app import mongo
 from datetime import datetime
 from config import TIMEZONE
 
@@ -158,26 +158,37 @@ def edit_marketer(oid):
             flash(str(key) + str(value), 'error')
         return redirect(url_for('lms.marketers'))
         
-    try:
-        contact_person.fname = form.fname.data
-        contact_person.lname = form.lname.data
-        
-        branches = []
-        branch_ids = request.form.getlist('branches[]')
+    # try:
+    contact_person.fname = form.fname.data
+    contact_person.lname = form.lname.data
+    
+    branches = []
+    branch_ids = request.form.getlist('branches[]')
 
-        if branch_ids:
-            for b_id in branch_ids:
-                branches.append(b_id)
+    if branch_ids:
+        for b_id in branch_ids:
+            branches.append(b_id)
 
-        contact_person.branches = branches
+    contact_person.branches = branches
 
-        contact_person.set_updated_at()
-        contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
-        
-        contact_person.save()
-        flash('Contact Person Updated Successfully!','success')
+    contact_person.set_updated_at()
+    contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
+    
+    # contact_person.save()
+    
+    mongo.db.auth_users.update_one(
+        {"_id": contact_person.id},
+        {"$set": {
+            "fname": contact_person.fname,
+            "lname": contact_person.lname,
+            "branches": contact_person.branches,
+            "updated_at": contact_person.updated_at,
+            "updated_by": contact_person.updated_by
+        }})
+    
+    flash('Contact Person Updated Successfully!','success')
 
-    except Exception as e:
-        flash(str(e),'error')
+    # except Exception as e:
+    #     flash(str(e),'error')
 
     return redirect(url_for('lms.marketers'))

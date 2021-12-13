@@ -44,21 +44,11 @@ def earnings():
         branches = Branch.objects()
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
-
+        
     if current_user.username == "likesadmin":
-        return admin_table(
-            Earning,
-            fields=[],
-            table_data=[],
-            table_columns=_table_columns,
-            heading="",
-            subheading='',
-            title='Earnings',
-            table_template='lms/earnings_admin.html',
-            marketers=marketers,
-            branches=branches,
-            batch_numbers=batch_numbers,
-        )
+        template = 'lms/earnings_admin.html'
+    else:
+        template = 'lms/earnings.html'
 
     return admin_table(
         Earning,
@@ -68,7 +58,7 @@ def earnings():
         heading="",
         subheading='',
         title='Earnings',
-        table_template='lms/earnings.html',
+        table_template=template,
         marketers=marketers,
         branches=branches,
         batch_numbers=batch_numbers,
@@ -301,35 +291,43 @@ def get_branch_total_earnings(branch_id):
         for contact_person in contact_persons:
             earning: Payment
             for earning in contact_person.earnings:
-                if earning.payment_mode == "profit_sharing":
-                    continue
-
-                # if earning.status is not None and earning.status == "for_approval":
-                if earning.status is None or earning.status == "for_approval":
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                try:
+                    print("TESTESTSET")
+                    if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
+                        continue
                     
-                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                        branches_total_earnings.append(
-                            {
-                                'id': str(earning.branch.id),
-                                'name': earning.branch.name,
-                                'totalEarnings': earning.earnings
-                            }
-                        )
-                    else:
-                        for x in branches_total_earnings:
-                            if x['id'] == str(earning['branch'].id):
-                                if type(x['totalEarnings']) == decimal.Decimal:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                else:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                elif earning.status is None:
-                    total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
-                
-                elif earning.status == "approved":
-                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
+
+                    if earning.payment_mode == "profit_sharing":
+                        continue
+
+                    # if earning.status is not None and earning.status == "for_approval":
+                    if earning.status == "for_approval":
+                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                        
+                        if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
+                            branches_total_earnings.append(
+                                {
+                                    'id': str(earning.branch.id),
+                                    'name': earning.branch.name,
+                                    'totalEarnings': earning.earnings
+                                }
+                            )
+                        else:
+                            for x in branches_total_earnings:
+                                if x['id'] == str(earning['branch'].id):
+                                    if type(x['totalEarnings']) == decimal.Decimal:
+                                        x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                    else:
+                                        x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                    elif earning.status is None:
+                        total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
+                    
+                    elif earning.status == "approved":
+                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
+                except Exception as err:
+                    continue
 
     for branch in branches_total_earnings:
         branch['totalEarnings'] = str(branch['totalEarnings'])
@@ -369,41 +367,48 @@ def get_branch_earnings(branch_id):
         for contact_person in contact_persons:
             earning: auth_user_earning
             for earning in contact_person.earnings:
-                if earning.payment_mode == "profit_sharing":
+                try:
+                    if earning.payment_mode == "profit_sharing":
+                        continue
+
+                    if earning.status == "for_approval":
+                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                        print(contact_person.full_name)
+                        student: Registration = Registration.objects.get(id=earning.client.id)
+                        
+                        if str(student.branch.id) != branch_id:
+                            continue
+                        
+                        if earning.payment_mode == "full_payment":
+                                remarks = "Full Payment"
+                        elif earning.payment_mode == "premium":
+                            remarks = "Premium"
+                        elif earning.payment_mode == "installment":
+                            remarks = "Installment"
+                        elif earning.payment_mode == "full_payment_promo":
+                            remarks = "Full Payment - Promo"
+                        elif earning.payment_mode == "installment_promo":
+                            remarks = "Installment - Promo"
+                        elif earning.payment_mode == "premium_promo":
+                            remarks = "Premium - Promo"
+                            
+                        status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
+                            
+                        data.append([
+                            str(earning.client.id),
+                            str(earning.payment_id),
+                            contact_person.full_name,
+                            student.full_name,
+                            student.batch_number.number if student.batch_number is not None else '',
+                            str(earning.earnings),
+                            student.schedule,
+                            remarks,
+                            status,
+                        ])
+                except Exception as err:
                     continue
-
-                if earning.status is None or earning.status == "for_approval":
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-
-                    student: Registration = Registration.objects.get(id=earning.client.id)
-                    
-                    if earning.payment_mode == "full_payment":
-                            remarks = "Full Payment"
-                    elif earning.payment_mode == "premium":
-                        remarks = "Premium"
-                    elif earning.payment_mode == "installment":
-                        remarks = "Installment"
-                    elif earning.payment_mode == "full_payment_promo":
-                        remarks = "Full Payment - Promo"
-                    elif earning.payment_mode == "installment_promo":
-                        remarks = "Installment - Promo"
-                    elif earning.payment_mode == "premium_promo":
-                        remarks = "Premium - Promo"
-                        
-                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                        
-                    data.append([
-                        str(earning.client.id),
-                        str(earning.payment_id),
-                        contact_person.full_name,
-                        student.full_name,
-                        student.batch_number.number if student.batch_number is not None else '',
-                        str(earning.earnings),
-                        student.schedule,
-                        remarks,
-                        status,
-                    ])
+                
     response = {
         'data': data,
         'totalEarnings': str(total_earnings),
@@ -490,7 +495,12 @@ def approve_branch_earnings(branch_id):
                             if earning.payment_mode == "profit_sharing":
                                 continue
 
-                            if earning.status is None or earning.status == "for_approval":
+                            if earning.status == "for_approval":
+                                student: Registration = Registration.objects.get(id=earning.client.id)
+                                
+                                if str(student.branch.id) != branch_id:
+                                    continue
+                                
                                 mongo.db.lms_registrations.update_one(
                                 {"_id": earning.client.id,
                                 "payments._id": ObjectId(earning.payment_id)},
