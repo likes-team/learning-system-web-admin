@@ -223,17 +223,27 @@
         });
 
         $("#btn_approve_earning").click(function(){
+            $("#mdl_approve .close").click();
+
             swal({
                 title: 'Approved Branch Earnings?',
                 text: "All marketers claim requests in this branch will be approved!",
-                type: 'warning',
+    			inputPlaceholder: "Your Password",
+                type: 'input',
                 showCancelButton: true,
                 cancelButtonColor: "#DD6B55",
                 confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Confirm!",
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
-              }, function (){
+              }, function (inputValue){
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Please input your password!");
+                    return false;
+                }
+
+                console.log("TEST");
                 const url = `/learning-management/earnings/branches/${selectedBranch}/approve-earning`;
 
                 setTimeout(function () {
@@ -241,9 +251,12 @@
                         url: url,
                         type: "POST",
                         dataType: "json",
+                        data: JSON.stringify({
+                            "password": inputValue,
+                        }),
                         async: false,
                         contentType: "application/json; charset=utf-8",
-                        success: function (data) {
+                        success: function (response) {
                             swal(
                                 'Success!',
                                 'All branch earnings approved!',
@@ -251,8 +264,9 @@
                                 );
                             location.reload();
                         },
-                        error: function (data) {
-                            swal("Error Occured!", "Please refresh the page then try again!", "error");
+                        error: function (response) {
+                            console.log(response.responseJSON);
+                            swal("Error Occured!", response.responseJSON.message, "error");
                         },
                     });
                 }, 500);

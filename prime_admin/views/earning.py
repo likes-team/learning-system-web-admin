@@ -32,24 +32,23 @@ def earnings():
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
         marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE))
+        template = 'lms/earnings_admin.html'
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id)
+        template = 'lms/earnings.html'
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id)
+        template = 'lms/earnings_admin.html'
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
-        
-    if current_user.username == "likesadmin":
         template = 'lms/earnings_admin.html'
-    else:
-        template = 'lms/earnings.html'
-
+        
     return admin_table(
         Earning,
         fields=[],
@@ -482,6 +481,14 @@ def claim_earning():
 
 @bp_lms.route('/earnings/branches/<string:branch_id>/approve-earning', methods=['POST'])
 def approve_branch_earnings(branch_id):
+    password = request.json['password']
+    print("password: ", password)
+    if not current_user.check_password(password):
+        return jsonify({
+            'status': 'error',
+            'message': "Invalid password!"
+        }), 500
+    
     try:
         contact_persons = User.objects(branches__in=[branch_id])
 
@@ -548,7 +555,7 @@ def approve_branch_earnings(branch_id):
     except Exception as err:
         return jsonify({
             'status': 'error',
-            'message': str(err)
+            'message': "Please refresh the page then try again!"
         }), 500
     
 
