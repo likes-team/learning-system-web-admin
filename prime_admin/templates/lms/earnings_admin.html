@@ -14,14 +14,14 @@
 {% block scripts %}
 <script>
     function init(){
-        getApprovalEarnings();
+        //getApprovalEarnings();
+        getProfitSharingEarnings();
     }
 
-    function getApprovalEarnings(){
-        var branchID = $("#btn_branch_label").val();
-        console.log(branchID);
+    function getMarketerTotalEarnings(){
+        var marketerID = $("#select_marketer").val();
 
-        $.getJSON(`branches/${branchID}/earnings/total`, function(response){
+        $.getJSON(`marketers/${marketerID}/earnings/total`, function(response){
             var totalEarnings = parseFloat(response.totalEarnings).toFixed(2);
     
             $("#total_earnings").html("₱" + totalEarnings);
@@ -57,6 +57,50 @@
                 }
 
                 $("#list_branches_total_earnings").html(newBranchesTotalEarningsList);
+            }
+        });
+    }
+
+    function getProfitSharingEarnings(){
+        var partner_id = $("#btn_marketer_label").val();
+    
+        $.ajax({
+            url: "/learning-management/api/get-profit-sharing-earnings/" + partner_id,
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            success: function(response){
+                if(response.result){
+                    $("#total_earnings_profit").html("₱" + response.totalEarningsProfit);
+    
+                    $("#list_branches_total_earnings_profit").children().remove();
+    
+                    if (response.branchesTotalEarningsProfit.length > 0){
+                        var newBranchesTotalEarningsList = '';
+                        
+                        for (i=0; i < response.branchesTotalEarningsProfit.length; i++){
+                            var totalEarnings = parseFloat(response.branchesTotalEarningsProfit[i]['totalEarnings']).toFixed(2);
+    
+                            newBranchesTotalEarningsList = newBranchesTotalEarningsList + `<li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">${response.branchesTotalEarningsProfit[i]['name']}</div>
+                                            <div class="widget-subheading">Total Earnings</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers text-primary">₱ ${totalEarnings}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>`
+                        }
+    
+                        $("#list_branches_total_earnings_profit").html(newBranchesTotalEarningsList);
+                    }
+                }else{
+                }
             }
         });
     }
@@ -216,14 +260,15 @@
         var selectedBranch = "";
         
         $("#list_branches_total_earnings").on('click', 'button.btn-approve',function(){
-            var branch_id = $(this).val();
-            selectedBranch = branch_id;
-
-            dt_approve_earnings.ajax.url(`/learning-management/branches/${branch_id}/earnings`).load();
+            var marketerID = $("#select_marketer").val();
+            var branchID = $(this).val();
+            selectedBranch = branchID;
+            dt_approve_earnings.ajax.url(`/learning-management/branches/${branchID}/marketers/${marketerID}/earnings`).load();
         });
 
         $("#btn_approve_earning").click(function(){
             $("#mdl_approve .close").click();
+            var marketerID = $("#select_marketer").val();
 
             swal({
                 title: 'Approved Branch Earnings?',
@@ -236,15 +281,14 @@
                 confirmButtonText: "Confirm!",
                 closeOnConfirm: false,
                 showLoaderOnConfirm: true
-              }, function (inputValue){
+              }, function (inputValue) {
                 if (inputValue === false) return false;
                 if (inputValue === "") {
                     swal.showInputError("Please input your password!");
                     return false;
                 }
 
-                console.log("TEST");
-                const url = `/learning-management/earnings/branches/${selectedBranch}/approve-earning`;
+                const url = `/learning-management/branches/${selectedBranch}/marketers/${marketerID}/earnings/approve-earnings`;
 
                 setTimeout(function () {
                     $.ajax({ 
@@ -386,54 +430,17 @@
                     },
                 }
             });
+        });    
+
+        $("#btn_confirm").click(function(){
+            getMarketerTotalEarnings();
+            var marketer_name = $("#select_marketer option:selected").text();
+            //$("#btn_branch_label").html(branch_name.toUpperCase());
+            //$("#btn_branch_label").val($(this).val());
+            $("#branch_card_header_label").html(marketer_name);
+            //$('#btn_branch_label').trigger('change');
         });
-    
-        getProfitSharingEarnings();
     });
-    
-    function getProfitSharingEarnings(){
-        var partner_id = $("#btn_marketer_label").val();
-    
-        $.ajax({
-            url: "/learning-management/api/get-profit-sharing-earnings/" + partner_id,
-            type: "GET",
-            contentType: "application/json; charset=utf-8",
-            success: function(response){
-                if(response.result){
-                    $("#total_earnings_profit").html("₱" + response.totalEarningsProfit);
-    
-                    $("#list_branches_total_earnings_profit").children().remove();
-    
-                    if (response.branchesTotalEarningsProfit.length > 0){
-                        var newBranchesTotalEarningsList = '';
-                        
-                        for (i=0; i < response.branchesTotalEarningsProfit.length; i++){
-                            var totalEarnings = parseFloat(response.branchesTotalEarningsProfit[i]['totalEarnings']).toFixed(2);
-    
-                            newBranchesTotalEarningsList = newBranchesTotalEarningsList + `<li class="list-group-item">
-                            <div class="widget-content p-0">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">${response.branchesTotalEarningsProfit[i]['name']}</div>
-                                            <div class="widget-subheading">Total Earnings</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers text-primary">₱ ${totalEarnings}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>`
-                        }
-    
-                        $("#list_branches_total_earnings_profit").html(newBranchesTotalEarningsList);
-                    }
-                }else{
-                }
-            }
-        });
-    }
 </script>
 {% endblock %}
 
@@ -522,10 +529,19 @@
                 <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
                     <div class="card-header">
                         <div id="branch_card_header_label">
-                            ALL BRANCHES
+                            ALL MARKETERS
                         </div>
             
                         <div class="btn-actions-pane-right">
+                            <div role="group" class="btn-group-sm btn-group">
+                                <button type="button" data-toggle="modal" data-target="#mdl_select_marketer" class="btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-search fa-w-20"></i>
+                                    </span>
+                                    Select Marketer</button>
+                            </div>
+                        </div>
+                        <!-- <div class="btn-actions-pane-right">
                             <div class="nav">  
                                 <div class="dropleft btn-group">
                                     <button disabled id="btn_branch_label" value="all" type="button" aria-haspopup="true" aria-expanded="false"
@@ -544,7 +560,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -555,7 +571,7 @@
                                     <div class="widget-content-wrapper">
                                         <div class="widget-content-left">
                                             <div class="widget-heading">TOTAL EARNINGS</div>
-                                            <div class="widget-subheading"></div>
+                                            <div class="widget-subheading">Requested claims/For approval</div>
                                         </div>
                                         <div class="widget-content-right">
                                             <div class="widget-numbers text-success"><span id="total_earnings">₱ 0.00</span></div>
@@ -574,7 +590,7 @@
                                     <div class="widget-content-wrapper">
                                         <div class="widget-content-left">
                                             <div class="widget-heading">TOTAL NYC</div>
-                                            <div class="widget-subheading"></div>
+                                            <div class="widget-subheading">Not yet claim</div>
                                         </div>
                                         <div class="widget-content-right">
                                             <div class="widget-numbers text-warning"><span id="total_nyc">₱ 0.00</span></div>
@@ -588,8 +604,8 @@
                                 <div class="card mb-3 widget-content">
                                     <div class="widget-content-wrapper">
                                         <div class="widget-content-left">
-                                            <div class="widget-heading">TOTAL CLAIMED</div>
-                                            <div class="widget-subheading"></div>
+                                            <div class="widget-heading">TOTAL RELEASED</div>
+                                            <div class="widget-subheading">Approved and released claims</div>
                                         </div>
                                         <div class="widget-content-right">
                                             <div class="widget-numbers text-warning" id="total_earnings_claimed"><span>₱ 0.00</span></div>
@@ -821,6 +837,7 @@
 
 {% block modals %}
 {% include "lms/approve_modal.html" %}
+{% include "lms/search_marketer.html" %}
 
 {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
 {% include TABLE_OPTIONS['create_modal_template'] %}
