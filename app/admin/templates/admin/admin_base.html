@@ -35,15 +35,12 @@
         href="{{url_for('bp_admin.static', filename='bower_components/sweetalert/css/sweetalert.css')}}">
     {% endblock %}
 
-    {% block extra_head %}
-    <!-- For extra service declaration -->
-    {% endblock %}
+    {% block head %} {% endblock %}
     
     <script type="text/javascript">
         CSRF_TOKEN = "{{csrf_token()}}";
         UID = "{{UID}}";
     </script> 
-
 </head>
 <body>
     <div class="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
@@ -148,9 +145,7 @@
 {% endblock %}
 
 
-{% block scripts %}
-    <!-- Scripts -->
-{% endblock %}
+{% block scripts %} {% endblock %}
 
 
 {% if SCRIPTS %} 

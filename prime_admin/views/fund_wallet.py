@@ -1,21 +1,18 @@
 from bson.decimal128 import create_decimal128_context
 from bson.objectid import ObjectId
-from flask_mongoengine import json
 import pytz
 from config import TIMEZONE
 import decimal
-from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, convert_to_utc, get_date_now
-from app.auth.models import Earning, User
-from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
+from prime_admin.globals import convert_to_utc, get_date_now
+from app.auth.models import User
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import redirect
-from app.admin.templating import admin_render_template, admin_table, admin_edit
+from app.admin.templating import admin_table
 from prime_admin import bp_lms
-from prime_admin.models import Accounting, Branch, CashFlow, CashOnHand, Expenses, FundWallet, OrientationAttendance, Registration, Batch, Orientator
+from prime_admin.models import Branch, FundWallet
 from flask import jsonify, request
-from datetime import date, datetime
-from mongoengine.queryset.visitor import Q
+from datetime import datetime
 from bson import Decimal128
 from app import mongo
 
@@ -27,13 +24,6 @@ D128_CTX = create_decimal128_context()
 @bp_lms.route('/fund-wallet')
 @login_required
 def fund_wallet():
-
-    # if current_user.role.name == "Secretary":
-    #     form = CashFlowSecretaryForm()
-
-    # else:
-    #     form = CashFlowAdminForm()
-    
     _table_data = []
 
     if current_user.role.name == "Secretary":
@@ -43,8 +33,6 @@ def fund_wallet():
     else:
         branches = Branch.objects
 
-    # orientators = Orientator.objects()
-
     modals = [
         'lms/add_funds_modal.html',
         'lms/add_expenses_modal.html',
@@ -53,7 +41,6 @@ def fund_wallet():
     return admin_table(
         FundWallet,
         fields=[],
-        # form=form,
         table_data=_table_data,
         table_columns=['id'],
         heading="Fund Wallet",
@@ -62,13 +49,13 @@ def fund_wallet():
         table_template="lms/fund_wallet.html",
         modals=modals,
         branches=branches
-        )
+    )
 
 
 @bp_lms.route('/add-fund', methods=['POST'])
 @login_required
 def add_fund():
-    date = request.form['date']
+    # date = request.form['date']
     bank_name = request.form['bank_name']
     transaction_no = request.form['transaction_no']
     sender = request.form['sender']
@@ -77,7 +64,6 @@ def add_fund():
     remarks = request.form['remarks']
     branch_id = request.form['branch']
     
-    print(branch_id)
     try:
         with mongo.cx.start_session() as session:
             with session.start_transaction():
@@ -91,7 +77,12 @@ def add_fund():
                         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
                         balance = Decimal128(Decimal128(
                             str(accounting["total_fund_wallet"] if 'total_fund_wallet' in accounting else 0.00)).to_decimal() + Decimal128(str(amount_received)).to_decimal())
-
+                        
+                        print("amount_received: ", amount_received)
+                        print("previous_fund_wallet: ", previous_fund_wallet)
+                        print("new_total_fund_wallet: ", new_total_fund_wallet)
+                        print("balance: ", balance)                        
+                        
                         mongo.db.lms_accounting.update_one({
                             "branch": ObjectId(branch_id)
                         },
@@ -117,7 +108,7 @@ def add_fund():
                     'type': 'add_fund',
                     'running_balance': balance,
                     'branch': ObjectId(branch_id),
-                    'date': convert_to_utc(date),
+                    'date': get_date_now(),
                     'bank_name': bank_name,
                     'transaction_no': transaction_no,
                     'sender': sender,

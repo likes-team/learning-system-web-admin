@@ -1,14 +1,7 @@
 {% extends "admin/admin_base.html" %}
 
 
-{% block extra_head %}
-<script type="text/javascript">
-    TABLE_NAME = "{{TABLE_OPTIONS['table_name']}}";
-    VIEW_MODAL = "{{TABLE_OPTIONS['view_modal']}}";
-    JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
-    VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
-</script>
-{% endblock %}
+{% block head %} {% endblock %}
 
 
 {% block scripts %}
@@ -191,25 +184,72 @@
             }
         });
 
-        function getContactPersons(){
-            var userBranch = $("#branch_expenses").val();
+        $('#frm_create_area').validate({
+            'rules': {
+                'name': {
+                    'required': true
+                },
+                'description': {
+                    'required': true,
+                },
+                'municipality': {
+                    'required': true,
+                },
+            },
+            'submitHandler': function(form){
+                var xform = $(form);
 
-            $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
-                if (response.data.length > 0) {
-                    $('#description').append(newOption);
+                swal({
+                    title: `Create this new Area?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function(){
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                dt_areas.ajax.reload();
 
-                    for (i = 0; i < response.data.length; i++) {
-                        var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
-                        $('#description').append(newOption);
-                    }
-                } else {
-                    var newOption = $('<option value="">No Contact Persons available</option>');
+                                swal("Success!", response.message, "success");
+
+                                event.stopPropagation();
+                                $("#mdl_create_area").removeClass('md-show');
+                                clearCreateModal();
+                            },
+                            error: function (data) {
+                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+    });
+
+    function getContactPersons(){
+        var userBranch = $("#branch_expenses").val();
+
+        $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
+            if (response.data.length > 0) {
+                $('#description').append(newOption);
+
+                for (i = 0; i < response.data.length; i++) {
+                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
                     $('#description').append(newOption);
                 }
-            });
-        }
-
-    });
+            } else {
+                var newOption = $('<option value="">No Contact Persons available</option>');
+                $('#description').append(newOption);
+            }
+        });
+    }
 </script>
 {% endblock %}
 
@@ -223,9 +263,9 @@
                     <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    {{ TABLE_OPTIONS['heading'] }}
+                    Fund Wallet
                     <div class="page-title-subheading">
-                        {{ TABLE_OPTIONS['subheading'] }}
+                        Funds wallet and Expenses
                     </div>
                 </div>
             </div>
@@ -311,7 +351,7 @@
                                 <button value="all" type="button" tabindex="0" class="dropdown-item btn-branch">ALL BRANCHES</button>
                             {% endif %}
 
-                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            {% for branch in branches %}
                             <button value="{{branch.id}}" type="button" tabindex="0"
                                 class="dropdown-item btn-branch">{{branch.name}}</button>
                             {% endfor %}
@@ -489,19 +529,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block outer_footer %}
-{% endblock %}
-
-{% block modals %}
-    
-    {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-        {% include TABLE_OPTIONS['create_modal_template'] %}
-    {% endif %}
-
-    {% if TABLE_OPTIONS['view_modal'] %}
-        {% include TABLE_OPTIONS['view_modal_template'] %}
-    {% endif %}
-
 {% endblock %}

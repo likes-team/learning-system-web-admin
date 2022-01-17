@@ -1,5 +1,6 @@
 {% extends "admin/admin_base.html" %}
 
+
 {% block content %}
 <div class="app-main__inner">
     <form onsubmit="document.getElementById('contact_person').disabled = false; document.getElementById('branch').disabled = false;" action="{{url_for('lms.register')}}" id="register_form" class="needs-validation" method="POST" novalidate>
@@ -427,7 +428,7 @@
 {% endblock %}
 
 
-{% block extra_head %}
+{% block head %}
 <style>
     .myHiddenColumn {
         display: none;

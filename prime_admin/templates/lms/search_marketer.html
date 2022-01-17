@@ -14,7 +14,7 @@
                     <select name="select" id="select_marketer" class="form-control">
                         <option value="">Choose...</option>
 
-                        {% for marketer in TABLE_OPTIONS['marketers'] %}
+                        {% for marketer in marketers %}
                             <option value="{{marketer.id}}">{{ marketer.full_name }}</option>
                         {% endfor %}
 

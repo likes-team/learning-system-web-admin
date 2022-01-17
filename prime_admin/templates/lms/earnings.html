@@ -1,15 +1,7 @@
 {% extends "admin/admin_base.html" %}
 
 
-{% block extra_head %}
-<script type="text/javascript">
-    TABLE_NAME = "{{TABLE_OPTIONS['table_name']}}";
-    VIEW_MODAL = "{{TABLE_OPTIONS['view_modal']}}";
-    JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
-    VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
-</script>
-{% endblock %}
-
+{% block head %} {% endblock %}
 
 {% block scripts %}
 <script>
@@ -381,7 +373,7 @@
         <div class="card-header">
             <div id="card_header_label">
                 {% if current_user.role.name == "Marketer" %}
-                    {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                    {{marketers[0].fname.upper()}}
                 {% else %}
                     MARKETER'S NAME
                 {% endif %}
@@ -400,9 +392,9 @@
 
                     <div class="dropleft btn-group">
                         {% if current_user.role.name == "Marketer" or current_user.role.name == "Partner" %}
-                        <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
+                        <button value="{{marketers[0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
                             data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
-                            {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                            {{marketers[0].fname.upper()}}
                         </button>
                         {% else %}
                         <button value="all" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
@@ -419,7 +411,7 @@
                             <button value="all" type="button" tabindex="0"
                             class="dropdown-item btn-marketer">All Marketers</button>
                             
-                            {% for marketer in TABLE_OPTIONS['marketers'] %}
+                            {% for marketer in marketers %}
                             <button value="{{marketer.id}}" type="button" tabindex="0"
                                 class="dropdown-item btn-marketer">{{marketer.fname}}</button>
                             {% endfor %}
@@ -492,7 +484,7 @@
             </div>
 
             <ul id="list_branches_total_earnings" class="list-group">
-                {% for branch in TABLE_OPTIONS['branches'] %}
+                {% for branch in branches %}
                 <li class="list-group-item">
                     <div class="widget-content p-0">
                         <div class="widget-content-outer">
@@ -545,19 +537,6 @@
             <div class="tab-content">
                 <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
                     <div class="form-row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-2">
-                            <div class="position-relative form-group">
-                                <label for="status" class="">Status</label>
-                                <select name="status" id="status" class="form-control" required>
-                                        <option value="all">All</option>
-                                        <option value="none">Not Yet Claim</option>
-                                        <option value="for_approval">For Approval</option>
-                                        <option value="approved">Claimed</option>
-                                </select>
-                            </div>
-                        </div>
                         <div class="col-md-2">
                             <div class="position-relative form-group">
                                 <label for="branch" class="">Branch</label>
@@ -568,7 +547,7 @@
                                         <option value="all">All</option>
                                     {% endif %}
         
-                                    {% for branch in TABLE_OPTIONS['branches'] %}
+                                    {% for branch in branches %}
                                     <option value="{{ branch.id }}">
                                         {{ branch.name }}
                                     </option>
@@ -584,15 +563,34 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                            <div class="position-relative form-group">
+                                <label for="status" class="">Status</label>
+                                <select name="status" id="status" class="form-control" required>
+                                        <option value="all">All</option>
+                                        <option value="none">Not Yet Claim</option>
+                                        <option value="for_approval">For Approval</option>
+                                        <option value="approved">Claimed</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
         
                     <div class="table-responsive">
                         <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
-                                    {% for column in TABLE_OPTIONS['table_columns'] %}
-                                    <th class="text-center">{{ column.upper() }}</th>
-                                    {% endfor %}
+                                    <th class="text-center">STUDENT ID</th>
+                                    <th class="text-center">PAYMENT ID</th>
+                                    <th class="text-center">BRANCH</th>
+                                    <th class="text-center">FULL NAME</th>
+                                    <th class="text-center">BATCH NO.</th>
+                                    <th class="text-center">FLE</th>
+                                    <th class="text-center">SLE</th>
+                                    <th class="text-center">SCHEDULE</th>
+                                    <th class="text-center">REMARKS</th>
+                                    <th class="text-center">STATUS</th>
+                                    <th class="text-center">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -625,7 +623,7 @@
                     </div>
         
                     <ul id="list_branches_total_earnings_profit" class="list-group">
-                        {% for branch in TABLE_OPTIONS['branches'] %}
+                        {% for branch in branches %}
                         <li class="list-group-item">
                             <div class="widget-content p-0">
                                 <div class="widget-content-outer">
@@ -662,19 +660,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block outer_footer %}
-{% endblock %}
-
-{% block modals %}
-
-{% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-{% include TABLE_OPTIONS['create_modal_template'] %}
-{% endif %}
-
-{% if TABLE_OPTIONS['view_modal'] %}
-{% include TABLE_OPTIONS['view_modal_template'] %}
-{% endif %}
-
 {% endblock %}
