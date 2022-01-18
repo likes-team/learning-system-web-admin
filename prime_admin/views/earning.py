@@ -1,5 +1,7 @@
 import decimal
+import pytz
 from datetime import timedelta
+from xml.dom.minidom import getDOMImplementation
 from bson.objectid import ObjectId
 from bson.decimal128 import Decimal128, create_decimal128_context
 from mongoengine.queryset.visitor import Q
@@ -10,6 +12,7 @@ from app import mongo
 from app.auth.models import User
 from app.auth.models import Earning as auth_user_earning
 from app.admin.templating import admin_render_template
+from config import TIMEZONE
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Earning, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
@@ -717,11 +720,16 @@ def print_payslip():
                     'earning': earning.earnings
                 })
 
-    print(branches_earnings)
-
+    
+    local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+    date_now = local_datetime.strftime("%B %d, %Y")
+    
     html = render_template(
             'lms/earnings/pdf_payslip.html',
-            branches_earnings=branches_earnings
+            branches_earnings=branches_earnings,
+            marketer=marketer,
+            date_now=date_now,
+            total_earnings=total_earnings
             )
 
     return render_pdf(HTML(string=html))

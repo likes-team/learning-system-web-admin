@@ -97,7 +97,7 @@
 			}
 
 			#img_logo{
-				width: 15%;
+				width: 10%;
 				height: auto;
 				top: 30px;
 				left: 40px;
@@ -109,7 +109,6 @@
 				margin-top: 30px;
 				width:300px;
 				height:35px;
-				border:1px solid #000;
 				text-align: center;
 				margin-left: auto;
 				margin-right: auto;
@@ -123,21 +122,22 @@
 			}
 
 			.information {
-				width:220px;
+				width:300px;
 				height:20px;
 				border:1px solid #000;
 				padding: 5px;
 				font-size: x-small;
-				margin-right: 141px;
+				margin-right: 71px;
 			}
 
 			#date {
-				width:180px;
+				width:170px;
 				height:20px;
 				border:1px solid #000;
 				padding: 5px;
 				font-size: x-small;
-				margin-top: 50px;
+				margin-top: 30px;
+				text-align: center;
 			}
 
 			#record {
@@ -185,6 +185,11 @@
 				margin: 0;
 				padding: 0;
 			}
+
+			.prime {
+				margin: 0;
+				padding: 0;
+			}
 		</style>
 	</head>
 
@@ -194,29 +199,33 @@
 				<img id="img_logo" src="{{url_for('lms.static', filename='img/logo.png')}}" alt="logo" width="10%" height="10%" style="float:left">
 			</div>
 
-			<div style="text-align: center;">
+			<div class="prime" style="text-align: center; font-size: larger;">
 				<strong>PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</strong>
 			</div>
-			<div style="text-align: center;"><p style="font-size:smaller;">ROOM 205, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY</p></div>
-			<div style="text-align: center;"><p style="font-size:smaller;">TEL. NO. (032) 425 2165</p></div>
+			
+			<div class="prime" style="text-align: center;">
+				<p class="prime" style="font-size:smaller;">ROOM 305, 3RD FLOOR, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY</p>
+				<p class="prime" style="font-size:smaller;">TEL. NO. (032) 425 2165</p>
+			</div>
+			<hr/>
 
 			<div id="title">PAYSLIP</div>
 
 
 			<div class="row">
-				<div class="information" style="margin-top: 50px;">NAME: GERSON ALDE</div>
-				<div id="date">DATE: JANUARY 22, 2022</div>
+				<div class="information" style="margin-top: 30px;">NAME: {{marketer.full_name}}</div>
+				<div id="date">DATE: {{date_now}}</div>
 			</div>
 
-			<div class="information">POSITION: MARKETER</div>
-			<div class="information">REFERRAL EARNING: 4,000.00</div>
+			<div class="information">POSITION: {{marketer.role.name}}</div>
+			<div class="information">REFERRAL EARNING: ₱ {{total_earnings}}</div>
 
 			<div id="record">RECORD</div>
 
 			{% for branch in branches_earnings %}
 				<div class="row">
 					<div class="branch" style="margin-top: 30px;">{{branch['name']}}</div>
-					<div class="total">{{branch['totalEarnings']}}</div>
+					<div class="total">₱ {{branch['totalEarnings']}}</div>
 				</div>
 
 				<table cellpadding="0" cellspacing="0">
@@ -224,7 +233,7 @@
 					<tr class="item">
 						<td>{{student['name']}}</td>
 	
-						<td>{{student['earning']}}</td>
+						<td>₱ {{student['earning']}}</td>
 					</tr>
 					{% endfor %}
 				</table>
@@ -232,10 +241,10 @@
 
 			<div id="footer">
 				<p>
-					Please don't stop invites!
+					Don't stop invite!
 				</p>
 				<p>
-					WORK HARD TO EARN MORE MONEY
+					THE MORE YOU SHARE, THE MORE YOU EARN
 				</p>
 			</div>
 		</div>
