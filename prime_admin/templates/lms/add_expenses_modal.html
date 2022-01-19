@@ -24,7 +24,7 @@
                                                 <option value="">Choose...</option>
                                             {% endif %}
                                             
-                                            {% for branch in TABLE_OPTIONS['branches'] %}
+                                            {% for branch in branches %}
                                                 <option value="{{branch.id}}">{{branch.name}}</option>
                                             {% endfor %}
                                         </select>

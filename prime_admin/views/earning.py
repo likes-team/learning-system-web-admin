@@ -1,5 +1,6 @@
 import decimal
 import pytz
+import pymongo
 from datetime import timedelta
 from xml.dom.minidom import getDOMImplementation
 from bson.objectid import ObjectId
@@ -14,7 +15,7 @@ from app.auth.models import Earning as auth_user_earning
 from app.admin.templating import admin_render_template
 from config import TIMEZONE
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, Payment, Registration, Batch
+from prime_admin.models import Branch, Earning, FundWallet, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 
 
@@ -215,6 +216,73 @@ def get_dtbl_earnings_members():
         'branchesTotalEarnings': branches_total_earnings
     }
 
+    return jsonify(response)
+
+
+@bp_lms.route('/marketers/<string:marketer_id>/payment-records/dt')
+def fetch_marketer_payment_records_dt(marketer_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    
+    if marketer_id == '':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+        }
+        return jsonify(response)
+    
+    query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+        {"$match": {
+            'type': 'expenses',
+            'category': 'salary_and_rebates',
+            'description': marketer_id,
+        }},
+        {"$skip": start},
+        {"$limit": length},
+        {"$sort": {
+            'created_at': pymongo.DESCENDING
+        }}
+    ]))
+    
+    print("query", query)
+    
+    filtered_records = len(query)
+    
+    total_records = len(list(mongo.db.lms_fund_wallet_transactions.aggregate([
+        {"$match": {
+            'type': 'expenses',
+            'category': 'salary_and_rebates',
+            'description': marketer_id,
+        }},
+        {"$sort": {
+            'created_at': pymongo.DESCENDING
+        }}
+    ])))
+
+    data = []
+
+    for record in query:
+        data.append([
+            str(record['_id']),
+            convert_to_local(record['date']),
+            record['account_no'],
+            '',
+            '',
+            str(record['total_amount_due']),
+            'PAID',
+            '',
+        ])
+        
+    print("data", data)
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': data
+    }
+    
     return jsonify(response)
 
 

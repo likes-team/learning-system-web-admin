@@ -34,7 +34,7 @@
                                         <label for="branch" class="">Branch</label>
                                         <select name="branch" id="branch" class="form-control">
                                             <option value="">Choose...</option>
-                                            {% for branch in TABLE_OPTIONS['branches'] %}
+                                            {% for branch in branches %}
                                                 <option value="{{branch.id}}">{{branch.name}}</option>
                                             {% endfor %}
                                         </select>

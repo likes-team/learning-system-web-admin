@@ -8,7 +8,7 @@ from app.auth.models import User
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import redirect
-from app.admin.templating import admin_table
+from app.admin.templating import admin_render_template, admin_table
 from prime_admin import bp_lms
 from prime_admin.models import Branch, FundWallet
 from flask import jsonify, request
@@ -24,8 +24,6 @@ D128_CTX = create_decimal128_context()
 @bp_lms.route('/fund-wallet')
 @login_required
 def fund_wallet():
-    _table_data = []
-
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
     elif current_user.role.name == "Partner":
@@ -38,15 +36,11 @@ def fund_wallet():
         'lms/add_expenses_modal.html',
     ]
 
-    return admin_table(
+    return admin_render_template(
         FundWallet,
-        fields=[],
-        table_data=_table_data,
-        table_columns=['id'],
-        heading="Fund Wallet",
-        subheading="Funds and Expenses",
+        "lms/fund_wallet.html",
+        'learning_management',
         title="Fund Wallet",
-        table_template="lms/fund_wallet.html",
         modals=modals,
         branches=branches
     )
