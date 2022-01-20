@@ -1,6 +1,7 @@
 from bson.decimal128 import create_decimal128_context
 from bson.objectid import ObjectId
 import pytz
+import pymongo
 from config import TIMEZONE
 import decimal
 from prime_admin.globals import convert_to_utc, get_date_now
@@ -44,21 +45,86 @@ def fund_wallet():
         modals=modals,
         branches=branches
     )
+    
+
+@bp_lms.route('/branches/<string:branch_id>/fund-wallet-statements/dt', methods=['GET'])
+def fetch_branch_fund_wallet_statements_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            transactions = FundWallet.objects().order_by("-date")
+        elif current_user.role.name == "Partner":
+            transactions = FundWallet.objects(branch__in=current_user.branches).order_by("-date")
+
+        total_fund_wallet = 0.00
+    else:
+        if current_user.role.name == "Secretary":
+            transactions = FundWallet.objects()(branch=current_user.branch).order_by("-date")
+            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+        elif current_user.role.name == "Admin":
+            transactions = FundWallet.objects(branch=branch_id).order_by("-date")
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        elif current_user.role.name == "Partner":
+            transactions = FundWallet.objects(branch=branch_id).order_by("-date")
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+
+        total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
+
+    table_data = []
+    
+    transaction: FundWallet
+    for transaction in transactions:
+        if type(transaction.date) == datetime:
+            local_datetime = transaction.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(transaction.date == str):
+            to_date = datetime.strptime(transaction.date, "%Y-%m-%d")
+            local_datetime = to_date.strftime("%B %d, %Y")
+        else: 
+            local_datetime = ''
+        
+        description = transaction.description
+        
+        if transaction.category == "salary_and_rebates":
+            contact_person : User = User.objects.get(id=transaction.description)
+            description = contact_person.full_name
+            
+        table_data.append([
+            local_datetime,
+            description,
+            str(transaction.amount_received) if transaction.type == "add_fund" else '',
+            str(transaction.total_amount_due) if transaction.type == "expenses" else '',
+            str(transaction.running_balance),
+            transaction.created_by,
+            transaction.remarks,
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': transactions.count(),
+        'recordsFiltered': transactions.count(),
+        'data': table_data,
+        'totalFundWallet': str(total_fund_wallet)
+        }
+
+    return jsonify(response)
 
 
-@bp_lms.route('/add-fund', methods=['POST'])
+@bp_lms.route('/fund-wallet/add-fund', methods=['POST'])
 @login_required
-def add_fund():
-    # date = request.form['date']
-    bank_name = request.form['bank_name']
-    transaction_no = request.form['transaction_no']
-    sender = request.form['sender']
-    amount_received = request.form['amount_received']
-    receiver = request.form['receiver']
-    remarks = request.form['remarks']
-    branch_id = request.form['branch']
+def fund_wallet_add_fund():
+    form = request.form
     
     try:
+        bank_name = form.get('bank_name', '')
+        transaction_no = form.get('transaction_no', '')
+        sender = form.get('sender', '')
+        amount_received = form.get('amount_received')
+        receiver = form.get('receiver')
+        remarks = form.get('remarks')
+        branch_id = form.get('branch')
+        
         with mongo.cx.start_session() as session:
             with session.start_transaction():
                 accounting = mongo.db.lms_accounting.find_one({
@@ -114,13 +180,17 @@ def add_fund():
                     'created_at': get_date_now(),
                     'created_by': current_user.fname + " " + current_user.lname
                 },session=session)
-
-
-        flash('Fund added successfully', 'success')
+                
+        response = {
+            'status': 'success',
+            'message': "Fund added successfully!"
+        }
+        return jsonify(response), 201
     except Exception as err:
-        flash(str(err), 'error')
-    
-    return redirect(url_for('lms.fund_wallet'))
+        return jsonify({
+            'status': 'error',
+            'message': str(err)
+        }), 500
 
 
 @bp_lms.route('/add-expenses', methods=['POST'])
@@ -183,76 +253,6 @@ def add_expenses():
     except Exception as err:
         flash(str(err), 'error')
     return redirect(url_for('lms.fund_wallet'))
-
-
-@bp_lms.route('/api/dtbl/fund-wallet-statements', methods=['GET'])
-def get_dtbl_fund_wallet_statements():
-    draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
-    branch_id = request.args.get('branch')
-
-    if branch_id == 'all':
-        if current_user.role.name == "Admin":
-            transactions = FundWallet.objects()
-            accounting = mongo.db.lms_accounting.find()
-        elif current_user.role.name == "Partner":
-            transactions = FundWallet.objects(branch__in=current_user.branches)
-            accounting = mongo.db.lms_accounting.find()
-
-        total_fund_wallet = 0.00
-
-    else:
-        if current_user.role.name == "Secretary":
-            transactions = FundWallet.objects()(branch=current_user.branch)
-            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-        elif current_user.role.name == "Admin":
-            transactions = FundWallet.objects(branch=branch_id)
-            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
-        elif current_user.role.name == "Partner":
-            transactions = FundWallet.objects(branch=branch_id)
-            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
-
-        total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00' 
-
-    data = []
-    
-    transaction: FundWallet
-    for transaction in transactions:
-        if type(transaction.date) == datetime:
-            local_datetime = transaction.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-        elif type(transaction.date == str):
-            to_date = datetime.strptime(transaction.date, "%Y-%m-%d")
-            local_datetime = to_date.strftime("%B %d, %Y")
-        else: 
-            local_datetime = ''
-        
-        description = transaction.description
-        
-        if transaction.category == "salary_and_rebates":
-            contact_person : User = User.objects.get(id=transaction.description)
-            description = contact_person.full_name
-            
-        data.append([
-            local_datetime,
-            description,
-            str(transaction.amount_received) if transaction.type == "add_fund" else '',
-            str(transaction.total_amount_due) if transaction.type == "expenses" else '',
-            str(transaction.running_balance),
-            transaction.created_by,
-            transaction.remarks,
-        ])
-
-    print(data)
-
-    response = {
-        'draw': draw,
-        'recordsTotal': transactions.count(),
-        'recordsFiltered': transactions.count(),
-        'data': data,
-        'totalFundWallet': str(total_fund_wallet)
-        }
-
-    return jsonify(response)
 
 
 @bp_lms.route('/api/dtbl/add-funds-transactions', methods=['GET'])

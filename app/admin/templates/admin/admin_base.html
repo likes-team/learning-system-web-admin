@@ -91,7 +91,12 @@
 <!-- sweet alert js -->
 <script type="text/javascript"
     src="{{url_for('bp_admin.static', filename='bower_components/sweetalert/js/sweetalert.min.js')}}"></script>
+<!-- Jquery validate js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script>
+    // Likes Global variables
+    CSRF_TOKEN = "{{csrf_token()}}";
+
     $(document).ready(function(){
 
         // $(".model-function").click(function(){
