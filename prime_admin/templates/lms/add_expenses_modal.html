@@ -1,5 +1,5 @@
-<div id="mdl_expenses" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
-     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+<div id="mdl_add_expenses" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+    aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -9,44 +9,23 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{url_for('lms.add_expenses')}}" method="POST" class="needs-validation" novalidate>
+                <form id="frm_add_expenses" action="{{url_for('lms.fund_wallet_add_expenses')}}" method="POST" novalidate>
                     <div class="main-card mb-3 card">
                         <div class="card-body">
-                        <!-- <h5 class="card-title">Student Information</h5> -->
-
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="form-row">
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
                                         <label for="branch_expenses" class="">Branch</label>
                                         <select name="branch" id="branch_expenses" class="form-control" required>
                                             {% if current_user.role.name != "Secretary" %}
-                                                <option value="">Choose...</option>
+                                            <option value="">Choose...</option>
                                             {% endif %}
-                                            
+
                                             {% for branch in branches %}
-                                                <option value="{{branch.id}}">{{branch.name}}</option>
+                                            <option value="{{branch.id}}">{{branch.name}}</option>
                                             {% endfor %}
                                         </select>
-                                        <div class="invalid-feedback">
-                                            Please provide a valid branch
-                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="date_deposit"
-                                            class="">Date</label>
-                                            <input name="date" id="date"
-                                            type="date" class="form-control" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid date
-                                            </div>
-                                        </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
@@ -58,9 +37,6 @@
                                             <option value="salary_and_rebates">Salary and Rebates</option>
                                             <option value="other_expenses">Other Expenses</option>
                                         </select>
-                                        <div class="invalid-feedback">
-                                            Please provide a valid value
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -71,141 +47,73 @@
                                         <select name="description" id="description" class="form-control" required>
                                             <option value="">Choose category first...</option>
                                         </select>
-                                        <div class="invalid-feedback">
-                                            Please provide a valid value
-                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="account_no"
-                                            class="">Account No. / Particular</label><input name="account_no" id="account_no"
-                                            type="text" class="form-control" required></div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide an account no.
-                                            </div>
+                                    <div class="position-relative form-group"><label for="account_no" class="">Account
+                                            No. / Particular</label><input name="account_no" id="account_no" type="text"
+                                            class="form-control" required></div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="position-relative form-group"><label for="billing_month_from"
-                                            class="">Billing Month</label>
-                                            <input name="billing_month_from" id="billing_month_from"
-                                            type="date" class="form-control" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid billing month
-                                            </div></div>
+                                            class="">Billing Month From</label>
+                                        <input name="billing_month_from" id="billing_month_from" type="date"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="position-relative form-group"><label for="billing_month_to"
-                                            class="">Billing Month</label>
-                                            <input name="billing_month_to" id="billing_month_to"
-                                            type="date" class="form-control" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid billing month
-                                            </div></div>
+                                            class="">Billing Month To</label>
+                                        <input name="billing_month_to" id="billing_month_to" type="date"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-md-4">
                                     <div class="position-relative form-group"><label for="total_amount_due"
                                             class="">Qty</label>
-                                            <input required id="qty" placeholder="Quantity" step="1" type="number" name="qty" class="form-control">
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid qty
-                                            </div>
+                                        <input id="qty" placeholder="Quantity" step="1" type="number"
+                                            name="qty" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="position-relative form-group"><label for="total_amount_due"
                                             class="">Unit Price</label>
-                                            <input required id="unit_price" placeholder="Price" step="any" type="number" name="unit_price" class="form-control">
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid price
-                                            </div>
+                                        <input required id="unit_price" placeholder="Price" step="any" type="number"
+                                            name="unit_price" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="position-relative form-group"><label for="total_amount_due"
                                             class="">Total Amount Due</label>
-                                            <input required id="total_amount_due" placeholder="Amount" step="1" type="number" name="total_amount_due" class="form-control">
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid amount
-                                            </div>
+                                        <input required id="total_amount_due" placeholder="Amount" step="1"
+                                            type="number" name="total_amount_due" class="form-control">
                                     </div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="settled_by"
-                                            class="">Settled By</label><input name="settled_by" id="settled_by"
-                                            type="text" class="form-control" required>
-                                            </div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide value
-                                            </div>
+                                    <div class="position-relative form-group"><label for="settled_by" class="">Settled
+                                            By</label><input name="settled_by" id="settled_by" type="text"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="position-relative form-group"><label for="remarks"
-                                            class="">Remarks</label><input name="remarks" id="remarks"
-                                            type="text" class="form-control" required>
-                                            </div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a remarks
-                                            </div>
+                                            class="">Remarks</label><input name="remarks" id="remarks" type="text"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
-                         
                             </div>
-
                         </div>
                     </div>
-                    <script>
-                        // Example starter JavaScript for disabling form submissions if there are invalid fields
-                        (function() {
-                            'use strict';
-                            window.addEventListener('load', function() {
-                                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                                var forms = document.getElementsByClassName('needs-validation');
-                                // Loop over them and prevent submission
-                                var validation = Array.prototype.filter.call(forms, function(form) {
-                                    form.addEventListener('submit', function(event) {
-                                        if (form.checkValidity() === false) {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }
-                                        form.classList.add('was-validated');
-                                    }, false);
-                                });
-                            }, false);
-                        })();
-                    </script>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="btn_confirm" type="submit" class="btn btn-success">Confirm</button>
+                        <button id="btn_add_expenses" type="submit" class="btn btn-success">Confirm</button>
                     </div>
                 </form>
             </div>

@@ -2,11 +2,13 @@ import pytz
 from config import TIMEZONE
 from datetime import datetime
 from app.auth.models import Role
+from bson.decimal128 import create_decimal128_context
 
 
 SECRETARYREFERENCE = Role.objects(name="Secretary").get().id
 PARTNERREFERENCE = Role.objects(name="Partner").get().id
 MARKETERREFERENCE = Role.objects(name="Marketer").get().id
+D128_CTX = create_decimal128_context()
 
 
 def get_date_now():
