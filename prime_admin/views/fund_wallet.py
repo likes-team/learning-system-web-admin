@@ -1,20 +1,18 @@
-from bson.objectid import ObjectId
 import pytz
 import pymongo
-from config import TIMEZONE
 import decimal
-from prime_admin.globals import D128_CTX, convert_to_utc, get_date_now
-from app.auth.models import User
-from flask.helpers import flash, url_for
+from bson import Decimal128
+from bson.objectid import ObjectId
+from datetime import datetime
+from config import TIMEZONE
+from flask import jsonify, request
 from flask_login import login_required, current_user
-from werkzeug.utils import redirect
-from app.admin.templating import admin_render_template, admin_table
+from app import mongo
+from app.auth.models import User
+from app.admin.templating import admin_render_template
+from prime_admin.globals import D128_CTX, get_date_now
 from prime_admin import bp_lms
 from prime_admin.models import Branch, FundWallet
-from flask import jsonify, request
-from datetime import datetime
-from bson import Decimal128
-from app import mongo
 
 
 
@@ -82,6 +80,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     for statement in statements_query:
         date = statement.get('date', None)
         description = statement.get('description', '')
+        category = statement.get('category', '')
         amount_received = statement.get('amount_received', 0.00)
         total_amount_due = statement.get('total_amount_due', 0.00)
         statement_type = statement.get('type', '')
@@ -97,7 +96,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         else: 
             local_datetime = ''
         
-        if description == "salary_and_rebates":
+        if category == "salary_and_rebates":
             contact_person : User = User.objects.get(id=description)
             description = contact_person.full_name
             
@@ -303,7 +302,7 @@ def fund_wallet_add_fund():
         bank_name = form.get('bank_name', '')
         transaction_no = form.get('transaction_no', '')
         sender = form.get('sender', '')
-        amount_received = form.get('amount_received')
+        amount_received = format(float(form.get('amount_received')), '.2f')
         receiver = form.get('receiver')
         remarks = form.get('remarks')
         branch_id = form.get('branch')
@@ -388,9 +387,9 @@ def fund_wallet_add_expenses():
         billing_month_from = form.get('billing_month_from', None)
         billing_month_to = form.get('billing_month_to', None)
         qty = form.get('qty', None)
-        unit_price = form.get('unit_price', None)
+        unit_price = format(float(form.get('unit_price', '0.00')), '.2f')
         settled_by = form.get('settled_by', '')
-        total_amount_due = form.get('total_amount_due', 0.00)
+        total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
         remarks = form.get('remarks', '')
         branch_id = form.get('branch', None)
         

@@ -98,12 +98,6 @@
     CSRF_TOKEN = "{{csrf_token()}}";
 
     $(document).ready(function(){
-
-        // $(".model-function").click(function(){
-        //     $(".model-function").closest( "ul" ).css( "background-color", "red" );
-        // });
-    
-    
         $.ajax({
             url: '/auth/users/get-role-name',
             type: "GET",
