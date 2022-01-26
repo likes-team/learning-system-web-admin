@@ -159,6 +159,10 @@ def fetch_add_funds_transactions_dt(branch_id):
     
     for transaction in query:
         date = transaction.get('date', None)
+        thru = transaction.get('thru', '')
+        remittance = transaction.get('remittance', '')
+        account_name = transaction.get('account_name', '')
+        account_no = transaction.get('account_no', '')
         bank_name = transaction.get('bank_name', '')
         transaction_no = transaction.get('transaction_no', '')
         sender = transaction.get('sender', '')
@@ -176,11 +180,15 @@ def fetch_add_funds_transactions_dt(branch_id):
 
         table_data.append([
             local_datetime,
+            thru,
             bank_name,
+            account_name,
+            account_no,
+            remittance,
             transaction_no,
             sender,
-            str(amount_received),
             receiver,
+            str(amount_received),
             remarks,
         ])
 
@@ -299,13 +307,17 @@ def fund_wallet_add_fund():
     form = request.form
     
     try:
-        bank_name = form.get('bank_name', '')
-        transaction_no = form.get('transaction_no', '')
-        sender = form.get('sender', '')
-        amount_received = format(float(form.get('amount_received')), '.2f')
-        receiver = form.get('receiver')
-        remarks = form.get('remarks')
         branch_id = form.get('branch')
+        thru = form.get('thru', '')
+        bank_name = form.get('bank', '')
+        remittance = form.get('remittance', '')
+        account_name = form.get('account_name', '')
+        account_no = form.get('account_no', '')
+        transaction_no = form.get('transaction_no', '')
+        amount_received = format(float(form.get('amount_received')), '.2f')
+        sender = form.get('sender', '')
+        receiver = form.get('receiver', '')
+        remarks = form.get('remarks')
         
         with mongo.cx.start_session() as session:
             with session.start_transaction():
@@ -348,6 +360,10 @@ def fund_wallet_add_fund():
 
                 mongo.db.lms_fund_wallet_transactions.insert_one({
                     'type': 'add_fund',
+                    'thru': thru,
+                    'remittance': remittance,
+                    'account_name': account_name,
+                    'account_no': account_no,
                     'running_balance': balance,
                     'branch': ObjectId(branch_id),
                     'date': get_date_now(),

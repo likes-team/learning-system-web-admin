@@ -75,6 +75,8 @@
         });
     }
 
+    function init(){
+    }
 
     $(document).ready(function(){
         var dtbl_fund_wallet_statements = $("#tbl_fund_wallet_statements").DataTable({
@@ -170,6 +172,9 @@
             'rules': {
                 'branch': {
                     'required': true
+                },
+                'thru': {
+                    'required': true,
                 },
                 'bank_name': {
                     'required': true,
@@ -395,6 +400,63 @@
         $("#branch_expenses").change(function(){
             if($("#category").val() == "salary_and_rebates"){
                 getContactPersons();
+            }
+        });
+
+        $("#thru").change(function(){
+            var thru = $(this).val();
+
+            $("#bank").prop('disabled', true);
+            $("#remittance").prop('disabled', true);
+            $("#account_name").prop('disabled', true);
+            $("#account_no").prop('disabled', true);
+            $("#transaction_no").prop('disabled', true);
+            $("#sender").prop('disabled', true);
+            $("#receiver").prop('disabled', true);
+            $("#amount_received").prop('disabled', true);
+            $("#remarks").prop('disabled', true);
+
+            $("#bank").rules('remove');
+            $("#remittance").rules('remove');
+            $("#account_name").rules('remove');
+            $("#account_no").rules('remove');
+            $("#transaction_no").rules('remove');
+            $("#sender").rules('remove');
+            $("#receiver").rules('remove');
+            $("#amount_received").rules('remove');
+            $("#remarks").rules('remove');
+
+            if(thru == "BANK"){
+                $("#bank").prop('disabled', false);
+                $("#account_name").prop('disabled', false);
+                $("#account_no").prop('disabled', false);
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+                
+                $("#bank").rules('add', {'required': true});
+                $("#account_name").rules('add', {'required': true});
+                $("#account_no").rules('add', {'required': true});
+                $("#amount_received").rules('add', {'required': true});
+                $("#remarks").rules('add', {'required': true});
+            } else if(thru == "REMITTANCE"){
+                $("#remittance").prop('disabled', false);
+                $("#transaction_no").prop('disabled', false);
+                $("#sender").prop('disabled', false);
+                $("#receiver").prop('disabled', false);
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+
+                $("#remittance").rules('add', {'required': true});
+                $("#transaction_no").rules('add', {'required': true});
+                $("#sender").rules('add', {'required': true});
+                $("#receiver").rules('add', {'required': true});
+                $("#amount_received").rules('add', {'required': true});
+                $("#remarks").rules('add', {'required': true});
+            } else if(thru == "CASH ON HAND"){
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+                $("#amount_received").rules('add', {'required': true});
+                $("#remarks").rules('add', {'required': true});
             }
         });
     });
@@ -636,11 +698,15 @@
                                     <thead>
                                         <tr>
                                             <th class="text-center">DATE</th>
-                                            <th class="text-center">BANK NAME / REMITTANCE CENTER</th>
-                                            <th class="text-center">TRANSACTION NO.</th>
+                                            <th class="text-center">THRU</th>
+                                            <th class="text-center">BANK NAME</th>
+                                            <th class="text-center">ACCOUNT NAME</th>
+                                            <th class="text-center">ACCOUNT NO.</th>
+                                            <th class="text-center">REMITTANCE NAME</th>
+                                            <th class="text-center">TRANSACTION CODE</th>
                                             <th class="text-center">SENDER</th>
-                                            <th class="text-center">AMOUNT RECEIVED</th>
                                             <th class="text-center">RECEIVER</th>
+                                            <th class="text-center">AMOUNT</th>
                                             <th class="text-center">REMARKS</th>
                                         </tr>
                                     </thead>

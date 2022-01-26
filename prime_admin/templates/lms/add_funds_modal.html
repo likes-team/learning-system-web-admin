@@ -25,36 +25,82 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="bank_name"
-                                            class="">Bank Name / Remittance Center</label><input name="bank_name" id="bank_name"
-                                            type="text" class="form-control">
-                                        </div>
+                                    <div class="position-relative form-group">
+                                        <label for="thru" class="">Thru</label>
+                                        <select name="thru" id="thru" class="form-control">
+                                            <option value="">Choose...</option>
+                                            <option value="BANK">BANK</option>
+                                            <option value="REMITTANCE">REMITTANCE</option>
+                                            <option value="CASH ON HAND">CASH ON HAND</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-
                             <div class="form-row">
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="transaction_no"
-                                            class="">Transaction No.</label><input name="transaction_no" id="transaction_no"
+                                    <div class="position-relative form-group">
+                                        <label for="bank" class="">BANK</label>
+                                        <select disabled name="bank" id="bank" class="form-control">
+                                            <option value="">Choose...</option>
+                                            <option value="METROBANK">METROBANK</option>
+                                            <option value="BDO">BDO</option>
+                                            <option value="LANDBANK">LANDBANK</option>
+                                            <option value="BPI">BPI</option>
+                                            <option value="RCBC">RCBC</option>
+                                            <option value="CHINABANK">CHINABANK</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label for="remittance" class="">REMITTANCE</label>
+                                        <select disabled name="remittance" id="remittance" class="form-control">
+                                            <option value="">Choose...</option>
+                                            <option value="PALAWAN PAWNSHOP">PALAWAN PAWNSHOP</option>
+                                            <option value="CEBUANA LHUILLIER">CEBUANA LHUILLIER</option>
+                                            <option value="M LHUILLIER">M LHUILLIER</option>
+                                            <option value="GCASH">GCASH</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="account_name"
+                                            class="">Account Name</label><input disabled name="account_name" id="account_name"
                                             type="text" class="form-control"></div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="sender"
-                                            class="">Sender</label><input name="sender" id="sender"
+                                    <div class="position-relative form-group"><label for="account_no"
+                                            class="">Account Number</label><input disabled name="account_no" id="account_no"
                                             type="text" class="form-control">
                                        </div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="transaction_no"
+                                            class="">Transaction Code</label><input disabled name="transaction_no" id="transaction_no"
+                                            type="text" class="form-control"></div>
+                                </div>
+                                <div class="col-md-6">
                                     <div class="position-relative form-group"><label for="amount_received"
-                                            class="">Amount Received</label>
-                                            <input id="amount_received" placeholder="Amount" step="any" min=0 type="number" name="amount_received" class="form-control">
+                                            class="">Amount</label>
+                                            <input disabled id="amount_received" placeholder="Amount" step="any" min=0 type="number" name="amount_received" class="form-control">
                                     </div>
+                                </div>
+                             
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="sender"
+                                            class="">Sender</label><input disabled name="sender" id="sender"
+                                            type="text" class="form-control">
+                                       </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="position-relative form-group"><label for="receiver"
-                                            class="">Receiver</label><input name="receiver" id="receiver"
+                                            class="">Receiver</label><input disabled name="receiver" id="receiver"
                                             type="text" class="form-control">
                                             </div>
                                 </div>
@@ -62,7 +108,7 @@
                             <div class="form-row">
                                 <div class="col-md-12">
                                     <div class="position-relative form-group"><label for="remarks"
-                                            class="">Remarks</label><input name="remarks" id="remarks"
+                                            class="">Remarks</label><input disabled name="remarks" id="remarks"
                                             type="text" class="form-control">
                                             </div>
                                 </div>
