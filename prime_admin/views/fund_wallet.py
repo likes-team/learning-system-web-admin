@@ -55,6 +55,8 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             }
         elif current_user.role.name == "Secretary":
             filter = {'branch': current_user.branch.id}
+            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+            total_fund_wallet = accounting.get('total_fund_wallet', "0.00")
     else:
         if current_user.role.name == "Secretary":
             filter = {'branch': current_user.branch.id}
@@ -66,9 +68,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             filter = {'branch': ObjectId(branch_id)}
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
             
-        total_fund_wallet = accounting.get('total_fund_wallet', 0.00)
-
-        total_fund_wallet = total_fund_wallet if 'total_fund_wallet' in accounting else '0.00' 
+        total_fund_wallet = accounting.get('total_fund_wallet', "0.00")
 
     statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
@@ -138,7 +138,7 @@ def fetch_add_funds_transactions_dt(branch_id):
         elif current_user.role.name == "Partner":
             filter = {'type': 'add_fund', 'branch': {"$in": current_user.branches}}
         elif current_user.role.name == "Secretary":
-            filter = {'branch': current_user.branch.id}
+            filter = {'type': 'add_fund' ,'branch': current_user.branch.id}
     else:
         if current_user.role.name == "Secretary":
             filter = {'type': 'add_fund', 'branch': current_user.branch.id}
@@ -218,7 +218,7 @@ def fetch_expenses_transactions_dt(branch_id):
         elif current_user.role.name == "Partner":
             filter = {'type': 'expenses', 'branch': {"$in": current_user.branches}}
         elif current_user.role.name == "Secretary":
-            filter = {'branch': current_user.branch.id}
+            filter = {'type': 'expenses', 'branch': current_user.branch.id}
     else:
         if current_user.role.name == "Secretary":
             filter = {'type': 'expenses', 'branch': current_user.branch.id}
