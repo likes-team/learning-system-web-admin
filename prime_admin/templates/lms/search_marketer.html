@@ -12,12 +12,11 @@
                 <div class="position-relative form-group">
                     <label for="select_marketer" class="">Marketers</label>
                     <select name="select" id="select_marketer" class="form-control">
-                        <option value="">Choose...</option>
+                        <option value="all">All Marketers</option>
 
                         {% for marketer in marketers %}
                             <option value="{{marketer.id}}">{{ marketer.full_name }}</option>
                         {% endfor %}
-
                     </select>
                 </div>
             </div>

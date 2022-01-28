@@ -21,6 +21,7 @@
     function init(){
         //getApprovalEarnings();
         getProfitSharingEarnings();
+        getMarketerTotalEarnings();
     }
 
     function getMarketerTotalEarnings(){
@@ -37,13 +38,14 @@
 
             if (response.branchesTotalEarnings.length > 0){
                 var newBranchesTotalEarningsList = '';
-                
+                var selectedMarketer = $("#select_marketer").val();
+
                 for (i=0; i < response.branchesTotalEarnings.length; i++){
                     var totalEarnings = parseFloat(response.branchesTotalEarnings[i]['totalEarnings']).toFixed(2);
 
                     var approveButton = "";
                     
-                    if (totalEarnings > 0.00){
+                    if (selectedMarketer != 'all' && totalEarnings > 0.00){
                         approveButton = `<button value="${response.branchesTotalEarnings[i]['id']}" type="button" data-toggle="modal" data-target="#mdl_approve" data-placement="bottom" class="btn-wide mb-2 mr-2 btn btn-warning btn-approve">Approve</button>`;
                     }
 
@@ -256,9 +258,9 @@
             $('#btn_branch_label').trigger('change');
         });
 
-        $("#btn_branch_label").change(function(){
-            getApprovalEarnings();
-        });
+        //$("#btn_branch_label").change(function(){
+        //    getApprovalEarnings();
+        //});
 
         var selectedBranch = "";
         
@@ -503,7 +505,7 @@
     <div class="mb-12 card">
         <div class="card-header">
             <div id="branch_card_header_label">
-                NO MARKETER SELECTED
+                ALL MARKETERS
             </div>
 
             <div class="btn-actions-pane-right">
