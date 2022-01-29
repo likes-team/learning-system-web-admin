@@ -1,19 +1,401 @@
 {% extends "admin/admin_base.html" %}
 
 
+{% block modals %}
+    {% include "lms/search_client_last_name_modal.html" %}
+    {% include "lms/orientation_attendance_client_view_modal.html" %}
+    {% include "lms/search_refferal_modal.html" %}
+{% endblock %}
+
+
 {% block head %}
-<script type="text/javascript">
-    TABLE_NAME = "{{TABLE_OPTIONS['table_name']}}";
-    VIEW_MODAL = "{{TABLE_OPTIONS['view_modal']}}";
-    JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
-    VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
+<!-- sweet alert framework -->
+<link rel="stylesheet" type="text/css" href="{{url_for('bp_admin.static', filename='bower_components/sweetalert/css/sweetalert.css')}}">
+{% endblock %}
+
+
+{% block scripts %}
+<!-- sweet alert js -->
+<script type="text/javascript" src="{{url_for('bp_admin.static', filename='bower_components/sweetalert/js/sweetalert.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('bp_admin.static', filename='js/modal.js')}}"></script>
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+
+    $(document).ready(function () {
+        var dtbl_members = $('#tbl_members').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+            ],
+            "ajax": {
+                "url": "/learning-management/orientation-attendance/students/dt",
+                "data": function (d) {
+                    d.branch = $("#branch_filter").val();
+                    d.contact_person = $("#contact_person_filter").val();
+                },
+            }
+        });
+
+
+        $('#frm_orient').validate({
+            'rules': {
+                'lname': {
+                    'required': true
+                },
+                'fname': {
+                    'required': true,
+                },
+                'contact_no': {
+                    'required': true,
+                },
+                'branch': {
+                    'required': true
+                },
+                'referred_by': {
+                    'required': true,
+                },
+                'contact_person': {
+                    'required': true,
+                },
+                'orientator': {
+                    'required': true,
+                },
+            },
+            'submitHandler': function(form){
+                var xform = $(form);
+
+                swal({
+                    title: `Orient new student?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function(){
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                event.stopPropagation();
+                                dtbl_members.ajax.reload();
+                                swal("Success!", response.message, "success");
+                            },
+                            error: function (data) {
+                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+
+    
+        $("#branch_filter").change(function () {
+            $.ajax({
+                url: '/learning-management/api/get-branch-contact-persons/' + $(this).val(),
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    $('#contact_person_filter').find('option').remove();
+    
+                    if (response.data.length > 0) {
+                        var newOption = $('<option value="all">All</option>');
+                        $('#contact_person_filter').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                            $('#contact_person_filter').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="all">No Contact Persons available</option>');
+                        $('#contact_person_filter').append(newOption);
+                    }
+                
+                    dtbl_members.ajax.reload();
+                }
+            });
+            
+        });
+    
+        $("#contact_person_filter").change(function () {
+            dtbl_members.ajax.reload();
+        });
+    
+        var dtbl_search = $("#tbl_mdl_clients").DataTable({
+            pageLength: 10,
+            columnDefs: [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            ajax: {
+                url: "/learning-management/api/dtbl/mdl-pre-registered-clients",
+            }
+        });
+    
+        $('#tbl_mdl_clients tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtbl_search.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    
+    
+        $('#btn_confirm').click(function () {
+            var selected = dtbl_search.row('.selected').data();
+    
+            $.ajax({
+                url: '/learning-management/api/clients/' + selected[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    console.log(response.data);
+    
+                    $("#client_id").val(selected[0]);
+                    $("#lname").val(selected[1]);
+                    $("#fname").val(selected[2]);
+                    $("#contact_no").val(selected[5]);
+                    $("#contact_person").val(response.data.contact_person);
+    
+                    $("#lname").prop('readonly', true);
+                    $("#fname").prop('readonly', true);
+                    $("#contact_no").prop('readonly', true);
+    
+                    if (response.data.status != "pre_registered") {
+                        $("#contact_person").prop('disabled', true);
+                    }
+                }
+            });
+        });
+    
+        $('#btn_clear_entries').click(function () {
+            $("#client_id").val('');
+            $("#lname").val('');
+            $("#fname").val('');
+            $("#contact_no").val('');
+            $("#contact_person").val('');
+            $("#referred_by").val('');
+            $("#referred_by_name").val('');
+    
+            $("#lname").prop('readonly', false);
+            $("#fname").prop('readonly', false);
+            $("#contact_no").prop('readonly', false);
+            $("#contact_person").prop('disabled', false);
+        });
+    
+        var dtbl_search_refferal = $("#tbl_mdl_referrals").DataTable({
+            pageLength: 10,
+            columnDefs: [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            ajax: {
+                url: "/learning-management/api/dtbl/mdl-referrals",
+            }
+        });
+    
+        load();
+    
+        $('#tbl_mdl_referrals tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtbl_search_refferal.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    
+        $('#btn_confirm_referral').click(function () {
+            var selected = dtbl_search_refferal.row('.selected').data();
+    
+            $.ajax({
+                url: '/learning-management/api/clients/' + selected[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    $("#referred_by").val(response.data.id);
+                    var full_name = response.data.fname + " " + response.data.lname;
+                    $("#referred_by_name").val(full_name);
+                    $("#contact_person").val(response.data.contact_person);
+                    $("#contact_person").prop('disabled', true);
+                }
+            });
+        });
+    
+        function load() {
+            $.ajax({
+                url: '/learning-management/api/get-branch-contact-persons/' + $("#branch").val(),
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    $('#contact_person').find('option').remove();
+    
+                    if (response.data.length > 0) {
+                        var newOption = $('<option value="">Choose...</option>');
+                        $('#contact_person').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                            $('#contact_person').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="">No Contact Persons available</option>');
+                        $('#contact_person').append(newOption);
+                    }
+                }
+            });
+        }
+    
+    
+        $('#branch').change(function () {
+            $.ajax({
+                url: '/learning-management/api/get-branch-contact-persons/' + $("#branch").val(),
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    $('#contact_person').find('option').remove();
+    
+                    if (response.data.length > 0) {
+                        var newOption = $('<option value="">Choose...</option>');
+                        $('#contact_person').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                            $('#contact_person').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="">No Contact Persons available</option>');
+                        $('#contact_person').append(newOption);
+                    }
+                }
+            });
+        });
+    
+    
+        $('#tbl_members tbody').on('click', '.btn-view', function () {
+            var data = dtbl_members.row($(this).parents('tr')).data();
+    
+            $.ajax({
+                url: '/learning-management/api/members/' + data[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    CLIENTID = response.data.id;
+    
+                    $("#view_client_id").val(response.data.id);
+                    $("#view_last_name").val(response.data.lname);
+                    $("#view_first_name").val(response.data.fname);
+                    $("#view_middle_name").val(response.data.mname);
+                    $("#view_suffix").val(response.data.suffix);
+                    $("#view_contact_no").val(response.data.contact_no);
+                    $("#view_branch").val(response.data.branch);
+                    $("#view_contact_person").val(response.data.contact_person);
+                }
+            });
+    
+        });
+    
+        $("#btn_edit").click(function(){
+            if($(this).html() == "Edit"){
+                $(this).html("Save");
+                $("#view_last_name").prop('disabled', false);
+                $("#view_first_name").prop('disabled', false);
+                $("#view_middle_name").prop('disabled', false);
+                $("#view_suffix").prop('disabled', false);
+                $("#view_contact_no").prop('disabled', false);
+            }else if ($(this).html() == "Save"){
+                $(this).html("Edit");
+                $("#view_last_name").prop('disabled', true);
+                $("#view_first_name").prop('disabled', true);
+                $("#view_middle_name").prop('disabled', true);
+                $("#view_suffix").prop('disabled', true);
+                $("#view_contact_no").prop('disabled', true);
+    
+                var lname = $("#view_last_name").val();
+                var fname = $("#view_first_name").val();
+                var mname = $("#view_middle_name").val();
+                var suffix = $("#view_suffix").val();
+                var contact_no = $("#view_contact_no").val();
+    
+                $.ajax({
+                    url: "/learning-management/api/members/" + $("#view_client_id").val() + "/edit",
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        "lname": lname,
+                        "fname": fname,
+                        "mname": mname,
+                        "suffix": suffix,
+                        "contact_no": contact_no,
+                        'from': 'orientation_attendance'
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function(response){
+                        if(response.result){
+                            dtbl_members.ajax.reload();
+                            toastr.success("Saved Successfully!");
+                        }else{
+                            toastr.error("Error Occured!, Saving Failed");
+                        }
+                    }
+                });
+            }
+        });
+    
+        $("#btn_search").click(function(){
+            dtbl_members.search($("#search_input").val()).draw();
+        });
+    
+        $("#btn_clear_entry").click(function(){
+            $("#search_input").val("")
+            dtbl_members.search("").draw();
+        });
+    });
 </script>
 {% endblock %}
 
+
 {% block content %}
 <div class="app-main__inner">
-
-
     <div class="app-page-title" style="background-color: skyblue">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
@@ -27,62 +409,19 @@
                 </div>
             </div>
 
-            {% block actions %}
-
             <div class="page-title-actions">
-            
-                <div class="d-inline-block dropdown">
-                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                            class="btn-shadow dropdown-toggle btn btn-info">
-                                    <span class="btn-icon-wrapper pr-2 opacity-7">
-                                        <i class="fa fa-list-alt fa-w-20"></i>
-                                    </span>
-                        Actions
-                    </button>
-                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                        <ul class="nav flex-column">
-                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
-                            <li id="nav_action_btns" class="nav-item">
-                                {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
-                                {% endblock %}
-                            </li>
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
+                <button disabled id="btn_print_payslip" type="button" data-toggle="tooltip" title="" data-placement="bottom" class="btn-shadow mr-3 btn btn-primary" data-original-title="Print">
+                    <i class="fa fa-print"> Records</i> 
+                </button>
             </div>
-            {% endblock %}
-
         </div>
     </div>
 
-    {% if current_user.role.name == "Marketer" %}
-    {% else %}
+    {% if current_user.role.name != "Marketer" %}
     <div class="main-card mb-3 card">
         <div class="card-body">
             <h5 class="card-title">Encode</h5>
-            <form onsubmit="document.getElementById('contact_person').disabled = false;" id="orientation_form" action="{{url_for('lms.orient')}}" method="POST" class="needs-validation" novalidate>
+            <form onsubmit="document.getElementById('contact_person').disabled = false;" id="frm_orient" action="{{url_for('lms.orient')}}" method="POST" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input id="client_id" name="client_id" type="hidden" class="form-control">
                 <div class="form-row">
@@ -91,12 +430,6 @@
                             <label for="lname" class="">Last Name</label>
                             <div class="input-group"><input id="lname" name="lname" type="text"
                                     class="form-control" required>
-                            </div>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a valid last name
                             </div>
                         </div>
                     </div>
@@ -120,18 +453,12 @@
                                     <option value="">Choose...</option>
                                 {% endif %}
                                 
-                                {% for branch in TABLE_OPTIONS['branches'] %}
+                                {% for branch in branches %}
                                 <option value="{{ branch.id }}">
                                     {{branch.name}}
                                 </option>
                                 {% endfor %}
                             </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a branch
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -144,7 +471,7 @@
                             <div class="input-group"><input id="referred_by_name" name="referred_by_name" type="text"
                                     class="form-control" readonly>
                                 <div class="input-group-append">
-                                    <button
+                                    <button disabled
                                         type="button" 
                                         data-toggle="modal"
                                         data-target="#mdl_search_referral"
@@ -153,9 +480,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
+                           
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -163,18 +488,7 @@
                             <label for="contact_person" class="">Contact Person</label>
                             <select name="contact_person" id="contact_person" class="form-control" required>
                                 <option value="">No Branch Selected...</option>
-                                <!-- {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
-                                <option value="{{ contact_person.id }}">
-                                    {{contact_person.fname}}
-                                </option>
-                                {% endfor %} -->
                             </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a contact person
-                            </div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -182,48 +496,20 @@
                             <label for="orientator" class="">Orientator</label>
                             <select name="orientator" id="orientator" class="form-control" required>
                                 <option value="">Choose...</option>
-                                {% for orientator in TABLE_OPTIONS['orientators'] %}
+                                {% for orientator in orientators %}
                                 <option value="{{ orientator.id }}">
                                     {{orientator.fname}}
                                 </option>
                                 {% endfor %}
                             </select>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please provide a orientator
-                            </div>
                         </div>
                     </div>
                 </div>
-
-                <script>
-                    // Example starter JavaScript for disabling form submissions if there are invalid fields
-                    (function () {
-                        'use strict';
-                        window.addEventListener('load', function () {
-                            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                            var forms = document.getElementsByClassName('needs-validation');
-                            // Loop over them and prevent submission
-                            var validation = Array.prototype.filter.call(forms, function (form) {
-                                form.addEventListener('submit', function (event) {
-                                    if (form.checkValidity() === false) {
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                    }
-                                    form.classList.add('was-validated');
-                                }, false);
-                            });
-                        }, false);
-                    })();
-                </script>
             </form>
         </div>
 
         <div class="d-block text-right card-footer">
-            <!-- <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry">CLEAR ENTRIES</button> -->
-            <input form="orientation_form" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SAVE">
+            <input form="frm_orient" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SAVE">
         </div>
     </div>
     {% endif %}
@@ -236,7 +522,7 @@
                         <label for="lname" class="">Search</label>
                         <div class="input-group">
                             <div class="input-group-append">
-                                <input id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                <input id="search_input" placeholder="By Last Name" type="text" class="form-control">
                                 <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
                                     </i></button>
                                 <button id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
@@ -253,7 +539,7 @@
                         <label for="branch_filter" class="">Branch</label>
                         <select name="branch_filter" id="branch_filter" class="form-control" required>
                             <option value="all">All</option>
-                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            {% for branch in branches %}
                             <option value="{{ branch.id }}">
                                 {{ branch.name }}
                             </option>
@@ -272,7 +558,7 @@
                         <label for="contact_person_filter" class="">Contact Person</label>
                         <select name="contact_person_filter" id="contact_person_filter" class="form-control" required>
                             <option value="all">All</option>
-                            {% for contact_person in TABLE_OPTIONS['contact_persons'] %}
+                            {% for contact_person in contact_persons %}
                             <option value="{{ contact_person.id }}">
                                 {{contact_person.fname}}
                             </option>
@@ -293,9 +579,13 @@
                     <thead>
                         <tr>
                             <th class="text-center"></th>
-                            {% for column in TABLE_OPTIONS['table_columns'] %}
-                            <th class="text-center">{{ column.upper() }}</th>
-                            {% endfor %}
+                            <th class="text-center">BRANCH</th>
+                            <th class="text-center">FULL NAME</th>
+                            <th class="text-center">CONTACT NO.</th>
+                            <th class="text-center">CONTACT PERSON</th>
+                            <th class="text-center">ORIENTATOR</th>
+                            <th class="text-center">DATE</th>
+                            <th class="text-center">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -306,21 +596,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block outer_footer %}
-{% endblock %}
-
-{% block modals %}
-
-{% include "lms/search_client_last_name_modal.html" %}
-
-{% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-{% include TABLE_OPTIONS['create_modal_template'] %}
-{% endif %}
-
-{% if TABLE_OPTIONS['view_modal'] %}
-{% include TABLE_OPTIONS['view_modal_template'] %}
-{% endif %}
-
 {% endblock %}
