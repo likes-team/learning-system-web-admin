@@ -40,7 +40,7 @@ def earnings():
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id)
-        template = 'lms/earnings_admin.html'
+        template = 'lms/earnings.html'
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
