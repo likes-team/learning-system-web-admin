@@ -113,22 +113,25 @@ def get_dtbl_accommodations():
     table_data = []
 
     for doc in query:
-        student = Registration.objects(id=doc['client_id']).get()
+        try:
+            student = Registration.objects(id=doc['client_id']).get()
 
-        table_data.append([
-            str(doc['_id']),
-            convert_to_local(doc['created_at']),
-            student.full_registration_number,
-            student.full_name,
-            student.branch.name,
-            student.batch_number.number,
-            student.schedule,
-            doc['date_from'],
-            doc['date_to'],
-            doc['days'],
-            str(doc['total_amount']),
-            doc['remarks']
-        ])
+            table_data.append([
+                str(doc['_id']),
+                convert_to_local(doc['created_at']),
+                student.full_registration_number,
+                student.full_name,
+                student.branch.name,
+                student.batch_number.number,
+                student.schedule,
+                doc['date_from'],
+                doc['date_to'],
+                doc['days'],
+                str(doc['total_amount']),
+                doc['remarks']
+            ])
+        except Exception:
+            continue
 
     response = {
         'draw': draw,

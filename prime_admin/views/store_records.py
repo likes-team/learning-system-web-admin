@@ -71,24 +71,27 @@ def get_dtbl_store_records():
     table_data = []
 
     for record in _store_records:
-        student = Registration.objects(id=record['client_id']).get()
+        try:
+            student = Registration.objects(id=record['client_id']).get()
 
-        table_data.append([
-            str(record['_id']),
-            convert_to_local(record['created_at']),
-            student.full_registration_number,
-            student.full_name,
-            student.branch.name,
-            student.batch_number.number,
-            student.schedule,
-            record['uniforms'],
-            record['id_lace'],
-            record['id_card'],
-            record['module_1'],
-            record['module_2'],
-            record['reviewer_l'],
-            record['reviewer_r'],
-        ])
+            table_data.append([
+                str(record['_id']),
+                convert_to_local(record['created_at']),
+                student.full_registration_number,
+                student.full_name,
+                student.branch.name,
+                student.batch_number.number,
+                student.schedule,
+                record['uniforms'],
+                record['id_lace'],
+                record['id_card'],
+                record['module_1'],
+                record['module_2'],
+                record['reviewer_l'],
+                record['reviewer_r'],
+            ])
+        except Exception:
+            continue
 
     response = {
         'draw': draw,

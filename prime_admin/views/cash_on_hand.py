@@ -395,15 +395,18 @@ def get_mdl_store_items_sold():
 
     record : StoreRecords
     for record in store_records:
-        data.append([
-            str(record.id),
-            record.local_datetime,
-            str(record.client_id.full_registration_number),
-            record.client_id.full_name,
-            record.branch.name,
-            record.client_id.batch_number.number,
-            str(record.total_amount)
-        ])
+        try:
+            data.append([
+                str(record.id),
+                record.local_datetime,
+                str(record.client_id.full_registration_number),
+                record.client_id.full_name,
+                record.branch.name,
+                record.client_id.batch_number.number,
+                str(record.total_amount)
+            ])
+        except Exception:
+            continue
 
     response = {
         'data': data
@@ -425,18 +428,21 @@ def get_mdl_accommmodations():
 
     record : Accommodation
     for record in accomodations:
-        data.append([
-            str(record.id),
-            record.local_datetime,
-            str(record.client_id.full_registration_number),
-            record.client_id.full_name,
-            record.branch.name,
-            record.client_id.batch_number.number,
-            record.date_from,
-            record.date_to,
-            record.days,
-            str(record.total_amount)
-        ])
+        try:
+            data.append([
+                str(record.id),
+                record.local_datetime,
+                str(record.client_id.full_registration_number),
+                record.client_id.full_name,
+                record.branch.name,
+                record.client_id.batch_number.number,
+                record.date_from,
+                record.date_to,
+                record.days,
+                str(record.total_amount)
+            ])
+        except Exception:
+            continue
 
     response = {
         'data': data
