@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Marketer, Partner
-from flask import redirect, url_for, request, current_app, flash
+from flask import redirect, url_for, request, current_app, flash, render_template
 from app import mongo
 from datetime import datetime
 from config import TIMEZONE
@@ -17,35 +17,90 @@ from config import TIMEZONE
 @bp_lms.route('/marketers')
 @login_required
 def marketers():
-    form = ContactPersonForm()
-
-    _table_data = []
-
-    for contact_person in User.objects(role=MARKETERREFERENCE):
-        _table_data.append((
-            contact_person.id,
-            contact_person.fname,
-            contact_person.lname,
-            contact_person.created_by,
-            contact_person.created_at_local,
-            contact_person.updated_by,
-            contact_person.updated_at_local,
-        ))
-
-    form.__heading__ = "Marketers"
-    form.__subheading__ = "List of Marketers"
-    form.__title__ = "Marketers"
-
-    return admin_table(
+    return admin_render_template(
         Marketer,
-        fields=[],
-        form=form,
-        table_data=_table_data,
-        # create_url='lms.create_marketer',
-        edit_url='lms.edit_marketer',
-        view_modal_url='/learning-management/get-view-contact-person-data',
-        create_button=True,
-        create_modal=False)
+        'lms/marketers.html',
+        'learning-management',
+        title="Marketers"
+    )
+    # form = ContactPersonForm()
+
+    # _table_data = []
+
+    # for contact_person in User.objects(role=MARKETERREFERENCE):
+    #     _table_data.append((
+    #         contact_person.id,
+    #         contact_person.fname,
+    #         contact_person.lname,
+    #         contact_person.created_by,
+    #         contact_person.created_at_local,
+    #         contact_person.updated_by,
+    #         contact_person.updated_at_local,
+    #     ))
+
+    # form.__heading__ = "Marketers"
+    # form.__subheading__ = "List of Marketers"
+    # form.__title__ = "Marketers"
+
+    # return admin_table(
+    #     Marketer,
+    #     fields=[],
+    #     form=form,
+    #     table_data=_table_data,
+    #     # create_url='lms.create_marketer',
+    #     edit_url='lms.edit_marketer',
+    #     view_modal_url='/learning-management/get-view-contact-person-data',
+    #     create_button=True,
+    #     create_modal=False)
+    
+
+@bp_lms.route('/marketers/dt', methods=['GET'])
+def fetch_marketers_dt():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    search_value = request.args.get("search[value]")
+
+    total_records: int
+    filtered_records: int
+
+    if search_value != '':
+        query = mongo.db.auth_users.find({'lname': {'$regex': search_value}, 'role': MARKETERREFERENCE}).skip(start).limit(length)
+        total_records = query.count()
+    else:
+        query = mongo.db.auth_users.find({'role': MARKETERREFERENCE}).skip(start).limit(length)
+        total_records = query.count(True)
+
+    # query = mongo.db.auth_users.find({}).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    filtered_records = query.count()
+    
+    table_data = []
+    
+    for data in query:
+        lname = data.get('lname', '')
+        fname = data.get('fname', '')
+        created_by = data.get('created_by', '')
+        created_at = data.get('created_at', '')
+        updated_by = data.get('updated_by', '')
+        updated_at = data.get('updated_at', '')
+        
+        table_data.append([
+            str(),
+            lname,
+            fname,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+
+    return jsonify(response)
 
 
 @bp_lms.route('/marketers/create',methods=['GET','POST'])

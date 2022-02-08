@@ -27,7 +27,6 @@
         }
     });
 
-
     $.validator.setDefaults({
         errorElement: 'span',
         errorPlacement: function (error, element) {
@@ -42,8 +41,22 @@
         }
     });
 
+    function clearForm(){
+        $(':input','#frm_orient')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+
+        $('#contact_person').find('option').remove();
+        var newOption = $(`<option value="">No Branch Selected</option>`);
+        $('#contact_person').append(newOption);
+    }
+
 
     $(document).ready(function () {
+        $("#li_orientation_attendance").addClass('mm-active');
+
         var dtbl_members = $('#tbl_members').DataTable({
             "dom": 'rtip',
             "pageLength": 20,
@@ -110,6 +123,7 @@
                             success: function (response) {
                                 event.stopPropagation();
                                 dtbl_members.ajax.reload();
+                                clearForm();
                                 swal("Success!", response.message, "success");
                             },
                             error: function (data) {

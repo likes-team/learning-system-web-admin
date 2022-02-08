@@ -6,47 +6,120 @@ from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Secretary
 from flask import redirect, url_for, request, current_app, flash
-from app import db
+from app import mongo
 from datetime import datetime
 from config import TIMEZONE
+from prime_admin.globals import SECRETARYREFERENCE
 
 
 
 @bp_lms.route('/secretaries')
 @login_required
 def secretaries():
-    form = SecretaryForm()
-
-    _table_data = []
-
-    secretary_role = Role.objects(name="Secretary").first()
-
-    _secretaries = User.objects(role=secretary_role)
-
-    for secretary in _secretaries:
-        _table_data.append((
-            secretary.id,
-            secretary.fname,
-            secretary.lname,
-            secretary.branch.name if secretary.branch is not None else '',
-            secretary.created_by,
-            secretary.created_at_local,
-            secretary.updated_by,
-            secretary.updated_at_local
-        ))
-
-    return admin_table(
+    return admin_render_template(
         Secretary,
-        fields=[],
-        form=form,
-        table_data=_table_data,
-        create_button=None,
-        create_url=None,
-        create_modal=False,
-        # create_url='lms.create_secretary',
-        edit_url='lms.edit_secretary',
-        view_modal_url='/learning-management/get-view-secretary-data'
-        )
+        'lms/secretaries.html',
+        'learning_management',
+        title="Secretaries"
+    )
+    
+    # form = SecretaryForm()
+    # _table_data = []
+    # secretary_role = Role.objects(name="Secretary").first()
+    # _secretaries = User.objects(role=secretary_role)
+    # for secretary in _secretaries:
+    #     _table_data.append((
+    #         secretary.id,
+    #         secretary.fname,
+    #         secretary.lname,
+    #         secretary.branch.name if secretary.branch is not None else '',
+    #         secretary.created_by,
+    #         secretary.created_at_local,
+    #         secretary.updated_by,
+    #         secretary.updated_at_local
+    #     ))
+
+    # return admin_table(
+    #     Secretary,
+    #     fields=[],
+    #     form=form,
+    #     table_data=_table_data,
+    #     create_button=None,
+    #     create_url=None,
+    #     create_modal=False,
+    #     # create_url='lms.create_secretary',
+    #     edit_url='lms.edit_secretary',
+    #     view_modal_url='/learning-management/get-view-secretary-data'
+    #     )
+
+
+@bp_lms.route('/secretaries/dt', methods=['GET'])
+def fetch_secretaries_dt():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    search_value = request.args.get("search[value]")
+
+    total_records: int
+    filtered_records: int
+
+    if search_value != '':
+        query = list(mongo.db.auth_users.aggregate([
+            {"$match": {'lname': {'$regex': search_value}, 'role': SECRETARYREFERENCE}},
+            {"$lookup": {
+                'from': 'lms_branches',
+                'localField': 'branch',
+                'foreignField': '_id',
+                'as': 'branch'
+                }
+            }]))
+        total_records = len(query)
+    else:
+        query = list(mongo.db.auth_users.aggregate([
+            {"$match": {'role': SECRETARYREFERENCE}},
+            {"$lookup": {
+                'from': 'lms_branches',
+                'localField': 'branch',
+                'foreignField': '_id',
+                'as': 'branch'
+                }
+            },
+            {"$skip": start},
+            {"$limit": length},
+            ]))
+        total_records = mongo.db.auth_users.find({'role': SECRETARYREFERENCE}).count()
+
+    filtered_records = len(query)
+    
+    table_data = []
+    
+    for data in query:
+        lname = data.get('lname', '')
+        fname = data.get('fname', '')
+        branch = data.get('branch', [{'name': ''}])[0]
+        created_by = data.get('created_by', '')
+        created_at = data.get('created_at', '')
+        updated_by = data.get('updated_by', '')
+        updated_at = data.get('updated_at', '')
+        
+        table_data.append([
+            str(),
+            lname,
+            fname,
+            branch['name'],
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+        ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+
+    return jsonify(response)
 
 
 @bp_lms.route('/get-view-secretary-data', methods=['GET'])

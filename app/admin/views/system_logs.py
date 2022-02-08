@@ -26,7 +26,7 @@ def system_logs():
         table_columns=['date', 'description', 'module'],
         heading="System Logs",
         title="System Logs",
-        # table_template="lms/orientation_attendance.html",
+        table_template="admin/admin_system_logs.html",
         scripts=scripts,
         view_modal=False
         )

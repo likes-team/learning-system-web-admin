@@ -1,5 +1,79 @@
 {% extends "admin/admin_base.html" %}
 
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $("#li_store_records").addClass('mm-active');
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+    
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "3000",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+            }
+    
+    
+        var table = $('#tbl_store_records').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "processing": true,
+            "serverSide": true,
+            "columnDefs": [
+                {"visible": false, "targets":[0]}
+            ],
+            "ordering": false,
+            "order": [[ 3, 'asc' ]],
+            "ajax": {
+                "url": "/learning-management/dtbl/store-records",
+                "data": function (d) {
+                    d.branch = $("#btn_marketer_label").val();
+                },
+            }
+        });
+    
+    
+        $("#div_marketer_buttons").on('click', '.btn-marketer', function () {
+            var marketer_name = $(this).html();
+    
+            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
+            $("#btn_marketer_label").html(marketer_name.toUpperCase());
+            $("#btn_marketer_label").val($(this).val());
+            $("#card_header_label").html(marketer_name);
+    
+            $('#btn_marketer_label').trigger('change');
+            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
+            // }
+    
+        });
+    
+        $("#btn_marketer_label").change(function(){
+            table.ajax.reload();
+        });
+    });
+</script>
+{% endblock %}
+
+
 {% block content %}
 <div class="app-main__inner">
     <div class="app-page-title" style="background-color: skyblue">
@@ -206,77 +280,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block outer_footer %}
-{% endblock %}
-
-{% block scripts %}
-<script>
-    $(document).ready(function(){
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
-                }
-            }
-        });
-    
-        toastr.options = {
-            "closeButton": true,
-            "debug": false,
-            "newestOnTop": false,
-            "progressBar": false,
-            "positionClass": "toast-top-center",
-            "preventDuplicates": false,
-            "onclick": null,
-            "showDuration": "3000",
-            "hideDuration": "1000",
-            "timeOut": "5000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-            }
-    
-    
-        var table = $('#tbl_store_records').DataTable({
-            "dom": 'rtip',
-            "pageLength": 20,
-            "processing": true,
-            "serverSide": true,
-            "columnDefs": [
-                {"visible": false, "targets":[0]}
-            ],
-            "ordering": false,
-            "order": [[ 3, 'asc' ]],
-            "ajax": {
-                "url": "/learning-management/dtbl/store-records",
-                "data": function (d) {
-                    d.branch = $("#btn_marketer_label").val();
-                },
-            }
-        });
-    
-    
-        $("#div_marketer_buttons").on('click', '.btn-marketer', function () {
-            var marketer_name = $(this).html();
-    
-            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
-            $("#btn_marketer_label").html(marketer_name.toUpperCase());
-            $("#btn_marketer_label").val($(this).val());
-            $("#card_header_label").html(marketer_name);
-    
-            $('#btn_marketer_label').trigger('change');
-            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
-            // }
-    
-        });
-    
-        $("#btn_marketer_label").change(function(){
-            table.ajax.reload();
-        });
-    });
-</script>
 {% endblock %}

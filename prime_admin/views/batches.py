@@ -34,10 +34,7 @@ def batches():
         ))
 
 
-    _scripts = [
-        {'bp_admin.static': 'js/admin_table.js'},
-        {'lms.static': 'js/batch.js'}
-    ]
+    _scripts = []
 
     return admin_table(
         Batch,

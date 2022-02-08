@@ -1,6 +1,8 @@
+from app.admin.models import AdminDashboard, SystemLogs
+from app.auth.models import User
 from app.core import CoreModule
 from .models import (
-    Accommodation, BuyItems, CashFlow, CashOnHand, FundWallet, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
+    Accommodation, Batch, Branch, BuyItems, CashFlow, CashOnHand, FundWallet, Partner, Dashboard, Earning, Equipment, Expenses, Inventory, Marketer, Member, 
     OrientationAttendance, Registration, Secretary, StoreRecords, Supplies, Utilities
 )
 
@@ -30,14 +32,16 @@ class LearningManagementModule(CoreModule):
         FundWallet,
         BuyItems,
         Accommodation,
-        StoreRecords
+        StoreRecords,
+        Batch,
+        AdminDashboard, User, Branch, SystemLogs
     ]
     version = '1.0'
     sidebar = {
         'Dashboard': [
             Dashboard
         ],
-        'System': [
+        'Enrollment': [
             OrientationAttendance,
             Registration,
             Member,
@@ -45,6 +49,7 @@ class LearningManagementModule(CoreModule):
             Partner,
             Marketer,
             Secretary,
+            Batch,
             # Expenses,
         ],
         'Accounting': [
@@ -61,5 +66,9 @@ class LearningManagementModule(CoreModule):
             Supplies,
             # Equipment,
             # Utilities
+        ],
+        'System': [
+            AdminDashboard,
+            Branch,
         ]
     }

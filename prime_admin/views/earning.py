@@ -29,22 +29,22 @@ def earnings():
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
-        marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE))
+        marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE)).order_by('fname')
         template = 'lms/earnings_admin.html'
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-        marketers = User.objects(id=current_user.id)
+        marketers = User.objects(id=current_user.id).order_by('fname')
         template = 'lms/earnings.html'
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-        marketers = User.objects(id=current_user.id)
+        marketers = User.objects(id=current_user.id).order_by('fname')
         template = 'lms/earnings.html'
     else:
         branches = Branch.objects()
         batch_numbers = Batch.objects()
-        marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
+        marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False)).order_by('fname')
         template = 'lms/earnings_admin.html'
         
     return admin_render_template(

@@ -6,6 +6,8 @@
 {% block scripts %}
 <script>
     $(document).ready(function(){
+        $("#li_earnings").addClass('mm-active');
+
         $.ajaxSetup({
             beforeSend: function(xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {

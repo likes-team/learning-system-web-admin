@@ -1,0 +1,110 @@
+{% extends "admin/admin_base.html" %}
+
+
+{% block modals %}
+{% endblock %}
+
+
+{% block head %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+    $(document).ready(function(){
+        $("#li_accounts").addClass("mm-active");
+        $("#li_partners").addClass("mm-active");
+        
+        var dt_partners = $('#tbl_partners').DataTable({
+            "pageLength": 25,
+            "processing": true,
+            "serverSide": true,
+            "ordering": false,
+            "responsive": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/partners/dt",
+            },
+            "language": {
+                "searchPlaceholder": "By last name",
+            },
+            initComplete : function() {
+                var input = $('.dataTables_filter input').unbind(),
+                    self = this.api(),
+                    $searchButton = $('<button>')
+                               .text('search')
+                               .click(function() {
+                                  self.search(input.val()).draw();
+                               }),
+                    $clearButton = $('<button>')
+                               .text('clear')
+                               .click(function() {
+                                  input.val('');
+                                  $searchButton.click(); 
+                               }) 
+                $('.dataTables_filter').append($searchButton, $clearButton);
+            }  
+        });
+
+        dt_partners.on( 'search.dt', function () {
+            dt_partners.search();
+        } );
+    });
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Partners
+                    <div class="page-title-subheading">
+                        List of Partners
+                    </div>
+                </div>
+            </div>
+
+            {% block actions %}
+
+            {% endblock %}
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                    <div class="table-responsive">
+                    <table id="tbl_partners" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">LAST NAME</th>
+                            <th class="text-center">FIRST NAME</th>
+                            <th class="text-center">CREATED BY</th>
+                            <th class="text-center">CREATED AT</th>
+                            <th class="text-center">UPDATED BY</th>
+                            <th class="text-center">UPDATED AT</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

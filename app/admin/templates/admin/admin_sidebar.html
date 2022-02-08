@@ -37,88 +37,151 @@
                 <li class="app-sidebar__heading" style="color: red;">DEVELOPMENT MODE</li>
                 {% endif %}
                 
-                {% if VDATA['sidebar'] is not none %}
+                {% if current_user.role.name in ["Admin"] %}
+                    <li id="header_dashboard" class="app-sidebar__heading">Dashboard</li>
+                    <li>
+                        <a id="li_dashboard" href="{{url_for('lms.dashboard')}}" class="">
+                            <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li id="header_dashboard" class="app-sidebar__heading">Enrollment</li>
+                <li>
+                    <a id="li_orientation_attendance" href="{{url_for('lms.orientation_attendance')}}" class="">
+                        <i class="metismenu-icon pe-7s-note2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                        Orientation Attendance
+                    </a>
+                </li>
+
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                    <li>
+                        <a id="li_registration" href="{{url_for('lms.register')}}" class="">
+                            <i class="metismenu-icon pe-7s-add-user icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Registration
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li>
+                    <a id="li_student_records" href="{{url_for('lms.members')}}" class="">
+                        <i class="metismenu-icon pe-7s-users icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                        Student Records
+                    </a>
+                </li>
+                <li>
+                    <a id="li_earnings" href="{{url_for('lms.earnings')}}" class="">
+                        <i class="metismenu-icon pe-7s-cash icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                        Earnings
+                    </a>
+                </li>
+
+                {% if current_user.role.name in ['Admin'] %}
+                    <li>
+                        <a id="li_batches" href="{{url_for('lms.batches')}}" class="">
+                            <i class="metismenu-icon pe-7s-date icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Batches
+                        </a>
+                    </li>
+                    <li id="li_accounts">
+                        <a href="#">
+                            <i class="metismenu-icon pe-7s-users"></i>
+                            Accounts
+                            <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                        </a>
+                        <ul>
+                            <li id="li_partners">
+                                <a href="{{url_for('lms.contact_persons')}}">
+                                    <i class="metismenu-icon"></i>
+                                    Partners
+                                </a>
+                            </li>
+                            <li id="li_marketers">
+                                <a href="{{url_for('lms.marketers')}}">
+                                    <i class="metismenu-icon"></i>
+                                    Marketers
+                                </a>
+                            </li>
+                            <li id="li_secretaries">
+                                <a href="{{url_for('lms.secretaries')}}">
+                                    <i class="metismenu-icon"></i>
+                                    Secretaries
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% endif %}
                 
-                    {% for header, models in VDATA['sidebar'].items() %}
-                        <li id="header_{{header}}" class="app-sidebar__heading">{{header}}</li>
-                        {% for model in models %}
-                            {% if model.__amname__ in session['permissions'] %}
-                            {% if session['permissions'][model.__amname__]['read'] or current_user.is_superuser %}
-                                {% if model.__amfunctions__ is not none %}
-                                    <li>
-                                        <a href="#" class="{% if (RENDERED_MODEL.__amname__ == model.__amname__ or RENDERED_MODEL.__parent_model__ == model.__amname__) %} mm-active {% endif %}">
-                                            <i class="metismenu-icon {{ model.__amicon__ }} icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                                            {{ model.__amdescription__ }}
-                                            <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                        </a>
-                                        <ul>
-                                            {% for function in model.__amfunctions__ %}
-                                            <li>
-                                                <a href="{{ url_for(function[1]) }}" 
-                                                class="model-function {% if RENDERED_MODEL.__amname__ == function[2] %} mm-active {% endif %}">
-                                                    <i class="metismenu-icon">
-                                                    </i>{{ function[0] }}
-                                                </a>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
-                                {% else %}
-                                    <li>
-                                    <a href="{{ url_for(model.__view_url__)}}" class="{% if RENDERED_MODEL.__amname__==model.__amname__ %} mm-active {% endif %}">
-                                        <i class="metismenu-icon {{model.__amicon__}} icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                                        {{model.__amdescription__}}
-                                    </a>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {% endif %}
-                        {% endfor %}
-                    {% endfor %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                    <li id="header_dashboard" class="app-sidebar__heading">ACCOUNTING</li>
 
-                {% else %}
+                    {% if current_user.role.name in ['Admin', 'Secretary'] %}
+                        <li>
+                            <a id="li_cash_on_hand" href="{{url_for('lms.cash_on_hand')}}" class="">
+                                <i class="metismenu-icon pe-7s-cash icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                                Cash On Hand
+                            </a>
+                        </li>
+                        <li>
+                            <a id="li_fund_wallet" href="{{url_for('lms.fund_wallet')}}" class="">
+                                <i class="metismenu-icon pe-7s-wallet icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                                Fund Wallet
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    <li>
+                        <a id="li_cash_flow" href="{{url_for('lms.cash_flow')}}" class="">
+                            <i class="metismenu-icon pe-7s-refresh-2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Cash Flow
+                        </a>
+                    </li>
+                {% endif %}
 
-                    {% block models_sidebar %}
-                        <li class="app-sidebar__heading">{{ config['ADMIN']['MODELS_SIDEBAR_HEADER']}}</li>
-                            {% for module in MODULES %}
-                                {% if module.module_name == VDATA['module'].module_name %}
-                                    {% for model in module.models %}
-                                        {% if model.__amname__ in session['permissions'] %}
-                                            {% if session['permissions'][model.__amname__]['read'] %}
-                                                {% if model.__amfunctions__ %}
-                                                    <li>
-                                                        <a href="#" class="{% if (RENDERED_MODEL.__amname__ == model.__amname__ or parent_model == model.__amname__) %} mm-active {% endif %}">
-                                                            <i class="metismenu-icon {{ model.__amicon__ }} icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                                                            {{ model.__amdescription__ }}
-                                                            <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                                        </a>
-                                                        <ul>
-                                                            {% for function in model.__amfunctions__ %}
-                                                                <li>
-                                                                    <a href="{{ url_for(function[1]) }}" 
-                                                                    class="model-function {% if RENDERED_MODEL.__amname__ == function[2] %} mm-active {% endif %}">
-                                                                        <i class="metismenu-icon">
-                                                                        </i>{{ function[0] }}
-                                                                    </a>
-                                                                </li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </li>
-                                                {% else %}
-                                                    <li>
-                                                    <a href="{{ url_for(model.__view_url__)}}" class="{% if RENDERED_MODEL.__amname__==model.__amname__ %} mm-active {% endif %}">
-                                                        <i class="metismenu-icon {{model.__amicon__}} icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                                                        {{model.__amdescription__}}
-                                                    </a>
-                                                    </li>
-                                                {% endif %}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                    {% endblock %}
+                {% if current_user.role.name in ['Admin', 'Secretary'] %}
+                    <li id="header_dashboard" class="app-sidebar__heading">STORE</li>
+                    <li>
+                        <a id="li_buy_items" href="{{url_for('lms.buy_items')}}" class="">
+                            <i class="metismenu-icon pe-7s-calculator icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Buy Items
+                        </a>
+                    </li>
+                    <li>
+                        <a id="li_accommodation" href="{{url_for('lms.accommodation')}}" class="">
+                            <i class="metismenu-icon pe-7s-bookmarks icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Accomodation
+                        </a>
+                    </li>
+                    <li>
+                        <a id="li_store_records" href="{{url_for('lms.store_records')}}" class="">
+                            <i class="metismenu-icon pe-7s-notebook icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Store Records
+                        </a>
+                    </li>
+                {% endif %}
 
+                {% if current_user.role.name in ['Admin'] %}
+                    <li id="header_dashboard" class="app-sidebar__heading">Inventory</li>
+                    <li>
+                        <a id="li_supplies" href="{{url_for('lms.supplies')}}" class="">
+                            <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Supplies
+                        </a>
+                    </li>
+                    <li id="header_dashboard" class="app-sidebar__heading">System</li>
+                    <li>
+                        <a id="li_users" href="{{url_for('bp_admin.dashboard')}}" class="">
+                            <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Users
+                        </a>
+                    </li>
+                    <li>
+                        <a id="li_logs" href="{{url_for('bp_admin.system_logs')}}" class="">
+                            <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Logs
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
         </div>

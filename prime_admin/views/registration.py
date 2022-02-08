@@ -55,10 +55,6 @@ def register():
             'branches': branches
         }
 
-        _scripts = [
-            {'lms.static': 'js/registration.js'}
-        ]
-        
         _modals = [
             'lms/search_client_last_name_modal.html',
         ]
@@ -69,7 +65,6 @@ def register():
             'learning_management',
             form=form,
             data=data,
-            scripts=_scripts,
             modals=_modals,
             title="Registration"
             )

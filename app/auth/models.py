@@ -24,7 +24,7 @@ class Earning(db.EmbeddedDocument):
         'strict': False
     }
     
-    custom_id = db.StringField(primary_key=True)
+    # custom_id = db.StringField(primary_key=True)
     payment_mode = db.StringField()
     savings = db.DecimalField()
     earnings = db.DecimalField()

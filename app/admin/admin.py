@@ -14,14 +14,3 @@ class AdminModule(CoreModule):
     module_long_description = "Administration Dashboard and pages"
     models = [AdminDashboard, AdminApp, User, Role, Branch, Batch, SystemLogs]
     version = '1.0'
-    sidebar = {
-        'Control Panels': [
-            AdminDashboard,
-            Batch,
-            Branch,
-        ],
-        'SYSTEM': [
-            SystemLogs,
-            User, Role
-        ],
-    }

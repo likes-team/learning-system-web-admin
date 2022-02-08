@@ -45,7 +45,7 @@ class AdminUserOptions(db.Document):
 
 class AdminDashboard(Admin):
     __amname__ = 'admin_dashboard'
-    __amdescription__ = 'User Control Panel'
+    __amdescription__ = 'Users'
     __amicon__ = 'pe-7s-graph1'
     __view_url__ = 'bp_admin.dashboard'
 
@@ -63,4 +63,3 @@ class SystemLogs(Admin):
     __amdescription__ = 'System Logs'
     __amicon__ = 'pe-7s-note2'
     __view_url__ = 'bp_admin.system_logs'
-

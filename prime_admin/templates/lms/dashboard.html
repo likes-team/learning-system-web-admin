@@ -1,6 +1,15 @@
-<!--THIS FILE EXTENDS admin_base.html-->
-<!--THIS IS THE DASHBOARD TEMPLATE-->
 {% extends "admin/admin_base.html" %}
+
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $("#li_dashboard").addClass('mm-active');
+    });
+</script>
+{% endblock %}
+
+
 {% block content %}
 <div class="app-main__inner">
     <div class="app-page-title" style="background-color: skyblue">

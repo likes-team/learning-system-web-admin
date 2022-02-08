@@ -1,5 +1,112 @@
 {% extends "admin/admin_base.html" %}
 
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $("#li_accommodation").addClass('mm-active');
+
+        var dtbl_search = $("#tbl_mdl_clients").DataTable({
+            "pageLength": 10,
+            "columnDefs": [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            "ajax": {
+                "url": "/learning-management/api/dtbl/registered-students",
+            }
+        });
+    
+        $('#btn_confirm').click( function () {
+            var selected = dtbl_search.row('.selected').data();
+            
+            $.ajax({
+                url: '/learning-management/api/clients/' + selected[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    console.log(response)
+                    $("#client_id").val(response.data.id);
+                    $("#branch_id").val(response.data.branch);
+                    $("#registration_no").val(response.data.registration_no);
+                    $("#branch").val(response.data.branch_name);
+                    $("#full_name").val(response.data.fname + " " + response.data.mname + " " + response.data.lname);
+                    $("#batch").val(response.data.batch_number);
+                    $("#schedule").val(response.data.schedule);
+                    $("#status").val(response.data.payment_status);
+                }
+            });
+        });
+
+        $('#tbl_mdl_clients tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtbl_search.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+
+        $("#date_from").change(function(){
+            computeNoOfDaysAmount();
+        });
+
+        $("#date_to").change(function(){
+            computeNoOfDaysAmount();
+        });
+
+        function computeNoOfDaysAmount() {
+            var start = new Date($('#date_from').val());
+            var end = new Date($('#date_to').val());
+            
+            // end - start returns difference in milliseconds 
+            var diff = new Date(end - start);
+            
+            // get days
+            var days = diff/1000/60/60/24;
+
+            if(days < 0){
+                alert("Invalid no of days");
+                $("#no_of_days").val(0);
+                return;
+            }
+
+            $("#no_of_days").val(days);
+
+            var total = parseFloat($("#price_per_day").val()) * parseFloat($("#no_of_days").val());
+            $("#total").val(total);
+        }
+
+        var dtbl_accommodations = $('#tbl_accommodations').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0},
+            ],
+            "ajax": {
+                "url": "/learning-management/dtbl/accommodations",
+                "data": function (d) {
+                    d.branch = $("#branch_filter").val();
+                },
+            }
+        });
+
+        $("#branch_filter").change(function(){
+            dtbl_accommodations.ajax.reload();
+        });
+    });
+</script>
+{% endblock %}
+
+
 {% block content %}
 <div class="app-main__inner">
     <div class="app-page-title" style="background-color: skyblue">
@@ -297,110 +404,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block outer_footer %}
-{% endblock %}
-
-{% block scripts %}
-<script>
-    $(document).ready(function(){
-        var dtbl_search = $("#tbl_mdl_clients").DataTable({
-            "pageLength": 10,
-            "columnDefs": [
-                {
-                    "targets": 0,
-                    "visible": false,
-                },
-            ],
-            "ajax": {
-                "url": "/learning-management/api/dtbl/registered-students",
-            }
-        });
-    
-        $('#btn_confirm').click( function () {
-            var selected = dtbl_search.row('.selected').data();
-            
-            $.ajax({
-                url: '/learning-management/api/clients/' + selected[0],
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                success: function(response) {
-                    console.log(response)
-                    $("#client_id").val(response.data.id);
-                    $("#branch_id").val(response.data.branch);
-                    $("#registration_no").val(response.data.registration_no);
-                    $("#branch").val(response.data.branch_name);
-                    $("#full_name").val(response.data.fname + " " + response.data.mname + " " + response.data.lname);
-                    $("#batch").val(response.data.batch_number);
-                    $("#schedule").val(response.data.schedule);
-                    $("#status").val(response.data.payment_status);
-                }
-            });
-        });
-
-        $('#tbl_mdl_clients tbody').on( 'click', 'tr', function () {
-            if ( $(this).hasClass('selected') ) {
-                $(this).removeClass('selected');
-            }
-            else {
-                dtbl_search.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-            }
-        } );
-
-        $("#date_from").change(function(){
-            computeNoOfDaysAmount();
-        });
-
-        $("#date_to").change(function(){
-            computeNoOfDaysAmount();
-        });
-
-        function computeNoOfDaysAmount() {
-            var start = new Date($('#date_from').val());
-            var end = new Date($('#date_to').val());
-            
-            // end - start returns difference in milliseconds 
-            var diff = new Date(end - start);
-            
-            // get days
-            var days = diff/1000/60/60/24;
-
-            if(days < 0){
-                alert("Invalid no of days");
-                $("#no_of_days").val(0);
-                return;
-            }
-
-            $("#no_of_days").val(days);
-
-            var total = parseFloat($("#price_per_day").val()) * parseFloat($("#no_of_days").val());
-            $("#total").val(total);
-        }
-
-        var dtbl_accommodations = $('#tbl_accommodations').DataTable({
-            "dom": 'rtip',
-            "pageLength": 20,
-            "order": [[1, 'asc']],
-            "processing": true,
-            "serverSide": true,
-            "autoWidth": false,
-            "ordering": false,
-            "columnDefs": [
-                { "visible": false, "targets": 0},
-            ],
-            "ajax": {
-                "url": "/learning-management/dtbl/accommodations",
-                "data": function (d) {
-                    d.branch = $("#branch_filter").val();
-                },
-            }
-        });
-
-        $("#branch_filter").change(function(){
-            dtbl_accommodations.ajax.reload();
-        });
-    });
-</script>
 {% endblock %}

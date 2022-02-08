@@ -30,12 +30,6 @@ def members():
 
     fields = []
 
-    modals = [
-        'lms/client_view_modal.html',
-        'lms/client_edit_modal.html',
-        'lms/client_upgrade_modal.html'
-    ]
-
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
@@ -57,8 +51,7 @@ def members():
         heading='Student Records',
         subheading="",
         title='Student Records',
-        modals=modals,
-        table_template="lms/members_table.html",
+        table_template="lms/student_records.html",
         branches=branches,
         batch_numbers=batch_numbers,
         schedules=['WDC', 'SDC']
