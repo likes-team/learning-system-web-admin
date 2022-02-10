@@ -1,9 +1,11 @@
+import pymongo
 from flask_migrate import current
 from config import TIMEZONE
 from datetime import datetime
 from flask import redirect, url_for, request, jsonify
 from flask.templating import render_template
 from flask_login import login_required, current_user
+from app import mongo
 from app.core.models import CoreModule, CoreModel
 from app.admin import bp_admin
 from app.admin.models import AdminDashboard
@@ -40,28 +42,65 @@ def get_dashboard_users():
 
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
+    search_value = request.args.get("search[value]")
 
-    users = User.objects(is_deleted__ne=True).order_by('active').skip(start).limit(length)
+    # users = User.objects(is_deleted__ne=True).order_by('active').skip(start).limit(length)
 
-    _table_data = []
+    if search_value != '':
+        query = list(mongo.db.auth_users.aggregate([
+            {"$match": {
+                "lname": {"$regex": search_value}
+            }},
+            {"$lookup": {"from": "auth_user_roles", "localField": "role",
+                         "foreignField": "_id", 'as': "role"}},
+            {"$sort": {
+                'fname': pymongo.ASCENDING
+            }}
+        ]))
+        total_records = len(query)
+    else:
+        query = list(mongo.db.auth_users.aggregate([
+            {"$lookup": {"from": "auth_user_roles", "localField": "role",
+                         "foreignField": "_id", 'as': "role"}},
+            {"$skip": start},
+            {"$limit": length},
+            {"$sort": {
+                'fname': pymongo.ASCENDING
+            }}
+        ]))
+        total_records = mongo.db.auth_users.find().count()
+        
+    filtered_records = len(query)
 
-    for user in users:
-        _table_data.append([
-            str(user.id),
-            user.full_employee_id,
+    table_data = []
+
+    for data in query:
+        print(data)
+        id = data.get('_id', '')
+        full_employee_id = data.get('full_employee_id', '')
+        lname = data.get('lname', '')
+        fname = data.get('fname', '')
+        username = data.get('username', '')
+        role = data.get('role', '')
+        active = data.get('active', '')
+        
+        table_data.append([
+            str(id),
+            full_employee_id,
             {
-                'name': user.full_name, 
-                'username': user.username},
-            user.role.name,
-            user.active,
-            user.active,
+                'name': fname + " " + lname,
+                'username': username
+            },
+            role[0]['name'],
+            active,
+            active
         ])
-
+   
     response = {
         'draw': draw,
-        'recordsTotal': users.count(),
-        'recordsFiltered': users.count(),
-        'data': _table_data,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
     }
 
     return jsonify(response)

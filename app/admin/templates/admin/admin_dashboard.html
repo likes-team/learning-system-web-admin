@@ -35,14 +35,33 @@
             }
     
         var dtbl_user_status = $('#tbl_user_status').DataTable({
-            "dom": 'rtip',
-            "pageLength": 20,
-            "order": [[ 1, 'asc' ]],
+            "pageLength": 25,
             "processing": true,
             "serverSide": true,
+            "ordering": false,
+            "responsive": true,
             "autoWidth": false,
             "ajax": {
                 "url": "/admin/dashboard/get-dashboard-users", // To be continued
+            },
+            "language": {
+                "searchPlaceholder": "By last name",
+            },
+            initComplete : function() {
+                var input = $('.dataTables_filter input').unbind(),
+                    self = this.api(),
+                    $searchButton = $('<button>')
+                               .text('search')
+                               .click(function() {
+                                  self.search(input.val()).draw();
+                               }),
+                    $clearButton = $('<button>')
+                               .text('clear')
+                               .click(function() {
+                                  input.val('');
+                                  $searchButton.click(); 
+                               }) 
+                $('.dataTables_filter').append($searchButton, $clearButton);
             },
             "columnDefs": [
                 {
@@ -105,6 +124,10 @@
             ],
         });
     
+        dtbl_user_status.on( 'search.dt', function () {
+            dtbl_user_status.search();
+        } );
+
         $("#tbl_user_status tbody").on('click', '.btn-approve', function(){
             var data = dtbl_user_status.row( $(this).parents('tr')).data();
             
