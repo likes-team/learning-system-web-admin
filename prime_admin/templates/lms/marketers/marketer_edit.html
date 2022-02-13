@@ -35,11 +35,11 @@
             </div>
             
             {% block actions %}
+                <div class="page-title-actions">
+                    <button form="edit_form" type="submit" class="btn btn-primary" style="margin-right: 10px;">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="history.back(-1)">Cancel</button>
 
-                {% if EDIT_OPTIONS['actions'] %}
-                    {% include EDIT_OPTIONS['action_template'] %}
-                {% endif %}
-
+                </div>
             {% endblock %}
 
         </div>
@@ -245,7 +245,5 @@
 
 {% block inner_footer %}
 <div class="app-footer-left">
-    <button form="edit_form" type="submit" class="btn btn-primary" style="margin-right: 10px;">Save</button>
-    <button type="button" class="btn btn-secondary" onclick="history.back(-1)">Cancel</button>
 </div>
 {% endblock %}
