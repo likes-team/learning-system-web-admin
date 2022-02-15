@@ -46,16 +46,16 @@ def get_users():
 
     return jsonify({'users':user_list})
 
-@bp_auth.route('/api/user/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    user = User.query.get(user_id)
+# @bp_auth.route('/api/user/<int:user_id>', methods=['GET'])
+# def get_user(user_id):
+#     user = User.query.get(user_id)
 
-    if user is None:
-        abort(404)
+#     if user is None:
+#         abort(404)
 
-    return jsonify({
-        'id': user.id,
-        'fname': user.fname,
-        'lname': user.lname,
-        'email': user.email,
-    })
+#     return jsonify({
+#         'id': user.id,
+#         'fname': user.fname,
+#         'lname': user.lname,
+#         'email': user.email,
+#     })

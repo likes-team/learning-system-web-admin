@@ -1,5 +1,3 @@
-from config import TIMEZONE
-from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
 from flask_cors import cross_origin
@@ -12,52 +10,77 @@ from app.auth.models import User, UserPermission, Role
 from app.auth.forms import UserForm, UserEditForm, UserPermissionForm
 from app.auth import auth_urls
 from app.auth.permissions import load_permissions, check_create
-from app.admin.templating import admin_table, admin_edit
+from app.admin.templating import admin_render_template, admin_table, admin_edit
 from bson.objectid import ObjectId
 
 
 
 @bp_auth.route('/users')
 @login_required
-def users(**options):
-    form = UserForm()
-    # fields = [User.id, User.username, User.fname, User.lname, Role.name, User.email]
-    fields = ['id', 'username', 'fname', 'lname', 'role', 'email']
-    models = [User]
+def users():
+    # form = UserForm()
+    # fields = ['id', 'username', 'fname', 'lname', 'role', 'email']
+    # models = [User]
 
-    _users = User.objects
+    # _users = User.objects
 
-    _table_data = []
+    # _table_data = []
 
-    for user in _users:
-        _table_data.append((
-            user.id,
-            user.username,
-            user.fname,
-            user.lname,
-            user.role.name,
-            user.email
-        ))
-    
-    return admin_table(*models, fields=fields, form=form, create_url='bp_auth.create_user',\
-        edit_url="bp_auth.edit_user", table_data=_table_data, view_modal_url='/auth/get-view-user-data', **options)
+    # for user in _users:
+    #     _table_data.append((
+    #         user.id,
+    #         user.username,
+    #         user.fname,
+    #         user.lname,
+    #         user.role.name,
+    #         user.email
+    #     ))
+    return render_template('auth/users/users.html', title='Users')
 
 
-@bp_auth.route('/get-view-user-data', methods=['GET'])
+@bp_auth.route('/users/<string:user_id>', methods=['GET'])
 @login_required
-def get_view_user_data():
-    _column, _id = request.args.get('column'), request.args.get('id')
+def get_user(user_id):
+    try:
+        user: User = User.objects.get(id=user_id)
 
-    _data = User.objects(id=_id).values_list(_column)
+        response = {
+            'status': 'success',
+            'data': {
+                'id': str(user.id),
+                'fname': user.fname,
+                'lname': user.lname,
+                'role': user.role.name,
+                'employee_id': user.full_employee_id,
+                'username': user.username,
+                'email': user.email,
+            },
+            'message': ""
+        }
+        return jsonify(response), 200
+    except Exception as err:
+        print(err)
+        return jsonify({
+            'status': 'error',
+            'message': str(err)
+        }), 500
 
-    response = jsonify(result=str(_data[0]),column=_column)
 
-    if _column == "role":
-        response = jsonify(result=str(_data[0].id),column=_column)
+# @bp_auth.route('/get-view-user-data', methods=['GET'])
+# @login_required
+# def get_view_user_data():
+#     _column, _id = request.args.get('column'), request.args.get('id')
 
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.status_code = 200
-    return response
+#     _data = User.objects(id=_id).values_list(_column)
+
+#     response = jsonify(result=str(_data[0]),column=_column)
+
+#     if _column == "role":
+#         response = jsonify(result=str(_data[0].id),column=_column)
+
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.status_code = 200
+#     return response
 
 
 @bp_auth.route('/users/create', methods=['POST'])
@@ -128,12 +151,10 @@ def edit_user(oid,**kwargs):
         return redirect(url_for(auth_urls['users']))
         
     try:
-
         user.username = form.username.data
         user.fname = form.fname.data
         user.lname = form.lname.data
         user.email = form.email.data if not form.email.data == '' else None
-        user.role = Role.objects.get(id=form.role.data)
         user.set_updated_at()
         user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
 

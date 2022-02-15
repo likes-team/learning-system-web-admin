@@ -1,7 +1,9 @@
-<!--THIS FILE EXTENDS admin_base.html-->
-<!--THIS IS THE DASHBOARD TEMPLATE-->
 {% extends "admin/admin_base.html" %}
 
+
+{% block modals %}
+    {% include 'auth/users/user_view_modal.html' %}
+{% endblock %}
 
 {% block scripts %}
 <script>
@@ -16,6 +18,8 @@
             }
         });
     
+        var selectedUserID;
+
         toastr.options = {
             "closeButton": true,
             "debug": false,
@@ -116,9 +120,12 @@
                             <button type="button" class="btn btn-danger btn-sm btn-decline">Decline</button>
                             `
                         }
+                        
+                        var id = row[0];
                         return `
-                        <div></div>
-                        ` 
+                        <a href="/auth/users/${id}/edit" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_view"><i class="fa fa-eye"></i></button>
+                        `
                     }
                 },
             ],
@@ -210,6 +217,41 @@
                 }
             });
         });
+
+
+        $("#tbl_user_status tbody").on('click', '.btn-view', function () {
+            // Get row data
+            var current_row = $(this).parents('tr');//Get the current row
+            if (current_row.hasClass('child')) {//Check if the current row is a child row
+                current_row = current_row.prev();//If it is, then point to the row before it (its 'parent')
+            }
+            const data = dtbl_user_status.row(current_row).data();//At this point, current_row refers to a valid row in the table, whether is a child row (collapsed by the DataTable's responsiveness) or a 'normal' row
+
+            selectedUserID = data[0];
+
+            $("#fname").val('');
+            $("#lname").val('');
+            $("#role").val('');
+            $("#employee_id").val('');
+            $("#username").val('');
+            $("#email").val('');
+            
+            $.getJSON(
+                `/auth/users/${selectedUserID}`, function(response){
+                if(response.status == "success"){
+                    $("#fname").val(response.data.fname);
+                    $("#lname").val(response.data.lname);
+                    $("#role").val(response.data.role);
+                    $("#employee_id").val(response.data.employee_id);
+                    $("#username").val(response.data.username);
+                    $("#email").val(response.data.email);
+                } else if(response.status == "error"){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                }
+            }).fail(function() {
+                swal("Error Occured!", "Please refresh the page then try again!", "error");
+            });
+        });
     });
 </script>
 
@@ -244,10 +286,10 @@
                         <tr>
                             <th class="text-center">SYSTEM ID</th>
                             <th class="text-center">EMPLOYEE ID</th>
-                            <th>Name</th>
-                            <th class="text-center">Position</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Actions</th>
+                            <th>NAME</th>
+                            <th class="text-center">POSITION</th>
+                            <th class="text-center">STATUS</th>
+                            <th class="text-center">ACTIONS</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -257,6 +299,5 @@
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}

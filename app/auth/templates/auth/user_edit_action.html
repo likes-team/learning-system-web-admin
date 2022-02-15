@@ -1,11 +1,52 @@
-{% extends 'admin/admin_edit_actions.html' %}
+{% block actions %}
+<div class="page-title-actions">
+    <button form="edit_form" type="submit" class="btn btn-primary" style="margin-right: 5px;">Save</button>
+    <button style="margin-right: 15px;" type="button" class="btn btn-secondary" onclick="history.back(-1)">Cancel</button>
 
-
-{% block dropdown_buttons %}
-    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#changepasswordmodal">
-        Change Password
-    </button>
-    <button disabled type="button" class="dropdown-item">
-        Change Profile Picture
-    </button>
+    <div class="d-inline-block dropdown">
+        <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                class="btn-shadow dropdown-toggle btn btn-info">
+                        <span class="btn-icon-wrapper pr-2 opacity-7">
+                            <i class="fa fa-list-alt fa-w-20"></i>
+                        </span>
+            Actions
+        </button>
+        <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+            <ul class="nav flex-column">
+                {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                <li id="nav_action_btns" class="nav-item">
+                    {% block dropdown_buttons %}
+                    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#changepasswordmodal">
+                        Change Password
+                    </button>
+                    <button disabled type="button" class="dropdown-item">
+                        Change Profile Picture
+                    </button>
+                    {% endblock %}
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                        <i class="nav-link-icon lnr-file-empty"></i>
+                        <span>
+                            No actions
+                        </span>
+                    </a>
+                </li>
+                {% endif %}
+                {% else %}
+                <li class="nav-item">
+                    <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                        <i class="nav-link-icon lnr-file-empty"></i>
+                        <span>
+                            No actions
+                        </span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
 {% endblock %}
