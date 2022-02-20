@@ -15,7 +15,7 @@
                         <option value="all">All Marketers</option>
 
                         {% for marketer in marketers %}
-                            <option value="{{marketer.id}}">{{ marketer.full_name }}</option>
+                            <option value="{{marketer.id}}">{{ marketer.full_name|upper }}</option>
                         {% endfor %}
                     </select>
                 </div>
