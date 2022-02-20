@@ -457,7 +457,7 @@
             const marketerId = $("#select_marketer").val();
             
             console.log(marketerId);
-            if(marketerId == ''){
+            if(marketerId == 'all'){
                 swal({
                     title: "Please select marketer first, before proceed!",
                     text: "Print Failed!",
@@ -470,6 +470,11 @@
             window.open('/learning-management/payslip.pdf' + 
                 `?marketer_id=${marketerId}`
             );
+        });
+
+
+        $("#btn_print_available_earnings").click(function(){
+            window.open('/learning-management/available-earnings.pdf');
         });
     });
 </script>
@@ -495,12 +500,29 @@
                 <button id="btn_print_payslip" type="button" data-toggle="tooltip" title="" data-placement="bottom" class="btn-shadow mr-3 btn btn-primary" data-original-title="Print">
                     <i class="fa fa-print"> Payslip</i> 
                 </button>
-                <button disabled type="button" data-toggle="tooltip" title="" data-placement="bottom" class="btn-shadow mr-3 btn btn-primary" data-original-title="Print">
-                    <i class="fa fa-print"> Member Records</i> 
-                </button>
-                <button disabled type="button" data-toggle="tooltip" title="" data-placement="bottom" class="btn-shadow mr-3 btn btn-primary" data-original-title="Print">
-                    <i class="fa fa-print"> Payment Records</i> 
-                </button>
+
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Print
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <button id="btndelete" type="button" tabindex="0" class="dropdown-item">Member Records</button>
+                            </li>
+                            <li class="nav-item">
+                                <button id="btndelete" type="button" tabindex="0" class="dropdown-item">Payment Records</button>
+                            </li>
+                            <li class="nav-item">
+                                <button id="btn_print_available_earnings" type="button" tabindex="0" class="dropdown-item">Marketer's Earnings</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

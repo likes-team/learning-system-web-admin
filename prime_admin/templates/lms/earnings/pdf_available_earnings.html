@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Payslip</title>
+		<title>Marketer's Earnings</title>
 
 		<style>
 			.invoice-box {
@@ -190,6 +190,10 @@
 				margin: 0;
 				padding: 0;
 			}
+
+			table, th, td {
+				border: 1px solid grey;
+			}
 		</style>
 	</head>
 
@@ -209,44 +213,17 @@
 			</div>
 			<hr/>
 
-			<div id="title">PAYSLIP</div>
+			<div id="title">MARKETER'S EARNINGS</div>
 
+			<table cellpadding="0" cellspacing="0">
+				{% for marketer_earning in marketer_earnings %}
+				<tr class="item">
+					<td>{{marketer_earning['name']}}</td>
 
-			<div class="row">
-				<div class="information" style="margin-top: 30px;">NAME: {{marketer.full_name}}</div>
-				<div id="date">DATE: {{date_now}}</div>
-			</div>
-
-			<div class="information">POSITION: {{marketer.role.name}}</div>
-			<div class="information">REFERRAL EARNING: ₱ {{total_earnings}}</div>
-
-			<div id="record">RECORD</div>
-
-			{% for branch in branches_earnings %}
-				<div class="row">
-					<div class="branch" style="margin-top: 30px;">{{branch['name']}}</div>
-					<div class="total">₱ {{branch['totalEarnings']}}</div>
-				</div>
-
-				<table cellpadding="0" cellspacing="0">
-					{% for student in branch['students'] %}
-					<tr class="item">
-						<td>{{student['name']}}</td>
-	
-						<td>₱ {{student['earning']}}</td>
-					</tr>
-					{% endfor %}
-				</table>
-			{% endfor %}
-
-			<div id="footer">
-				<p>
-					Don't stop invite!
-				</p>
-				<p>
-					THE MORE YOU SHARE, THE MORE YOU EARN
-				</p>
-			</div>
+					<td>₱ {{marketer_earning['totalEarnings']}}</td>
+				</tr>
+				{% endfor %}
+			</table>
 		</div>
 	</body>
 </html>

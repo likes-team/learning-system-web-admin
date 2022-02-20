@@ -15,7 +15,7 @@ from app.auth.models import Earning as auth_user_earning
 from app.admin.templating import admin_render_template
 from config import TIMEZONE
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, FundWallet, Payment, Registration, Batch
+from prime_admin.models import Branch, Earning, FundWallet, Marketer, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 
 
@@ -802,6 +802,58 @@ def print_payslip():
             'lms/earnings/pdf_payslip.html',
             branches_earnings=branches_earnings,
             marketer=marketer,
+            date_now=date_now,
+            total_earnings=total_earnings
+            )
+
+    return render_pdf(HTML(string=html))
+
+
+@bp_lms.route('/available-earnings.pdf')
+def print_available_earnings():
+    marketers = User.objects()
+
+    total_earnings = 0
+    marketer_earnings = []
+
+    with decimal.localcontext(D128_CTX):
+        total_earnings = Decimal128('0.00')
+        total_savings = Decimal128('0.00')
+
+        marketer: User
+        for marketer in marketers:
+            for earning in marketer.earnings:
+                if earning.payment_mode == "profit_sharing":
+                    continue
+
+                if earning.status != "for_approval":
+                    continue
+
+                total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                
+                if not any(d['id'] == str(marketer.id) for d in marketer_earnings):
+                    marketer_earnings.append(
+                        {
+                            'id': str(marketer.id),
+                            'name': marketer.full_name,
+                            'totalEarnings': earning.earnings,
+                        }
+                    )
+                else:
+                    for x in marketer_earnings:
+                        if x['id'] == str(marketer.id):
+                                if type(x['totalEarnings']) == decimal.Decimal:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                else:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+    
+    local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
+    date_now = local_datetime.strftime("%B %d, %Y")
+    
+    html = render_template(
+            'lms/earnings/pdf_available_earnings.html',
+            marketer_earnings=marketer_earnings,
             date_now=date_now,
             total_earnings=total_earnings
             )
