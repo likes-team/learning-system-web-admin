@@ -41,15 +41,15 @@
                 
                     $(this).val(Math.max(Math.min(value, 5500), -5500));
                 }
+                
             } else if (payment_mode == "installment") {
                 if ((value !== '') && (value.indexOf('.') === -1)) {
                 
-                    $(this).val(Math.max(Math.min(value, 4000), -4000));
+                    $(this).val(Math.max(Math.min(value, 7800), -7800));
                 }
             } else if (payment_mode == "installment_promo"){
                 if ((value !== '') && (value.indexOf('.') === -1)) {
-                
-                    $(this).val(Math.max(Math.min(value, 4000), -4000));
+                    $(this).val(Math.max(Math.min(value, 6300), -6300));
                 }
             }
         

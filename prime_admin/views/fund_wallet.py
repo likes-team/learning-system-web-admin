@@ -56,7 +56,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         elif current_user.role.name == "Secretary":
             filter = {'branch': current_user.branch.id}
             accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-            total_fund_wallet = accounting.get('total_fund_wallet', "0.00")
+            total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
     else:
         if current_user.role.name == "Secretary":
             filter = {'branch': current_user.branch.id}
@@ -68,7 +68,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             filter = {'branch': ObjectId(branch_id)}
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
             
-        total_fund_wallet = accounting.get('total_fund_wallet', "0.00")
+        total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
 
     statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
@@ -84,7 +84,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         amount_received = statement.get('amount_received', 0.00)
         total_amount_due = statement.get('total_amount_due', 0.00)
         statement_type = statement.get('type', '')
-        running_balance = statement.get('running_balance', 0.00)
+        running_balance = decimal.Decimal(str(statement.get('running_balance', 0.00)))
         created_by = statement.get('created_by', 0.00)
         remarks = statement.get('remarks', 0.00)
         
@@ -105,7 +105,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             description,
             str(amount_received) if statement_type == "add_fund" else '',
             str(total_amount_due) if statement_type == "expenses" else '',
-            str(running_balance),
+            str(round(running_balance, 2)),
             created_by,
             remarks
         ])
