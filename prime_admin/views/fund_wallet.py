@@ -96,7 +96,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         else: 
             local_datetime = ''
         
-        if category == "salary_and_rebates":
+        if category == "salary_and_rebates" or category == "salary" or category == "rebates":
             contact_person : User = User.objects.get(id=description)
             description = contact_person.full_name
             
@@ -264,7 +264,7 @@ def fetch_expenses_transactions_dt(branch_id):
                     total_utilities = total_utilities + total_amount_due.to_decimal()
                 elif category == "office_supply":
                     total_office_supplies = total_office_supplies + total_amount_due.to_decimal()
-                elif category == "salary_and_rebates":
+                elif category == "salary_and_rebates" or category == "salary" or category == "rebates":
                     total_salaries_and_rebates = total_salaries_and_rebates + total_amount_due.to_decimal()
                     contact_person : User = User.objects.get(id=description)
                     description = contact_person.full_name

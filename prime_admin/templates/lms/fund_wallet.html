@@ -374,7 +374,12 @@
                 $("#billing_month_to").rules('remove');
 
                 $("#total_amount_due").prop('readonly', true);
-            } else if(selectedCategory == "salary_and_rebates") {
+            } else if(selectedCategory == "salary" || selectedCategory == "rebates") {
+                if($("#branch_expenses").val() == ''){
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    return;
+                }
+                
                 getContactPersons();
 
                 $("#label_description").html('Contact Person');
@@ -400,7 +405,7 @@
         });
 
         $("#branch_expenses").change(function(){
-            if($("#category").val() == "salary_and_rebates"){
+            if($("#category").val() == "salary" || $("#category").val() == "rebates"){
                 getContactPersons();
             }
         });
