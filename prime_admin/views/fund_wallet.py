@@ -10,7 +10,7 @@ from flask_login import login_required, current_user
 from app import mongo
 from app.auth.models import User
 from app.admin.templating import admin_render_template
-from prime_admin.globals import D128_CTX, get_date_now
+from prime_admin.globals import D128_CTX, convert_to_utc, get_date_now
 from prime_admin import bp_lms
 from prime_admin.models import Branch, FundWallet
 
@@ -39,6 +39,8 @@ def fund_wallet():
 def fetch_branch_fund_wallet_statements_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
     
     total_records: int
     filtered_records: int
@@ -66,10 +68,18 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         elif current_user.role.name == "Partner":
             filter = {'branch': ObjectId(branch_id)}
-            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
-            
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})            
         total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
 
+    if date_from != "":
+        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    if date_to != "":
+        if 'date' in filter:
+            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        else:
+            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+            
     statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
@@ -125,7 +135,9 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
 def fetch_add_funds_transactions_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
     total_records: int
     filtered_records: int
     filter: dict
@@ -151,6 +163,15 @@ def fetch_add_funds_transactions_dt(branch_id):
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00'
 
+    if date_from != "":
+        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    if date_to != "":
+        if 'date' in filter:
+            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        else:
+            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+     
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
     filtered_records = query.count()
@@ -207,7 +228,9 @@ def fetch_add_funds_transactions_dt(branch_id):
 def fetch_expenses_transactions_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
     total_records: int
     filtered_records: int
     filter: dict
@@ -226,7 +249,16 @@ def fetch_expenses_transactions_dt(branch_id):
             filter = {'type': 'expenses', 'branch': ObjectId(branch_id)}
         elif current_user.role.name == "Partner":
             filter = {'type': 'expenses', 'branch': ObjectId(branch_id)}
-            
+           
+    if date_from != "":
+        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    if date_to != "":
+        if 'date' in filter:
+            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        else:
+            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+      
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
     filtered_records = query.count()
