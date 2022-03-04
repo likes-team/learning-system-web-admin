@@ -41,6 +41,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
+    category = request.args.get('category', '')
     
     total_records: int
     filtered_records: int
@@ -79,7 +80,10 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
         else:
             filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
-            
+    
+    if category != "":
+        filter['category'] = category
+    
     statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
@@ -230,6 +234,7 @@ def fetch_expenses_transactions_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
+    category = request.args.get('category', '')
     
     total_records: int
     filtered_records: int
@@ -258,6 +263,9 @@ def fetch_expenses_transactions_dt(branch_id):
             filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
         else:
             filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+    
+    if category != "":
+        filter['category'] = category
       
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()

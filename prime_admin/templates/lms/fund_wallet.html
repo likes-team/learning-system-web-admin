@@ -95,6 +95,7 @@
                 "data": function(d) {
                     d.date_from = $("#filter_date_from").val();
                     d.date_to = $("#filter_date_to").val();
+                    d.category = $("#filter_category").val();
                 }
             },
             "pageLength": 25,
@@ -148,6 +149,7 @@
                 "data": function(d) {
                     d.date_from = $("#filter_tab3_date_from").val();
                     d.date_to = $("#filter_tab3_date_to").val();
+                    d.category = $("#filter_tab3_category").val();
                 }
             },
             "pageLength": 25,
@@ -503,6 +505,14 @@
         $('#filter_tab3_date_to').change(function() {
             dtbl_expenses_transactions.ajax.reload();
         });
+
+        $('#filter_category').change(function() {
+            dtbl_fund_wallet_statements.ajax.reload();
+        });
+
+        $('#filter_tab3_category').change(function() {
+            dtbl_expenses_transactions.ajax.reload();
+        });
     });
 </script>
 {% endblock %}
@@ -730,6 +740,19 @@
                                         <input id="filter_date_to" type="date" class="form-control">
                                     </div>
                                 </div>
+                                <div class="col-md-2 col-xs-2">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_category" class="">Category</label>
+                                        <select id="filter_category" class="form-control" required>
+                                            <option value="">Choose...</option>
+                                            <option value="utilities">Utilities</option>
+                                            <option value="office_supply">Office Supply</option>
+                                            <option value="salary">Salary</option>
+                                            <option value="rebates">Rebates</option>
+                                            <option value="other_expenses">Other Expenses</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div style="margin-top: 10px;" class="table-responsive">
                                 <table id="tbl_fund_wallet_statements"
@@ -799,6 +822,19 @@
                                     <div class="position-relative form-group">
                                         <label for="filter_tab3_date_to" class="">Date To</label>
                                         <input id="filter_tab3_date_to" type="date" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-xs-2">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_tab3_category" class="">Category</label>
+                                        <select id="filter_tab3_category" class="form-control" required>
+                                            <option value="">Choose...</option>
+                                            <option value="utilities">Utilities</option>
+                                            <option value="office_supply">Office Supply</option>
+                                            <option value="salary">Salary</option>
+                                            <option value="rebates">Rebates</option>
+                                            <option value="other_expenses">Other Expenses</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
