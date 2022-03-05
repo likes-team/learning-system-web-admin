@@ -42,6 +42,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
     category = request.args.get('category', '')
+    description = request.args.get('description', '')
     
     total_records: int
     filtered_records: int
@@ -83,6 +84,9 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     
     if category != "":
         filter['category'] = category
+        
+    if description != "":
+        filter['description'] = description    
     
     statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
@@ -235,6 +239,7 @@ def fetch_expenses_transactions_dt(branch_id):
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
     category = request.args.get('category', '')
+    description = request.args.get('description', '')
     
     total_records: int
     filtered_records: int
@@ -266,6 +271,9 @@ def fetch_expenses_transactions_dt(branch_id):
     
     if category != "":
         filter['category'] = category
+        
+    if description != '':
+        filter['description'] = description
       
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()

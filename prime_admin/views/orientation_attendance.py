@@ -263,6 +263,8 @@ def get_branch_contact_persons(branch_id):
 
     data = []
 
+    print(contact_persons)
+
     for contact_person in contact_persons:
         data.append({
             'id': str(contact_person.id),

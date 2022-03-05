@@ -57,20 +57,26 @@
     }
 
 
-    function getContactPersons(){
-        var userBranch = $("#branch_expenses").val();
+    function getContactPersons(branch, from){
+        var selectDescriptionId = "#description";
 
-        $.getJSON('/learning-management/api/get-branch-contact-persons/' + userBranch, function(response){
+        if(from == "filter"){
+            selectDescriptionId = "#filter_description";
+        } else if(from == "filter_tab3"){
+            selectDescriptionId = "#filter_tab3_description";
+        }
+
+        $.getJSON('/learning-management/api/get-branch-contact-persons/' + branch, function(response){
             if (response.data.length > 0) {
-                $('#description').append(newOption);
+                $(selectDescriptionId).append(newOption);
 
                 for (i = 0; i < response.data.length; i++) {
                     var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
-                    $('#description').append(newOption);
+                    $(selectDescriptionId).append(newOption);
                 }
             } else {
                 var newOption = $('<option value="">No Contact Persons available</option>');
-                $('#description').append(newOption);
+                $(selectDescriptionId).append(newOption);
             }
         });
     }
@@ -96,6 +102,7 @@
                     d.date_from = $("#filter_date_from").val();
                     d.date_to = $("#filter_date_to").val();
                     d.category = $("#filter_category").val();
+                    d.description = $("#filter_description").val();
                 }
             },
             "pageLength": 25,
@@ -150,6 +157,7 @@
                     d.date_from = $("#filter_tab3_date_from").val();
                     d.date_to = $("#filter_tab3_date_to").val();
                     d.category = $("#filter_tab3_category").val();
+                    d.description = $("#filter_tab3_description").val();
                 }
             },
             "pageLength": 25,
@@ -393,7 +401,7 @@
                     swal("Error Occured!", "Please select branch first!", "info");
                     return;
                 }
-                getContactPersons();
+                getContactPersons($("#branch_expenses").val(), "add_expenses");
 
                 $("#label_description").html('Contact Person');
                 $("#qty").prop('disabled', true);
@@ -419,7 +427,7 @@
 
         $("#branch_expenses").change(function(){
             if($("#category").val() == "salary" || $("#category").val() == "rebates"){
-                getContactPersons();
+                getContactPersons($("#branch_expenses").val(), "add_expenses");
             }
         });
 
@@ -508,9 +516,85 @@
 
         $('#filter_category').change(function() {
             dtbl_fund_wallet_statements.ajax.reload();
+
+            var selectedCategory = $(this).val();
+
+            $("#filter_description").empty();
+            $("#filter_description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+
+            if(selectedCategory == "utilities"){
+                $("#filter_description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#filter_description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#filter_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#filter_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+            } else if(selectedCategory == "office_supply"){
+                $("#filter_description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
+                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
+                $("#filter_description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
+                $("#filter_description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
+                $("#filter_description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
+                $("#filter_description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
+                $("#filter_description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
+                $("#filter_description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
+                $("#filter_description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
+                $("#filter_description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
+                $("#filter_description").append($('<option></option>').attr("value", "Ball Pen").text("Parchment"));
+                $("#filter_description").append($('<option></option>').attr("value", "Medal").text("Medal"));
+                $("#filter_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
+                $("#filter_description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
+                $("#filter_description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
+                $("#filter_description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
+                $("#filter_description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
+            } else if(selectedCategory == "salary" || selectedCategory == "rebates") {
+                getContactPersons($("#btn_branch_label").val(), "filter");
+            } else if(selectedCategory == "other_expenses"){
+                $("#filter_description").append($('<option></option>').attr("value", "Others").text("Others"));
+            }
         });
 
         $('#filter_tab3_category').change(function() {
+            dtbl_expenses_transactions.ajax.reload();
+
+            var selectedCategory = $(this).val();
+
+            $("#filter_tab3_description").empty();
+            $("#filter_tab3_description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+
+            if(selectedCategory == "utilities"){
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+            } else if(selectedCategory == "office_supply"){
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ball Pen").text("Parchment"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Medal").text("Medal"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
+            } else if(selectedCategory == "salary" || selectedCategory == "rebates") {
+                getContactPersons($("#btn_branch_label").val(), "filter_tab3");
+            } else if(selectedCategory == "other_expenses"){
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Others").text("Others"));
+            }
+        });
+
+        $('#filter_description').change(function() {
+            dtbl_fund_wallet_statements.ajax.reload();
+        });
+
+        $('#filter_tab3_description').change(function() {
             dtbl_expenses_transactions.ajax.reload();
         });
     });
@@ -753,6 +837,14 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-2 col-xs-2">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_description" class="">Description</label>
+                                        <select id="filter_description" class="form-control" required>
+                                            <option value="">Choose category first...</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div style="margin-top: 10px;" class="table-responsive">
                                 <table id="tbl_fund_wallet_statements"
@@ -834,6 +926,14 @@
                                             <option value="salary">Salary</option>
                                             <option value="rebates">Rebates</option>
                                             <option value="other_expenses">Other Expenses</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-xs-2">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_tab3_description" class="">Description</label>
+                                        <select id="filter_tab3_description" class="form-control" required>
+                                            <option value="">Choose category first...</option>
                                         </select>
                                     </div>
                                 </div>
