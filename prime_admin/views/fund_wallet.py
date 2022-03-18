@@ -1,3 +1,4 @@
+import calendar
 import pytz
 import pymongo
 import decimal
@@ -232,14 +233,128 @@ def fetch_add_funds_transactions_dt(branch_id):
     return jsonify(response)
 
 
+# @bp_lms.route('/branches/<string:branch_id>/expenses-transactions/dt', methods=['GET'])
+# def fetch_expenses_transactions_dt(branch_id):
+#     draw = request.args.get('draw')
+#     start, length = int(request.args.get('start')), int(request.args.get('length'))
+#     date_from = request.args.get('date_from', '')
+#     date_to = request.args.get('date_to', '')
+#     category = request.args.get('category', '')
+#     description = request.args.get('description', '')
+    
+#     total_records: int
+#     filtered_records: int
+#     filter: dict
+    
+#     if branch_id == 'all':
+#         if current_user.role.name == "Admin":
+#             filter = {'type': 'expenses'}
+#         elif current_user.role.name == "Partner":
+#             filter = {'type': 'expenses', 'branch': {"$in": current_user.branches}}
+#         elif current_user.role.name == "Secretary":
+#             filter = {'type': 'expenses', 'branch': current_user.branch.id}
+#     else:
+#         if current_user.role.name == "Secretary":
+#             filter = {'type': 'expenses', 'branch': current_user.branch.id}
+#         elif current_user.role.name == "Admin":
+#             filter = {'type': 'expenses', 'branch': ObjectId(branch_id)}
+#         elif current_user.role.name == "Partner":
+#             filter = {'type': 'expenses', 'branch': ObjectId(branch_id)}
+           
+#     if date_from != "":
+#         filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+#     if date_to != "":
+#         if 'date' in filter:
+#             filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+#         else:
+#             filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+    
+#     if category != "":
+#         filter['category'] = category
+        
+#     if description != '':
+#         filter['description'] = description
+      
+#     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+#     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+#     filtered_records = query.count()
+    
+#     table_data = []
+#     total_utilities = decimal.Decimal(0)
+#     total_office_supplies = decimal.Decimal(0)
+#     total_salaries_and_rebates = decimal.Decimal(0)
+#     total_other_expenses = decimal.Decimal(0)
+    
+#     with decimal.localcontext(D128_CTX):
+#         for transaction in query:
+#             try:
+#                 date = transaction.get('date', None)
+#                 description = transaction.get('description', '')
+#                 category = transaction.get('category', '')
+#                 account_no = transaction.get('account_no', '')
+#                 unit_price = transaction.get('unit_price', '')
+#                 qty = transaction.get('qty', 0)
+#                 billing_month_from = transaction.get('billing_month_from', '')
+#                 billing_month_to = transaction.get('billing_month_to', '')
+#                 settled_by = transaction.get('settled_by', '')
+#                 total_amount_due = transaction.get('total_amount_due', 0.00)
+#                 remarks = transaction.get('remarks', 0.00)
+                
+#                 if type(date == datetime):
+#                     local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+#                 elif type(date == str):
+#                     to_date = datetime.strptime(date, "%Y-%m-%d")
+#                     local_datetime = to_date.strftime("%B %d, %Y")
+#                 else:
+#                     local_datetime = ''
+
+#                 if category == "utilities":
+#                     total_utilities = total_utilities + total_amount_due.to_decimal()
+#                 elif category == "office_supply":
+#                     total_office_supplies = total_office_supplies + total_amount_due.to_decimal()
+#                 elif category == "salary_and_rebates" or category == "salary" or category == "rebates":
+#                     total_salaries_and_rebates = total_salaries_and_rebates + total_amount_due.to_decimal()
+#                     contact_person : User = User.objects.get(id=description)
+#                     description = contact_person.full_name
+#                 elif category == "other_expenses":
+#                     total_other_expenses = total_other_expenses + total_amount_due.to_decimal()
+
+#                 table_data.append([
+#                     local_datetime,
+#                     category,
+#                     description,
+#                     account_no,
+#                     str(unit_price),
+#                     str(qty),
+#                     str(billing_month_from if billing_month_from is not None else '') + " - " + str(billing_month_to if billing_month_to is not None else ''),
+#                     settled_by,
+#                     str(total_amount_due),
+#                     remarks,
+#                 ])
+#             except Exception as e:
+#                 print(str(e))
+#                 continue
+
+#     response = {
+#         'draw': draw,
+#         'recordsTotal': filtered_records,
+#         'recordsFiltered': total_records,
+#         'data': table_data,
+#         'totalUtilities': str(total_utilities),
+#         'totalOfficeSupplies': str(total_office_supplies),
+#         'totalSalariesAndRebates': str(total_salaries_and_rebates),
+#         'totalOtherExpenses': str(total_other_expenses)
+#         }
+
+#     return jsonify(response)
+
+
 @bp_lms.route('/branches/<string:branch_id>/expenses-transactions/dt', methods=['GET'])
-def fetch_expenses_transactions_dt(branch_id):
+def fetch_business_expenses_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-    date_from = request.args.get('date_from', '')
-    date_to = request.args.get('date_to', '')
-    category = request.args.get('category', '')
-    description = request.args.get('description', '')
+    year = request.args.get('year', '')
     
     total_records: int
     filtered_records: int
@@ -260,21 +375,12 @@ def fetch_expenses_transactions_dt(branch_id):
         elif current_user.role.name == "Partner":
             filter = {'type': 'expenses', 'branch': ObjectId(branch_id)}
            
-    if date_from != "":
-        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    if year != "all":
+        filter['date'] = {
+            "$gt": convert_to_utc(f'{year}-01-01', 'date_from'),
+            "$lt": convert_to_utc(f'{year}-12-31', 'date_to'),
+        }
     
-    if date_to != "":
-        if 'date' in filter:
-            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
-        else:
-            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
-    
-    if category != "":
-        filter['category'] = category
-        
-    if description != '':
-        filter['description'] = description
-      
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
     filtered_records = query.count()
@@ -285,10 +391,21 @@ def fetch_expenses_transactions_dt(branch_id):
     total_salaries_and_rebates = decimal.Decimal(0)
     total_other_expenses = decimal.Decimal(0)
     
+    expenses_data = {
+        'UTILITIES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'OFFICE SUPPLIES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'SALARY': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'REBATES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'REFUND': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'BOOKEEPER': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'OTHER EXPENSES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'TOTAL OF EXPENDITURE': [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    }
+    
     with decimal.localcontext(D128_CTX):
         for transaction in query:
             try:
-                date = transaction.get('date', None)
+                transaction_date: datetime = transaction.get('date', None)
                 description = transaction.get('description', '')
                 category = transaction.get('category', '')
                 account_no = transaction.get('account_no', '')
@@ -300,40 +417,35 @@ def fetch_expenses_transactions_dt(branch_id):
                 total_amount_due = transaction.get('total_amount_due', 0.00)
                 remarks = transaction.get('remarks', 0.00)
                 
-                if type(date == datetime):
-                    local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-                elif type(date == str):
-                    to_date = datetime.strptime(date, "%Y-%m-%d")
-                    local_datetime = to_date.strftime("%B %d, %Y")
-                else:
-                    local_datetime = ''
-
+                month_index = transaction_date.month
                 if category == "utilities":
                     total_utilities = total_utilities + total_amount_due.to_decimal()
+                    expenses_data['UTILITIES'][month_index] += total_amount_due.to_decimal()
                 elif category == "office_supply":
                     total_office_supplies = total_office_supplies + total_amount_due.to_decimal()
-                elif category == "salary_and_rebates" or category == "salary" or category == "rebates":
+                    expenses_data['OFFICE SUPPLIES'][month_index] += total_amount_due.to_decimal()
+                elif category == "salary_and_rebates" or category == "salary":
                     total_salaries_and_rebates = total_salaries_and_rebates + total_amount_due.to_decimal()
                     contact_person : User = User.objects.get(id=description)
                     description = contact_person.full_name
+                    expenses_data['SALARY'][month_index] += total_amount_due.to_decimal()
+                elif category == "rebates":
+                    expenses_data['REBATES'][month_index] += total_amount_due.to_decimal()
                 elif category == "other_expenses":
                     total_other_expenses = total_other_expenses + total_amount_due.to_decimal()
-
-                table_data.append([
-                    local_datetime,
-                    category,
-                    description,
-                    account_no,
-                    str(unit_price),
-                    str(qty),
-                    str(billing_month_from if billing_month_from is not None else '') + " - " + str(billing_month_to if billing_month_to is not None else ''),
-                    settled_by,
-                    str(total_amount_due),
-                    remarks,
-                ])
+                    expenses_data['OTHER EXPENSES'][month_index] += total_amount_due.to_decimal()
             except Exception as e:
                 print(str(e))
                 continue
+    
+    expenses_data['UTILITIES'][12] = total_utilities
+    expenses_data['OFFICE SUPPLIES'][12] = total_office_supplies
+    expenses_data['SALARY'][12] = total_salaries_and_rebates
+    expenses_data['OTHER EXPENSES'][12] = total_other_expenses
+    
+    for key, value in expenses_data.items():
+        row = [key] + [str(val) for val in value]
+        table_data.append(row)
 
     response = {
         'draw': draw,
@@ -506,3 +618,90 @@ def fund_wallet_add_expenses():
             'status': 'error',
             'message': str(err)
         }), 500
+
+
+@bp_lms.route('/branches/<string:branch_id>/utilities/dt', methods=['GET'])
+def fetch_utilities_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
+    total_records: int
+    filtered_records: int
+    filter: dict
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            filter = {'category': 'utilities'}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'utilities', 'branch': {"$in": current_user.branches}}
+        elif current_user.role.name == "Secretary":
+            filter = {'category': 'utilities' ,'branch': current_user.branch.id}
+    else:
+        if current_user.role.name == "Secretary":
+            filter = {'category': 'utilities', 'branch': current_user.branch.id}
+        elif current_user.role.name == "Admin":
+            filter = {'category': 'utilities', 'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'utilities', 'branch': ObjectId(branch_id)}
+
+    # if date_from != "":
+    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    # if date_to != "":
+    #     if 'date' in filter:
+    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     else:
+    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+     
+    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    filtered_records = query.count()
+    
+    table_data = []
+    
+    total_utilities = decimal.Decimal(0)
+    
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_date: datetime = transaction.get('date', None)
+            account_no = transaction.get('account_no', '')
+            billing_month_from = transaction.get('billing_month_from', '')
+            billing_month_to = transaction.get('billing_month_to', '')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', 0.00)
+            remarks = transaction.get('remarks', 0.00)
+            remittance = transaction.get('remittance', '')
+        
+            if type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+
+            billing_month = billing_month_from + " - " + billing_month_to
+            total_utilities = total_utilities + total_amount_due.to_decimal()
+
+            table_data.append([
+                local_datetime,
+                '',
+                account_no,
+                billing_month,
+                str(total_amount_due),
+                remittance,
+                settled_by,
+                remarks,
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+        'totalUtilities': str(total_utilities)
+    }
+
+    return jsonify(response)
