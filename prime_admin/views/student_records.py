@@ -81,7 +81,7 @@ def get_dtbl_members():
     print(get_date_now())
 
     if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(status='registered').filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
+        registrations = Registration.objects(branch=branch_id).filter(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
         installment_registrations = installment_registrations.filter(branch=branch_id)
@@ -89,12 +89,12 @@ def get_dtbl_members():
         premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
     else:
         if current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
             sales_today = registrations.filter(registration_date__gte=get_date_now().date()).filter(branch__in=current_user.branches).sum('amount')
         elif current_user.role.name == "Partner":
-            registrations = Registration.objects(status='registered').filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         else:
-            registrations = Registration.objects(status='registered').filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
+            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
             sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
 
     if batch_no != 'all':
@@ -219,6 +219,8 @@ def get_dtbl_members():
             payment_mode = "Installment - Promo"
         elif registration.payment_mode == 'premium_promo':
             payment_mode = "Premium Payment - Promo"
+        elif registration.payment_mode == "refund":
+            payment_mode = "Refunded"
 
         if registration.amount == registration.amount_deposit:
             deposit = "Yes"
@@ -1049,3 +1051,71 @@ def print_student_info():
             )
 
     return render_pdf(HTML(string=html))
+
+
+@bp_lms.route('/refund', methods=['POST'])
+def refund():
+    student_id = request.json.get('student_id', None)
+    password = request.json.get('password', '')
+
+    if not current_user.check_password(password):
+        return jsonify({
+            'status': 'error',
+            'message': "Invalid password!"
+        }), 500
+    
+    try:
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                student: Registration = Registration.objects.get(id=student_id)
+                
+                mongo.db.lms_registrations.update_one({
+                    "_id": ObjectId(student_id)
+                },{"$set": {
+                    'status': "refunded",
+                    'payment_mode': 'refund'
+                }}, session=session)
+                
+                accounting = mongo.db.lms_accounting.find_one({
+                    "branch": ObjectId(student.branch.id),
+                })
+
+                with decimal.localcontext(D128_CTX):
+                    total_amount_due = student.amount * decimal.Decimal(".2")
+
+                if accounting:
+                    with decimal.localcontext(D128_CTX):
+                        previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                        new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
+                        balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
+
+                        mongo.db.lms_accounting.update_one({
+                            "branch": ObjectId(student.branch.id)
+                        },
+                        {'$set': {
+                            "total_fund_wallet": Decimal128(new_total_fund_wallet)
+                        }},session=session)
+                else:
+                    raise Exception("Likes Error: Accounting data not found")
+
+                mongo.db.lms_fund_wallet_transactions.insert_one({
+                    'type': 'expenses',
+                    'running_balance': balance,
+                    'branch': ObjectId(student.branch.id),
+                    'date': get_date_now(),
+                    'category': "refund",
+                    'description': str(student.id),
+                    'total_amount_due': Decimal128(total_amount_due),
+                    'created_at': get_date_now(),
+                    'created_by': current_user.fname + " " + current_user.lname
+                },session=session)
+        response = {
+            'status': 'success',
+            'message': "Refunded successfully!"
+        }
+        return jsonify(response), 201
+    except Exception as err:
+        return jsonify({
+            'status': 'error',
+            'message': str(err)
+        }), 500

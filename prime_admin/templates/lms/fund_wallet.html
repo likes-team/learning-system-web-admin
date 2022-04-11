@@ -701,6 +701,32 @@
         });
 
     });
+
+
+    var dtbl_refund = $("#tbl_refund").DataTable({
+        "dom": 'rtip',
+        "processing": true,
+        "autoWidth": false,
+        "serverSide": true,
+        "ajax": {
+            "url": "/learning-management/branches/all/refund/dt",
+            "dataSrc": function (json) {
+                //$("#total_office_supply_tab").html("₱" + json.totalOfficeSupply);
+                return json.data;
+            },
+            "data": function (d) {
+                //d.date_from = $("#filter_tab2_date_from").val();
+                //d.date_to = $("#filter_tab2_date_to").val();
+            }
+        },
+        "pageLength": 25,
+        "ordering": false,
+        "order": [[0, 'asc']],
+        "columnDefs": [
+        ],
+        "order": [[1, 'asc']],
+    });
+
 </script>
 {% endblock %}
 
@@ -1303,7 +1329,24 @@
                                             <p>Coming soon...</p>
                                         </div>
                                         <div class="tab-pane" id="tab-eg6-5" role="tabpanel">
-                                            <p>Coming soon...</p>
+                                            <div style="margin-top: 10px;" class="table-responsive">
+                                                <table id="tbl_refund"
+                                                    class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center">DATE</th>
+                                                            <th class="text-center">NAME OF STUDENT</th>
+                                                            <th class="text-center">REGISTRATION NO.</th>
+                                                            <th class="text-center">BATCH NO.</th>
+                                                            <th class="text-center">SCHEDULE</th>
+                                                            <th class="text-center">AMOUNT</th>
+                                                            <th class="text-center">CONTACT PERSON</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                         <div class="tab-pane" id="tab-eg6-6" role="tabpanel">
                                             <div style="margin-top: 10px;" class="table-responsive">

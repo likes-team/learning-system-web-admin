@@ -13,7 +13,7 @@ from app.auth.models import User
 from app.admin.templating import admin_render_template
 from prime_admin.globals import D128_CTX, convert_to_utc, get_date_now
 from prime_admin import bp_lms
-from prime_admin.models import Branch, FundWallet
+from prime_admin.models import Branch, FundWallet, Registration
 
 
 
@@ -1034,6 +1034,91 @@ def fetch_other_expenses_dt(branch_id):
                 str(total_amount_due),
                 settled_by,
                 remarks
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/branches/<string:branch_id>/refund/dt', methods=['GET'])
+def fetch_refund_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
+    total_records: int
+    filtered_records: int
+    filter: dict
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            filter = {'category': 'refund'}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'refund', 'branch': {"$in": current_user.branches}}
+        elif current_user.role.name == "Secretary":
+            filter = {'category': 'refund','branch': current_user.branch.id}
+    else:
+        if current_user.role.name == "Secretary":
+            filter = {'category': 'refund', 'branch': current_user.branch.id}
+        elif current_user.role.name == "Admin":
+            filter = {'category': 'refund', 'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'refund', 'branch': ObjectId(branch_id)}
+
+    # if date_from != "":
+    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    # if date_to != "":
+    #     if 'date' in filter:
+    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     else:
+    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+     
+    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    filtered_records = query.count()
+    
+    table_data = []
+    
+    total_ofice_supply = decimal.Decimal(0)
+    
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_date: datetime = transaction.get('date', None)
+            description = transaction.get('description', '')
+            billing_month_from = transaction.get('billing_month_from', '')
+            billing_month_to = transaction.get('billing_month_to', '')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', 0.00)
+            remarks = transaction.get('remarks', 0.00)
+        
+            if type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+            
+            student: Registration = Registration.objects.get(id=description)
+
+            # total_ofice_supply = total_ofice_supply + total_amount_due.to_decimal()
+
+            table_data.append([
+                local_datetime,
+                student.full_name,
+                student.full_registration_number,
+                student.batch_number.number,
+                student.schedule,
+                str(total_amount_due),
+                student.contact_person.full_name
             ])
 
     response = {

@@ -18,6 +18,10 @@
         color:#71132a !important;
         background-color: #f4c2ce !important;
     }
+    .row-refunded {
+        color:#504648 !important;
+        background-color: #b1b1b1 !important;
+    }
     .modal-dialog {
         overflow-y: initial !important
     }
@@ -140,6 +144,10 @@
     
                 if(data[10] == "NOT PAID"){
                     $(row).addClass('row-not-paid');
+                }
+
+                if(data[7] == "Refunded"){
+                    $(row).addClass('row-refunded');
                 }
             }
         });
@@ -819,6 +827,53 @@
 
         $('#payment_mode').change(function() {
             table.ajax.reload();
+        });
+
+        $("#btn_refund").click(function(){
+            $("#viewModal .close").click();
+            var marketerID = $("#select_marketer").val();
+
+            swal({
+                title: 'Confirm refund?',
+                text: "This student will be refunded!",
+    			inputPlaceholder: "Your Password",
+                type: 'input',
+                showCancelButton: true,
+                cancelButtonColor: "#DD6B55",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Confirm!",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+              }, function (inputValue) {
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Please input your password!");
+                    return false;
+                }
+
+                const url = `/learning-management/refund`;
+
+                setTimeout(function () {
+                    $.ajax({ 
+                        url: url,
+                        type: "POST",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            'student_id': CLIENTID,
+                            "password": inputValue,
+                        }),
+                        async: false,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (response) {
+                            swal("Success!", response.message, "success");
+                            location.reload();
+                        },
+                        error: function (response) {
+                            swal("Error Occured!", response.message, "error");
+                        },
+                    });
+                }, 500);
+              });
         });
     });
 </script>
