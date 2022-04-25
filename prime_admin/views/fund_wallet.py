@@ -691,7 +691,6 @@ def fetch_utilities_dt(branch_id):
                 account_no,
                 billing_month,
                 str(total_amount_due),
-                remittance,
                 settled_by,
                 remarks,
             ])
