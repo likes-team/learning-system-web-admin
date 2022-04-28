@@ -408,7 +408,20 @@
                 $("#qty").rules('remove');
                 $("#unit_price").rules('remove');
             } else if (selectedCategory == "other_expenses") {
-                $("#description").append($('<option></option>').attr("value", "Others").text("Others"));
+                $("#description").append($('<option></option>').attr("value", "TRANSPORTATION BUDGET").text("TRANSPORTATION BUDGET"));
+                $("#description").append($('<option></option>').attr("value", "REMITTANCE CHARGE").text("REMITTANCE CHARGE"));
+                $("#description").append($('<option></option>').attr("value", "C.M. LOAD BUDGET").text("C.M. LOAD BUDGET"));
+                $("#description").append($('<option></option>').attr("value", "GASUL").text("GASUL"));
+                $("#description").append($('<option></option>').attr("value", "GRADUATION CAKE").text("GRADUATION CAKE"));
+                $("#description").append($('<option></option>').attr("value", "TRASHBAG").text("TRASHBAG"));
+                $("#description").append($('<option></option>').attr("value", "AIRFRESHENER").text("AIRFRESHENER"));
+                $("#description").append($('<option></option>').attr("value", "ALCOHOL").text("ALCOHOL"));
+                $("#description").append($('<option></option>').attr("value", "BATHROOM CLEANER").text("BATHROOM CLEANER"));
+                $("#description").append($('<option></option>').attr("value", "AIRCON CLEANING").text("AIRCON CLEANING"));
+                $("#description").append($('<option></option>').attr("value", "ADVERTISING FEE").text("ADVERTISING FEE"));
+                $("#description").append($('<option></option>').attr("value", "TARPAULEN").text("TARPAULEN"));
+                $("#description").append($('<option></option>').attr("value", "COMPUTER REPAIR").text("COMPUTER REPAIR"));
+                $("#description").append($('<option></option>').attr("value", "PRINTER REPAIR").text("PRINTER REPAIR"));
             }
         });
 
