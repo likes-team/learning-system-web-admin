@@ -624,6 +624,7 @@ def fund_wallet_add_expenses():
 def fetch_utilities_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
+    description = request.args.get('description', '')
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
     
@@ -646,14 +647,17 @@ def fetch_utilities_dt(branch_id):
         elif current_user.role.name == "Partner":
             filter = {'category': 'utilities', 'branch': ObjectId(branch_id)}
 
-    # if date_from != "":
-    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    if description != "":
+        filter['description'] = description
+
+    if date_from != "":
+        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
-    # if date_to != "":
-    #     if 'date' in filter:
-    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
-    #     else:
-    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+    if date_to != "":
+        if 'date' in filter:
+            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        else:
+            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
@@ -667,6 +671,7 @@ def fetch_utilities_dt(branch_id):
         for transaction in query:
             transaction_date: datetime = transaction.get('date', None)
             account_no = transaction.get('account_no', '')
+            description = transaction.get('description', '')
             billing_month_from = transaction.get('billing_month_from', '')
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
@@ -687,7 +692,7 @@ def fetch_utilities_dt(branch_id):
 
             table_data.append([
                 local_datetime,
-                '',
+                description,
                 account_no,
                 billing_month,
                 str(total_amount_due),

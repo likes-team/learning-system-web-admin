@@ -30,6 +30,7 @@
     <link href="{{ url_for('bp_admin.static', filename='DataTables/dataTables.checkboxes.css') }}" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
     <!-- sweet alert framework -->
     <link rel="stylesheet" type="text/css"
         href="{{url_for('bp_admin.static', filename='bower_components/sweetalert/css/sweetalert.css')}}">
@@ -93,6 +94,7 @@
     src="{{url_for('bp_admin.static', filename='bower_components/sweetalert/js/sweetalert.min.js')}}"></script>
 <!-- Jquery validate js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 <script>
     // Likes Global variables
     CSRF_TOKEN = "{{csrf_token()}}";
