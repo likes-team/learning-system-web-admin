@@ -715,6 +715,7 @@ def fetch_utilities_dt(branch_id):
 def fetch_office_supply_dt(branch_id):
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
+    description = request.args.get('description', '')
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
     
@@ -737,15 +738,18 @@ def fetch_office_supply_dt(branch_id):
         elif current_user.role.name == "Partner":
             filter = {'category': 'office_supply', 'branch': ObjectId(branch_id)}
 
-    # if date_from != "":
-    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    if description != "":
+        filter['description'] = description
+
+    if date_from != "":
+        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
-    # if date_to != "":
-    #     if 'date' in filter:
-    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
-    #     else:
-    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
-     
+    if date_to != "":
+        if 'date' in filter:
+            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        else:
+            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+      
     query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
     filtered_records = query.count()

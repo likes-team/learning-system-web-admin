@@ -653,8 +653,9 @@
                     return json.data;
                 },
                 "data": function (d) {
-                    //d.date_from = $("#filter_tab2_date_from").val();
-                    //d.date_to = $("#filter_tab2_date_to").val();
+                    d.description = $("#filter_office_supply_description").val();
+                    d.date_from = $("#filter_office_supply_date_from").val();
+                    d.date_to = $("#filter_office_supply_date_to").val();
                 }
             },
             "pageLength": 25,
@@ -752,13 +753,24 @@
             dtbl_utilities.ajax.reload();
         });
 
-
         $('#filter_utilities_date_from').change(function () {
+            dtbl_utilities.ajax.reload();
+        });
+        
+        $('#filter_utilities_date_to').change(function () {
             dtbl_utilities.ajax.reload();
         });
 
         
-        $('#filter_utilities_date_to').change(function () {
+        $('#filter_office_supply_description').change(function () {
+            dtbl_office_supply.ajax.reload();
+        });
+
+        $('#filter_office_supply_date_from').change(function () {
+            dtbl_office_supply.ajax.reload();
+        });
+        
+        $('#filter_office_supply_date_to').change(function () {
             dtbl_utilities.ajax.reload();
         });
 
@@ -1258,14 +1270,45 @@
                                                 <div class="col-lg-4 col-xl-4">
                                                 </div>
                                             </div>
-                                            <!-- <div class="form-row">
+                                            <div class="form-row">
                                                 <div class="col-md-2 col-xs-2">
                                                     <div class="position-relative form-group">
-                                                        <label for="filter_utilities_date_from" class="">Date From</label>
-                                                        <input id="filter_utilities_date_from" type="date" class="form-control">
+                                                        <label for="filter_office_supply_description" class="">Description</label>
+                                                        <select id="filter_office_supply_description" class="form-control">
+                                                            <option value="">Choose...</option>
+                                                            <option value="Bond Paper">Bond Paper</option>
+                                                            <option value="Epson Ink">Epson Ink</option>
+                                                            <option value="Whiteboard Marker">Whiteboard Marker</option>
+                                                            <option value="Whiteboard Marker Ink">Whiteboard Marker Ink</option>
+                                                            <option value="PVC Cover">PVC Cover</option>
+                                                            <option value="Photo Paper">Photo Paper</option>
+                                                            <option value="Staple Wire">Staple Wire</option>
+                                                            <option value="Vellum">Vellum</option>
+                                                            <option value="Ductape">Ductape</option>
+                                                            <option value="Parchment">Parchment</option>
+                                                            <option value="Ball Pen">Ball Pen</option>
+                                                            <option value="Medal">Medal</option>
+                                                            <option value="Notarial Seals Ribbon">Notarial Seals Ribbon</option>
+                                                            <option value="Alcohol">Alcohol</option>
+                                                            <option value="Air Freshener">Air Freshener</option>
+                                                            <option value="Bathroom Cleaner">Bathroom Cleaner</option>
+                                                            <option value="Water Refill">Water Refill</option>
+                                                        </select>
                                                     </div>
                                                 </div>
-                                            </div> -->
+                                                <div class="col-md-2 col-xs-2">
+                                                    <div class="position-relative form-group">
+                                                        <label for="filter_office_supply_date_from" class="">Date From</label>
+                                                        <input id="filter_office_supply_date_from" type="date" class="form-control" placeholder="Date From">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 col-xs-2">
+                                                    <div class="position-relative form-group">
+                                                        <label for="filter_office_supply_date_to" class="">Date To</label>
+                                                        <input id="filter_office_supply_date_to" type="date" class="form-control" placeholder="Date To">
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div style="margin-top: 10px;" class="table-responsive">
                                                 <table id="tbl_office_supply"
                                                     class="align-middle mb-0 table table-bordered table-striped table-hover">
