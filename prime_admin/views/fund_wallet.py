@@ -1118,6 +1118,45 @@ def fetch_refund_dt(branch_id):
             student: Registration = Registration.objects.get(id=description)
 
             # total_ofice_supply = total_ofice_supply + total_amount_due.to_decimal()
+            books = 'None'
+            uniforms = 'None'
+            id_materials = 'None'
+
+            if student.books:
+                if student.books['volume1']:
+                    books = "Vol. 1"
+                if student.books['volume2']:
+                    books += " Vol. 2"
+                if student.books['book_none']:
+                    books = "None"
+            else:
+                books = "None"
+
+            if student.uniforms:
+                if student.uniforms['uniform_none']:
+                    uniforms = "None"
+                elif student.uniforms['uniform_xs']:
+                    uniforms = "XS"
+                elif student.uniforms['uniform_s']:
+                    uniforms = "S"
+                elif student.uniforms['uniform_m']:
+                    uniforms = "M"
+                elif student.uniforms['uniform_l']:
+                    uniforms = "L"
+                elif student.uniforms['uniform_xl']:
+                    uniforms = "XL"
+                elif student.uniforms['uniform_xxl']:
+                    uniforms = "XXL"
+            else:
+                uniforms = "None"
+
+            if student.id_materials:
+                if student.id_materials['id_card']:
+                    id_materials = "ID Card"
+                if student.id_materials['id_lace']:
+                    id_materials += " ID Lace"
+            else:
+                id_materials = "None"
 
             table_data.append([
                 local_datetime,
@@ -1126,7 +1165,11 @@ def fetch_refund_dt(branch_id):
                 student.batch_number.number,
                 student.schedule,
                 str(total_amount_due),
-                student.contact_person.full_name
+                books,
+                uniforms,
+                id_materials,
+                student.contact_person.full_name,
+                str(student.fle),
             ])
 
     response = {
