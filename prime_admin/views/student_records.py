@@ -132,12 +132,16 @@ def get_dtbl_members():
         installment_registrations = installment_registrations.filter(balance__lte=0)
         full_payment_registrations = full_payment_registrations.filter(balance__lte=0)
         premium_payment_registrations = premium_payment_registrations.filter(balance__lte=0)
-
     elif payment_status == "NOT PAID":
         registrations = registrations.filter(balance__gt=0)
         installment_registrations = installment_registrations.filter(balance__gt=0)
         full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
         premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
+    elif payment_status == "REFUNDED":
+        registrations = registrations.filter(payment_mode='refund')
+        installment_registrations = installment_registrations.filter(payment_mode='refund')
+        full_payment_registrations = full_payment_registrations.filter(payment_mode='refund')
+        premium_payment_registrations = premium_payment_registrations.filter(payment_mode='refund')
     
     if payment_mode != "all":
         registrations = registrations.filter(payment_mode=payment_mode)
@@ -1063,31 +1067,29 @@ def refund():
             'status': 'error',
             'message': "Invalid password!"
         }), 500
+    student: Registration = Registration.objects.get(id=student_id)
     
     try:
         with mongo.cx.start_session() as session:
-            with session.start_transaction():
-                student: Registration = Registration.objects.get(id=student_id)
-                
-                mongo.db.lms_registrations.update_one({
-                    "_id": ObjectId(student_id)
-                },{"$set": {
-                    'status': "refunded",
-                    'payment_mode': 'refund'
-                }}, session=session)
-                
+            with session.start_transaction():                
+                with decimal.localcontext(D128_CTX):
+                    total_amount_due = student.amount * decimal.Decimal(".8")
+                    # refunded_balance = (total_amount_due - student.amount) + student.balance.to_decimal()
+
                 accounting = mongo.db.lms_accounting.find_one({
                     "branch": ObjectId(student.branch.id),
                 })
-
-                with decimal.localcontext(D128_CTX):
-                    total_amount_due = student.amount * decimal.Decimal(".2")
-
                 if accounting:
                     with decimal.localcontext(D128_CTX):
                         previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
                         new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
                         balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
+
+                        if total_amount_due > previous_fund_wallet.to_decimal():
+                            return jsonify({
+                                'status': 'error',
+                                'message': "Insufficient fund wallet balance"
+                            }), 500
 
                         mongo.db.lms_accounting.update_one({
                             "branch": ObjectId(student.branch.id)
@@ -1096,7 +1098,33 @@ def refund():
                             "total_fund_wallet": Decimal128(new_total_fund_wallet)
                         }},session=session)
                 else:
-                    raise Exception("Likes Error: Accounting data not found")
+                    return jsonify({
+                        'status': 'error',
+                        'message': "Accounting data not found"
+                    }), 500
+                
+                payment = {
+                    "_id": ObjectId(),
+                    "deposited": "Pre Deposit",
+                    "payment_mode": 'refund',
+                    "amount": Decimal128(str(total_amount_due)),
+                    "current_balance": Decimal128(str('0.00')),
+                    "confirm_by": current_user.id,
+                    "date": get_date_now(),
+                    "payment_by": ObjectId(student.id),
+                    "earnings": Decimal128('0'),
+                    "savings": Decimal128('0'),
+                }
+
+                mongo.db.lms_registrations.update_one({
+                    "_id": ObjectId(student_id)
+                },{"$set": {
+                    'status': "refunded",
+                    'payment_mode': 'refund'
+                },
+                    "$push": {
+                    'payments': payment
+                }}, session=session)
 
                 mongo.db.lms_fund_wallet_transactions.insert_one({
                     'type': 'expenses',

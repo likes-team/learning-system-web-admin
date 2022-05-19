@@ -300,8 +300,10 @@
         } );
             
         $('#tbl_members tbody').on('click', '.btn-view', function () {
+            $("#btn_refund").show();
+
             var data = table.row( $(this).parents('tr') ).data();
-            
+                        
             $.ajax({
                 url: '/learning-management/api/members/' + data[0],
                 type: "GET",
@@ -344,6 +346,10 @@
                             <td class="text-center">${response.data.payments[i].deposited}</td>
                             </tr>`
                             );
+                    }
+
+                    if(response.data.mode_of_payment == "refund"){
+                        $("#btn_refund").hide();
                     }
                 }
             });
@@ -869,7 +875,8 @@
                             location.reload();
                         },
                         error: function (response) {
-                            swal("Error Occured!", response.message, "error");
+                            console.log(response);
+                            swal("Error Occured!", response.responseJSON.message, "error");
                         },
                     });
                 }, 500);
@@ -1105,6 +1112,9 @@
                             </option>
                             <option value="NOT PAID">
                                 NOT PAID
+                            </option>
+                            <option value="REFUNDED">
+                                REFUNDED
                             </option>
                         </select>
                     </div>
