@@ -1,258 +1,498 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Student Information</title>
 
-		<style>
-			.invoice-box {
-				max-width: 800px;
-				margin: auto;
-				padding: 30px;
-				border: 1px solid #eee;
-				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-				font-size: 16px;
-				line-height: 24px;
-				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-				color: #555;
-			}
+<head>
+	<style>
+		@page {
+			size: letter landscape;
+			margin: 1cm;
+		}
 
-			.invoice-box table {
-				width: 100%;
-				line-height: inherit;
-				text-align: left;
-			}
+		.tbl_information tr.heading td {
+			border-bottom: 1px solid #ddd;
+			font-weight: bold;
+			font-size: 14px;
+		}
 
-			.invoice-box table td {
-				padding: 5px;
-				vertical-align: top;
-			}
+		.tbl_payment tr.heading td {
+			border-bottom: 1px solid #ddd;
+			font-weight: bold;
+			font-size: 15px;
+		}
+		
+		.tbl_payment .item td {
+			font-size: 16px;
+		}
 
-			.invoice-box table tr td:nth-child(2) {
-				text-align: right;
-			}
+		.tbl_information .item td {
+			font-size: 15px;
+		}
 
-			.invoice-box table tr.top table td {
-				padding-bottom: 20px;
-			}
+		.tbl_inclusion tr.heading td {
+			border-bottom: 1px solid #ddd;
+			font-weight: bold;
+			font-size: 15px;
+		}
 
-			.invoice-box table tr.top table td.title {
-				font-size: 45px;
-				line-height: 45px;
-				color: #333;
-			}
+		.inclusion-item {
+			font-size: 15px;
+		}
 
-			.invoice-box table tr.information table td {
-				padding-bottom: 40px;
-			}
+		.center-text {
+			text-align: center;
+			font-size: 16px;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+		.signature p {
+			text-decoration: overline;
+		}
+	</style>
+</head>
 
-			.invoice-box table tr.heading td {
-				background: #eee;
-				border-bottom: 1px solid #ddd;
-				font-weight: bold;
-			}
-
-			.invoice-box table tr.details td {
-				padding-bottom: 20px;
-			}
-
-			.invoice-box table tr.item td {
-				border-bottom: 1px solid #eee;
-			}
-
-			.invoice-box table tr.item.last td {
-				border-bottom: none;
-			}
-
-			.invoice-box table tr.total td:nth-child(2) {
-				border-top: 2px solid #eee;
-				font-weight: bold;
-			}
-
-			@media only screen and (max-width: 600px) {
-				.invoice-box table tr.top table td {
-					width: 100%;
-					display: block;
-					text-align: center;
-				}
-
-				.invoice-box table tr.information table td {
-					width: 100%;
-					display: block;
-					text-align: center;
-				}
-			}
-
-			/** RTL **/
-			.invoice-box.rtl {
-				direction: rtl;
-				font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-			}
-
-			.invoice-box.rtl table {
-				text-align: right;
-			}
-
-			.invoice-box.rtl table tr td:nth-child(2) {
-				text-align: left;
-			}
-		</style>
-	</head>
-
-	<body>
-		<div class="invoice-box">
-			<div style="text-align: center;">
-				<strong>CHOGI LANGUAGE AND TECHNOLOGY CENTER INCORPORATED</strong>
+<body>
+	<div style="width: 105%;">
+		<div style="width: 50%; height: 100px; float: left; padding: 5px 5px;">
+			<div style="text-align: center; font-size: 15px; margin: 0;">
+				<strong>PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</strong>
 			</div>
-			<div style="text-align: center;"><p style="font-size:smaller;">{{address}}</p></div>
-			<table cellpadding="0" cellspacing="0">
-				
-				<tr class="information">
-					<td colspan="2">
-						<table>
-							<tr>
-								<td>
-									<!-- First Name: <strong>{{student.fname}}</strong><br />
-									Last Name: <strong>{{student.lname}}</strong><br />
-									Middle Name: <strong>{{student.mname}}</strong><br />
-									Suffix: <strong>{{student.suffix}}</strong><br /> -->
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
+			<div style="text-align: center;">
+				<p style="font-size: 13px; margin: 0; padding: 0;">{{address}}</p>
+			</div>
+			<div style="text-align: center;">
+				<p style="font-size: 10px; margin: 0; padding: 0;">Landline: 0324252165 | Email Address: primesmd2022@gmail.com</p>
+			</div>
 
+			<div class="center-text">
+				<p>STUDENT RECORD</p>
+			</div>
+
+			<table class="tbl_information" cellpadding="0" cellspacing="0">
 				<tr class="heading">
-					<td>Student Information</td>
-
+					<td>
+						Personal Information
+					</td>
+					<td></td>
+					<td></td>
+					<td></td>
 					<td></td>
 				</tr>
-
 				<tr class="item">
-					<td>First Name</td>
-
-					<td>{{student.fname}}</td>
+					<td>Last Name:</td>
+					<td colspan="2">{{student.lname}}</td>
 				</tr>
 				<tr class="item">
-					<td>Last Name</td>
+					<td>First Name:</td>
 
-					<td>{{student.lname}}</td>
+					<td colspan="2">{{student.fname}}</td>
 				</tr>
 				<tr class="item">
-					<td>Middle Name</td>
+					<td>Middle Name:</td>
 
-					<td>{{student.mname}}</td>
+					<td colspan="2">{{student.mname}}</td>
 				</tr>
 				<tr class="item">
-					<td>Suffix</td>
-
+					<td>Suffix:</td>
 					<td>{{student.suffix}}</td>
 				</tr>
-
-
+				<tr class="item">
+					<td>Date of Birth:</td>
+					<td colspan="2">{{student.birth_date}}</td>
+				</tr>
+				<tr class="item">
+					<td>Address:</td>
+					<td style="font-size:10px;" colspan="3">{{student.address}}</td>
+				</tr>
+				<tr class="item">
+					<td>Mobile No.:</td>
+					<td colspan="2">{{student.contact_number}}</td>
+				</tr>
+				<tr class="item">
+					<td>Email Address:</td>
+					<td colspan="2">{{student.email}}</td>
+				</tr>
+				<tr class="item">
+					<td>Passport No.:</td>
+					<td colspan="2">{{student.passport}}</td>
+				</tr>
+				<tr class="item">
+					<td>E-Registration No.:</td>
+					<td colspan="2">{{student.e_registration}}</td>
+				</tr>
+				<tr class="item">
+					<td>Password:</td>
+					<td colspan="2">{{student.e_reg_password}}</td>
+				</tr>
+				<tr class="item signature">
+					<td></td>
+					<td></td>
+					<td></td>
+					<td colspan="1"><p>Student Signature</p></td>
+				</tr>
 				<tr class="heading">
-					<td>Mode of Payment</td>
-
-					<td>{{student.payment_mode.upper()}}</td>
-				</tr>
-				<tr class="item">
-					<td>Remarks</td>
-
-					<td>
-						{% if student.balance > 0 %}
-							Not Paid
-						{% else %}
-							Paid
-						{% endif %}
-
-					</td>
-				</tr>
-				<tr class="item">
-					<td>Amount</td>
-
-					<td>{{student.amount}}</td>
-				</tr>
-				<tr class="item">
-					<td>Balance</td>
-
-					<td>{{student.balance}}</td>
-				</tr>
-
-
-				<tr class="heading">
-					<td>Other Information</td>
-
+					<td>Payment Information</td>
+					<td></td>
+					<td></td>
+					<td>Materials</td>
 					<td></td>
 				</tr>
-
 				<tr class="item">
-					<td>Book</td>
+					<td>Mode of Payment:</td>
+					<td colspan="2">{{student.amount}}</td>
+						<td>Book V1:</td>
+						<td>
+							{% if student.books['book_none'] %}
+							NO
+							{% elif student.books['volume1']%}
+							YES
+							{% endif %}
+						</td>
+				</tr>
+				<tr class="item">
+					<td>Remarks:</td>
+					<td colspan="2">
+						{% if student.balance > 0 %}
+						Not Paid
+						{% else %}
+						Paid
+						{% endif %}
 
+					</td>
+					<td>Book V2:</td>
 					<td>
 						{% if student.books['book_none'] %}
-						No Book
-						{% elif student.books['volume1'] and student.books['volume2'] %}
-						Volume 1 & Volume 2
-						{% elif student.books['volume1'] %}
-						Volume 1
-						{% elif student.books['volume2'] %}
-						Volume 2
+						NO
+						{% elif student.books['volume2']%}
+						YES
 						{% endif %}
 					</td>
 				</tr>
-
 				<tr class="item">
-					<td>Uniform</td>
-
+					<td>Amount:</td>
+					<td colspan="2">{{student.amount}}</td>
+					<td>Uniform:</td>
 					<td>
-						{% if student.uniforms['book_none'] %}
-						No Uniform
+						{% if student.uniforms['uniform_none'] %}
+						NO
 						{% elif student.uniforms['uniform_xs'] %}
-						Extra Small (xs)
+						YES
 						{% elif student.uniforms['uniform_s'] %}
-						Small (s)
+						YES
 						{% elif student.uniforms['uniform_m'] %}
-						Medium (m)
+						YES
 						{% elif student.uniforms['uniform_l'] %}
-						Large (l)
+						YES
 						{% elif student.uniforms['uniform_xl'] %}
-						Extra Large (xl)
+						YES
 						{% elif student.uniforms['uniform_xxl'] %}
-						Double Extra Large (xxl)
-						{% endif %}						
+						YES
+						{% endif %}
 					</td>
+
 				</tr>
-
-				<tr class="item last">
-					<td>Others</td>
-
+				<tr class="item">
+					<td>Balance:</td>
+					<td colspan="2">{{student.balance}}</td>
+					<td>ID Card/Lace:</td>
 					<td>
-					</td>
-				</tr>
-
-				<tr class="information">
-					<td colspan="2">
-						<table>
-							<tr>
-								<td>
-									<strong>INCLUSION:</strong><br />
-									- Full Assistance for EPS TOPIK REGISTRATION<br />
-									- FREE Korean language training<br />
-									- FREE Skill test training<br />
-									- FREE Passport appointment
-								</td>
-								<td style="text-align: left;">
-									<br />
-									- FINANCIAL ASSISTANCE<br />
-									- OPEN TO LOAN up to<br />
-									- Php 50,000.00<br />
-									(Note: If already have an employer)
-								</td>
-							</tr>
-						</table>
+						{% if student.id_materials['id_card'] %}
+						YES
+						{% elif student.id_materials['id_lace'] %}
+						YES
+						{% else%}
+						NO
+						{% endif %}
 					</td>
 				</tr>
 			</table>
+
+			<div>
+				
+			</div>
+			<table style="margin-top: 15px;" class="tbl_inclusion" cellpadding="20" cellspacing="20">
+				<tr class="heading">
+					<td>Inclusion</td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>E-Registration Assistance</td>
+					<td colspan="20"></td>
+
+					<td>Passport Appointment</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>EPS-Topik Registration</td>
+					<td colspan="20"></td>
+
+					
+					<td>Financial Assistance</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>Korean Language Training</td>
+					<td colspan="20"></td>
+
+					<td>Unlimited Sit-in</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>Skill Test Training</td>
+					<td colspan="20"></td>
+
+				</tr>
+			</table>
+
+			<table class="tbl_information" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+				<tr class="item">
+					<td>EPS-TOPIK Test Fee:</td>
+					<td style="text-decoration: underline;">Php</td>
+				</tr>
+				<tr class="item signature">
+					<td></td>
+					<td colspan="40"></td>
+					<td><p>Receiver Signature</p></td>
+				</tr>
+			</table>
 		</div>
-	</body>
+
+		 <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!S -->
+		<div style="margin-left: 50%; height: 100px; padding: 5px 5px;">
+			<div style="text-align: center; font-size: 15px; margin: 0;">
+				<strong>PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</strong>
+			</div>
+			<div style="text-align: center;">
+				<p style="font-size: 13px; margin: 0; padding: 0;">{{address}}</p>
+			</div>
+			<div style="text-align: center;">
+				<p style="font-size: 10px; margin: 0; padding: 0;">Landline: 0324252165 | Email Address: primesmd2022@gmail.com</p>
+			</div>
+
+			<div class="center-text">
+				<p>STUDENT RECORD</p>
+			</div>
+
+			<table class="tbl_information" cellpadding="0" cellspacing="0">
+				<tr class="heading">
+					<td>
+						Personal Information
+					</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="item">
+					<td>Last Name:</td>
+					<td colspan="2">{{student.lname}}</td>
+				</tr>
+				<tr class="item">
+					<td>First Name:</td>
+
+					<td colspan="2">{{student.fname}}</td>
+				</tr>
+				<tr class="item">
+					<td>Middle Name:</td>
+
+					<td colspan="2">{{student.mname}}</td>
+				</tr>
+				<tr class="item">
+					<td>Suffix:</td>
+					<td>{{student.suffix}}</td>
+				</tr>
+				<tr class="item">
+					<td>Date of Birth:</td>
+					<td colspan="2">{{student.birth_date}}</td>
+				</tr>
+				<tr class="item">
+					<td>Address:</td>
+					<td style="font-size:10px;" colspan="3">{{student.address}}</td>
+				</tr>
+				<tr class="item">
+					<td>Mobile No.:</td>
+					<td colspan="2">{{student.contact_number}}</td>
+				</tr>
+				<tr class="item">
+					<td>Email Address:</td>
+					<td colspan="2">{{student.email}}</td>
+				</tr>
+				<tr class="item">
+					<td>Passport No.:</td>
+					<td colspan="2">{{student.passport}}</td>
+				</tr>
+				<tr class="item">
+					<td>E-Registration No.:</td>
+					<td colspan="2">{{student.e_registration}}</td>
+				</tr>
+				<tr class="item">
+					<td>Password:</td>
+					<td colspan="2">{{student.e_reg_password}}</td>
+				</tr>
+				<tr class="item signature">
+					<td></td>
+					<td></td>
+					<td></td>
+					<td colspan="1"><p>Student Signature</p></td>
+				</tr>
+				<tr class="heading">
+					<td>Payment Information</td>
+					<td></td>
+					<td></td>
+					<td>Materials</td>
+					<td></td>
+				</tr>
+				<tr class="item">
+					<td>Mode of Payment:</td>
+					<td colspan="2">{{student.amount}}</td>
+						<td>Book V1:</td>
+						<td>
+							{% if student.books['book_none'] %}
+							NO
+							{% elif student.books['volume1']%}
+							YES
+							{% endif %}
+						</td>
+				</tr>
+				<tr class="item">
+					<td>Remarks:</td>
+					<td colspan="2">
+						{% if student.balance > 0 %}
+						Not Paid
+						{% else %}
+						Paid
+						{% endif %}
+
+					</td>
+					<td>Book V2:</td>
+					<td>
+						{% if student.books['book_none'] %}
+						NO
+						{% elif student.books['volume2']%}
+						YES
+						{% endif %}
+					</td>
+				</tr>
+				<tr class="item">
+					<td>Amount:</td>
+					<td colspan="2">{{student.amount}}</td>
+					<td>Uniform:</td>
+					<td>
+						{% if student.uniforms['uniform_none'] %}
+						NO
+						{% elif student.uniforms['uniform_xs'] %}
+						YES
+						{% elif student.uniforms['uniform_s'] %}
+						YES
+						{% elif student.uniforms['uniform_m'] %}
+						YES
+						{% elif student.uniforms['uniform_l'] %}
+						YES
+						{% elif student.uniforms['uniform_xl'] %}
+						YES
+						{% elif student.uniforms['uniform_xxl'] %}
+						YES
+						{% endif %}
+					</td>
+				</tr>
+				<tr class="item">
+					<td>Balance:</td>
+					<td colspan="2">{{student.balance}}</td>
+					<td>ID Card/Lace:</td>
+					<td>
+						{% if student.id_materials['id_card'] %}
+						YES
+						{% elif student.id_materials['id_lace'] %}
+						YES
+						{% else%}
+						NO
+						{% endif %}
+					</td>
+				</tr>
+			</table>
+
+			<div>
+				
+			</div>
+			<table style="margin-top: 15px;" class="tbl_inclusion" cellpadding="20" cellspacing="20">
+				<tr class="heading">
+					<td>Inclusion</td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+					<td ></td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>E-Registration Assistance</td>
+					<td colspan="20"></td>
+
+					<td>Passport Appointment</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>EPS-Topik Registration</td>
+					<td colspan="20"></td>
+
+					
+					<td>Financial Assistance</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>Korean Language Training</td>
+					<td colspan="20"></td>
+
+					<td>Unlimited Sit-in</td>
+				</tr>
+				<tr class="inclusion-item">
+					<td>Skill Test Training</td>
+					<td colspan="20"></td>
+
+				</tr>
+			</table>
+
+			<table class="tbl_information" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+				<tr class="item">
+					<td>EPS-TOPIK Test Fee:</td>
+					<td style="text-decoration: underline;">Php</td>
+				</tr>
+				<tr class="item signature">
+					<td></td>
+					<td colspan="40"></td>
+					<td><p style="padding-top: 3px; margin-top: 5px;">Receiver Signature</p></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
 </html>
