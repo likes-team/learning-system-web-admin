@@ -44,7 +44,21 @@ class="nav-background border border-left-0 border-right-0 border-top-0 navbar na
                 role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Branches</a>
             </li>
         </ul>
-        <!-- <a class="btn btn-light ml-lg-auto pl-4 pr-4 rounded-pill" href="#">Log In</a> -->
+        <ul class="navbar-nav" style="margin-left: 30px;">
+            <li class="nav-item dropdown">
+                <a href="https://www.dmw.gov.ph" class="nav-link px-lg-3 py-lg-4" 
+                    role="button" aria-haspopup="true" aria-expanded="false">DMW</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="https://eps.hrdkorea.or.kr/epstopik/home/main/mainPage.do?lang=en" class="nav-link px-lg-3 py-lg-4"
+                    role="button" aria-haspopup="true" aria-expanded="false">EPS-TOPIK</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="https://onlineservices.dmw.gov.ph//OnlineServices/POEAOnline.aspx" class="nav-link px-lg-3 py-lg-4" id="navbarDropdownMenuLink"
+                    role="button" aria-haspopup="true" aria-expanded="false">E-Registration</a>
+            </li>
+        </ul>
+        <a class="btn btn-light ml-lg-auto pl-4 pr-4 rounded-pill" href="{{url_for('bp_auth.login')}}">Log In</a>
     </div>
 </div>
 </nav>
