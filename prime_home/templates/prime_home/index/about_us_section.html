@@ -20,6 +20,11 @@ id="about">
                 <h5 data-aos="zoom-in" data-aos-duration="5000" class="h5 mb-4 text-dark">Welcome to our team
                 </h5>
             <!-- <a data-aos="zoom-in" data-aos-duration="5000" class="btn btn-danger pl-4 pr-4 rounded-pill" href="#">Learn More</a> -->
+            <div data-aos="zoom-in" class="embed-responsive embed-responsive-16by9 mb-4">
+                <video width="560" class="embed-responsive-item" controls>
+                    <source src="{{url_for('prime_home.static', filename='img/welcome_vid_1.mp4')}}" type="video/mp4">
+                </video>
+            </div>
             <div class="pb-4 pt-4 text-center">
                 <a style="color: white;" class="btn primary-color pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.about')}}">View More</a>
             </div>
