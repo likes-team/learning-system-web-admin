@@ -126,7 +126,6 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             str(total_amount_due) if statement_type == "expenses" else '',
             str(round(running_balance, 2)),
             created_by,
-            remarks
         ])
 
     response = {
@@ -219,7 +218,6 @@ def fetch_add_funds_transactions_dt(branch_id):
             sender,
             receiver,
             str(amount_received),
-            remarks,
         ])
 
     response = {
@@ -415,7 +413,6 @@ def fetch_business_expenses_dt(branch_id):
                 billing_month_to = transaction.get('billing_month_to', '')
                 settled_by = transaction.get('settled_by', '')
                 total_amount_due = transaction.get('total_amount_due', 0.00)
-                remarks = transaction.get('remarks', 0.00)
                 
                 month_index = transaction_date.month
                 if category == "utilities":
@@ -477,7 +474,6 @@ def fund_wallet_add_fund():
         amount_received = format(float(form.get('amount_received')), '.2f')
         sender = form.get('sender', '')
         receiver = form.get('receiver', '')
-        remarks = form.get('remarks')
         
         with mongo.cx.start_session() as session:
             with session.start_transaction():
@@ -532,7 +528,6 @@ def fund_wallet_add_fund():
                     'sender': sender,
                     'amount_received': Decimal128(amount_received),
                     'receiver': receiver,
-                    'remarks':remarks,
                     'previous_total_fund_wallet': previous_fund_wallet,
                     'new_total_fund_wallet': Decimal128(new_total_fund_wallet),
                     'created_at': get_date_now(),
@@ -566,7 +561,6 @@ def fund_wallet_add_expenses():
         unit_price = format(float(form.get('unit_price', '0.00')), '.2f')
         settled_by = form.get('settled_by', '')
         total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
-        remarks = form.get('remarks', '')
         branch_id = form.get('branch', None)
         
         with mongo.cx.start_session() as session:
@@ -604,7 +598,6 @@ def fund_wallet_add_expenses():
                     'unit_price': unit_price,
                     'total_amount_due': Decimal128(total_amount_due),
                     'settled_by': settled_by,
-                    'remarks':remarks,
                     'created_at': get_date_now(),
                     'created_by': current_user.fname + " " + current_user.lname
                 },session=session)
@@ -676,7 +669,6 @@ def fetch_utilities_dt(branch_id):
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
             total_amount_due = transaction.get('total_amount_due', 0.00)
-            remarks = transaction.get('remarks', 0.00)
             remittance = transaction.get('remittance', '')
         
             if type(transaction_date == datetime):
@@ -697,7 +689,6 @@ def fetch_utilities_dt(branch_id):
                 billing_month,
                 str(total_amount_due),
                 settled_by,
-                remarks,
             ])
 
     response = {
@@ -1024,7 +1015,6 @@ def fetch_other_expenses_dt(branch_id):
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
             total_amount_due = transaction.get('total_amount_due', 0.00)
-            remarks = transaction.get('remarks', 0.00)
         
             if type(transaction_date == datetime):
                 local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
@@ -1041,7 +1031,6 @@ def fetch_other_expenses_dt(branch_id):
                 description,
                 str(total_amount_due),
                 settled_by,
-                remarks
             ])
 
     response = {
@@ -1105,7 +1094,6 @@ def fetch_refund_dt(branch_id):
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
             total_amount_due = transaction.get('total_amount_due', 0.00)
-            remarks = transaction.get('remarks', 0.00)
         
             if type(transaction_date == datetime):
                 local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
