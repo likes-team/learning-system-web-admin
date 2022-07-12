@@ -414,7 +414,8 @@ def fetch_business_expenses_dt(branch_id):
                 settled_by = transaction.get('settled_by', '')
                 total_amount_due = transaction.get('total_amount_due', 0.00)
                 
-                month_index = transaction_date.month
+                month_index = transaction_date.month - 1
+                print("transaction_date.month:::" + str(transaction_date.month))
                 if category == "utilities":
                     total_utilities = total_utilities + total_amount_due.to_decimal()
                     expenses_data['UTILITIES'][month_index] += total_amount_due.to_decimal()
