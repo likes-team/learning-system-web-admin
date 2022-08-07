@@ -68,3 +68,76 @@ body {
 .tree li a:hover+ul li::after, .tree li a:hover+ul li::before, .tree li a:hover+ul::before, .tree li a:hover+ul ul::before {
 	border-color: #94a0b4;
 }
+
+/*tooltip message*/
+
+li .contentrs{
+    	position: absolute;
+    	bottom: 55px;
+   	 width: 400px;
+    	background: #333;
+    	padding: 20px;
+    	box-sizing: border-box;
+    	border-radius: 4px;
+    	visibility: hidden;
+    	opacity: 0;
+    	transition: 0.5s;
+    	transform: translateX(55%) translateY(250px);
+}
+
+li .contentrs::before{
+    	content: '';
+    	position: absolute;
+    	width: 30px;
+    	height: 30px;
+	background: #333;
+	top: 50%;    
+	left: -20px;
+	bottom: -15px;	
+    	transform: rotate(45deg);
+}
+
+li:hover .contentrs{
+    	visibility: visible;
+    	opacity: 1;
+    	transform: translateX(55%) translateY(200px);
+	background: #86ff3b;
+    	box-shadow: 0 0 0 4px #333,
+                0 0 0 6px #86ff3b;
+}
+
+
+ul li .content{
+    	position: absolute;
+    	bottom: 55px;
+    	width: 400px;
+    	background: #333;
+    	padding: 20px;
+    	box-sizing: border-box;
+    	border-radius: 4px;
+    	visibility: hidden;
+    	opacity: 0;
+    	transition: 0.5s;
+    	transform: translateX(-100%) translateY(-10px);
+}
+
+ul li .content::before{
+    	content: '';
+    	position: absolute;
+   	width: 30px;
+    	height: 30px;
+    	background: #333;
+    	top: 70%;
+    	left: 385px;
+    	bottom: -15px;
+    	transform: rotate(45deg);
+}
+
+ul li:hover .content{
+    	visibility: visible;
+   	opacity: 1;
+	transform: translateX(-100%) translateY(0px);
+	background: #86ff3b;
+	box-shadow: 0 0 0 4px #333,
+                0 0 0 6px #86ff3b;
+}
