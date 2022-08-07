@@ -1066,7 +1066,7 @@ def refund():
         return jsonify({
             'status': 'error',
             'message': "Invalid password!"
-        }), 500
+        }), 400
     student: Registration = Registration.objects.get(id=student_id)
     
     try:

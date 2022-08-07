@@ -18,7 +18,7 @@ from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
 from bson import Decimal128
 from app import mongo
-
+import pymongo
 
 
 D128_CTX = create_decimal128_context()
@@ -375,6 +375,9 @@ def get_cash_flow():
     # column_order = request.args.get('column_order')
     branch_id = request.args.get('branch')
     from_what = request.args.get('from_what')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    transaction_type = request.args.get('transaction_type', '')
 
     if branch_id == 'all':
         response = {
@@ -388,18 +391,23 @@ def get_cash_flow():
             'fund1': 0.00,
             'fund2': 0.00,
             'finalFund1': 0.00,
-            'finalFund2': 0.00
+            'finalFund2': 0.00,
+            'totalDeposit': 0.00,
+            'totalWithdrawal': 0.00,
+            'totalCurrentBalance': 0.00
         }
 
         return jsonify(response)
         # bank_statements = CashFlow.objects.skip(start).limit(length)
-        
+    
     if current_user.role.name == "Secretary":
         accounting = Accounting.objects(branch=current_user.branch.id).first()
     else:
         accounting = Accounting.objects(branch=branch_id).first()
 
     if accounting:
+        filter: dict = {}
+                
         total_gross_sales = accounting.total_gross_sale
         remaining = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.05)
         net = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.55)
@@ -410,14 +418,33 @@ def get_cash_flow():
 
         if current_user.role.name == "Secretary":
             if from_what == "sales":
-                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
+                filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': 'Sales'}
+                # bank_statements = CashFlow.objects(branch=).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
-                bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
+                filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': {'$ne': 'Sales'}}
+                # bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         else:
             if from_what == "sales":
-                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
+                filter = {'branch': ObjectId(branch_id), 'group': accounting.active_group, 'from_what': 'Sales'}
+                # bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
-                bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
+                filter = {'branch': ObjectId(branch_id), 'group': accounting.active_group, 'from_what': {'$ne': 'Sales'}}
+                # bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
+        
+        if date_from != "":
+            print('date_from: ' + date_from)
+            filter['date_deposit'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+        
+        if date_to != "":
+            if 'date_deposit' in filter:
+                filter['date_deposit']['$lt'] = convert_to_utc(date_to, 'date_to')
+            else:
+                filter['date_deposit'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+        
+        if transaction_type != "":
+            filter['type'] = transaction_type
+
+        bank_statements = mongo.db.lms_bank_statements.find(filter).sort('date_deposit', pymongo.DESCENDING).skip(start).limit(length)
         recordsTotal = bank_statements.count(),
         recordsFiltered = bank_statements.count(),
     else:
@@ -433,40 +460,86 @@ def get_cash_flow():
         bank_statements = []
 
     _table_data = []
+    total_deposit = decimal.Decimal(0)
+    total_withdrawal = decimal.Decimal(0)
+    total_current_balance = decimal.Decimal(0)
 
     if current_user.role.name == "Secretary":
-        for statement in bank_statements:
-            _table_data.append((
-                str(statement.id),
-                statement.date_deposit,
-                statement.bank_name,
-                statement.account_no,
-                statement.account_name,
-                str(statement.amount),
-                statement.from_what,
-                statement.by_who,
-                statement.remarks,
-                statement.group,
-                ''
-            ))
+        with decimal.localcontext(D128_CTX):
+            for statement in bank_statements:
+                _id = statement.get('_id', '')
+                date_deposit = statement.get('date_deposit', None)
+                bank_name = statement.get('bank_name', '')
+                account_no = statement.get('account_no', '')
+                account_name = statement.get('account_name', '')
+                amount = statement.get('amount').to_decimal()
+                from_what = statement.get('fron_what', '')
+                by_who = statement.get('by_who', '')
+                remarks = statement.get('remarks', '')
+                group = statement.get('group')
+                _type = statement.get('type')
+                
+                if _type == 'deposit':
+                    total_deposit = total_deposit + amount
+                elif _type == 'withdraw':
+                    total_withdrawal = total_withdrawal + amount
+                
+                _table_data.append((
+                    str(_id),
+                    date_deposit,
+                    bank_name,
+                    account_no,
+                    account_name,
+                    str(amount),
+                    from_what,
+                    by_who,
+                    remarks,
+                    group,
+                    ''
+                ))
     else:
-        for statement in bank_statements:
-            _table_data.append((
-                str(statement.id),
-                statement.date_deposit,
-                '' if statement.type == 'withdraw' else str(statement.amount),
-                '' if statement.type == 'withdraw' else statement.from_what,
-                '' if statement.type == "deposit" else str(statement.amount),
-                str(statement.balance) if statement.balance is not None else '',
-                '' if statement.type == "deposit" else statement.from_what,
-                statement.bank_name,
-                statement.account_no,
-                statement.account_name,
-                statement.by_who,
-                statement.remarks,
-                statement.group,
-                ''
-            ))
+        with decimal.localcontext(D128_CTX):
+            for statement in bank_statements:
+                _id = statement.get('_id', '')
+                date_deposit = statement.get('date_deposit', None)
+                bank_name = statement.get('bank_name', '')
+                account_no = statement.get('account_no', '')
+                account_name = statement.get('account_name', '')
+                amount = statement.get('amount').to_decimal()
+                from_what = statement.get('fron_what', '')
+                by_who = statement.get('by_who', '')
+                remarks = statement.get('remarks', '')
+                group = statement.get('group')
+                balance = statement.get('balance', 0.00)
+                _type = statement.get('type')
+                
+                if _type == 'deposit':
+                    total_deposit = total_deposit + amount
+                elif _type == 'withdraw':
+                    total_withdrawal = total_withdrawal + amount
+                
+                _table_data.append((
+                    str(id),
+                    date_deposit,
+                    '' if _type == 'withdraw' else str(amount),
+                    '' if _type == 'withdraw' else from_what,
+                    '' if _type == "deposit" else str(amount),
+                    str(balance) if balance is not None else '',
+                    '' if _type == "deposit" else from_what,
+                    bank_name,
+                    account_no,
+                    account_name,
+                    by_who,
+                    remarks,
+                    group,
+                    ''
+                ))
+            
+    total_current_balance = total_deposit - total_withdrawal
+
+    print("total_deposit:")
+    print(total_deposit)
+
 
     response = {
         'draw': draw,
@@ -479,7 +552,10 @@ def get_cash_flow():
         'fund1': str(fund1),
         'fund2': str(fund2),
         'finalFund1': str(final_fund1),
-        'finalFund2': str(final_fund2)
+        'finalFund2': str(final_fund2),
+        'totalDeposit': str(total_deposit),
+        'totalWithdrawal': str(total_withdrawal),
+        'totalCurrentBalance': str(total_current_balance)
     }
 
     return jsonify(response)
