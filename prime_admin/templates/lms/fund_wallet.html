@@ -417,6 +417,10 @@
                 $("#description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
                 $("#description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
                 $("#description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
+                $("#description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
+                $("#description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
+                $("#description").append($('<option></option>').attr("value", "Logo").text("Logo"));
+                $("#description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
                 
                 $("#account_no").prop('disabled', true);
                 $("#billing_month_from").prop('disabled', true);
@@ -453,7 +457,11 @@
                 $("#description").append($('<option></option>').attr("value", "ADVERTISING FEE").text("ADVERTISING FEE"));
                 $("#description").append($('<option></option>').attr("value", "TARPAULEN").text("TARPAULEN"));
                 $("#description").append($('<option></option>').attr("value", "COMPUTER REPAIR").text("COMPUTER REPAIR"));
-                $("#description").append($('<option></option>').attr("value", "PRINTER REPAIR").text("PRINTER REPAIR"));
+                $("#description").append($('<option></option>').attr("value", "BUCKET").text("BUCKET"));
+                $("#description").append($('<option></option>').attr("value", "GAS STOVE").text("GAS STOVE"));
+                $("#description").append($('<option></option>').attr("value", "BULB").text("BULB"));
+                $("#description").append($('<option></option>').attr("value", "BATTERY").text("BATTERY"));
+                $("#description").append($('<option></option>').attr("value", "LAPEL").text("LAPEL"));
             }
         });
 
@@ -616,6 +624,10 @@
                 $("#filter_description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
                 $("#filter_description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
                 $("#filter_description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
+                $("#filter_description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
+                $("#filter_description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
+                $("#filter_description").append($('<option></option>').attr("value", "Logo").text("Logo"));
+                $("#filter_description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
                 
             } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
                 getContactPersons($("#btn_branch_label").val(), "filter");
@@ -682,6 +694,10 @@
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Logo").text("Logo"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
             } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
                 getContactPersons($("#btn_branch_label").val(), "filter_tab3");
             } else if (selectedCategory == "other_expenses") {
