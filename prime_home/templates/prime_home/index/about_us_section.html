@@ -3,16 +3,19 @@ id="about">
 <div class="container pb-5 pt-5">
     <div class="row">
         <div class="col-lg-12 ml-auto mr-auto">
-           
             <!-- <a data-aos="zoom-in" data-aos-duration="5000" class="btn btn-danger pl-4 pr-4 rounded-pill" href="#">Learn More</a> -->
             <div data-aos="zoom-in" class="embed-responsive embed-responsive-16by9 mb-4">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/AXtGLSUk1HQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <video id="vid_welcome" width="560" height="315" controls autoplay muted>
+                    <source src="{{url_for('prime_home.static', filename='img/welcome_vid_1.mp4')}}" type="video/mp4">
+                  </video>
             </div>
             <div class="pb-4 pt-4 text-center">
                 <a style="color: white;" class="btn primary-color pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.about')}}">View More</a>
             </div>
+            <script>
+                document.getElementById('vid_welcome').play();
+            </script>
         </div>
- 
     </div>
 </div>
 </section>
