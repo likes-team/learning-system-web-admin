@@ -373,55 +373,14 @@
                 $("#qty").rules('remove');
                 $("#unit_price").rules('remove');
             } else if (selectedCategory == "office_supply") {
-                $("#description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
-                $("#description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
-                $("#description").append($('<option></option>').attr("value", "Epson Ink (Black)").text("Epson Ink (Black)"));
-                $("#description").append($('<option></option>').attr("value", "Epson Ink (Yellow)").text("Epson Ink (Yellow)"));
-                $("#description").append($('<option></option>').attr("value", "Epson Ink (Blue)").text("Epson Ink (Blue)"));
-                $("#description").append($('<option></option>').attr("value", "Epson Ink (Pink)").text("Epson Ink (Pink)"));
-                $("#description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
-                $("#description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
-                $("#description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
-                $("#description").append($('<option></option>').attr("value", "PVC Cover (8.5x11) 100pcs").text("PVC Cover (8.5x11) 100pcs"));
-                $("#description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
-                $("#description").append($('<option></option>').attr("value", "Stapler").text("Stapler"));
-                $("#description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
-                $("#description").append($('<option></option>').attr("value", "Staple Wire (23/24)").text("Staple Wire (23/24)"));
-                $("#description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
-                $("#description").append($('<option></option>').attr("value", "Vellum (Worx 8.5x11)").text("Vellum (Worx 8.5x11)"));
-                $("#description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
-                $("#description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
-                $("#description").append($('<option></option>').attr("value", "Parchment (10 pcs per pack)").text("Parchment (10 pcs per pack)"));
-                $("#description").append($('<option></option>').attr("value", "Ball Pen").text("Ball Pen"));
-                $("#description").append($('<option></option>').attr("value", "Ball Pen (50 pcs)").text("Ball Pen (50 pcs)"));
-                $("#description").append($('<option></option>').attr("value", "Notebook (50 pcs)").text("Notebook (50 pcs)"));
-                $("#description").append($('<option></option>').attr("value", "Medal").text("Medal"));
-                $("#description").append($('<option></option>').attr("value", "Ribbon").text("Ribbon"));
-                $("#description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
-                $("#description").append($('<option></option>').attr("value", "Notarial Seals Ribbon (10 pcs per box)").text("Notarial Seals Ribbon (10 pcs per box)"));
-                $("#description").append($('<option></option>').attr("value", "Computer").text("Computer"));
-                $("#description").append($('<option></option>').attr("value", "Aircon").text("Aircon"));
-                $("#description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
-                $("#description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
-                $("#description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
-                $("#description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
-                $("#description").append($('<option></option>').attr("value", "Printer").text("Printer"));
-                $("#description").append($('<option></option>').attr("value", "Laptop").text("Laptop"));
-                $("#description").append($('<option></option>').attr("value", "Projector").text("Projector"));
-                $("#description").append($('<option></option>').attr("value", "Chair").text("Chair"));
-                $("#description").append($('<option></option>').attr("value", "Arm Chair").text("Arm Chair"));
-                $("#description").append($('<option></option>').attr("value", "Whiteboard").text("Whiteboard"));
-                $("#description").append($('<option></option>').attr("value", "Scissor").text("Scissor"));
-                $("#description").append($('<option></option>').attr("value", "Calculator").text("Calculator"));
-                $("#description").append($('<option></option>').attr("value", "Correction Pen").text("Correction Pen"));
-                $("#description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
-                $("#description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
-                $("#description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
-                $("#description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
-                $("#description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
-                $("#description").append($('<option></option>').attr("value", "Logo").text("Logo"));
-                $("#description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
-                
+                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
                 $("#account_no").prop('disabled', true);
                 $("#billing_month_from").prop('disabled', true);
                 $("#billing_month_to").prop('disabled', true);
@@ -463,6 +422,13 @@
                 $("#description").append($('<option></option>').attr("value", "BATTERY").text("BATTERY"));
                 $("#description").append($('<option></option>').attr("value", "LAPEL").text("LAPEL"));
             }
+        });
+
+        $("#description").change(function(){
+            $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){
+                $("#unit_price").val(response.data.price);
+                $("#unit_price").change();
+            });
         });
 
         $("#qty").change(function () {
@@ -580,55 +546,14 @@
                 $("#filter_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#filter_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
             } else if (selectedCategory == "office_supply") {
-                $("#filter_description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
-                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
-                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink (Black)").text("Epson Ink (Black)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink (Yellow)").text("Epson Ink (Yellow)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink (Blue)").text("Epson Ink (Blue)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Epson Ink (Pink)").text("Epson Ink (Pink)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
-                $("#filter_description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
-                $("#filter_description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
-                $("#filter_description").append($('<option></option>').attr("value", "PVC Cover (8.5x11) 100pcs").text("PVC Cover (8.5x11) 100pcs"));
-                $("#filter_description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
-                $("#filter_description").append($('<option></option>').attr("value", "Stapler").text("Stapler"));
-                $("#filter_description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
-                $("#filter_description").append($('<option></option>').attr("value", "Staple Wire (23/24)").text("Staple Wire (23/24)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
-                $("#filter_description").append($('<option></option>').attr("value", "Vellum (Worx 8.5x11)").text("Vellum (Worx 8.5x11)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
-                $("#filter_description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
-                $("#filter_description").append($('<option></option>').attr("value", "Parchment (10 pcs per pack)").text("Parchment (10 pcs per pack)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Ball Pen").text("Ball Pen"));
-                $("#filter_description").append($('<option></option>').attr("value", "Ball Pen (50 pcs)").text("Ball Pen (50 pcs)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Notebook (50 pcs)").text("Notebook (50 pcs)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Medal").text("Medal"));
-                $("#filter_description").append($('<option></option>').attr("value", "Ribbon").text("Ribbon"));
-                $("#filter_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
-                $("#filter_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon (10 pcs per box)").text("Notarial Seals Ribbon (10 pcs per box)"));
-                $("#filter_description").append($('<option></option>').attr("value", "Computer").text("Computer"));
-                $("#filter_description").append($('<option></option>').attr("value", "Aircon").text("Aircon"));
-                $("#filter_description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
-                $("#filter_description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
-                $("#filter_description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
-                $("#filter_description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
-                $("#filter_description").append($('<option></option>').attr("value", "Printer").text("Printer"));
-                $("#filter_description").append($('<option></option>').attr("value", "Laptop").text("Laptop"));
-                $("#filter_description").append($('<option></option>').attr("value", "Projector").text("Projector"));
-                $("#filter_description").append($('<option></option>').attr("value", "Chair").text("Chair"));
-                $("#filter_description").append($('<option></option>').attr("value", "Arm Chair").text("Arm Chair"));
-                $("#filter_description").append($('<option></option>').attr("value", "Whiteboard").text("Whiteboard"));
-                $("#filter_description").append($('<option></option>').attr("value", "Scissor").text("Scissor"));
-                $("#filter_description").append($('<option></option>').attr("value", "Calculator").text("Calculator"));
-                $("#filter_description").append($('<option></option>').attr("value", "Correction Pen").text("Correction Pen"));
-                $("#filter_description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
-                $("#filter_description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
-                $("#filter_description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
-                $("#filter_description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
-                $("#filter_description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
-                $("#filter_description").append($('<option></option>').attr("value", "Logo").text("Logo"));
-                $("#filter_description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
-                
+                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#filter_description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
             } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
                 getContactPersons($("#btn_branch_label").val(), "filter");
             } else if (selectedCategory == "other_expenses") {
@@ -650,54 +575,14 @@
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
             } else if (selectedCategory == "office_supply") {
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Bond Paper").text("Bond Paper"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink").text("Epson Ink"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink (Black)").text("Epson Ink (Black)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink (Yellow)").text("Epson Ink (Yellow)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink (Blue)").text("Epson Ink (Blue)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Epson Ink (Pink)").text("Epson Ink (Pink)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Whiteboard Marker").text("Whiteboard Marker"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Whiteboard Marker Ink").text("Whiteboard Marker Ink"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "PVC Cover").text("PVC Cover"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "PVC Cover (8.5x11) 100pcs").text("PVC Cover (8.5x11) 100pcs"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Photo Paper").text("Photo Paper"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Stapler").text("Stapler"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Staple Wire").text("Staple Wire"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Staple Wire (23/24)").text("Staple Wire (23/24)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Vellum").text("Vellum"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Vellum (Worx 8.5x11)").text("Vellum (Worx 8.5x11)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ductape").text("Ductape"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Parchment").text("Parchment"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Parchment (10 pcs per pack)").text("Parchment (10 pcs per pack)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ball Pen").text("Ball Pen"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ball Pen (50 pcs)").text("Ball Pen (50 pcs)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Notebook (50 pcs)").text("Notebook (50 pcs)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Medal").text("Medal"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Ribbon").text("Ribbon"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon").text("Notarial Seals Ribbon"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Notarial Seals Ribbon (10 pcs per box)").text("Notarial Seals Ribbon (10 pcs per box)"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Computer").text("Computer"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Aircon").text("Aircon"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Alcohol").text("Alcohol"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Air Freshener").text("Air Freshener"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Bathroom Cleaner").text("Bathroom Cleaner"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Refill").text("Water Refill"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Printer").text("Printer"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Laptop").text("Laptop"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Projector").text("Projector"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Chair").text("Chair"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Arm Chair").text("Arm Chair"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Whiteboard").text("Whiteboard"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Scissor").text("Scissor"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Calculator").text("Calculator"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Correction Pen").text("Correction Pen"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Highlighter").text("Highlighter"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Push Pen").text("Push Pen"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Binder Clip").text("Binder Clip"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "T-shirt Budget").text("T-shirt Budget"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Polo shirt Budget").text("Polo shirt Budget"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Logo").text("Logo"));
-                $("#filter_tab3_description").append($('<option></option>').attr("value", "Voucher").text("Voucher"));
+                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#filter_tab3_description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
             } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
                 getContactPersons($("#btn_branch_label").val(), "filter_tab3");
             } else if (selectedCategory == "other_expenses") {

@@ -295,3 +295,66 @@ def move_earnings():
     # print("new account updated", new_account.earnings)
     
     # new_account.save()
+    
+    
+@bp_core.cli.command('items')
+def items():
+    data = [
+      'Bond Paper','Epson Ink', 'Epson Ink (Black)', 'Epson Ink (Yellow)', 'Epson Ink (Blue)',
+      'Epson Ink (Pink)',
+      'Whiteboard Marker',
+      'Whiteboard Marker Ink',
+      'PVC Cover',
+      'PVC Cover (8.5x11) 100pcs',
+      'Photo Paper',
+      'Stapler',
+      'Staple Wire',
+      'Staple Wire (23/24)',
+      'Vellum',
+      'Vellum (Worx 8.5x11)',
+      'Parchment',
+      'Parchment (10 pcs per pack)',
+      'Ball Pen',
+      'Ball Pen (50 pcs)',
+      'Notebook (50 pcs)',
+      'Medal',
+      'Ribbon',
+      'Notarial Seals Ribbon',
+      'Notarial Seals Ribbon (10 pcs per box)',
+      'Computer',
+      'Aircon',
+      'Alcohol',
+      'Air Freshener',
+      'Bathroom Cleaner',
+      'Water Refill',
+      'Printer',
+      'Laptop',
+      'Projector',
+      'Chair',
+      'Arm Chair',
+      'Whiteboard',
+      'Scissor',
+      'Calculator',
+      'Correction Pen',
+      'Highlighter',
+      'Push Pen',
+      'Binder Clip',
+      'T-shirt Budget',
+      'Polo shirt Budget',
+      'Logo',
+      'Voucher'
+    ]
+    
+    for x in data:
+        mongo.db.lms_inventories.insert({
+            'description': x,
+            'active': True,
+            'is_deleted': False,
+            'is_archived': False,
+            'created_by': 'System',
+            'maintaining': 0,
+            'remaining': 0,
+            'type': 'supplies',
+            'is_for_sale': False,
+            'price': 0,
+        })

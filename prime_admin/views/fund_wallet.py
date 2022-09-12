@@ -1169,3 +1169,41 @@ def fetch_refund_dt(branch_id):
     }
 
     return jsonify(response)
+
+
+@bp_lms.route('api/supplies', methods=['GET'])
+def get_supplies():
+    inventory_type = request.args.get('inventory_type', 'supplies')
+    
+    query = mongo.db.lms_inventories.find({'type': inventory_type})
+    
+    list_supplies = []
+    
+    for row in query:
+        list_supplies.append({
+            'id': str(row['_id']),
+            'description': row['description'],
+        })
+    
+    return jsonify({
+        'status': 'success',
+        'data': list_supplies,
+        'message': ""
+    }), 200
+    
+
+@bp_lms.route('api/supplies/<string:description>', methods=['GET'])
+def get_supply(description):
+    query = mongo.db.lms_inventories.find_one({'description': description})
+
+    product = {
+        'id': str(query['_id']),
+        'description': query['description'],
+        'price': str(query['price'])
+    }
+    
+    return jsonify({
+        'status': 'success',
+        'data': product,
+        'message': ""
+    }), 200
