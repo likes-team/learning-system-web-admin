@@ -211,8 +211,7 @@ def supplies():
         modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
         scripts=[],
         view_modal=False,
-        # view_modal_url='/learning-management/get-view-supplies-data'
-        )
+    )
 
 
 @bp_lms.route('/get-view-supplies-data', methods=['GET'])

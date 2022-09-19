@@ -7,3 +7,4 @@ bp_lms = Blueprint('lms', __name__, template_folder='templates', static_folder='
 
 
 from . import views
+from . import datatables
