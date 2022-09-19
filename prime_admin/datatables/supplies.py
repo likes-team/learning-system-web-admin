@@ -179,6 +179,7 @@ def dt_summary():
                 
         table_data.append([
             str(supply['_id']),
+            '',
             supply['description'],
             supply.get('uom', ''),
             supply.get('remaining', ''),

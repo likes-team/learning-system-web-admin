@@ -184,7 +184,7 @@ def supplies():
                 thirty = x.quantity
             elif x.date.day == 31:
                 thone = x.quantity
-        
+
         _table_data.append((
             equipment.id,
             "actions",

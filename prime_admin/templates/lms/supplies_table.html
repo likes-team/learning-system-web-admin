@@ -37,18 +37,6 @@
             ],
         });
 
-        $('#tbl_supplies tbody').on('click', '.btn-inbound', function () {
-            var data = $(this).parents('tr').attr('id');
-
-            console.log(data);
-            $("#supply_id").val(data);
-        });
-
-        $('#tbl_supplies tbody').on('click', '.btn-outbound', function () {
-            var data = $(this).parents('tr').attr('id');
-            $("#outbound_supply_id").val(data);
-        });
-
         var dtbl_summaries = $("#tbl_summaries").DataTable({
             "dom": 'rtip',
             "processing": true,
@@ -69,7 +57,27 @@
                     'targets': 0,
                     'visible': false
                 },
+                {
+                    'targets': 1,
+                    'render': function(data, row, type){
+                        return `
+                        <button style="margin-bottom: 8px; margin-left:5px;" type="button" data-toggle="modal" data-target="#mdl_inbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
+                        <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_outbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-danger btn-outbound"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                        `
+                    }
+                }
             ],
+        });
+
+        $('#tbl_summaries tbody').on('click', '.btn-inbound', function () {
+            var data = dtbl_summaries.row( $(this).parents('tr') ).data();
+
+            $("#supply_id").val(data[0]);
+        });
+
+        $('#tbl_summaries tbody').on('click', '.btn-outbound', function () {
+            var data = dtbl_summaries.row( $(this).parents('tr') ).data();
+            $("#outbound_supply_id").val(data[0]);
         });
 
         $("#filter_year").change(function(){
@@ -218,6 +226,7 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">ID</th>
+                                        <th class="text-center"></th>
                                         <th class="text-center">DESCRIPTION</th>
                                         <th class="text-center">UOM</th>
                                         <th class="text-center">REMAINING MATERIALS</th>
