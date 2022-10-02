@@ -64,7 +64,7 @@ def create_app(config_name):
     csrf.init_app(app)
     
     sentry_sdk.init(
-        dsn="https://8a8a00ee87b6445cb56c98de7ec6e25f@o1405988.ingest.sentry.io/6739301",
+        dsn="https://9cf2405303714b4b873f1f6c0e28eed3@o4503912449245184.ingest.sentry.io/4503912450424832",
         integrations=[
             FlaskIntegration(),
         ],
