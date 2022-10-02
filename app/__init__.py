@@ -3,7 +3,7 @@ app/__init__.py
 ====================================
 Create our application
 """
-# import sentry_sdk
+import sentry_sdk
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -13,7 +13,7 @@ from flask_cors import CORS
 from flask_mongoengine import MongoEngine
 from flask_pymongo import PyMongo
 from config import app_config
-# from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 # DEVELOPERS-NOTE: -INCLUDE YOUR IMPORTS HERE-
 
@@ -63,13 +63,13 @@ def create_app(config_name):
     cors.init_app(app)
     csrf.init_app(app)
     
-    # sentry_sdk.init(
-    #     dsn="https://8a8a00ee87b6445cb56c98de7ec6e25f@o1405988.ingest.sentry.io/6739301",
-    #     integrations=[
-    #         FlaskIntegration(),
-    #     ],
-    #     traces_sample_rate=1.0,
-    # )
+    sentry_sdk.init(
+        dsn="https://8a8a00ee87b6445cb56c98de7ec6e25f@o1405988.ingest.sentry.io/6739301",
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0,
+    )
 
     # DEVELOPERS-NOTE: -INITIALIZE YOUR IMPORTS HERE-
 
