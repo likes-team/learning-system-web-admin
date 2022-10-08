@@ -472,7 +472,11 @@ def get_cash_flow():
                 bank_name = statement.get('bank_name', '')
                 account_no = statement.get('account_no', '')
                 account_name = statement.get('account_name', '')
-                amount = statement.get('amount').to_decimal()
+                amount = statement.get('amount')
+                if isinstance(amount, Decimal128):
+                    amount = amount.to_decimal()
+                else:
+                    amount = decimal.Decimal(amount)
                 from_what = statement.get('fron_what', '')
                 by_who = statement.get('by_who', '')
                 remarks = statement.get('remarks', '')
@@ -505,7 +509,11 @@ def get_cash_flow():
                 bank_name = statement.get('bank_name', '')
                 account_no = statement.get('account_no', '')
                 account_name = statement.get('account_name', '')
-                amount = statement.get('amount').to_decimal()
+                amount = statement.get('amount')
+                if isinstance(amount, Decimal128):
+                    amount = amount.to_decimal()
+                else:
+                    amount = decimal.Decimal(amount)
                 from_what = statement.get('fron_what', '')
                 by_who = statement.get('by_who', '')
                 remarks = statement.get('remarks', '')
