@@ -12,7 +12,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
-        $("#li_supplies").addClass('mm-active');
+        $("#li_office_supplies").addClass('mm-active');
 
         var dtbl_supplies = $("#tbl_supplies").DataTable({
             "dom": 'rtip',
@@ -24,6 +24,7 @@
                 "data": function (d) {
                     d.year = $("#filter_year").val();
                     d.month = $("#filter_month").val();
+                    d.supplies_type = "supplies";
                 }
             },
             "pageLength": 50,
@@ -105,7 +106,7 @@
                     <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    Supplies
+                    Office Supplies
                     <div class="page-title-subheading">
                         Inventory
                     </div>

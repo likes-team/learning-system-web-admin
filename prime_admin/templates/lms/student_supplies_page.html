@@ -1,0 +1,250 @@
+{% extends 'admin/admin_table.html' %}
+
+
+{% block head %}
+<style>
+    table.dataTable thead th, table.dataTable thead td {
+        padding: 0px !important;
+      }
+</style>
+{% endblock head %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $("#li_student_supplies").addClass('mm-active');
+
+        var dtbl_supplies = $("#tbl_supplies").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/monthly-transactions",
+                "data": function (d) {
+                    d.year = $("#filter_year").val();
+                    d.month = $("#filter_month").val();
+                    d.supplies_type = "student_supply";
+                }
+            },
+            "pageLength": 50,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+                {
+                    'targets': 0,
+                    'visible': false
+                },
+            ],
+        });
+
+        var dtbl_summaries = $("#tbl_summaries").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/summary",
+                "data": function (d) {
+                    d.year = $("#filter_year").val();
+                    d.month = $("#filter_month").val();
+                }
+            },
+            "pageLength": 50,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+                {
+                    'targets': 0,
+                    'visible': false
+                },
+                {
+                    'targets': 1,
+                    'render': function(data, row, type){
+                        return `
+                        <button style="margin-bottom: 8px; margin-left:5px;" type="button" data-toggle="modal" data-target="#mdl_inbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
+                        <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_outbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-danger btn-outbound"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                        `
+                    }
+                }
+            ],
+        });
+
+        $('#tbl_summaries tbody').on('click', '.btn-inbound', function () {
+            var data = dtbl_summaries.row( $(this).parents('tr') ).data();
+
+            $("#supply_id").val(data[0]);
+        });
+
+        $('#tbl_summaries tbody').on('click', '.btn-outbound', function () {
+            var data = dtbl_summaries.row( $(this).parents('tr') ).data();
+            $("#outbound_supply_id").val(data[0]);
+        });
+
+        $("#filter_year").change(function(){
+            dtbl_supplies.ajax.reload();
+            dtbl_summaries.ajax.reload();
+        });
+
+        $("#filter_month").change(function(){
+            dtbl_supplies.ajax.reload();
+            dtbl_summaries.ajax.reload();
+        });
+
+
+    });
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Student Supplies
+                    <div class="page-title-subheading">
+                        Inventory
+                    </div>
+                </div>
+            </div>
+
+            {% block actions %}
+
+            {% if TABLE_OPTIONS['actions'] %}
+            {% include TABLE_OPTIONS['action_template'] %}
+            {% endif %}
+
+            {% endblock %}
+
+        </div>
+    </div>
+    <div class="main-card mb-6 card">
+        <div class="card-header">
+            <div id="card_header_label">ALL BRANCHES</div>
+        </div>
+        <div class="mb-12 card">
+            <div class="card-body">
+                <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+                    <li class="nav-item">
+                        <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
+                            href="#tab-animated1-0" aria-selected="false">
+                            <span class="nav-text">MONTHLY TRANSACTIONS</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
+                            aria-selected="false">
+                            <span class="nav-text">SUMMARY</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
+                        <div class="form-row">
+                            <div class="col-md-1 col-xs-1">
+                                <div class="position-relative form-group">
+                                    <label for="filter_year" class="">Year</label>
+                                    <select id="filter_year" class="form-control" required>
+                                        <option value="all">All</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 col-xs-2">
+                                <div class="position-relative form-group">
+                                    <label for="filter_month" class="">Month</label>
+                                    <select id="filter_month" class="form-control" required>
+                                        <option value="all">All</option>
+                                        <option value="1">Jan</option>
+                                        <option value="2">Feb</option>
+                                        <option value="3">Mar</option>
+                                        <option value="4">Apr</option>
+                                        <option value="5">May</option>
+                                        <option value="6">Jun</option>
+                                        <option value="7">Jul</option>
+                                        <option value="8">Aug</option>
+                                        <option value="9">Sep</option>
+                                        <option value="10">Oct</option>
+                                        <option value="11">Nov</option>
+                                        <option value="12">Dec</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="tbl_supplies" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">ID</th>
+                                        <th class="text-center">DESCRIPTION</th>
+                                        <th class="text-center">1</th>
+                                        <th class="text-center">2</th>
+                                        <th class="text-center">3</th>
+                                        <th class="text-center">4</th>
+                                        <th class="text-center">5</th>
+                                        <th class="text-center">6</th>
+                                        <th class="text-center">7</th>
+                                        <th class="text-center">8</th>
+                                        <th class="text-center">9</th>
+                                        <th class="text-center">10</th>
+                                        <th class="text-center">11</th>
+                                        <th class="text-center">12</th>
+                                        <th class="text-center">13</th>
+                                        <th class="text-center">14</th>
+                                        <th class="text-center">15</th>
+                                        <th class="text-center">16</th>
+                                        <th class="text-center">18</th>
+                                        <th class="text-center">19</th>
+                                        <th class="text-center">20</th>
+                                        <th class="text-center">21</th>
+                                        <th class="text-center">22</th>
+                                        <th class="text-center">23</th>
+                                        <th class="text-center">24</th>
+                                        <th class="text-center">25</th>
+                                        <th class="text-center">26</th>
+                                        <th class="text-center">27</th>
+                                        <th class="text-center">28</th>
+                                        <th class="text-center">29</th>
+                                        <th class="text-center">30</th>
+                                        <th class="text-center">31</th>
+                                        <th class="text-center">TOTAL USED</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane show" id="tab-animated1-1" role="tabpanel">
+                        <div class="table-responsive">
+                            <table id="tbl_summaries" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">ID</th>
+                                        <th class="text-center"></th>
+                                        <th class="text-center">DESCRIPTION</th>
+                                        <th class="text-center">UOM</th>
+                                        <th class="text-center">REMAINING MATERIALS</th>
+                                        <th class="text-center">MAINTANING MATERIALS</th>
+                                        <th class="text-center">UNIT PRICE</th>
+                                        <th class="text-center">TOTAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     
+    </div>
+</div>
+{% endblock %}

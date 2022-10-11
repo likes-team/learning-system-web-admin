@@ -99,112 +99,41 @@ def create_equipment():
 
 
 
-@bp_lms.route('/supplies')
+@bp_lms.route('/office-supplies')
 @login_required
-def supplies():
+def office_supplies():
     form = InventoryForm()
-    form.__heading__ = "Supplies"
+    form.__heading__ = "Office Supplies"
 
     _table_data = []
-
-    _equipments = Inventory.objects(type="supplies")
-
-    for equipment in _equipments:
-        one, two, three, four, five = '', '', '', '', ''
-        six, seven, eight, nine, ten = '', '', '', '', ''
-        eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
-        sixteen, seventeen, eighteen, nineteen, twenty = '', '', '', '', ''
-        tone, ttwo, tthree, tfour, tfive = '', '', '', '', ''
-        tsix,tseven,teight, tnine, thirty = '', '', '', '', ''
-        thone = ''
-
-        for x in equipment.transactions:
-            if x.date is None:
-                continue
-
-            if x.date.day == 1:
-                one = x.quantity
-            elif x.date.day == 2:
-                two = x.quantity
-            elif x.date.day == 3:
-                three = x.quantity
-            elif x.date.day == 4:
-                four = x.quantity
-            elif x.date.day == 5:
-                five = x.quantity
-            elif x.date.day == 6:
-                six = x.quantity
-            elif x.date.day == 7:
-                seven = x.quantity
-            elif x.date.day == 8:
-                eight = x.quantity
-            elif x.date.day == 9:
-                nine = x.quantity
-            elif x.date.day == 10:
-                ten = x.quantity
-            elif x.date.day == 11:
-                eleven = x.quantity
-            if x.date.day == 12:
-                twelve = x.quantity
-            elif x.date.day == 13:
-                thirteen = x.quantity
-            if x.date.day == 14:
-                fourteen = x.quantity
-            elif x.date.day == 15:
-                fifteen = x.quantity
-            if x.date.day == 16:
-                sixteen = x.quantity
-            elif x.date.day == 17:
-                seventeen = x.quantity
-            if x.date.day == 18:
-                eighteen = x.quantity
-            elif x.date.day == 19:
-                nineteen = x.quantity
-            if x.date.day == 20:
-                twenty = x.quantity
-            elif x.date.day == 21:
-                tone = x.quantity
-            if x.date.day == 22:
-                ttwo = x.quantity
-            elif x.date.day == 23:
-                tthree = x.quantity
-            if x.date.day == 24:
-                tfour = x.quantity
-            elif x.date.day == 25:
-                tfive = x.quantity
-            elif x.date.day == 26:
-                tsix = x.quantity
-            elif x.date.day == 27:
-                tseven = x.quantity
-            elif x.date.day == 28:
-                teight = x.quantity
-            elif x.date.day == 29:
-                tnine = x.quantity
-            elif x.date.day == 30:
-                thirty = x.quantity
-            elif x.date.day == 31:
-                thone = x.quantity
-
-        _table_data.append((
-            equipment.id,
-            "actions",
-            equipment.description,
-            equipment.uom, equipment.qty,
-            equipment.maintaining,
-            one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
-            eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
-            equipment.released,
-            equipment.remaining,
-            equipment.total_replacement,
-            equipment.price,
-            '',
-        ))
 
     return admin_table(
         Supplies,
         fields=[],
         form=form,
-        table_template="lms/supplies_table.html",
+        table_template="lms/office_supplies_page.html",
+        table_data=_table_data,
+        create_url='lms.create_supplies',
+        edit_url=False,
+        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
+        scripts=[],
+        view_modal=False,
+    )
+
+    
+@bp_lms.route('/student-supplies')
+@login_required
+def student_supplies():
+    form = InventoryForm()
+    form.__heading__ = "Student Supplies"
+
+    _table_data = []
+
+    return admin_table(
+        Supplies,
+        fields=[],
+        form=form,
+        table_template="lms/student_supplies_page.html",
         table_data=_table_data,
         create_url='lms.create_supplies',
         edit_url=False,

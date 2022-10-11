@@ -164,9 +164,15 @@
                 {% if current_user.role.name in ['Admin'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">Inventory</li>
                     <li>
-                        <a id="li_supplies" href="{{url_for('lms.supplies')}}" class="">
-                            <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                            Supplies
+                        <a id="li_office_supplies" href="{{url_for('lms.office_supplies')}}" class="">
+                            <i class="metismenu-icon pe-7s-box2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Office Supplies
+                        </a>
+                    </li>
+                    <li>
+                        <a id="li_student_supplies" href="{{url_for('lms.student_supplies')}}" class="">
+                            <i class="metismenu-icon pe-7s-box2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Student Supplies
                         </a>
                     </li>
                     <li id="header_dashboard" class="app-sidebar__heading">System</li>

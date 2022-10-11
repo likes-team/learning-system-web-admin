@@ -13,10 +13,11 @@ def dt_monthly_transactions():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
+    supplies_type = request.args.get('supplies_type', 'supplies')
     
     total_records: int
     filtered_records: int
-    _filter: dict = {'type': 'supplies'}
+    _filter: dict = {'type': supplies_type}
 
     query =  mongo.db.lms_inventories.find(_filter).skip(start).limit(length)
 
