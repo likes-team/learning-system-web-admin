@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		html {
+			font-family: "arial";
+		}
+
+		table {
+			font-family: arial, sans-serif;
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		td,
+		th {
+			border: 1px solid black;
+			text-align: center;
+			padding: 8px;
+			font-size: 9px;
+		}
+
+		tr:nth-child(even) {
+			background-color: #dddddd;
+		}
+
+		@page {
+			size: A4 portrait;
+			margin-right: 1cm;
+			margin-left: 1cm;
+			margin-top: .5cm;
+		}
+
+		.Row {
+			width: 100%;
+		}
+
+		.Column {
+			display: table-cell;
+			font-size: 11px;
+			/*Optional*/
+		}
+
+		ul.payment-rules-bullets {
+			list-style-type: none;
+			/* Remove bullets */
+			margin-bottom: 5;
+			/* Remove padding */
+		}
+
+		#div_logo {
+			height: auto;
+			left: 0px;
+			right: 0px;
+			align-items: center;
+			text-align: center;
+			margin-bottom: 0px;
+		}
+
+		#img_logo {
+			width: 15%;
+			height: auto;
+			top: 30px;
+			left: 40px;
+			right: 0px;
+		}
+
+		li {
+			list-style: lower-alpha;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		.line{
+			width: 310px;
+			height: 47px;
+			border-bottom: 1px solid black;
+			}
+	</style>
+</head>
+
+<body>
+	<div id="div_logo">
+		<img id="img_logo" src="{{url_for('lms.static', filename='img/logo.png')}}" alt="logo" width="15%" height="15%">
+	</div>
+	<div style="text-align: center;">
+		<h3 style="margin-bottom: 5px; margin-top: 0px;">Branch of {{branch.city.title()}} City</h3>
+		<p style="margin: 2px; font-size:12px;">{{branch.address.upper()}}</p>
+		<p style="margin: 2px; font-size:12px;">Email: {{branch.email_address}}</p>
+		<p style="margin: 2px; font-size:12px;">LANDLINE: {{branch.landline}}</p>
+	</div>
+
+	<div style="text-align: center; margin-top:20px;">
+		<h3 style="font-weight:bold;margin:0%;"><u>AGREEMENT FORM</u></h3>
+	</div>
+
+	<div style="text-align: left; margin-top:40px;">
+		<h3 style="font-weight:bold;margin:0%; font-size:12px;">PSRN: {{student.full_registration_number}}</h3>
+	</div>
+
+	<div style="text-align: left; margin-top:10px; font-size: 12px;" class="Row">
+		<div class="Column" style="padding-right: 390px;">Contact Number: <u>{{student.contact_number}}</u></div>
+		<div class="Column">Batch No.: <u>{{student.batch_number.number}}</u></div>
+	</div>
+
+	<div style="text-align: left; margin-top:10px; font-size:12px;">
+		<p style="text-indent: 50px; line-height: 1.5">I, <u>{{student.full_name}}</u> of legal age, <u>{{student.civil_status}}</u> Filipino citizen, Single/married, with postal address at 
+			<u>{{student.address}}</u> after being enrolled in a learning establishment, PRIME KOREAN LANGUAGE AND REVIEW CENTER INCORPORATED  agreed by the rules and regulation of tutorial center.</p>
+	</div>
+	
+
+	<div style="text-align: center; margin-top:20px;">
+		<h3 style="font-weight:bold;margin:0%;">GUIDELINES FOR PAYMENTS</h3>
+	</div>
+
+	<div style="text-align: left; margin-top:20px;">
+		<h4 style="font-weight:bold;margin:0%;">1. PAYMENT RULES</h4>
+		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+				<li>
+					<p style="margin: 0px;">CLIENT must pay the amount of Four Thousand Pesos (P4,000.00) as a partial down payment for
+						his/her EPS-TOPIK assistance partial down payment should be paid on or before the first day of the
+						class.
+					</p>
+				</li>
+				<li>
+					<p style="margin: 0px;">CLIENT with remaining balance shall pay Three Thousand Eight Hundred pesos only (P3,800.00) for
+						settlement of the remaining amount should be within (15 days), on or before the training ends.
+					</p>
+				</li>
+		</ul>
+	</div>
+
+	<div style="text-align: left; margin-top:10px;">
+		<h4 style="font-weight:bold;margin:0%;">2. MODE OF PAYMENTS</h4>
+		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+			<li>
+				<p style="margin: 0px;"><strong>CASH (FULL PAYMENT)</strong><br>
+					(Issuance of official Receipt upon receiving of the exact amount of Seven Thousand pesos only (P7,
+					000.00).
+				</p>
+			</li>
+			<li>
+				<p style="margin: 0px;">
+					<strong>INSTALLMENT</strong><br>
+					Strictly settling of the given amount for partial down payment of Four Thousand Pesos
+					(P4,000.00)<br>
+					Cash voucher issuance<br>
+					(Issuance of official receipt upon receiving the full amount of remaining balance.)
+				</p>
+			</li>
+		</ul>
+	</div>
+
+	<div style="text-align: left; margin-top:10px;">
+		<h4 style="font-weight:bold;margin:0;">3. REFUNDS AND WITHDRAWALS</h4>
+		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+			<li>
+				<p style="margin: 0px;">a. If the refunds were made before the class starts, 20% of the whole amount of the payment will be
+					deducted.
+				</p>
+			</li>
+			<li>
+				<p style="margin: 0px;">b. If the Client attended and finished his/her first day of class, refund will no longer be honored.
+				</p>
+			</li>
+		</ul>
+	</div>
+
+	<div style="text-align: left; margin-top:30px; font-size: 12px;">
+		<p style="text-indent: 50px; line-height: 1.5">I hereby certify that the above information I wrote was true to the best of my knowledge and belief. In
+			witness whereof, I have hereunto set my hands this month of ___________ with the day of _______ and with the year of _______ at CHOGI
+			LANGUAGES AND TECHNOLOGY CENTER INCORPORATED.
+		</p>
+	</div>
+
+	<div style="text-align: right; margin-right: 125px; font-size: 10px; margin-top:40px;">
+		DocuSigned by:
+	</div>	
+
+	<div style="text-align: right; margin-right: 50px; font-size: 12px; margin-top:0px;">
+		<div style="margin-left: 60%;" class="line"></div>
+		SIGNATURE OVER PRINTED NAME
+	</div>	
+</body>
+
+</html>

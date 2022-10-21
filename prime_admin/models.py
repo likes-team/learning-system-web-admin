@@ -83,6 +83,14 @@ class Registration(Base, Admin):
     registration_date = db.DateTimeField()
     amount_deposit = db.DecimalField()
     copy_payments = db.ListField()
+    civil_status = db.StringField()
+    gender = db.StringField()
+    session = db.StringField()
+    
+    @property
+    def age(self):
+        today = datetime.today()
+        return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
     
     def set_registration_date(self):
         date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
@@ -142,8 +150,13 @@ class Branch(Base, Admin):
     name = db.StringField()
     address = db.StringField()
     maintaining_balance = db.DecimalField()
-
-
+    email_address = db.StringField()
+    landline = db.StringField()
+    
+    @property
+    def city(self): 
+        return self.name.replace('BRANCH', '')
+        
 class Batch(Base, Admin):
     meta = {
         'collection': 'lms_batches',

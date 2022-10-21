@@ -39,6 +39,7 @@
     PDF_URL = "{{url_for('lms.print_students_pdf')}}";
     STUDENT_INFO_PDF_URL = "{{url_for('lms.print_student_info')}}";
     STUDENTS_AUDIT_PDF_URL = "{{url_for('lms.print_students_pdf')}}";
+    STUDENT_AGREEMENT_FORM = "{{url_for('lms.print_student_agreement_form')}}";
     ROLE = "{{current_user.role.name}}";
 </script>
 <script>
@@ -333,6 +334,8 @@
                     $("#view_amount").val(response.data.amount);
                     $("#view_balance").val(response.data.balance);
                     $("#view_password").val(response.data.e_reg_password);
+                    $("#view_civil_status").val(response.data.civil_status);
+                    $("#view_gender").val(response.data.gender);
     
                     $("#tbl_payment_history > tbody").empty();
     
@@ -371,6 +374,8 @@
                 $("#view_address").prop('disabled', false);
                 $("#view_e_registration").prop('disabled', false);
                 $("#view_password").prop('disabled', false);
+                $("#view_civil_status").prop('disabled', false);
+                $("#view_gender").prop('disabled', false);
             }else if ($(this).html() == "Save"){
                 $(this).html("Edit");
                 $("#view_last_name").prop('disabled', true);
@@ -385,6 +390,8 @@
                 $("#view_address").prop('disabled', true);
                 $("#view_e_registration").prop('disabled', true);
                 $("#view_password").prop('disabled', true);
+                $("#view_civil_status").prop('disabled', true);
+                $("#view_gender").prop('disabled', true);
     
                 var lname = $("#view_last_name").val();
                 var fname = $("#view_first_name").val();
@@ -397,6 +404,8 @@
                 var address = $("#view_address").val();
                 var e_registration = $("#view_e_registration").val();
                 var e_reg_password = $("#view_password").val();
+                var civil_status = $("#view_civil_status").val();
+                var gender = $("#view_gender").val();
     
                 $.ajax({
                     url: "/learning-management/api/members/" + $("#client_id").val() + "/edit",
@@ -413,7 +422,9 @@
                         "email": email,
                         "address": address,
                         "e_registration": e_registration,
-                        'e_reg_password': e_reg_password
+                        'e_reg_password': e_reg_password,
+                        'civil_status': civil_status,
+                        'gender': gender
                     }),
                     contentType: "application/json; charset=utf-8",
                     success: function(response){
@@ -474,6 +485,11 @@
             );
         });
     
+        $("#btn_print_agreement_form").click(function(){
+            window.open(STUDENT_AGREEMENT_FORM + `?student_id=${CLIENTID}`
+            );
+        });
+
         $("#btn_print_student_info").click(function(){
             window.open(STUDENT_INFO_PDF_URL + `?student_id=${CLIENTID}`,'_blank');
         });
@@ -933,10 +949,10 @@
                                 {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
                                 current_user.is_superuser %}
                                 <li id="nav_action_btns" class="nav-item">
-                                    {% block dropdown_buttons %}
+                                    <button disabled id="btndelete" type="button" tabindex="0"
+                                        class="dropdown-item">Agreement Form Settings</button>
                                     <button disabled id="btndelete" type="button" tabindex="0"
                                         class="dropdown-item">Delete</button>
-                                    {% endblock %}
                                 </li>
                                 {% else %}
                                 <li class="nav-item">

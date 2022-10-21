@@ -404,3 +404,6 @@ class RegistrationForm(FlaskForm):
     book = StringField()
     payment_mode = StringField()
     e_registration = StringField()
+    civil_status = StringField()
+    gender = StringField()
+    session = StringField()

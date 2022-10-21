@@ -97,6 +97,9 @@ def register():
         client.amount = form.amount.data
         client.payment_mode = request.form['payment_modes']
         client.created_by = "{} {}".format(current_user.fname,current_user.lname)
+        client.civil_status = form.civil_status.data
+        client.gender = form.gender.data
+        client.session = form.session.data
         client.set_registration_date()
 
         books = request.form.getlist('books')
@@ -225,7 +228,10 @@ def register():
                     "level": client.level,
                     "balance": Decimal128(str(client.balance)),
                     "fle": Decimal128(str(client.fle)),
-                    "sle": Decimal128(str(client.sle))
+                    "sle": Decimal128(str(client.sle)),
+                    "civil_status": client.civil_status,
+                    "gender": client.gender,
+                    "session": client.session
                     },
                 "$push": {
                     "payments": payment

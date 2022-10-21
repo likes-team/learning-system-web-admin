@@ -329,6 +329,8 @@ def edit_member(client_id):
     address = request.json['address']
     e_registration = request.json['e_registration']
     e_reg_password = request.json['e_reg_password']
+    civil_status = request.json['civil_status']
+    gender = request.json['gender']
 
     client = Registration.objects.get_or_404(id=client_id)
     client.lname = lname
@@ -342,6 +344,8 @@ def edit_member(client_id):
     client.address = address
     client.e_registration = e_registration
     client.e_reg_password = e_reg_password
+    client.civil_status = civil_status
+    client.gender = gender
 
     client.save()
 
@@ -462,7 +466,9 @@ def get_member(client_id):
         'is_oriented': client.is_oriented,
         'payments': payments,
         'e_registration': client.e_registration,
-        'e_reg_password': client.e_reg_password
+        'e_reg_password': client.e_reg_password,
+        'civil_status': client.civil_status,
+        'gender': client.gender
     }
 
     response = {
@@ -1051,6 +1057,23 @@ def print_student_info():
     html = render_template(
             'lms/student_info_pdf.html',
             address=address,
+            student=student
+            )
+
+    return render_pdf(HTML(string=html))
+
+
+@bp_lms.route('/student_agreement_form.pdf')
+def print_student_agreement_form():
+    student_id = request.args.get('student_id', '')
+
+    student = Registration.objects.get_or_404(id=student_id)
+
+    branch = student.branch
+
+    html = render_template(
+            'lms/student_agreement_form_pdf.html',
+            branch=branch,
             student=student
             )
 
