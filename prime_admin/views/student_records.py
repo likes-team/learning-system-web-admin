@@ -43,6 +43,11 @@ def members():
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects()        
 
+    settings = mongo.db.lms_configurations.find_one({'name': 'agreement_form_pdf_setting'})['settings']
+    payment_rules = settings.get('payment_rules')
+    mode_of_payment = settings.get('mode_of_payment')
+    refunds_and_withdrawals = settings.get('refunds_and_withdrawals')
+    print(payment_rules)
     return admin_table(
         Member,
         fields=fields,
@@ -54,7 +59,10 @@ def members():
         table_template="lms/student_records.html",
         branches=branches,
         batch_numbers=batch_numbers,
-        schedules=['WDC', 'SDC']
+        schedules=['WDC', 'SDC'],
+        payment_rules=payment_rules,
+        mode_of_payment=mode_of_payment,
+        refunds_and_withdrawals=refunds_and_withdrawals
         )
 
 
@@ -1070,12 +1078,24 @@ def print_student_agreement_form():
     student = Registration.objects.get_or_404(id=student_id)
 
     branch = student.branch
+    
+    settings = mongo.db.lms_configurations.find_one({'name': 'agreement_form_pdf_setting'})['settings']
+    payment_rules = settings.get('payment_rules')
+    mode_of_payment = settings.get('mode_of_payment')
+    refunds_and_withdrawals = settings.get('refunds_and_withdrawals')
 
+    timezone = pytz.timezone('Asia/Manila')
+    today = datetime.now(tz=timezone)
+    
     html = render_template(
             'lms/student_agreement_form_pdf.html',
             branch=branch,
-            student=student
-            )
+            student=student,
+            payment_rules=payment_rules,
+            mode_of_payment=mode_of_payment,
+            refunds_and_withdrawals=refunds_and_withdrawals,
+            today=today
+        )
 
     return render_pdf(HTML(string=html))
 
@@ -1170,3 +1190,23 @@ def refund():
             'status': 'error',
             'message': str(err)
         }), 500
+        
+
+@bp_lms.route('/update_agreement_form_settings', methods=['POST'])
+def update_agreement_form_settings():
+    form = request.form
+    
+    payment_rules = form.get('payment_rules')
+    mode_of_payment = form.get('mode_of_payment')
+    refund_and_withdrawals = form.get('refunds_and_withdrawals')
+
+    mongo.db.lms_configurations.update_one(
+        {"name": "agreement_form_pdf_setting"},
+        {"$set": {
+            "settings.payment_rules": payment_rules,
+            "settings.mode_of_payment": mode_of_payment,
+            "settings.refunds_and_withdrawals": refund_and_withdrawals
+        }}
+    )
+
+    return redirect(url_for('lms.members'))

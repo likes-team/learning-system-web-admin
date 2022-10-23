@@ -1,0 +1,50 @@
+<div id="mdl_agreement_form_settings" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agreement Form Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body mdl-agreement-body">
+                <form id="frm_add_fund" action="{{url_for('lms.update_agreement_form_settings')}}" method="POST" novalidate="novalidate">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="main-card mb-3 card">
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label for="payment_rules" class="">1. Payment Rules</label>
+                                        <textarea rows="6" name="payment_rules" class="form-control">{{TABLE_OPTIONS['payment_rules']}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label for="mode_of_payment" class="">2. Mode of Payment</label>
+                                        <textarea rows="6" name="mode_of_payment" class="form-control">{{TABLE_OPTIONS['mode_of_payment']}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label for="refunds_and_withdrawals" class="">3. Refund and Withrdrawals</label>
+                                        <textarea rows="6" name="refunds_and_withdrawals" class="form-control">{{TABLE_OPTIONS['refunds_and_withdrawals']}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="btn_save_agreement" type="submit" class="btn btn-success">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

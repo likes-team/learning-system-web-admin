@@ -105,7 +105,7 @@
 	</div>
 
 	<div style="text-align: left; margin-top:10px; font-size:12px;">
-		<p style="text-indent: 50px; line-height: 1.5">I, <u>{{student.full_name}}</u> of legal age, <u>{{student.civil_status}}</u> Filipino citizen, Single/married, with postal address at 
+		<p style="text-indent: 50px; line-height: 1.5">I, <u>{{student.full_name}}</u> of legal age, <u>{{student.age}}</u> Filipino citizen, <u>{{student.civil_status}}</u>, with postal address at 
 			<u>{{student.address}}</u> after being enrolled in a learning establishment, PRIME KOREAN LANGUAGE AND REVIEW CENTER INCORPORATED  agreed by the rules and regulation of tutorial center.</p>
 	</div>
 	
@@ -117,59 +117,27 @@
 	<div style="text-align: left; margin-top:20px;">
 		<h4 style="font-weight:bold;margin:0%;">1. PAYMENT RULES</h4>
 		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
-				<li>
-					<p style="margin: 0px;">CLIENT must pay the amount of Four Thousand Pesos (P4,000.00) as a partial down payment for
-						his/her EPS-TOPIK assistance partial down payment should be paid on or before the first day of the
-						class.
-					</p>
-				</li>
-				<li>
-					<p style="margin: 0px;">CLIENT with remaining balance shall pay Three Thousand Eight Hundred pesos only (P3,800.00) for
-						settlement of the remaining amount should be within (15 days), on or before the training ends.
-					</p>
-				</li>
+		{{payment_rules|safe}}
 		</ul>
 	</div>
 
 	<div style="text-align: left; margin-top:10px;">
 		<h4 style="font-weight:bold;margin:0%;">2. MODE OF PAYMENTS</h4>
 		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
-			<li>
-				<p style="margin: 0px;"><strong>CASH (FULL PAYMENT)</strong><br>
-					(Issuance of official Receipt upon receiving of the exact amount of Seven Thousand pesos only (P7,
-					000.00).
-				</p>
-			</li>
-			<li>
-				<p style="margin: 0px;">
-					<strong>INSTALLMENT</strong><br>
-					Strictly settling of the given amount for partial down payment of Four Thousand Pesos
-					(P4,000.00)<br>
-					Cash voucher issuance<br>
-					(Issuance of official receipt upon receiving the full amount of remaining balance.)
-				</p>
-			</li>
+			{{mode_of_payment|safe}}
 		</ul>
 	</div>
 
 	<div style="text-align: left; margin-top:10px;">
 		<h4 style="font-weight:bold;margin:0;">3. REFUNDS AND WITHDRAWALS</h4>
 		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
-			<li>
-				<p style="margin: 0px;">a. If the refunds were made before the class starts, 20% of the whole amount of the payment will be
-					deducted.
-				</p>
-			</li>
-			<li>
-				<p style="margin: 0px;">b. If the Client attended and finished his/her first day of class, refund will no longer be honored.
-				</p>
-			</li>
+			{{refunds_and_withdrawals|safe}}
 		</ul>
 	</div>
 
 	<div style="text-align: left; margin-top:30px; font-size: 12px;">
 		<p style="text-indent: 50px; line-height: 1.5">I hereby certify that the above information I wrote was true to the best of my knowledge and belief. In
-			witness whereof, I have hereunto set my hands this month of ___________ with the day of _______ and with the year of _______ at CHOGI
+			witness whereof, I have hereunto set my hands this month of <u>{{today.strftime("%B")}}</u> with the day of <u>{{today.day}}</u> and with the year of <u>{{today.year}}</u> at CHOGI
 			LANGUAGES AND TECHNOLOGY CENTER INCORPORATED.
 		</p>
 	</div>

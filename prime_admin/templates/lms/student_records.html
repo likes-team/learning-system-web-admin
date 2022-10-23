@@ -5,6 +5,7 @@
     {% include "lms/client_view_modal.html" %}
     {% include "lms/client_edit_modal.html" %}
     {% include "lms/client_upgrade_modal.html" %}
+    {% include "lms/agreement_form_settings_modal.html" %}
 {% endblock %}
 
 
@@ -29,6 +30,10 @@
     .modal-body {
         height: 800px;
         overflow-y: auto;
+    }
+     
+    .mdl-agreement-body {
+        height: auto !important;
     }
 </style>
 {% endblock %}
@@ -949,8 +954,9 @@
                                 {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
                                 current_user.is_superuser %}
                                 <li id="nav_action_btns" class="nav-item">
-                                    <button disabled id="btndelete" type="button" tabindex="0"
-                                        class="dropdown-item">Agreement Form Settings</button>
+                                    <button type="button" data-toggle="modal" data-target="#mdl_agreement_form_settings" data-placement="bottom"
+                                        class="dropdown-item">Agreement Form Settings
+                                    </button>
                                     <button disabled id="btndelete" type="button" tabindex="0"
                                         class="dropdown-item">Delete</button>
                                 </li>
