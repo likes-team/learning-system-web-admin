@@ -1086,6 +1086,8 @@ def print_student_agreement_form():
 
     timezone = pytz.timezone('Asia/Manila')
     today = datetime.now(tz=timezone)
+    year_last_2 = str(today.year)[2:]
+    sequence_no = str(today.month) + str(today.day) + year_last_2 + "SN" + student.full_registration_number + str(today.month) + str(today.day) + str(today.year)
     
     html = render_template(
             'lms/student_agreement_form_pdf.html',
@@ -1094,7 +1096,8 @@ def print_student_agreement_form():
             payment_rules=payment_rules,
             mode_of_payment=mode_of_payment,
             refunds_and_withdrawals=refunds_and_withdrawals,
-            today=today
+            today=today,
+            sequence_no=sequence_no
         )
 
     return render_pdf(HTML(string=html))
