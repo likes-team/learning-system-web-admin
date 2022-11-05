@@ -6,6 +6,7 @@
     {% include "lms/client_edit_modal.html" %}
     {% include "lms/client_upgrade_modal.html" %}
     {% include "lms/agreement_form_settings_modal.html" %}
+    {% include "lms/print_certificate_modal.html" %}
 {% endblock %}
 
 
@@ -45,6 +46,7 @@
     STUDENT_INFO_PDF_URL = "{{url_for('lms.print_student_info')}}";
     STUDENTS_AUDIT_PDF_URL = "{{url_for('lms.print_students_pdf')}}";
     STUDENT_AGREEMENT_FORM = "{{url_for('lms.print_student_agreement_form')}}";
+    CERTIFICATE_PDF = "{{url_for('lms.modify_and_download_certificate')}}";
     ROLE = "{{current_user.role.name}}";
 </script>
 <script>
@@ -341,6 +343,7 @@
                     $("#view_password").val(response.data.e_reg_password);
                     $("#view_civil_status").val(response.data.civil_status);
                     $("#view_gender").val(response.data.gender);
+                    $("#view_registration_no").val(response.data.registration_no);
     
                     $("#tbl_payment_history > tbody").empty();
     
@@ -359,6 +362,8 @@
                     if(response.data.mode_of_payment == "refund"){
                         $("#btn_refund").hide();
                     }
+
+                    return true;
                 }
             });
         });
@@ -497,6 +502,57 @@
 
         $("#btn_print_student_info").click(function(){
             window.open(STUDENT_INFO_PDF_URL + `?student_id=${CLIENTID}`,'_blank');
+        });
+
+        $("#btn_print_certificate").click(function(){
+            var certType = $('input[name="cert_type"]:checked').val();
+            if (certType == undefined){
+                swal("Error Occured!", "Select certificate type!", "error");
+                return;
+            }
+
+            var fname = $("#print_first_name").val();
+            var mname = $("#print_middle_name").val();
+            var lname = $("#print_last_name").val();
+            var day = $("#print_day").val();
+            var month = $("#print_month").val();
+            var year = $("#print_year").val();
+            var teacherName = $("#print_teacher_name").val();
+            var managerName = $("#print_manager_name").val();
+            var primeRegistration = $("#print_registration_no").val();
+            var address = $("#print_address").val();
+
+            var fontFullName = $("#font_full_name").val();
+            var fontManagerName = $("#font_manager_name").val();
+            var fontTeacherName = $("#font_teacher_name").val();
+            var fontAddress = $("#font_address").val();
+
+            window.open(
+                CERTIFICATE_PDF +
+                "?fname=" + fname + 
+                "&mname=" + mname + 
+                "&lname=" + lname +
+                "&day=" + day +
+                "&month=" + month +
+                "&year=" + year +
+                "&address=" + address +
+                "&prime_registration=" + primeRegistration +
+                "&cert_type=" + certType +
+                "&teacher_name=" + teacherName +
+                "&manager_name=" + managerName +
+                "&font_full_name=" + fontFullName +
+                "&font_manager_name=" + fontManagerName +
+                "&font_teacher_name=" + fontTeacherName +
+                "&font_address=" + fontAddress
+            );
+        });
+
+        $('input[type=radio][name=cert_type]').change(function() {
+            if(this.value == "no_partner_no_underline" || this.value == "no_partner_underline"){
+                $("#print_manager_name").prop('readonly', true);
+            } else {
+                $("#print_manager_name").prop('readonly', false);
+            }
         });
     
         $("#btn_search").click(function(){
@@ -903,7 +959,21 @@
                 }, 500);
               });
         });
-    });
+
+        $('#btn_show_certificate_modal').on('click', function () {
+            var fname =$("#view_first_name").val();
+            var lname =$("#view_last_name").val();
+            var mname =$("#view_middle_name").val();
+            var registration_no = $("#view_registration_no").val();
+            var address = $("#view_address").val();
+            
+            $("#print_first_name").val(fname);
+            $("#print_last_name").val(lname);
+            $("#print_middle_name").val(mname);
+            $("#print_registration_no").val(registration_no);
+            $("#print_address").val(address);
+        });
+    }); // document end
 </script>
 {% endblock %}
 

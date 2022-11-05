@@ -85,7 +85,7 @@ def admin_table(*models, fields, form=None, **options):
         'table_name': table_name,
         'modals': [],
         'scripts': [
-            {'bp_admin.static': 'js/admin_table.js'}
+            # {'bp_admin.static': 'js/admin_table.js'}
             ]
     }
 

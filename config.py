@@ -2,6 +2,8 @@ import os
 from dateutil import tz
 import pytz
 from dotenv import load_dotenv
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 
@@ -10,6 +12,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 TIMEZONE = pytz.timezone('Asia/Manila')
 FROM_ZONE = tz.tzutc()
 
+def _register_old_english_font():
+    font_path = basedir + '/prime_admin/static/font/black_chancery.TTF'
+    pdfmetrics.registerFont(TTFont('Black Chancery', font_path))
+
+_register_old_english_font()
 
 class Config(object):
     load_dotenv()
@@ -17,6 +24,7 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') # Key
 
     CORS_HEADERS = 'Content-Type' # Flask Cors
+    PDF_FOLDER = basedir + '/prime_admin/static/pdf/'
 
     # DEVELOPERS-NOTE: ADMIN PAGE CONFIGURATIONS HERE
     ADMIN = {
@@ -32,10 +40,6 @@ class Config(object):
     AUTH = {
         'LOGIN_REDIRECT_URL': 'lms.dashboard',
     }
-    #                 -END-
-
-    # DEVELOPERS-NOTE: -ADD YOUR CONFIGURATIONS HERE-
-    
     #                 -END-
 
 

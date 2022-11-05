@@ -1,0 +1,140 @@
+<div id="mdlPrintCertificate" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Print Certificate</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 500px;">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <input type="hidden" class="form-control" id="client_id" value="">
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="print_first_name">First Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_first_name" name="print_first_name"
+                                    value="">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="print_middle_name">Middle Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_middle_name" name="print_middle_name"
+                                    value="">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="print_last_name">Last Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_last_name" name="print_last_name"
+                                    value="">
+                            </div>
+             
+                            <div class="col-md-3 mb-3">
+                                <label for="print_registration_no">Prime Registration</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_registration_no" name="print_registration_no"
+                                    value="">
+                            </div>
+                        </div>
+                 
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="position-relative form-group">
+                                    <div>
+                                        <div class="custom-radio custom-control"><input required type="radio" id="partner_underline" name="cert_type" value="partner_underline" class="custom-control-input"><label class="custom-control-label" for="partner_underline">
+                                            Cert with Partner and underline
+                                        </label></div>
+                                        <div class="custom-radio custom-control"><input required type="radio" id="partner_no_underline" name="cert_type" value="partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="partner_no_underline">
+                                            Cert with Partner but without underline
+                                        </label></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="position-relative form-group">
+                                    <div>
+                                        <div class="custom-radio custom-control"><input required type="radio" id="no_partner_underline" name="cert_type" value="no_partner_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_underline">
+                                            Cert without Partner but with underline
+                                        </label></div>
+                                        <div class="custom-radio custom-control"><input required type="radio" id="no_partner_no_underline" name="cert_type" value="no_partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_no_underline">
+                                            Cert without Partner and underline
+                                        </label></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6 mb-3">
+                                <label for="print_manager_name">Manager Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_manager_name" name="print_manager_name"
+                                    value="">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="print_teacher_name">Teacher Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_teacher_name" name="print_teacher_name"
+                                    value="">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-12 mb-3">
+                                <label for="print_address">Address</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_address" name="print_address"
+                                    value="">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-2 mb-2">
+                                <label for="print_day">Day</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_day" name="print_day"
+                                    value="">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="print_month">Month</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_month" name="print_month"
+                                    value="">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="print_year">Year</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_year" name="print_year"
+                                    value="">
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <h5 class="card-title">Font Sizes</h5>
+                        <div class="form-row">
+                            <div class="col-md-2 mb-2">
+                                <label for="font_full_name">Full Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="font_full_name" name="font_full_name"
+                                    value="53">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="font_manager_name">Manager Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="font_manager_name" name="font_manager_name"
+                                    value="22">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="font_teacher_name">Teacher Name</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="font_teacher_name" name="font_teacher_name"
+                                    value="22">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="font_address">Address</label>
+                                <input style="font-weight: bold;" type="text" class="form-control" id="font_address" name="font_address"
+                                    value="18">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btn_print_certificate" type="button" class="btn btn-info">Preview/Print</button>
+            </div>
+        </div>
+    </div>
+</div>

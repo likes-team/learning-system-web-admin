@@ -115,6 +115,11 @@
                         </div>
                         <div class="form-row">
                             <div class="col-md-6 mb-3">
+                                <label for="view_registration_no">Registration No.</label>
+                                <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_registration_no" name="view_registration_no"
+                                    value="">
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label for="view_address">Address</label>
                                 <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_address" name="view_address"
                                     value="">
@@ -190,6 +195,7 @@
                 {% if current_user.role.name in ['Secretary', 'Admin', 'Partner'] %}
                 <button id="btn_refund" type="button" class="btn btn-danger">Refund</button>
                 {% endif %}
+                <button id="btn_show_certificate_modal" data-toggle="modal" data-target="#mdlPrintCertificate" type="button" class="btn btn-info">Print Certificate</button>
                 <button id="btn_print_student_info" type="button" class="btn btn-info">Print Student Information</button>
                 <button id="btn_print_agreement_form" type="button" class="btn btn-info">Print Agreement Form</button>
                 {% if current_user.role.name in ['Secretary', 'Admin', 'Partner'] %}

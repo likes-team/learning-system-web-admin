@@ -1,4 +1,11 @@
 import decimal
+import os
+import glob
+import io
+from shutil import copyfile
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from bson.objectid import ObjectId
 from mongoengine.queryset.visitor import Q
 import pytz
@@ -9,7 +16,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, Payment, Registration, Member
-from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template
+from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory
 from app import mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128, create_decimal128_context
@@ -476,7 +483,8 @@ def get_member(client_id):
         'e_registration': client.e_registration,
         'e_reg_password': client.e_reg_password,
         'civil_status': client.civil_status,
-        'gender': client.gender
+        'gender': client.gender,
+        'registration_no': client.full_registration_number
     }
 
     response = {
@@ -1213,3 +1221,109 @@ def update_agreement_form_settings():
     )
 
     return redirect(url_for('lms.members'))
+
+
+@bp_lms.route('modify_and_download_certificate')
+def modify_and_download_certificate():
+    fname = request.args.get('fname', '')
+    mname = request.args.get('mname', '')
+    lname = request.args.get('lname', '')
+    full_name = fname + " " + mname + " " + lname
+    prime_registration = request.args.get('prime_registration', '')
+    cert_type = request.args.get('cert_type',)
+    manager_name = request.args.get('manager_name', '')
+    teacher_name = request.args.get('teacher_name', '')
+    address = request.args.get('address', '')
+    day = request.args.get('day', '23rd')
+    month = request.args.get('month', 'October')
+    year = request.args.get('year', '2022')
+    
+    font_full_name = int(request.args.get('font_full_name'))
+    font_manager_name = int(request.args.get('font_manager_name'))
+    font_teacher_name = int(request.args.get('font_teacher_name'))
+    font_address = int(request.args.get('font_address'))
+    
+    # Delete old pdfs
+    old_files = glob.glob(current_app.config['PDF_FOLDER'] + 'generated/*.pdf')
+    for file in old_files:
+        os.remove(file)
+
+    if cert_type == 'no_partner_no_underline':
+        src_dir = current_app.config['PDF_FOLDER'] + 'cert_no_partner_no_underline.pdf'
+    elif cert_type == 'partner_underline':
+        src_dir = current_app.config['PDF_FOLDER'] + 'cert_partner_underline.pdf'
+    elif cert_type == 'partner_no_underline':
+        src_dir = current_app.config['PDF_FOLDER'] + 'cert_partner_no_underline.pdf'
+    elif cert_type == 'no_partner_underline':
+        src_dir = current_app.config['PDF_FOLDER'] + 'cert_no_partner_underline.pdf'
+
+    # Copy template
+    file_name = "generated/" +"cert_" + str(datetime.timestamp(datetime.utcnow())) + '.pdf'
+    dst_dir = os.path.join(current_app.config['PDF_FOLDER'], file_name)
+    copyfile(src_dir,dst_dir)
+
+    # Add texts on the new PDF     
+    # Create a new PDF with Reportlab
+    packet = io.BytesIO()
+    inch = 72.0
+    can = canvas.Canvas(packet, pagesize=(14.76*inch, 11.33*inch))
+    
+    # Full name
+    print(font_full_name)
+    can.setFont('Black Chancery', font_full_name)
+    can.drawCentredString(320, 270, full_name)
+    
+    # day, month, year
+    can.setFont('Black Chancery', 18)
+    if cert_type in ['partner_underline', 'partner_no_underline']:
+        can.drawCentredString(150, 182, day)
+        can.drawCentredString(247, 182, month)
+        can.drawCentredString(312, 182, year)
+    else:
+        can.drawCentredString(160, 182, day)
+        can.drawCentredString(255, 182, month)
+        can.drawCentredString(322, 182, year)
+    
+    # address
+    can.setFont('Black Chancery', font_address)
+    if cert_type in ['partner_underline', 'partner_no_underline']:
+        can.drawCentredString(455, 182, address)
+    else:
+        can.drawCentredString(460, 182, address)
+    
+    # teacher
+    can.setFont('Black Chancery', font_teacher_name)
+    if cert_type in ['partner_underline', 'partner_no_underline']:
+        can.drawCentredString(140, 105, teacher_name)
+    else:
+        can.drawCentredString(225, 75, teacher_name)
+        
+
+    # manager
+    if cert_type in ['partner_underline', 'partner_no_underline']:
+        can.setFont('Black Chancery', font_manager_name)
+        can.drawCentredString(507, 105, manager_name)
+        
+    # certificate no.
+    can.setFont('Black Chancery', 15)
+    can.drawString(682, 498, prime_registration)
+
+    can.showPage()
+    can.save()
+    # Move to the beginning of the StringIO buffer
+    packet.seek(0)
+    new_pdf = PdfFileReader(packet)
+    # Read your existing PDF
+    existing_pdf = PdfFileReader(open(src_dir, "rb"))
+    output = PdfFileWriter()
+    # Add the "watermark" (which is the new pdf) on the existing page
+    page = existing_pdf.getPage(0)
+    page.mergePage(new_pdf.getPage(0))
+    output.addPage(page)
+    # Finally, write "output" to a real file
+    outputStream = open(dst_dir, "wb")
+    output.write(outputStream)
+    outputStream.close()
+
+    return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=file_name,as_attachment=True)
+

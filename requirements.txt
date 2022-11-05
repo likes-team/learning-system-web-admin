@@ -42,6 +42,8 @@ pycparser==2.20
 pylint==2.6.0
 pymongo==3.11.3
 PyMySQL==0.9.3
+PyPDF2==2.11.1
+reportlab==3.6.8
 Pyphen==0.10.0
 python-dateutil==2.8.1
 python-dotenv==0.12.0
