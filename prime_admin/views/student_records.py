@@ -1269,7 +1269,6 @@ def modify_and_download_certificate():
     can = canvas.Canvas(packet, pagesize=(14.76*inch, 11.33*inch))
     
     # Full name
-    print(font_full_name)
     can.setFont('Black Chancery', font_full_name)
     can.drawCentredString(320, 270, full_name)
     
@@ -1292,16 +1291,15 @@ def modify_and_download_certificate():
         can.drawCentredString(460, 182, address)
     
     # teacher
-    can.setFont('Black Chancery', font_teacher_name)
+    can.setFont('Arial', font_teacher_name)
     if cert_type in ['partner_underline', 'partner_no_underline']:
         can.drawCentredString(140, 105, teacher_name)
     else:
         can.drawCentredString(225, 75, teacher_name)
-        
 
     # manager
     if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.setFont('Black Chancery', font_manager_name)
+        can.setFont('Arial', font_manager_name)
         can.drawCentredString(507, 105, manager_name)
         
     # certificate no.

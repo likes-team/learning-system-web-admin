@@ -16,7 +16,12 @@ def _register_old_english_font():
     font_path = basedir + '/prime_admin/static/font/black_chancery.TTF'
     pdfmetrics.registerFont(TTFont('Black Chancery', font_path))
 
+def _register_arial_font():
+    font_path = basedir + '/prime_admin/static/font/arial.ttf'
+    pdfmetrics.registerFont(TTFont('Arial', font_path))
+
 _register_old_english_font()
+_register_arial_font()
 
 class Config(object):
     load_dotenv()

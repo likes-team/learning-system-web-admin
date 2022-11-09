@@ -16,23 +16,23 @@
                             
                             <div class="col-md-3 mb-3">
                                 <label for="print_first_name">First Name</label>
-                                <input style="font-weight: bold;" type="text" class="form-control" id="print_first_name" name="print_first_name"
+                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_first_name" name="print_first_name"
                                     value="">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="print_middle_name">Middle Name</label>
-                                <input style="font-weight: bold;" type="text" class="form-control" id="print_middle_name" name="print_middle_name"
+                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_middle_name" name="print_middle_name"
                                     value="">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="print_last_name">Last Name</label>
-                                <input style="font-weight: bold;" type="text" class="form-control" id="print_last_name" name="print_last_name"
+                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_last_name" name="print_last_name"
                                     value="">
                             </div>
              
                             <div class="col-md-3 mb-3">
                                 <label for="print_registration_no">Prime Registration</label>
-                                <input style="font-weight: bold;" type="text" class="form-control" id="print_registration_no" name="print_registration_no"
+                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_registration_no" name="print_registration_no"
                                     value="">
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                                         <div class="custom-radio custom-control"><input required type="radio" id="partner_underline" name="cert_type" value="partner_underline" class="custom-control-input"><label class="custom-control-label" for="partner_underline">
                                             Cert with Partner and underline
                                         </label></div>
-                                        <div class="custom-radio custom-control"><input required type="radio" id="partner_no_underline" name="cert_type" value="partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="partner_no_underline">
+                                        <div class="custom-radio custom-control"><input {% if current_user.role.name == "SECRETARY" %} disabled {% endif %} required type="radio" id="partner_no_underline" name="cert_type" value="partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="partner_no_underline">
                                             Cert with Partner but without underline
                                         </label></div>
                                     </div>
@@ -53,10 +53,10 @@
                             <div class="col-md-6">
                                 <div class="position-relative form-group">
                                     <div>
-                                        <div class="custom-radio custom-control"><input required type="radio" id="no_partner_underline" name="cert_type" value="no_partner_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_underline">
+                                        <div class="custom-radio custom-control"><input {% if current_user.role.name == "SECRETARY" %} disabled {% endif %} required type="radio" id="no_partner_underline" name="cert_type" value="no_partner_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_underline">
                                             Cert without Partner but with underline
                                         </label></div>
-                                        <div class="custom-radio custom-control"><input required type="radio" id="no_partner_no_underline" name="cert_type" value="no_partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_no_underline">
+                                        <div class="custom-radio custom-control"><input {% if current_user.role.name == "SECRETARY" %} disabled {% endif %} required type="radio" id="no_partner_no_underline" name="cert_type" value="no_partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="no_partner_no_underline">
                                             Cert without Partner and underline
                                         </label></div>
                                     </div>
@@ -114,12 +114,12 @@
                             <div class="col-md-2 mb-2">
                                 <label for="font_manager_name">Manager Name</label>
                                 <input style="font-weight: bold;" type="text" class="form-control" id="font_manager_name" name="font_manager_name"
-                                    value="22">
+                                    value="15">
                             </div>
                             <div class="col-md-2 mb-2">
                                 <label for="font_teacher_name">Teacher Name</label>
                                 <input style="font-weight: bold;" type="text" class="form-control" id="font_teacher_name" name="font_teacher_name"
-                                    value="22">
+                                    value="15">
                             </div>
                             <div class="col-md-2 mb-2">
                                 <label for="font_address">Address</label>
