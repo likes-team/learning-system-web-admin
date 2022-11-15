@@ -16,17 +16,17 @@
                             
                             <div class="col-md-3 mb-3">
                                 <label for="print_first_name">First Name</label>
-                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_first_name" name="print_first_name"
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_first_name" name="print_first_name"
                                     value="">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="print_middle_name">Middle Name</label>
-                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_middle_name" name="print_middle_name"
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_middle_name" name="print_middle_name"
                                     value="">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="print_last_name">Last Name</label>
-                                <input disabled style="font-weight: bold;" type="text" class="form-control" id="print_last_name" name="print_last_name"
+                                <input style="font-weight: bold;" type="text" class="form-control" id="print_last_name" name="print_last_name"
                                     value="">
                             </div>
              
@@ -41,7 +41,7 @@
                             <div class="col-md-6">
                                 <div class="position-relative form-group">
                                     <div>
-                                        <div class="custom-radio custom-control"><input required type="radio" id="partner_underline" name="cert_type" value="partner_underline" class="custom-control-input"><label class="custom-control-label" for="partner_underline">
+                                        <div class="custom-radio custom-control"><input required type="radio" id="partner_underline" name="cert_type" value="partner_underline" class="custom-control-input" checked><label class="custom-control-label" for="partner_underline">
                                             Cert with Partner and underline
                                         </label></div>
                                         <div class="custom-radio custom-control"><input {% if current_user.role.name == "SECRETARY" %} disabled {% endif %} required type="radio" id="partner_no_underline" name="cert_type" value="partner_no_underline" class="custom-control-input"><label class="custom-control-label" for="partner_no_underline">

@@ -453,6 +453,11 @@ def get_member(client_id):
             'remarks': payment.payment_mode,
             'deposited': payment.deposited if payment.deposited is not None else 'No',
         })
+        
+    if client.balance <= 0:
+        is_paid = True
+    else:
+        is_paid = False
 
     data = {
         'id': str(client.id),
@@ -484,7 +489,8 @@ def get_member(client_id):
         'e_reg_password': client.e_reg_password,
         'civil_status': client.civil_status,
         'gender': client.gender,
-        'registration_no': client.full_registration_number
+        'registration_no': client.full_registration_number,
+        'is_paid': is_paid
     }
 
     response = {

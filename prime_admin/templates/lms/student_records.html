@@ -361,6 +361,14 @@
 
                     if(response.data.mode_of_payment == "refund"){
                         $("#btn_refund").hide();
+                    } else {
+                        $("#btn_refund").show();
+                    }
+
+                    if(response.data.is_paid){
+                        $("#btn_show_certificate_modal").show();
+                    } else {
+                        $("#btn_show_certificate_modal").hide();
                     }
 
                     return true;
