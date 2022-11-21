@@ -360,7 +360,14 @@
             $("#total_amount_due").prop('readonly', false);
 
             $("#label_description").html('Description');
+            $("#lbl_account_no").html('Account No. / Particular');
+            $("#lbl_billing_month_from").html("Billing Month From");
+            $("#lbl_billing_month_to").html("Billing Month To");
 
+            $("#billing_month_from").closest('.col-md-3').show();
+            $("#billing_month_to").closest('.col-md-3').show();
+            $("#qty").closest('.col-md-4').show();
+            $("#unit_price").closest('.col-md-4').show();
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
                 $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
@@ -372,6 +379,8 @@
 
                 $("#qty").rules('remove');
                 $("#unit_price").rules('remove');
+                $("#qty").closest('.col-md-4').hide();
+                $("#unit_price").closest('.col-md-4').hide();
             } else if (selectedCategory == "office_supply") {
                 $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
@@ -388,11 +397,30 @@
                 $("#account_no").rules('remove');
                 $("#billing_month_from").rules('remove');
                 $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
 
                 $("#total_amount_due").prop('readonly', true);
-            } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
+                $("#lbl_account_no").html('Supplier');
+            } else if (selectedCategory == "salary") {
                 if ($("#branch_expenses").val() == '') {
                     swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                getContactPersons($("#branch_expenses").val(), "add_expenses");
+
+                $("#lbl_billing_month_from").html("Cut-off Month From");
+                $("#lbl_billing_month_to").html("Cut-off Month to");
+
+                $("#label_description").html('Contact Person');
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+                $("#qty").rules('remove');
+            } else if(selectedCategory == "rebates"){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
                     return;
                 }
                 getContactPersons($("#branch_expenses").val(), "add_expenses");
@@ -400,8 +428,17 @@
                 $("#label_description").html('Contact Person');
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
+                $("#account_no").prop('disabled', true);
                 $("#qty").rules('remove');
-                $("#unit_price").rules('remove');
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#account_no").rules('remove');
+
+                $("#account_no").closest('.col-md-6').hide();
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+                $("#qty").closest('.col-md-4').hide();
+                $("#unit_price").closest('.col-md-4').hide();
             } else if (selectedCategory == "other_expenses") {
                 $("#description").append($('<option></option>').attr("value", "TRANSPORTATION BUDGET").text("TRANSPORTATION BUDGET"));
                 $("#description").append($('<option></option>').attr("value", "REMITTANCE CHARGE").text("REMITTANCE CHARGE"));
@@ -430,6 +467,12 @@
                 $("#description").append($('<option></option>').attr("value", "SNPL PASSPORT FEE").text("SNPL PASSPORT FEE"));
                 $("#description").append($('<option></option>').attr("value", "SNPL EPS-TOPIK TEST FEE").text("SNPL EPS-TOPIK TEST FEE"));
                 $("#description").append($('<option></option>').attr("value", "MALETA").text("MALETA"));
+
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+                $("#lbl_account_no").html('Supplier');
             }
         });
 
@@ -464,7 +507,7 @@
             $("#bank").prop('disabled', true);
             $("#remittance").prop('disabled', true);
             $("#account_name").prop('disabled', true);
-            $("#account_no").prop('disabled', true);
+            $("#fund_account_no").prop('disabled', true);
             $("#transaction_no").prop('disabled', true);
             $("#sender").prop('disabled', true);
             $("#receiver").prop('disabled', true);
@@ -474,7 +517,7 @@
             $("#bank").rules('remove');
             $("#remittance").rules('remove');
             $("#account_name").rules('remove');
-            $("#account_no").rules('remove');
+            $("#fund_account_no").rules('remove');
             $("#transaction_no").rules('remove');
             $("#sender").rules('remove');
             $("#receiver").rules('remove');
@@ -484,13 +527,13 @@
             if (thru == "BANK") {
                 $("#bank").prop('disabled', false);
                 $("#account_name").prop('disabled', false);
-                $("#account_no").prop('disabled', false);
+                $("#fund_account_no").prop('disabled', false);
                 $("#amount_received").prop('disabled', false);
                 $("#remarks").prop('disabled', false);
 
                 $("#bank").rules('add', { 'required': true });
                 $("#account_name").rules('add', { 'required': true });
-                $("#account_no").rules('add', { 'required': true });
+                $("#fund_account_no").rules('add', { 'required': true });
                 $("#amount_received").rules('add', { 'required': true });
                 $("#remarks").rules('add', { 'required': true });
             } else if (thru == "REMITTANCE") {
