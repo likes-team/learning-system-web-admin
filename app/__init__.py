@@ -99,14 +99,12 @@ def create_app(config_name):
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
         from app.admin.admin import AdminModule
         from app.auth.auth import AuthModule
-        from prime_admin.learning_center import LearningManagementModule
         from prime_home.prime_home import PrimeHomeModule
         #                  -END-
         
         # DEVELOPERS-NOTE: -APPEND YOUR MODULE HERE-
         MODULES.append(AdminModule)
         MODULES.append(AuthModule)
-        MODULES.append(LearningManagementModule)
         MODULES.append(PrimeHomeModule)
         #                  -END-
 

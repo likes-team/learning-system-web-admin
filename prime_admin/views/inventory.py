@@ -6,7 +6,7 @@ from prime_admin.forms import InventoryForm, PartnerForm, SecretaryEditForm, Sec
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Equipment, InboundOutbound, Inventory, Secretary, Supplies, Utilities
+from prime_admin.models import Branch, Equipment, InboundOutbound, Inventory, Secretary, Utilities
 from flask import redirect, url_for, request, current_app, flash
 from app import db
 from datetime import datetime
@@ -96,51 +96,6 @@ def create_equipment():
         flash(str(e),'error')
     
     return redirect(url_for('lms.equipments'))
-
-
-
-@bp_lms.route('/office-supplies')
-@login_required
-def office_supplies():
-    form = InventoryForm()
-    form.__heading__ = "Office Supplies"
-
-    _table_data = []
-
-    return admin_table(
-        Supplies,
-        fields=[],
-        form=form,
-        table_template="lms/office_supplies_page.html",
-        table_data=_table_data,
-        create_url='lms.create_supplies',
-        edit_url=False,
-        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
-        scripts=[],
-        view_modal=False,
-    )
-
-    
-@bp_lms.route('/student-supplies')
-@login_required
-def student_supplies():
-    form = InventoryForm()
-    form.__heading__ = "Student Supplies"
-
-    _table_data = []
-
-    return admin_table(
-        Supplies,
-        fields=[],
-        form=form,
-        table_template="lms/student_supplies_page.html",
-        table_data=_table_data,
-        create_url='lms.create_supplies',
-        edit_url=False,
-        modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],  
-        scripts=[],
-        view_modal=False,
-    )
 
 
 @bp_lms.route('/get-view-supplies-data', methods=['GET'])

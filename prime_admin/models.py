@@ -369,8 +369,16 @@ class Accounting(Base):
     profits = db.ListField()
     active_group = db.IntField()
 
-class Supplies(Admin):
-    __tablename__ = 'lms_inventories'
+class StudentSupply(Admin):
+    __tablename__ = 'lms_student_supplies'
+    __amname__ = 'supplies'
+    __amdescription__ = 'Supplies'
+    __amicon__ = 'pe-7s-back-2'
+    __view_url__ = 'lms.supplies'
+    
+
+class OfficeSupply(Admin):
+    __tablename__ = 'lms_office_supplies'
     __amname__ = 'supplies'
     __amdescription__ = 'Supplies'
     __amicon__ = 'pe-7s-back-2'
