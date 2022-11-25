@@ -1,1 +1,1 @@
-from . import supplies
+from . import supplies_datatable

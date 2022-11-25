@@ -28,7 +28,6 @@ def dt_monthly_transactions():
     
     table_data = []
     for supply in query:
-        print("supply:::",supply)
         one, two, three, four, five = '', '', '', '', ''
         six, seven, eight, nine, ten = '', '', '', '', ''
         eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
@@ -38,6 +37,8 @@ def dt_monthly_transactions():
         thone = ''
         
         transactions = supply.get('transactions', [])
+        total_used = 0
+        
         for trans in transactions:
             date = trans.get('date', None)
             
@@ -118,21 +119,33 @@ def dt_monthly_transactions():
                 thirty = quantity
             elif date.day == 31:
                 thone = quantity
+            total_used += quantity
 
-        table_data.append([
-            str(supply['_id']),
-            supply['description'],
-            # supply.get('uom', ''),
-            # supply.get('qty', ''),
-            # supply.get('maintaining', ''),
-            one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
-            eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
-            supply.get('released', ''),
-            supply.get('remaining', ''),
-            supply.get('total_replacement', ''),
-            str(supply.get('price', '')),
-            '',
-        ])
+        if supplies_type == "office_supplies":
+            row = [
+                str(supply['_id']),
+                supply['description'],
+                supply.get('maintaining', ''),
+                '',
+                supply.get('uom', ''),
+                one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+                eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
+                total_used
+            ]
+        elif supplies_type == "student_supplies":
+            row = [
+                str(supply['_id']),
+                supply['description'],
+                supply.get('completing', ''),
+                supply.get('maintaining', ''),
+                '',
+                supply.get('uom', ''),
+                one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+                eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
+                total_used
+            ]
+
+        table_data.append(row)
         
     total_records = mongo_table.find().count()
     filtered_records = query.count()
@@ -189,16 +202,26 @@ def dt_summary():
                 if month != int(filter_month):
                     continue
                 
-        table_data.append([
-            str(supply['_id']),
-            '',
-            supply['description'],
-            supply.get('uom', ''),
-            supply.get('remaining', ''),
-            supply.get('maintaining', ''),
-            str(supply.get('price', '')),
-            '',
-        ])
+        if supplies_type == "office_supplies":
+            row = [
+                str(supply['_id']),
+                '',
+                supply['description'],
+                supply.get('remaining', ''),
+                supply.get('replacement', ''),
+                str(supply.get('price', '')),
+                ''
+            ]
+        elif supplies_type == "student_supplies":
+            row = [
+                str(supply['_id']),
+                '',
+                supply['description'],
+                supply.get('remaining', ''),
+                supply.get('replacement', ''),
+            ]
+            
+        table_data.append(row)
         
     total_records = mongo_table.find().count()
     filtered_records = query.count()
@@ -209,5 +232,4 @@ def dt_summary():
         'recordsFiltered': total_records,
         'data': table_data,
     }
-
     return jsonify(response)
