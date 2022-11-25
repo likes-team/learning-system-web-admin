@@ -369,20 +369,62 @@ class Accounting(Base):
     profits = db.ListField()
     active_group = db.IntField()
 
-class StudentSupply(Admin):
+class StudentSupply(Base, Admin):
+    meta = {
+        'collection': 'lms_student_supplies',
+        'strict': False,
+    }
+    __amname__ = 'inventory'
+    __amdescription__ = 'Inventory'
+    __amicon__ = 'pe-7s-back-2'
     __tablename__ = 'lms_student_supplies'
-    __amname__ = 'supplies'
-    __amdescription__ = 'Supplies'
-    __amicon__ = 'pe-7s-back-2'
-    __view_url__ = 'lms.supplies'
-    
 
-class OfficeSupply(Admin):
-    __tablename__ = 'lms_office_supplies'
-    __amname__ = 'supplies'
-    __amdescription__ = 'Supplies'
+    price = db.DecimalField()
+    description = db.StringField()
+    maintaining = db.IntField()
+    released = db.IntField()
+    remaining = db.IntField()
+    total_replacement = db.IntField()
+    type = db.StringField()
+    branch = db.ReferenceField('Branch')
+    uom = db.StringField()
+    qty = db.StringField()
+    purchase_date = db.DateTimeField()
+    transactions = db.EmbeddedDocumentListField(InboundOutbound)
+    is_for_sale = db.BooleanField()
+
+    @property
+    def name(self):
+        return self.description
+
+
+class OfficeSupply(Base, Admin):
+    meta = {
+        'collection': 'lms_office_supplies',
+        'strict': False,
+    }
+    __amname__ = 'inventory'
+    __amdescription__ = 'Inventory'
     __amicon__ = 'pe-7s-back-2'
-    __view_url__ = 'lms.supplies'
+    __tablename__ = 'lms_office_supplies'
+
+    price = db.DecimalField()
+    description = db.StringField()
+    maintaining = db.IntField()
+    released = db.IntField()
+    remaining = db.IntField()
+    total_replacement = db.IntField()
+    type = db.StringField()
+    branch = db.ReferenceField('Branch')
+    uom = db.StringField()
+    qty = db.StringField()
+    purchase_date = db.DateTimeField()
+    transactions = db.EmbeddedDocumentListField(InboundOutbound)
+    is_for_sale = db.BooleanField()
+
+    @property
+    def name(self):
+        return self.description
 
 
 class Utilities(Admin):

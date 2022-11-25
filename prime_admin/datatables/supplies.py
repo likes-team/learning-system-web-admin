@@ -13,17 +13,22 @@ def dt_monthly_transactions():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
-    supplies_type = request.args.get('supplies_type', 'supplies')
+    supplies_type = request.args.get('supplies_type')
     
     total_records: int
     filtered_records: int
-    _filter: dict = {'type': supplies_type}
-
-    query =  mongo.db.lms_inventories.find(_filter).skip(start).limit(length)
-
-    table_data = []
     
+    mongo_table = None
+    if supplies_type == "office_supplies":
+        mongo_table =  mongo.db.lms_office_supplies
+    elif supplies_type == "student_supplies":
+        mongo_table =  mongo.db.lms_student_supplies
+
+    query =  mongo_table.find().skip(start).limit(length)
+    
+    table_data = []
     for supply in query:
+        print("supply:::",supply)
         one, two, three, four, five = '', '', '', '', ''
         six, seven, eight, nine, ten = '', '', '', '', ''
         eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
@@ -129,7 +134,7 @@ def dt_monthly_transactions():
             '',
         ])
         
-    total_records = mongo.db.lms_inventories.find(_filter).count()
+    total_records = mongo_table.find().count()
     filtered_records = query.count()
 
     response = {
@@ -148,13 +153,18 @@ def dt_summary():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
-    supplies_type = request.args.get('supplies_type', 'supplies')
+    supplies_type = request.args.get('supplies_type')
     
     total_records: int
     filtered_records: int
-    _filter: dict = {'type': supplies_type}
 
-    query =  mongo.db.lms_inventories.find(_filter).skip(start).limit(length)
+    mongo_table = None
+    if supplies_type == "office_supplies":
+        mongo_table =  mongo.db.lms_office_supplies
+    elif supplies_type == "student_supplies":
+        mongo_table =  mongo.db.lms_student_supplies
+
+    query =  mongo_table.find().skip(start).limit(length)
 
     table_data = []
     
@@ -190,7 +200,7 @@ def dt_summary():
             '',
         ])
         
-    total_records = mongo.db.lms_inventories.find(_filter).count()
+    total_records = mongo_table.find().count()
     filtered_records = query.count()
 
     response = {
