@@ -390,11 +390,9 @@
                 }).fail(function(err){
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
                 });
-                $("#account_no").prop('disabled', true);
                 $("#billing_month_from").prop('disabled', true);
                 $("#billing_month_to").prop('disabled', true);
 
-                $("#account_no").rules('remove');
                 $("#billing_month_from").rules('remove');
                 $("#billing_month_to").rules('remove');
                 $("#billing_month_from").closest('.col-md-3').hide();

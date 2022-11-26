@@ -552,68 +552,70 @@ def fund_wallet_add_fund():
 def fund_wallet_add_expenses():
     form = request.form
 
-    try:
-        category = form.get('category', '')
-        description = form.get('description', '')
-        account_no = form.get('account_no', None)
-        billing_month_from = form.get('billing_month_from', None)
-        billing_month_to = form.get('billing_month_to', None)
-        qty = form.get('qty', None)
-        unit_price = format(float(form.get('unit_price', '0.00')), '.2f')
-        settled_by = form.get('settled_by', '')
-        total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
-        branch_id = form.get('branch', None)
-        
-        with mongo.cx.start_session() as session:
-            with session.start_transaction():
-                accounting = mongo.db.lms_accounting.find_one({
-                    "branch": ObjectId(branch_id),
-                })
+    category = form.get('category', '')
+    description = form.get('description', '')
+    account_no = form.get('account_no', None)
+    billing_month_from = form.get('billing_month_from', None)
+    billing_month_to = form.get('billing_month_to', None)
+    qty = form.get('qty', None)
+    unit_price = format(float(form.get('unit_price', '0.00')), '.2f')
+    settled_by = form.get('settled_by', '')
+    total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
+    branch_id = form.get('branch', None)
+    
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            accounting = mongo.db.lms_accounting.find_one({
+                "branch": ObjectId(branch_id),
+            })
 
-                if accounting:
-                    with decimal.localcontext(D128_CTX):
-                        previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
-                        new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
-                        balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
+            if accounting:
+                with decimal.localcontext(D128_CTX):
+                    previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+                    new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
+                    balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
 
-                        mongo.db.lms_accounting.update_one({
-                            "branch": ObjectId(branch_id)
-                        },
-                        {'$set': {
-                            "total_fund_wallet": Decimal128(new_total_fund_wallet)
-                        }},session=session)
-                else:
-                    raise Exception("Likes Error: Accounting data not found")
-                
-                
-
-                mongo.db.lms_fund_wallet_transactions.insert_one({
-                    'type': 'expenses',
-                    'running_balance': balance,
-                    'branch': ObjectId(branch_id),
-                    'date': get_date_now(),
-                    'category': category,
-                    'description': description,
-                    'account_no': account_no,
-                    'billing_month_from': billing_month_from,
-                    'billing_month_to': billing_month_to,
-                    'qty': qty,
-                    'unit_price': unit_price,
-                    'total_amount_due': Decimal128(total_amount_due),
-                    'settled_by': settled_by,
-                    'created_at': get_date_now(),
-                    'created_by': current_user.fname + " " + current_user.lname
+                    mongo.db.lms_accounting.update_one({
+                        "branch": ObjectId(branch_id)
+                    },
+                    {'$set': {
+                        "total_fund_wallet": Decimal128(new_total_fund_wallet)
+                    }},session=session)
+            else:
+                raise Exception("Likes Error: Accounting data not found")
+            
+            
+            if category == "office_supply":
+                # increment reserve materials value
+                mongo.db.lms_office_supplies.update_one({
+                    'description': description
+                }, {
+                    '$inc': {'reserve': int(qty)}
                 },session=session)
-        response = {
-            'status': 'success',
-            'message': "Expenses added successfully!"
-        }
-        return jsonify(response), 201
-    except Exception as err:
-        return jsonify({
-            'status': 'error',
-            'message': str(err)
-        }), 500
+
+            mongo.db.lms_fund_wallet_transactions.insert_one({
+                'type': 'expenses',
+                'running_balance': balance,
+                'branch': ObjectId(branch_id),
+                'date': get_date_now(),
+                'category': category,
+                'description': description,
+                'account_no': account_no,
+                'billing_month_from': billing_month_from,
+                'billing_month_to': billing_month_to,
+                'qty': qty,
+                'unit_price': unit_price,
+                'total_amount_due': Decimal128(total_amount_due),
+                'settled_by': settled_by,
+                'created_at': get_date_now(),
+                'created_by': current_user.fname + " " + current_user.lname
+            },session=session)
+    response = {
+        'status': 'success',
+        'message': "Expenses added successfully!"
+    }
+    return jsonify(response), 201
+
 
 
 @bp_lms.route('/branches/<string:branch_id>/utilities/dt', methods=['GET'])
@@ -1196,12 +1198,12 @@ def get_supplies():
 
 @bp_lms.route('api/supplies/<string:description>', methods=['GET'])
 def get_supply(description):
-    query = mongo.db.lms_inventories.find_one({'description': description})
+    query = mongo.db.lms_office_supplies.find_one({'description': description})
 
     product = {
         'id': str(query['_id']),
         'description': query['description'],
-        'price': str(query['price'])
+        'price': str(query.get('price', 0))
     }
     
     return jsonify({
