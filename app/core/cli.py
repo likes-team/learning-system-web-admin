@@ -297,24 +297,24 @@ def move_earnings():
     # new_account.save()
     
     
-@bp_core.cli.command('items')
-def items():
-    data = [
-        'Styro foam',
-        'Duct tape',
-        'Cartolina'
-    ]
+# @bp_core.cli.command('items')
+# def items():
+#     data = [
+#         'Styro foam',
+#         'Duct tape',
+#         'Cartolina'
+#     ]
     
-    for x in data:
-        mongo.db.lms_inventories.insert({
-            'description': x,
-            'active': True,
-            'is_deleted': False,
-            'is_archived': False,
-            'created_by': 'System',
-            'maintaining': 0,
-            'remaining': 0,
-            'type': 'supplies',
-            'is_for_sale': False,
-            'price': 0,
-        })
+#     for x in data:
+#         mongo.db.lms_inventories.insert({
+#             'description': x,
+#             'active': True,
+#             'is_deleted': False,
+#             'is_archived': False,
+#             'created_by': 'System',
+#             'maintaining': 0,
+#             'remaining': 0,
+#             'type': 'supplies',
+#             'is_for_sale': False,
+#             'price': 0,
+#         })

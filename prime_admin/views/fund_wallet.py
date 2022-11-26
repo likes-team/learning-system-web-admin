@@ -584,6 +584,8 @@ def fund_wallet_add_expenses():
                         }},session=session)
                 else:
                     raise Exception("Likes Error: Accounting data not found")
+                
+                
 
                 mongo.db.lms_fund_wallet_transactions.insert_one({
                     'type': 'expenses',
@@ -1175,7 +1177,7 @@ def fetch_refund_dt(branch_id):
 def get_supplies():
     inventory_type = request.args.get('inventory_type', 'supplies')
     
-    query = mongo.db.lms_inventories.find({'type': inventory_type})
+    query = mongo.db.lms_office_supplies.find()
     
     list_supplies = []
     

@@ -61,7 +61,7 @@ def buy_items():
             with session.start_transaction():
                 if item_list:
                     for item_id in form.getlist('items[]'):
-                        item = mongo.db.lms_inventories.find_one({"_id": ObjectId(item_id)})
+                        item = mongo.db.lms_student_supplies.find_one({"_id": ObjectId(item_id)})
                         qty = int(form.get("qty_{}".format(item_id)))
                         price = decimal.Decimal(form.get("price_{}".format(item_id)))
                         amount = qty * price
@@ -74,7 +74,7 @@ def buy_items():
                             'amount': Decimal128(str(amount))
                         })
                         
-                        mongo.db.lms_inventories.update_one({
+                        mongo.db.lms_student_supplies.update_one({
                             "_id": ObjectId(item_id)
                         },
                         {"$inc": {
