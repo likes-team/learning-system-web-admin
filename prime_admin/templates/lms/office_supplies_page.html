@@ -61,15 +61,6 @@
                     'targets': 0,
                     'visible': false
                 },
-                {
-                    'targets': 1,
-                    'render': function(data, row, type){
-                        return `
-                        <button style="margin-bottom: 8px; margin-left:5px;" type="button" data-toggle="modal" data-target="#mdl_inbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
-                        <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_outbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-danger btn-outbound"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
-                        `
-                    }
-                }
             ],
         });
 
@@ -77,11 +68,6 @@
             var data = dtbl_summaries.row( $(this).parents('tr') ).data();
 
             $("#supply_id").val(data[0]);
-        });
-
-        $('#tbl_summaries tbody').on('click', '.btn-outbound', function () {
-            var data = dtbl_summaries.row( $(this).parents('tr') ).data();
-            $("#outbound_supply_id").val(data[0]);
         });
 
         $("#filter_year").change(function(){
@@ -110,6 +96,20 @@
             dtbl_supplies.ajax.reload();
             dtbl_summaries.ajax.reload();
         });
+
+        $("#outbound_branch").change(function(){
+            $("#outbound_supply_id").empty();
+            $("#outbound_supply_id").append($('<option></option>').attr("value", "").text("Choose branch first..."));
+
+            $.getJSON(`/learning-management/api/supplies?branch=${$(this).val()}`, function(response, status, xhr){
+                for(i=0; i < response.data.length; i++){
+                    var supply = response.data[i];
+                    $("#outbound_supply_id").append($('<option></option>').attr("value", supply.id).text(supply.description));
+                }
+            }).fail(function(err){
+                swal("Error Occured!", "Please refresh the page then try again!", "error");
+            });
+        });
     });
 </script>
 {% endblock %}
@@ -130,13 +130,15 @@
                     </div>
                 </div>
             </div>
-
             <div class="page-title-actions">
                 {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-            
                     {% if session['permissions'][RENDERED_MODEL.__amname__]['create'] or current_user.is_superuser %}
-            
                         {% if TABLE_OPTIONS['create_modal'] %}
+                            <button type="button" data-toggle="modal" data-target="#mdl_outbound" title="Create new" data-placement="bottom"
+                                class="btn-shadow mr-3 btn btn-warning">
+                                <i class="fa fa-upload"></i>
+                                Supplies Withdrawal
+                            </button>
                             <button type="button" data-toggle="modal" data-target="#create_modal" title="Create new" data-placement="bottom"
                                     class="btn-shadow mr-3 btn btn-primary">
                                 {% if RENDERED_MODEL.__amname__ == 'user' %}
@@ -146,59 +148,14 @@
                                 {% endif %}
                                 Create Item
                             </button>
-                        
+                  
                         {% elif TABLE_OPTIONS['create_button'] and MODAL_DATA['create_url'] is not none %}
                             <a href="{{ url_for(MODAL_DATA['create_url']) }}" type="button" class="btn-shadow mr-3 btn btn-primary">
                                 <i class="fa fa-plus"></i>
                             </a>
-            
-                        {% else %}
-            
                         {% endif %}
-            
                     {% endif %}
                 {% endif %}
-            
-                <div class="d-inline-block dropdown">
-                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                            class="btn-shadow dropdown-toggle btn btn-info">
-                                    <span class="btn-icon-wrapper pr-2 opacity-7">
-                                        <i class="fa fa-list-alt fa-w-20"></i>
-                                    </span>
-                        Actions
-                    </button>
-                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                        <ul class="nav flex-column">
-                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
-                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
-                            <li id="nav_action_btns" class="nav-item">
-                                {% block dropdown_buttons %}
-                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
-                                {% endblock %}
-                            </li>
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                            {% else %}
-                            <li class="nav-item">
-                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
-                                    <i class="nav-link-icon lnr-file-empty"></i>
-                                    <span>
-                                        No actions
-                                    </span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -211,7 +168,6 @@
                     ALL BRANCHES
                 {% endif %}
             </div>
-
             <div class="btn-actions-pane-right">
                 <div class="nav">
                     <div class="dropleft btn-group">
@@ -350,7 +306,6 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">ID</th>
-                                        <th class="text-center">ACTIONS</th>
                                         <th class="text-center">DESCRIPTION</th>
                                         <th class="text-center">REMAINING</th>
                                         <th class="text-center">REPLACEMENT</th>

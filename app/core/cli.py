@@ -299,7 +299,7 @@ def move_earnings():
     
 @bp_core.cli.command('items')
 def items():
-    # mongo.db.lms_office_supplies.delete_many({'branch': {'$exists': False}})
+    # mongo.db.lms_office_supplies.delete_many({'branch': {'$exists': True}})
     # mongo.db.lms_student_supplies.delete_many({'branch': {'$exists': False}})
     
     ####################################### OFFICE
@@ -316,7 +316,7 @@ def items():
     #             'is_deleted': office_supply['is_deleted'],
     #             'is_archived': office_supply['is_archived'],
     #             'created_by': office_supply['created_by'],
-    #             'description': branch['name'] + " " + office_supply['description'],
+    #             'description': office_supply['description'],
     #             'maintaining': office_supply['maintaining'],
     #             'remaining': 0,
     #             'reserve': 0,
@@ -326,25 +326,25 @@ def items():
 
     
     ################## STUDENT
-    branches = mongo.db.lms_branches.find()
-    student_supplies = list(mongo.db.lms_student_supplies.find())
+    # branches = mongo.db.lms_branches.find()
+    # student_supplies = list(mongo.db.lms_student_supplies.find())
     
-    for branch in branches:
-        for student_supply in student_supplies:
-            mongo.db.lms_student_supplies.insert({
-                'branch': branch['_id'],
-                'active': student_supply['active'],
-                'is_deleted': student_supply['is_deleted'],
-                'is_archived': student_supply['is_archived'],
-                'created_by': student_supply['created_by'],
-                'description': branch['name'] + " " + student_supply['description'],
-                'maintaining': student_supply['maintaining'],
-                'remaining': 0,
-                'released': 0,
-                'is_for_sale': student_supply.get('is_for_sale', False),
-                'price': student_supply.get('price', 0)
-            })
-            print(branch['name'], student_supply['description'])
+    # for branch in branches:
+    #     for student_supply in student_supplies:
+    #         mongo.db.lms_student_supplies.insert({
+    #             'branch': branch['_id'],
+    #             'active': student_supply['active'],
+    #             'is_deleted': student_supply['is_deleted'],
+    #             'is_archived': student_supply['is_archived'],
+    #             'created_by': student_supply['created_by'],
+    #             'description': student_supply['description'],
+    #             'maintaining': student_supply['maintaining'],
+    #             'remaining': 0,
+    #             'released': 0,
+    #             'is_for_sale': student_supply.get('is_for_sale', False),
+    #             'price': student_supply.get('price', 0)
+    #         })
+    #         print(branch['name'], student_supply['description'])
 
     print("success!")
 

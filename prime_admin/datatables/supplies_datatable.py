@@ -139,7 +139,7 @@ def dt_monthly_transactions():
                 str(supply['_id']),
                 supply['description'],
                 supply.get('maintaining', ''),
-                supply.get('reserve', ''),
+                supply.get('remaining', ''),
                 supply.get('uom', ''),
                 one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
                 eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
@@ -225,7 +225,6 @@ def dt_summary():
         if supplies_type == "office_supplies":
             row = [
                 str(supply['_id']),
-                '',
                 supply['description'],
                 supply.get('remaining', ''),
                 supply.get('replacement', ''),

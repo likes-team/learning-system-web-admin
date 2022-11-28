@@ -585,11 +585,11 @@ def fund_wallet_add_expenses():
                 raise Exception("Likes Error: Accounting data not found")
 
             if category == "office_supply":
-                # increment reserve materials value
+                # increment remaining materials value
                 mongo.db.lms_office_supplies.update_one({
                     'description': description
                 }, {
-                    '$inc': {'reserve': int(qty)}
+                    '$inc': {'remaining': int(qty)}
                 },session=session)
 
             mongo.db.lms_fund_wallet_transactions.insert_one({

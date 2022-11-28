@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Outbound Material</h5>
+                <h5 class="modal-title">Supplies Withdrawal</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -12,20 +12,24 @@
                 <form action="{{url_for(TABLE_OPTIONS['outbound_url'])}}" method="POST" class="needs-validation" novalidate>
                     <div class="main-card mb-3 card">
                         <div class="card-body">
-                        <h5 class="card-title">Material Information</h5>
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" class="form-control" id="outbound_supply_id" name="outbound_supply_id"
-                            value="">
                             <div class="form-row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="withdraw_by">Withdraw by</label>
-                                    <input required style="font-weight: bold;" type="text" class="form-control" id="withdraw_by" name="withdraw_by"
-                                        value="">
+                                    <label for="outbound_branch">Branch</label>
+                                    <select name="outbound_branch" id="outbound_branch" class="form-control" required>
+                                        <option value="">Choose...</option>
+                                        {% for branch in TABLE_OPTIONS['branches'] %}
+                                        <option value="{{ branch.id }}">
+                                            {{ branch.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="date">Date</label>
-                                    <input required style="font-weight: bold;" type="date" class="form-control" id="date" name="date"
-                                        value="">
+                                    <label for="outbound_supply_id" class="">Description</label>
+                                    <select name="outbound_supply_id" id="outbound_supply_id" class="form-control" required>
+                                        <option value="">Choose branch first...</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-2 mb-3">
                                     <label for="quantity">Quantity</label>
@@ -33,18 +37,8 @@
                                         value="">
                                 </div>
                             </div>
-
-                            <div class="form-row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="remarks">Reasons/Remarks</label>
-                                    <input required style="font-weight: bold;" type="text" class="form-control" id="remarks" name="remarks"
-                                        value="">
-                                </div>
-                            </div>
                         </div>
-                        
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-success">Confirm</button>
