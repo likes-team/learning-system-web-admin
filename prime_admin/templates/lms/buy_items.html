@@ -27,7 +27,6 @@
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function(response) {
-                    console.log(response)
                     $("#client_id").val(response.data.id);
                     $("#branch_id").val(response.data.branch);
                     $("#registration_no").val(response.data.registration_no);
@@ -36,6 +35,35 @@
                     $("#batch").val(response.data.batch_number);
                     $("#schedule").val(response.data.schedule);
                     $("#status").val(response.data.payment_status);
+
+                    $.ajax({
+                        url: `/learning-management/get-student-supplies?branch=${response.data.branch}`,
+                        type: 'GET',
+                        contentType: "application/json; charset=utf-8",
+                        success: function(response){
+                            $('#tbl_items > tbody').empty();
+                            for(i=0; i < response.data.length; i++){
+                                var item = response.data[i];
+                                $('#tbl_items > tbody:first').append(
+                                    `<tr>
+                                        <td style="display:none;"><input name="items[]" type="hidden" value="${item.id}"></td>
+                                        <td>${item.maintaining}</td>
+                                        <td>${item.description}</td>
+                                        <td>
+                                            <input readonly name="price_${item.id}" style="font-weight: bold;" type="number"
+                                                class="form-control price" value="${item.price}">
+                                        </td>
+                                        <td>
+                                            <input name="qty_${item.id}" style="font-weight: bold;" type="number"
+                                                class="form-control qty" value="0">
+                                        </td>
+                                        <td><input style="font-weight: bold;" readonly type="text"
+                                                class="form-control sub_total" value=""></td>
+                                    </tr>`
+                                );
+                            }
+                        }
+                    })
                 }
             });
         });
@@ -56,14 +84,17 @@
             var qty = row.find('.qty').val();
             var amount = parseFloat(qty) * parseFloat(cost);
             row.find('.sub_total').val(amount.toFixed(2));
-    
             var total = 0;
-            $('#tbl_items > tbody > tr').each(function () {
-                var sub_total = parseFloat($(this).find(".sub_total").val());
-                total += sub_total;
-            });
-    
-            $("#total").val(total);
+            
+            setTimeout(function(){
+                $('.sub_total').each(function () {
+                    if($(this).val() != ""){
+                        var sub_total = parseFloat($(this).val());
+                        total += sub_total;
+                    }
+                });
+                $("#total").val(total);
+            }, 500);
         });
     });
 </script>
@@ -162,35 +193,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in items %}
-                            <tr>
-                                <td style="display:none;"><input name="items[]" type="hidden" value="{{item.id}}"></td>
-                                <td>{{item.maintaining}}</td>
-                                <td>{{item.description}}</td>
-                                <td>
-                                    <input readonly name="price_{{item.id}}" style="font-weight: bold;" type="number"
-                                        class="form-control price" value="{{item.price}}">
-                                </td>
-                                <td>
-                                    <input name="qty_{{item.id}}" style="font-weight: bold;" type="number"
-                                        class="form-control qty" value="0">
-                                </td>
-                                <td><input style="font-weight: bold;" readonly type="text"
-                                        class="form-control sub_total" value=""></td>
-                            </tr>
-                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 <div class="form-row">
                     <div class="col-md-3">
-
                     </div>
-
                     <div class="col-md-3">
-
                     </div>
-
                     <div class="col-md-3">
                     </div>
                     <div class="col-md-3">
@@ -238,7 +248,7 @@
     <!-- <button type="button" class="btn btn-secondary" onclick="history.back(-1)"
         style="margin-right: 10px;">Cancel</button> -->
     <!-- <button id="btn_clear_entries" class="btn-wide btn btn-danger" type="button" value="Clear Entry" style="margin-right: 10px;">Clear Entries</button> -->
-    <input form="frm_create" type="submit" class="btn btn-primary" name='btn_submit' value="Submit">
+    <input form="frm_create" type="submit" class="btn btn-primary" name='btn_submit' value="Buy">
     <!-- <input form="register_form" type="submit" style="margin-right: 10px;" name='btn_submit' 
     class="btn btn-primary" value="Save and Print" style="margin-right: 10px;"> -->
 </div>

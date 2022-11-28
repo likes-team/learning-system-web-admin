@@ -382,7 +382,12 @@
                 $("#qty").closest('.col-md-4').hide();
                 $("#unit_price").closest('.col-md-4').hide();
             } else if (selectedCategory == "office_supply") {
-                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                $.getJSON(`/learning-management/api/supplies?branch=${$("#branch_expenses").val()}`, function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
                         var supply = response.data[i];
                         $("#description").append($('<option></option>').attr("value", supply.description).text(supply.description));
@@ -596,6 +601,11 @@
                 $("#filter_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#filter_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
             } else if (selectedCategory == "office_supply") {
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
                 $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
                         var supply = response.data[i];

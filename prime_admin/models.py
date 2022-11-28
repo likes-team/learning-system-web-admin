@@ -404,7 +404,7 @@ class OfficeSupply(Base, Admin):
         'strict': False,
     }
     __amname__ = 'inventory'
-    __amdescription__ = 'Inventory'
+    __amdescription__ = 'Office Supply'
     __amicon__ = 'pe-7s-back-2'
     __tablename__ = 'lms_office_supplies'
 

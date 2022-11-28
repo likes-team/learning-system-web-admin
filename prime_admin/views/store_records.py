@@ -61,7 +61,6 @@ def get_dtbl_store_records():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
-    batch_no = request.args.get('batch_no')
 
     if branch_id == 'all':
         _store_records = mongo.db.lms_store_buyed_items.find().skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
@@ -71,27 +70,25 @@ def get_dtbl_store_records():
     table_data = []
 
     for record in _store_records:
-        try:
-            student = Registration.objects(id=record['client_id']).get()
+        student = Registration.objects(id=record['client_id']).get()
 
-            table_data.append([
-                str(record['_id']),
-                convert_to_local(record['created_at']),
-                student.full_registration_number,
-                student.full_name,
-                student.branch.name,
-                student.batch_number.number,
-                student.schedule,
-                record['uniforms'],
-                record['id_lace'],
-                record['id_card'],
-                record['module_1'],
-                record['module_2'],
-                record['reviewer_l'],
-                record['reviewer_r'],
-            ])
-        except Exception:
-            continue
+        table_data.append([
+            str(record['_id']),
+            convert_to_local(record['created_at']),
+            student.full_registration_number,
+            student.full_name,
+            student.branch.name,
+            student.batch_number.number,
+            student.schedule,
+            record['uniforms'],
+            record['id_lace'],
+            record['id_card'],
+            record['module_1'],
+            record['module_2'],
+            record['reviewer_l'],
+            record['reviewer_r'],
+        ])
+
 
     response = {
         'draw': draw,

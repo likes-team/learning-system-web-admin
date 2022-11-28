@@ -10,7 +10,7 @@ from prime_admin.forms import InventoryForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_table
 from prime_admin import bp_lms
-from prime_admin.models import InboundOutbound
+from prime_admin.models import InboundOutbound, Branch, Batch
 
 
 
@@ -21,6 +21,17 @@ def student_supplies():
     form.__heading__ = "Student Supplies"
 
     _table_data = []
+
+    if current_user.role.name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+        batch_numbers = Batch.objects(branch=current_user.branch.id)
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+    else:
+        branches = Branch.objects()
 
     return admin_table(
         StudentSupply,
@@ -35,6 +46,7 @@ def student_supplies():
         view_modal=False,
         inbound_url='lms.inbound_student_supply',
         outbound_url='lms.outbound_student_supply',
+        branches=branches,
     )
 
 

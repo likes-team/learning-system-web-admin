@@ -25,6 +25,7 @@
                     d.year = $("#filter_year").val();
                     d.month = $("#filter_month").val();
                     d.supplies_type = "office_supplies";
+                    d.branch = $("#btn_marketer_label").val();
                 }
             },
             "pageLength": 50,
@@ -49,6 +50,7 @@
                     d.year = $("#filter_year").val();
                     d.month = $("#filter_month").val();
                     d.supplies_type = "office_supplies";
+                    d.branch = $("#btn_marketer_label").val();
                 }
             },
             "pageLength": 50,
@@ -93,6 +95,21 @@
         });
 
 
+        $("#div_marketer_buttons").on('click', '.btn-marketer', function () {
+            var marketer_name = $(this).html();
+    
+            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
+            $("#btn_marketer_label").html(marketer_name.toUpperCase());
+            $("#btn_marketer_label").val($(this).val());
+            $("#card_header_label").html(marketer_name);
+    
+            $('#btn_marketer_label').trigger('change');
+        });
+    
+        $("#btn_marketer_label").change(function(){
+            dtbl_supplies.ajax.reload();
+            dtbl_summaries.ajax.reload();
+        });
     });
 </script>
 {% endblock %}
@@ -114,19 +131,120 @@
                 </div>
             </div>
 
-            {% block actions %}
-
-            {% if TABLE_OPTIONS['actions'] %}
-            {% include TABLE_OPTIONS['action_template'] %}
-            {% endif %}
-
-            {% endblock %}
-
+            <div class="page-title-actions">
+                {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+            
+                    {% if session['permissions'][RENDERED_MODEL.__amname__]['create'] or current_user.is_superuser %}
+            
+                        {% if TABLE_OPTIONS['create_modal'] %}
+                            <button type="button" data-toggle="modal" data-target="#create_modal" title="Create new" data-placement="bottom"
+                                    class="btn-shadow mr-3 btn btn-primary">
+                                {% if RENDERED_MODEL.__amname__ == 'user' %}
+                                <i class="fa fa-user-plus"></i>
+                                {% else %}
+                                <i class="fa fa-plus"></i>
+                                {% endif %}
+                                Create Item
+                            </button>
+                        
+                        {% elif TABLE_OPTIONS['create_button'] and MODAL_DATA['create_url'] is not none %}
+                            <a href="{{ url_for(MODAL_DATA['create_url']) }}" type="button" class="btn-shadow mr-3 btn btn-primary">
+                                <i class="fa fa-plus"></i>
+                            </a>
+            
+                        {% else %}
+            
+                        {% endif %}
+            
+                    {% endif %}
+                {% endif %}
+            
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            class="btn-shadow dropdown-toggle btn btn-info">
+                                    <span class="btn-icon-wrapper pr-2 opacity-7">
+                                        <i class="fa fa-list-alt fa-w-20"></i>
+                                    </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0" class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="main-card mb-6 card">
         <div class="card-header">
-            <div id="card_header_label">ALL BRANCHES</div>
+            <div id="card_header_label">
+                {% if current_user.role.name == "Marketer" %}
+                    {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                {% else %}
+                    ALL BRANCHES
+                {% endif %}
+            </div>
+
+            <div class="btn-actions-pane-right">
+                <div class="nav">
+                    <div class="dropleft btn-group">
+                        {% if current_user.role.name == "Marketer" or current_user.role.name == "Partner" %}
+                        <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
+                            data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                            {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
+                        </button>
+                        {% else %}
+                        <button value="all" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
+                            data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                            ALL BRANCHES
+                        </button>
+                        {% endif %}
+
+                        {% if current_user.role.name != "Marketer" %}
+                        <div id="div_marketer_buttons" tabindex="-1" role="menu" aria-hidden="true"
+                            class="dropdown-menu" x-placement="left-start"
+                            style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
+                            
+                            <button value="all" type="button" tabindex="0"
+                            class="dropdown-item btn-marketer">All Branches</button>
+                            
+                            {% for branch in TABLE_OPTIONS['branches'] %}
+                            <button value="{{branch.id}}" type="button" tabindex="0"
+                                class="dropdown-item btn-marketer">{{branch.name}}</button>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="mb-12 card">
             <div class="card-body">

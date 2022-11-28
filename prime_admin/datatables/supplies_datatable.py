@@ -1,4 +1,5 @@
 import pymongo
+from bson import ObjectId
 from flask import request, jsonify
 from flask_login import current_user
 from app import mongo
@@ -14,9 +15,21 @@ def dt_monthly_transactions():
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
     supplies_type = request.args.get('supplies_type')
+    branch_id = request.args.get('branch')
     
+    if branch_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+        }
+        return jsonify(response)
+
     total_records: int
     filtered_records: int
+        
+    _filter = {'branch': ObjectId(branch_id)}
     
     mongo_table = None
     if supplies_type == "office_supplies":
@@ -24,7 +37,7 @@ def dt_monthly_transactions():
     elif supplies_type == "student_supplies":
         mongo_table =  mongo.db.lms_student_supplies
 
-    query =  mongo_table.find().skip(start).limit(length)
+    query = mongo_table.find(_filter).skip(start).limit(length)
     
     table_data = []
     for supply in query:
@@ -146,7 +159,7 @@ def dt_monthly_transactions():
 
         table_data.append(row)
         
-    total_records = mongo_table.find().count()
+    total_records = mongo_table.find(_filter).count()
     filtered_records = query.count()
 
     response = {
@@ -166,24 +179,32 @@ def dt_summary():
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
     supplies_type = request.args.get('supplies_type')
-    
+    branch_id = request.args.get('branch')
+
+    if branch_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+        }
+        return jsonify(response)
+        
     total_records: int
     filtered_records: int
 
+    _filter = {'branch': ObjectId(branch_id)}
+    
     mongo_table = None
     if supplies_type == "office_supplies":
         mongo_table =  mongo.db.lms_office_supplies
     elif supplies_type == "student_supplies":
         mongo_table =  mongo.db.lms_student_supplies
-
-    query =  mongo_table.find().skip(start).limit(length)
+    query = mongo_table.find(_filter).skip(start).limit(length)
 
     table_data = []
-    
     for supply in query:
         transactions = supply.get('transactions', [])
-        
-        
         for trans in transactions:
             date = trans.get('date', None)
             
@@ -222,7 +243,7 @@ def dt_summary():
             
         table_data.append(row)
         
-    total_records = mongo_table.find().count()
+    total_records = mongo_table.find(_filter).count()
     filtered_records = query.count()
 
     response = {

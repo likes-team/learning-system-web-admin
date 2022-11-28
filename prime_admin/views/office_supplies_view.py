@@ -1,4 +1,5 @@
 from flask import redirect, url_for, request, flash
+from bson import ObjectId
 from prime_admin.forms import InventoryForm
 from flask_login import login_required
 from app.admin.templating import admin_table
@@ -10,8 +11,7 @@ from prime_admin.forms import InventoryForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_table
 from prime_admin import bp_lms
-from prime_admin.models import InboundOutbound
-
+from prime_admin.models import InboundOutbound, Branch, Batch
 
 
 
@@ -21,14 +21,21 @@ def office_supplies():
     form = InventoryForm()
     form.__heading__ = "Office Supplies"
 
-    _table_data = []
+    if current_user.role.name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+    else:
+        branches = Branch.objects()
 
     return admin_table(
         OfficeSupply,
         fields=[],
         form=form,
         table_template="lms/office_supplies_page.html",
-        table_data=_table_data,
+        table_data=[],
         create_url='lms.create_office_supply',
         edit_url=False,
         modals=['lms/inbound_modal.html', 'lms/outbound_modal.html'],
@@ -36,6 +43,7 @@ def office_supplies():
         view_modal=False,
         inbound_url='lms.inbound_office_supply',
         outbound_url='lms.outbound_office_supply',
+        branches=branches,
     )
 
 
@@ -119,7 +127,7 @@ def create_office_supply():
     equipment.description = form.description.data
     equipment.maintaining = form.maintaining.data
     equipment.remaining = form.remaining.data
-    equipment.type = "supplies"
+    equipment.branch = ObjectId(form.branch.data)
     equipment.created_by = "{} {}".format(current_user.fname,current_user.lname)
     equipment.save()
     flash('New Supplies Added Successfully!','success')

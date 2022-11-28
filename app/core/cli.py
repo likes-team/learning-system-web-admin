@@ -297,24 +297,55 @@ def move_earnings():
     # new_account.save()
     
     
-# @bp_core.cli.command('items')
-# def items():
-#     data = [
-#         'Styro foam',
-#         'Duct tape',
-#         'Cartolina'
-#     ]
+@bp_core.cli.command('items')
+def items():
+    # mongo.db.lms_office_supplies.delete_many({'branch': {'$exists': False}})
+    # mongo.db.lms_student_supplies.delete_many({'branch': {'$exists': False}})
     
-#     for x in data:
-#         mongo.db.lms_inventories.insert({
-#             'description': x,
-#             'active': True,
-#             'is_deleted': False,
-#             'is_archived': False,
-#             'created_by': 'System',
-#             'maintaining': 0,
-#             'remaining': 0,
-#             'type': 'supplies',
-#             'is_for_sale': False,
-#             'price': 0,
-#         })
+    ####################################### OFFICE
+    # branches = mongo.db.lms_branches.find()
+    # office_supplies = list(mongo.db.lms_office_supplies.find())
+    
+    # for branch in branches:
+    #     print(branch['name'])
+    #     print(list(office_supplies))
+    #     for office_supply in office_supplies:
+    #         mongo.db.lms_office_supplies.insert({
+    #             'branch': branch['_id'],
+    #             'active': office_supply['active'],
+    #             'is_deleted': office_supply['is_deleted'],
+    #             'is_archived': office_supply['is_archived'],
+    #             'created_by': office_supply['created_by'],
+    #             'description': branch['name'] + " " + office_supply['description'],
+    #             'maintaining': office_supply['maintaining'],
+    #             'remaining': 0,
+    #             'reserve': 0,
+    #             'price': 0
+    #         })
+    #         print(branch['name'], office_supply['description'])
+
+    
+    ################## STUDENT
+    branches = mongo.db.lms_branches.find()
+    student_supplies = list(mongo.db.lms_student_supplies.find())
+    
+    for branch in branches:
+        for student_supply in student_supplies:
+            mongo.db.lms_student_supplies.insert({
+                'branch': branch['_id'],
+                'active': student_supply['active'],
+                'is_deleted': student_supply['is_deleted'],
+                'is_archived': student_supply['is_archived'],
+                'created_by': student_supply['created_by'],
+                'description': branch['name'] + " " + student_supply['description'],
+                'maintaining': student_supply['maintaining'],
+                'remaining': 0,
+                'released': 0,
+                'is_for_sale': student_supply.get('is_for_sale', False),
+                'price': student_supply.get('price', 0)
+            })
+            print(branch['name'], student_supply['description'])
+
+    print("success!")
+
+

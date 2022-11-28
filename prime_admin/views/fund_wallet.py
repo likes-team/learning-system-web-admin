@@ -583,8 +583,7 @@ def fund_wallet_add_expenses():
                     }},session=session)
             else:
                 raise Exception("Likes Error: Accounting data not found")
-            
-            
+
             if category == "office_supply":
                 # increment reserve materials value
                 mongo.db.lms_office_supplies.update_one({
@@ -1177,9 +1176,9 @@ def fetch_refund_dt(branch_id):
 
 @bp_lms.route('api/supplies', methods=['GET'])
 def get_supplies():
-    inventory_type = request.args.get('inventory_type', 'supplies')
-    
-    query = mongo.db.lms_office_supplies.find()
+    branch_id = request.args.get('branch')
+
+    query = mongo.db.lms_office_supplies.find({'branch': ObjectId(branch_id)})
     
     list_supplies = []
     
