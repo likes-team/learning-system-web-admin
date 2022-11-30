@@ -161,7 +161,7 @@
                     </li>
                 {% endif %}
 
-                {% if current_user.role.name in ['Admin'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">Inventory</li>
                     <li>
                         <a id="li_office_supplies" href="{{url_for('lms.office_supplies')}}" class="">
