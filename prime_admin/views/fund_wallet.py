@@ -484,7 +484,8 @@ def fund_wallet_add_expenses():
             if category == "office_supply":
                 # increment remaining materials value
                 mongo.db.lms_office_supplies.update_one({
-                    'description': description
+                    'description': description,
+                    'branch': ObjectId(branch_id)
                 }, {
                     '$inc': {'remaining': int(qty)}
                 },session=session)
