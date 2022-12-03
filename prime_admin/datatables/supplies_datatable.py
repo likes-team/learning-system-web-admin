@@ -1,10 +1,11 @@
 import pymongo
-from bson import ObjectId
+import decimal
+from bson import ObjectId, Decimal128
 from flask import request, jsonify
 from flask_login import current_user
 from app import mongo
 from prime_admin import bp_lms
-from prime_admin.globals import convert_to_utc
+from prime_admin.globals import convert_to_utc, D128_CTX
 
 
 
@@ -203,51 +204,53 @@ def dt_summary():
     query = mongo_table.find(_filter).skip(start).limit(length)
 
     table_data = []
-    for supply in query:
-        total_used = 0
-        transactions = supply.get('transactions', [])
+    
+    with decimal.localcontext(D128_CTX):
+        for supply in query:
+            total_used = 0
+            transactions = supply.get('transactions', [])
 
-        for trans in transactions:
-            quantity = trans.get('quantity', 0)
-            date = trans.get('date', None)
-            
-            if date is None:
-                continue
-            
-            year = date.year
-            month = date.month
-
-            if filter_year != "all":
-                if year != int(filter_year):
+            for trans in transactions:
+                quantity = trans.get('quantity', 0)
+                date = trans.get('date', None)
+                
+                if date is None:
                     continue
                 
-            if filter_month != "all":
-                if month != int(filter_month):
-                    continue
-            total_used += quantity
+                year = date.year
+                month = date.month
+
+                if filter_year != "all":
+                    if year != int(filter_year):
+                        continue
                     
-        if supplies_type == "office_supplies":
-            unit_price = supply.get('price', 0)
-            total_price = total_used * unit_price
-            
-            row = [
-                str(supply['_id']),
-                supply['description'],
-                supply.get('remaining', ''),
-                total_used,
-                str(unit_price),
-                str(total_price)
-            ]
-        elif supplies_type == "student_supplies":
-            row = [
-                str(supply['_id']),
-                '',
-                supply['description'],
-                supply.get('remaining', ''),
-                total_used
-            ]
-            
-        table_data.append(row)
+                if filter_month != "all":
+                    if month != int(filter_month):
+                        continue
+                total_used += quantity
+                        
+            if supplies_type == "office_supplies":
+                unit_price = Decimal128(str(supply.get('price', 0)))
+                total_price = Decimal128(str(total_used)).to_decimal() * unit_price.to_decimal()
+                
+                row = [
+                    str(supply['_id']),
+                    supply['description'],
+                    supply.get('remaining', ''),
+                    total_used,
+                    str(unit_price),
+                    str(total_price)
+                ]
+            elif supplies_type == "student_supplies":
+                row = [
+                    str(supply['_id']),
+                    '',
+                    supply['description'],
+                    supply.get('remaining', ''),
+                    total_used
+                ]
+                
+            table_data.append(row)
         
     total_records = mongo_table.find(_filter).count()
     filtered_records = query.count()
