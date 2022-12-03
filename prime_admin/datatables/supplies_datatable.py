@@ -204,8 +204,11 @@ def dt_summary():
 
     table_data = []
     for supply in query:
+        total_used = 0
         transactions = supply.get('transactions', [])
+
         for trans in transactions:
+            quantity = trans.get('quantity', 0)
             date = trans.get('date', None)
             
             if date is None:
@@ -221,15 +224,19 @@ def dt_summary():
             if filter_month != "all":
                 if month != int(filter_month):
                     continue
-                
+            total_used += quantity
+                    
         if supplies_type == "office_supplies":
+            unit_price = supply.get('price', 0)
+            total_price = total_used * unit_price
+            
             row = [
                 str(supply['_id']),
                 supply['description'],
                 supply.get('remaining', ''),
-                supply.get('replacement', ''),
-                str(supply.get('price', '')),
-                ''
+                total_used,
+                str(unit_price),
+                str(total_price)
             ]
         elif supplies_type == "student_supplies":
             row = [
@@ -237,7 +244,7 @@ def dt_summary():
                 '',
                 supply['description'],
                 supply.get('remaining', ''),
-                supply.get('replacement', ''),
+                total_used
             ]
             
         table_data.append(row)
