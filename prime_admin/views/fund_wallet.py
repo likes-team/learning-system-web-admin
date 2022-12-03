@@ -488,7 +488,7 @@ def fund_wallet_add_expenses():
                     'branch': ObjectId(branch_id),
                 }, {
                     '$inc': {'remaining': int(qty)},
-                    '$set': {'price': unit_price}
+                    '$set': {'price': Decimal128(unit_price)}
                 },session=session)
 
             mongo.db.lms_fund_wallet_transactions.insert_one({
