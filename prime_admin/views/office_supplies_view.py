@@ -59,6 +59,7 @@ def outbound_office_supply():
     
     supply.remaining = supply.remaining - quantity
     supply.released = supply.released + quantity if supply.released is not None else quantity
+    supply.replacement = int(supply.replacement + quantity)
     supply.transactions.append(
         InboundOutbound(
             quantity=quantity,

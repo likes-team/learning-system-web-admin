@@ -237,7 +237,7 @@ def dt_summary():
                     str(supply['_id']),
                     supply['description'],
                     supply.get('remaining', ''),
-                    total_used,
+                    supply.get('replacement', ''),
                     str(unit_price),
                     str(total_price)
                 ]
@@ -247,7 +247,7 @@ def dt_summary():
                     '',
                     supply['description'],
                     supply.get('remaining', ''),
-                    total_used
+                    supply.get('replacement', ''),
                 ]
                 
             table_data.append(row)

@@ -392,6 +392,7 @@ class StudentSupply(Base, Admin):
     purchase_date = db.DateTimeField()
     transactions = db.EmbeddedDocumentListField(InboundOutbound)
     is_for_sale = db.BooleanField()
+    replacent = db.IntField()
 
     @property
     def name(self):
@@ -421,6 +422,7 @@ class OfficeSupply(Base, Admin):
     purchase_date = db.DateTimeField()
     transactions = db.EmbeddedDocumentListField(InboundOutbound)
     is_for_sale = db.BooleanField()
+    replacement = db.IntField()
 
     @property
     def name(self):

@@ -482,13 +482,26 @@ def fund_wallet_add_expenses():
                 raise Exception("Likes Error: Accounting data not found")
 
             if category == "office_supply":
+                supply = mongo.db.lms_office_supplies.find_one({
+                    'description': description,
+                    'branch': ObjectId(branch_id),
+                })
+                old_replacement = supply.get('replacement', 0)
+                if old_replacement == 0:
+                    new_replacement = 0
+                else:
+                    new_replacement = int(old_replacement - int(qty))
+
+                if new_replacement < 0:
+                    new_replacement = 0
+                    
                 # increment remaining materials value
                 mongo.db.lms_office_supplies.update_one({
                     'description': description,
                     'branch': ObjectId(branch_id),
                 }, {
                     '$inc': {'remaining': int(qty)},
-                    '$set': {'price': Decimal128(unit_price)}
+                    '$set': {'price': Decimal128(unit_price), 'replacement': new_replacement}
                 },session=session)
 
             mongo.db.lms_fund_wallet_transactions.insert_one({

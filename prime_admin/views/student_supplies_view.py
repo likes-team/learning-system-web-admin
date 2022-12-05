@@ -82,7 +82,6 @@ def inbound_student_supply():
 @bp_lms.route('/student-supplies/outbound', methods=["POST"])
 @login_required
 def outbound_student_supply():
-    # try:
     supply_id = request.form['outbound_supply_id']
     withdraw_by = request.form['withdraw_by']
     date = request.form['date']
@@ -90,13 +89,12 @@ def outbound_student_supply():
     remarks = request.form['remarks']
     
     supply : StudentSupply = StudentSupply.objects.get(id=supply_id)
-
     if supply is None:
         raise Exception("Product cannot be found")
     
     supply.remaining = supply.remaining - quantity 
     supply.released = supply.released + quantity if supply.released is not None else quantity
-
+    supply.replacement = int(supply.replacement + quantity)
     supply.transactions.append(
         InboundOutbound(
             quantity=quantity,
@@ -106,13 +104,8 @@ def outbound_student_supply():
             confirm_by=User.objects.get(id=current_user.id)
         )
     )
-
     supply.save()
-
     flash('Process Successfully!','success')
-    # except Exception as e:
-    #     flash(str(e),'error')
-    
     return redirect(url_for('lms.student_supplies'))
 
 
