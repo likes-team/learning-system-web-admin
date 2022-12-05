@@ -1,18 +1,21 @@
 from datetime import datetime
-from flask import redirect, url_for, request, flash
-from bson import ObjectId
+import decimal
+from flask import redirect, url_for, request, flash, render_template
+from bson import ObjectId, Decimal128
 from prime_admin.forms import InventoryForm
 from flask_login import login_required
 from app.admin.templating import admin_table
 from prime_admin import bp_lms
 from prime_admin.models import OfficeSupply
-import decimal
 from app.auth.models import User
 from prime_admin.forms import InventoryForm
 from flask_login import login_required, current_user
 from app.admin.templating import admin_table
 from prime_admin import bp_lms
-from prime_admin.models import InboundOutbound, Branch, Batch
+from prime_admin.models import InboundOutbound, Branch
+from flask_weasyprint import HTML, render_pdf
+from app import mongo
+from prime_admin.globals import convert_to_utc, D128_CTX
 
 
 
@@ -93,3 +96,66 @@ def create_office_supply():
     equipment.save()
     flash('New Supplies Added Successfully!','success')
     return redirect(url_for('lms.office_supplies'))
+
+
+@bp_lms.route('/office_supplies_summary.pdf')
+def print_office_supplies_summary():
+    branch_id = request.args.get('branch', '')
+    branch = Branch.objects.get_or_404(id=branch_id)
+    filter_year = request.args.get('year', 'all')
+    filter_month = request.args.get('month', 'all')
+    _filter = {'branch': ObjectId(branch_id)}
+    query = mongo.db.lms_office_supplies.find(_filter)
+    table_data = []
+
+    with decimal.localcontext(D128_CTX):
+        for supply in query:
+            total_used = 0
+            transactions = supply.get('transactions', [])
+
+            for trans in transactions:
+                quantity = trans.get('quantity', 0)
+                date = trans.get('date', None)
+                
+                if date is None:
+                    continue
+                
+                year = date.year
+                month = date.month
+
+                if filter_year != "all":
+                    if year != int(filter_year):
+                        continue
+                    
+                if filter_month != "all":
+                    if month != int(filter_month):
+                        continue
+                total_used += quantity
+                        
+            unit_price = Decimal128(str(supply.get('price', 0)))
+            total_price = Decimal128(str(total_used)).to_decimal() * unit_price.to_decimal()
+            
+            row = [
+                str(supply['_id']),
+                supply['description'],
+                supply.get('remaining', ''),
+                supply.get('replacement', ''),
+                str(unit_price),
+                str(total_price)
+            ]
+   
+            table_data.append(row)
+    
+    if filter_month != "all":
+        month = datetime(1998, month=int(filter_month), day=1).strftime("%B")
+    else:
+        month = 'all'
+    
+    html = render_template(
+            "lms/pdfs/office_supplies_pdf.html",
+            supplies=table_data,
+            branch=branch.name.upper(),
+            year=filter_year,
+            month=month
+        )
+    return render_pdf(HTML(string=html))

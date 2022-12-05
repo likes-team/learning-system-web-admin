@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td,
+    th {
+      border: 1px solid black;
+      text-align: center;
+      padding: 8px;
+      font-size: 9px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+
+    @page {
+      size: letter landscape;
+      margin: 2cm;
+    }
+
+    .Row {
+      text-align: center;
+      display: table;
+      width: 100%;
+      /*Optional*/
+      table-layout: fixed;
+      /*Optional*/
+      border-spacing: 10px;
+      /*Optional*/
+    }
+
+    .Column {
+      display: table-cell;
+      font-size: 11px;
+      /*Optional*/
+    }
+  </style>
+</head>
+
+<body>
+
+  <div style="text-align: center;">
+    <h3 style="margin-bottom: 5px;">Prime Korean Language and Review Center Inc.</h3>
+    <h6 style="font-weight:lighter;margin-top: 5px;">SEC. REG. NO.: CS201817522</h6>
+    <h5 style="font-weight:bold;margin-top: 10px;">AUDIT STUDENTS RECORD</h5>
+  </div>
+
+  <div style="text-align: center;">
+    <h6 style="font-weight:lighter;margin: 5px;margin-bottom: 20px;">{{branch}} {% if branch == "ALL" %}BRANCHES{% else %}BRANCH{% endif %}</h6>
+    <h6 style="font-weight:lighter;margin: 5px;">YEAR: {{year}}</h6>
+    <h6 style="font-weight:lighter;margin: 5px;">MONTH: {{month}}</h6>
+  </div>
+  
+  <table>
+    <tr>
+      <th>DESCRIPTION</th>
+      <th>REMAINING MATERIALS</th>
+      <th>REPLACEMENT</th>
+      <th>UNIT PRICE</th>
+      <th>TOTAL</th>
+    </tr>
+
+    {% for supply in supplies %}
+    <tr>
+      <td>
+        {{supply[1]}}
+      </td>
+      <td>
+        {{supply[2]}}
+      </td>
+      <td>
+        {{supply[3]}}
+      </td>
+      <td>
+        {{supply[4]}}
+      </td>
+      <td>
+        {{supply[5]}}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</body>
+
+</html>
