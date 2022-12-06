@@ -231,7 +231,8 @@ def dt_summary():
                         
             if supplies_type == "office_supplies":
                 unit_price = Decimal128(str(supply.get('price', 0)))
-                total_price = Decimal128(str(total_used)).to_decimal() * unit_price.to_decimal()
+                replacement = Decimal128(str(supply.get('replacement', 0)))
+                total_price = replacement.to_decimal() * unit_price.to_decimal()
                 
                 row = [
                     str(supply['_id']),
