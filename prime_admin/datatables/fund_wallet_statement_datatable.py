@@ -27,18 +27,14 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     filter: dict
     
     if branch_id == 'all':
-        total_fund_wallet = 0.00
-
-        if current_user.role.name == "Admin":
-            filter = {}
-        elif current_user.role.name == "Partner":
-            filter = {
-                'branch': {"$in": current_user.branches}
-            }
-        elif current_user.role.name == "Secretary":
-            filter = {'branch': current_user.branch.id}
-            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-            total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+            'totalFundWallet': "0.00"
+        }
+        return jsonify(response)
     else:
         if current_user.role.name == "Secretary":
             filter = {'branch': current_user.branch.id}
