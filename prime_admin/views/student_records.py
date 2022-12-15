@@ -1284,6 +1284,10 @@ def modify_and_download_certificate():
         can.drawCentredString(150, 182, day)
         can.drawCentredString(247, 182, month)
         can.drawCentredString(312, 182, year)
+    elif cert_type == "no_partner_underline":
+        can.drawCentredString(150, 182, day)
+        can.drawCentredString(245, 182, month)
+        can.drawCentredString(312, 182, year)
     else:
         can.drawCentredString(160, 182, day)
         can.drawCentredString(255, 182, month)
