@@ -42,13 +42,13 @@ def dt_monthly_transactions():
     
     table_data = []
     for supply in query:
-        one, two, three, four, five = '', '', '', '', ''
-        six, seven, eight, nine, ten = '', '', '', '', ''
-        eleven, twelve, thirteen, fourteen, fifteen = '', '', '', '', ''
-        sixteen, seventeen, eighteen, nineteen, twenty = '', '', '', '', ''
-        tone, ttwo, tthree, tfour, tfive = '', '', '', '', ''
-        tsix,tseven,teight, tnine, thirty = '', '', '', '', ''
-        thone = ''
+        one, two, three, four, five = 0, 0, 0, 0, 0
+        six, seven, eight, nine, ten = 0, 0, 0, 0, 0
+        eleven, twelve, thirteen, fourteen, fifteen = 0, 0, 0, 0, 0
+        sixteen, seventeen, eighteen, nineteen, twenty = 0, 0, 0, 0, 0
+        tone, ttwo, tthree, tfour, tfive = 0, 0, 0, 0, 0
+        tsix,tseven,teight, tnine, thirty = 0, 0, 0, 0, 0
+        thone = 0
         
         transactions = supply.get('transactions', [])
         total_used = 0
@@ -72,67 +72,67 @@ def dt_monthly_transactions():
             
             quantity = trans.get('quantity', 0)
             if date.day == 1:
-                one = quantity
+                one += quantity
             elif date.day == 2:
-                two = quantity
+                two += quantity
             elif date.day == 3:
-                three = quantity
+                three += quantity
             elif date.day == 4:
-                four = quantity
+                four += quantity
             elif date.day == 5:
-                five = quantity
+                five += quantity
             elif date.day == 6:
-                six = quantity
+                six += quantity
             elif date.day == 7:
-                seven = quantity
+                seven += quantity
             elif date.day == 8:
-                eight = quantity
+                eight += quantity
             elif date.day == 9:
-                nine = quantity
+                nine += quantity
             elif date.day == 10:
-                ten = quantity
+                ten += quantity
             elif date.day == 11:
-                eleven = quantity
+                eleven += quantity
             if date.day == 12:
-                twelve = quantity
+                twelve += quantity
             elif date.day == 13:
-                thirteen = quantity
+                thirteen += quantity
             if date.day == 14:
-                fourteen = quantity
+                fourteen += quantity
             elif date.day == 15:
-                fifteen = quantity
+                fifteen += quantity
             if date.day == 16:
-                sixteen = quantity
+                sixteen += quantity
             elif date.day == 17:
-                seventeen = quantity
+                seventeen += quantity
             if date.day == 18:
-                eighteen = quantity
+                eighteen += quantity
             elif date.day == 19:
-                nineteen = quantity
+                nineteen += quantity
             if date.day == 20:
-                twenty = quantity
+                twenty += quantity
             elif date.day == 21:
-                tone = quantity
+                tone += quantity
             if date.day == 22:
-                ttwo = quantity
+                ttwo += quantity
             elif date.day == 23:
-                tthree = quantity
+                tthree += quantity
             if date.day == 24:
-                tfour = quantity
+                tfour += quantity
             elif date.day == 25:
-                tfive = quantity
+                tfive += quantity
             elif date.day == 26:
-                tsix = quantity
+                tsix += quantity
             elif date.day == 27:
-                tseven = quantity
+                tseven += quantity
             elif date.day == 28:
-                teight = quantity
+                teight += quantity
             elif date.day == 29:
-                tnine = quantity
+                tnine += quantity
             elif date.day == 30:
-                thirty = quantity
+                thirty += quantity
             elif date.day == 31:
-                thone = quantity
+                thone += quantity
             total_used += quantity
 
         if supplies_type == "office_supplies":
@@ -157,6 +157,13 @@ def dt_monthly_transactions():
                 eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
                 total_used
             ]
+        
+        # Replace zeros to empty string
+        i = 0
+        for x in row:
+            if x == 0:
+                row[i] = ''
+            i += 1
 
         table_data.append(row)
         
