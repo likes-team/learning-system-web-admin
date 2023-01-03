@@ -299,8 +299,11 @@ def move_earnings():
     
 @bp_core.cli.command('items')
 def items():
-    # mongo.db.lms_office_supplies.delete_many({'branch': {'$exists': True}})
+    # mongo.db.lms_office_supplies.delete_many({'branch': {'$exists': False}})
     # mongo.db.lms_student_supplies.delete_many({'branch': {'$exists': False}})
+
+    # UPDATE MAINTAINING TO 5
+    mongo.db.lms_office_supplies.update_many({}, {"$set": {"maintaining": 5}})
     
     ####################################### OFFICE
     # branches = mongo.db.lms_branches.find()
