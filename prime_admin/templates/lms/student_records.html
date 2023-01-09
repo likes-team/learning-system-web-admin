@@ -593,7 +593,7 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     success: function (response) {
-                        var new_amount = parseInt(response.data.balance) - 800;
+                        var new_amount = parseInt(response.data.balance) - 500; // installment - full payment
 
                         $("#new_amount").val(new_amount);
                         $("#new_amount").prop('readonly', true);
@@ -658,7 +658,7 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     success: function (response) {
-                        var new_amount = parseInt(response.data.balance) + 700;
+                        var new_amount = parseInt(response.data.balance) + 1000;
 
                         $("#new_amount").val(new_amount);
                         $("#new_amount").prop('readonly', true);
@@ -740,7 +740,7 @@
                             $("#upgrade_book1").attr('onclick', "return false;");
                             $("#upgrade_book2").attr('onclick', "return false;");
                         } else {
-                            var new_amount = parseInt(response.data.balance) + 700;
+                            var new_amount = parseInt(response.data.balance) + 1000;
 
                             $("#upgrade_new_amount").val(new_amount);
                             $('#upgrade_book_none').prop('checked', false);

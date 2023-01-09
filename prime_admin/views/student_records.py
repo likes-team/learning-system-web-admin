@@ -529,10 +529,10 @@ def new_payment():
         client.amount += amount
         
         if client.payment_mode == "premium" or client.payment_mode == "premium_promo":
-            client.balance = ((client.balance + 700) - amount)
+            client.balance = ((client.balance + 1000) - amount)
         else:
             if is_upgrade_full_payment == 'on':
-                client.balance = client.balance - (amount + 800)
+                client.balance = client.balance - (amount + 500) # installment - full_payment
             else:
                 client.balance = client.balance - amount
         

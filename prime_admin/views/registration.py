@@ -140,17 +140,17 @@ def register():
             savings_percent = decimal.Decimal(0.00)
 
         if client.payment_mode == "full_payment":
-            client.balance = 7000 - client.amount
-            earnings = 7000 * earnings_percent
-            savings = 7000 * savings_percent
-        elif client.payment_mode == "installment":
-            client.balance = 7800 - client.amount
-            earnings = client.amount * earnings_percent
-            savings = client.amount * savings_percent
-        elif client.payment_mode == 'premium':
             client.balance = 8500 - client.amount
             earnings = 8500 * earnings_percent
             savings = 8500 * savings_percent
+        elif client.payment_mode == "installment":
+            client.balance = 9000 - client.amount
+            earnings = client.amount * earnings_percent
+            savings = client.amount * savings_percent
+        elif client.payment_mode == 'premium':
+            client.balance = 10000 - client.amount
+            earnings = 10000 * earnings_percent
+            savings = 10000 * savings_percent
         elif client.payment_mode == "full_payment_promo":
             client.balance = 5500 - client.amount
             earnings = 5500 * earnings_percent
