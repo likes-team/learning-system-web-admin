@@ -7,7 +7,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, Payment, Registration
+from prime_admin.models import Batch, Branch, Registration
 from app.auth.models import Earning, Role, User
 from flask import redirect, url_for, request, current_app, flash, jsonify, abort
 from app import db, mongo
@@ -15,6 +15,7 @@ from datetime import datetime
 from bson.decimal128 import Decimal128
 from mongoengine.queryset.visitor import Q
 from config import TIMEZONE
+from prime_admin.helpers import Payment
 
 
 
@@ -182,7 +183,7 @@ def register():
             "current_balance": Decimal128(str(client.balance)),
             "confirm_by": current_user.id,
             "date": get_date_now(),
-            "payment_by": client_id,
+            "payment_by": ObjectId(client_id),
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
         }
@@ -232,11 +233,10 @@ def register():
                     "civil_status": client.civil_status,
                     "gender": client.gender,
                     "session": client.session
-                    },
-                "$push": {
-                    "payments": payment
-                }}, session=session)
-
+                    }}, session=session)
+                
+                Payment.pay_registration(payment, session=session)
+                
                 mongo.db.auth_users.update_one({"_id": client.contact_person.id},
                 {"$push": {
                     "earnings": contact_person_earning
@@ -307,7 +307,7 @@ def register():
 
         flash("Registered added successfully!", 'success')
     except Exception as e:
-        flash(str(e), 'error')
+        raise e
 
     return redirect(url_for('lms.members'))
 

@@ -79,24 +79,26 @@ def get_mdl_pre_deposit():
 
     for client in clients:
         if client.amount != client.amount_deposit:
-            for payment in client.payments:
-                if payment.deposited is None or payment.deposited == "No":
-                    if type(payment.date) == datetime:
-                        local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-                    elif type(payment.date == str):
-                        to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+            student_payments = mongo.db.lms_registration_payments.find({"payment_by": ObjectId(client.id)})
+            for payment in student_payments:
+                payment_deposited = payment.get('deposited')
+                if payment_deposited is None or payment_deposited == "No":
+                    if type(payment['date']) == datetime:
+                        local_datetime = payment['date'].replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+                    elif type(payment['date'] == str):
+                        to_date = datetime.strptime(payment['date'], "%Y-%m-%d")
                         local_datetime = to_date.strftime("%B %d, %Y")
                     else: 
                         local_datetime = ''
 
                     _data.append([
-                        payment.id,
+                        str(payment['_id']),
                         str(client.full_registration_number),
                         client.lname,
                         client.fname,
                         client.mname,
                         client.suffix,
-                        str(payment.amount),
+                        str(payment['amount']),
                         local_datetime
                         # str(payment['current_balance']),
                         # str(payment['deposited']) if 'deposit' in payment else 'No'
@@ -110,6 +112,11 @@ def get_mdl_pre_deposit():
 
 @bp_lms.route('/api/to-pre-deposit', methods=['POST'])
 def to_pre_deposit():
+    """(DEPRECATED)
+
+    Returns:
+        _type_: _description_
+    """
     payments_selected = request.json['payments_selected']
     source = request.json['source']
 
@@ -244,17 +251,19 @@ def get_dtbl_student_payments():
 
     with decimal.localcontext(D128_CTX):
         for client in clients:
-            for payment in client.payments:
-                if payment.deposited == "Pre Deposit":
-                    if type(payment.date) == datetime:
-                        local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-                    elif type(payment.date == str):
-                        to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+            student_payments = mongo.db.lms_registration_payments.find({"payment_by": ObjectId(client.id)})
+            for payment in student_payments:
+                payment_deposited = payment.get('deposited')
+                if payment_deposited == "Pre Deposit":
+                    if type(payment['date']) == datetime:
+                        local_datetime = payment['date'].replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+                    elif type(payment['date'] == str):
+                        to_date = datetime.strptime(payment['date'], "%Y-%m-%d")
                         local_datetime = to_date.strftime("%B %d, %Y")
                     else: 
                         local_datetime = ''
-
-                    total_student_payments += payment.amount
+                        
+                    total_student_payments += payment['amount'].to_decimal()
 
                     _data.append([
                         local_datetime,
@@ -263,7 +272,7 @@ def get_dtbl_student_payments():
                         client.batch_number.number,
                         client.schedule,
                         client.payment_mode,
-                        str(payment.amount),
+                        str(payment['amount']),
                     ])
 
     total_items_sold : decimal.Decimal = 0

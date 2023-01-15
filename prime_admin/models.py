@@ -72,7 +72,7 @@ class Registration(Base, Admin):
     date_oriented = db.DateTimeField()
     orientator = db.ReferenceField('Orientator')
     # payments = db.ListField()
-    payments = db.EmbeddedDocumentListField(Payment)
+    # payments = db.EmbeddedDocumentListField(Payment)
     # payments = db.ListField(db.EmbeddedDocumentField(Payment))
     e_registration = db.StringField()
     e_reg_password = db.StringField()

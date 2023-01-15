@@ -351,4 +351,23 @@ def items():
 
     print("success!")
 
-
+@bp_core.cli.command('move_payments')
+def move_payments():
+    students = mongo.db.lms_registrations.find({})
+    
+    for student in students:
+        for payment in student['payments']:
+            # payment = {
+            #     "_id": ObjectId(),
+            #     "deposited": "Pre Deposit",
+            #     "payment_mode": client.payment_mode,
+            #     "amount": Decimal128(str(amount)),
+            #     "current_balance": Decimal128(str(client.balance)),
+            #     "confirm_by": current_user.id,
+            #     "date": convert_to_utc(date, "date_from"),
+            #     "payment_by": ObjectId(client_id),
+            #     "earnings": Decimal128(str(earnings)),
+            #     "savings": Decimal128(str(savings)),
+            # }
+            mongo.db.lms_registration_payments.insert(payment)
+            print("{} {} success!".format(student['fname'], str(payment['_id'])))

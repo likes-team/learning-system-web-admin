@@ -15,7 +15,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, Payment, Registration, Member
+from prime_admin.models import Batch, Branch, Registration, Member
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory
 from app import mongo
 from datetime import datetime
@@ -23,6 +23,9 @@ from bson.decimal128 import Decimal128, create_decimal128_context
 from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
 from config import TIMEZONE
+from prime_admin.helpers import Payment
+
+
 
 D128_CTX = create_decimal128_context()
 
@@ -435,23 +438,22 @@ def get_member(client_id):
 
     payments = []
 
-    print('TETSTSTET',client.payments)
-    for payment in client.payments:
-        print(payment)
-        if type(payment.date) == datetime:
-            local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-        elif type(payment.date == str):
-            to_date = datetime.strptime(payment.date, "%Y-%m-%d")
+    student_payments = mongo.db.lms_registration_payments.find({"payment_by": ObjectId(client_id)})
+    for payment in student_payments:
+        if type(payment['date']) == datetime:
+            local_datetime = payment['date'].replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+        elif type(payment['date'] == str):
+            to_date = datetime.strptime(payment['date'], "%Y-%m-%d")
             local_datetime = to_date.strftime("%B %d, %Y")
-        else: 
+        else:
             local_datetime = ''
 
         payments.append({
-            'amount': str(payment.amount),
-            'current_balance': str(payment.current_balance),
+            'amount': str(payment['amount']),
+            'current_balance': str(payment['current_balance']),
             'date': local_datetime,
-            'remarks': payment.payment_mode,
-            'deposited': payment.deposited if payment.deposited is not None else 'No',
+            'remarks': payment['payment_mode'],
+            'deposited': payment['deposited'] if payment['deposited'] is not None else 'No',
         })
         
     if client.balance <= 0:
@@ -492,11 +494,9 @@ def get_member(client_id):
         'registration_no': client.full_registration_number,
         'is_paid': is_paid
     }
-
     response = {
         'data': data
-        }
-
+    }
     return jsonify(response)
 
 
@@ -618,10 +618,9 @@ def new_payment():
                     "books": client.books,
                     "uniforms": client.uniforms,
                     "id_materials": client.id_materials,
-                },
-                "$push": {
-                    "payments": payment,
                 }}, session=session)
+
+                Payment.pay_registration(payment, session=session)
 
                 mongo.db.auth_users.update_one({"_id": client.contact_person.id},
                 {"$push": {
@@ -674,7 +673,7 @@ def new_payment():
                 #     }}, session=session)
 
     except Exception as err:
-        flash(str(err), 'error')
+        raise err
 
     if is_premium == 'on':
         flash("Client's payment upgraded successfully!", 'success')
@@ -783,10 +782,9 @@ def upgrade_to_premium():
                     "books": client.books,
                     "uniforms": client.uniforms,
                     "id_materials": client.id_materials,
-                },
-                "$push": {
-                    "payments": payment
                 }}, session=session)
+
+                Payment.pay_registration(payment, session=session)
 
                 mongo.db.auth_users.update_one({"_id": client.contact_person.id},
                 {"$push": {

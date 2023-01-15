@@ -17,7 +17,7 @@ from config import TIMEZONE
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Earning, FundWallet, Marketer, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
-
+from prime_admin.helpers import Earning as earning_helper
 
 
 D128_CTX = create_decimal128_context()
@@ -177,53 +177,54 @@ def get_dtbl_earnings_members():
         elif registration.payment_mode == "premium_promo":
             remarks = "Premium - Promo"
 
-        for payment in registration.payments:
-            # total_records += 1
+        student_payments = mongo.db.lms_registration_payments.find({"payment_by": registration.id})
+        for payment in student_payments:
+            payment_status = payment.get('status')
             actions = ''
             status = ''
 
             if filter_status != 'all':
                 if filter_status == "none":
                     filter_status = None 
-                if payment.status != filter_status:
+                if payment_status != filter_status:
                     continue
 
             if current_user.role.name == "Secretary" or current_user.role.name == "Admin":
-                if payment.status == "for_approval":
+                if payment_status == "for_approval":
                     actions = """
                         <button style="margin-bottom: 8px;" type="button" 
                             class="mr-2 btn-icon btn-icon-only btn btn-outline-info 
                             btn-approve-claim">Approve Claim</button>""" if not contact_person_id == 'all' else ''
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                elif payment.status is None:
+                elif payment_status is None:
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
-                elif payment.status == "approved":
+                elif payment_status == "approved":
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">RELEASED</div>"""
             else:
                 if registration.batch_number.start_date is None:
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NOT YET STARTED</div>"""
                 else:
                     start_date = registration.batch_number.start_date + timedelta(days=3)
-                    if payment.status == "for_approval":
+                    if payment_status == "for_approval":
                         status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                    elif payment.status is None:
+                    elif payment_status is None:
                         if start_date.date() <= get_date_now().date():
                             actions = """<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon 
                                 btn-icon-only btn btn-outline-warning btn-claim">Request for Claim</button>""" if not contact_person_id == 'all' else ''
                             status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-warning">FOR CLAIM</div>"""
                         else:
                             status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
-                    elif payment.status == "approved":
+                    elif payment_status == "approved":
                         status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">RELEASED</div>"""
 
             _table_data.append([
                 str(registration.id),
-                str(payment.id),
+                str(payment['_id']),
                 registration.branch.name if registration.branch is not None else '',
                 registration.full_name,
                 registration.batch_number.number if registration.batch_number is not None else '',
-                str(payment.earnings) if registration.fle is not None and not registration.fle == 0 else '',
-                str(payment.earnings) if registration.sle is not None and not registration.sle == 0 else '',
+                str(payment['earnings']) if registration.fle is not None and not registration.fle == 0 else '',
+                str(payment['earnings']) if registration.sle is not None and not registration.sle == 0 else '',
                 registration.schedule,
                 remarks,
                 status,
@@ -524,208 +525,109 @@ def get_marketer_earnings(branch_id, marketer_id):
 @bp_lms.route('/api/claim-earning', methods=['POST'])
 @login_required
 def claim_earning():
-    student_id = request.json['student_id']
     payment_id = request.json['payment_id']
-
-    print("student id: ", student_id)
     print('payment_id: ', payment_id)
-
-    with mongo.cx.start_session() as session:
-        with session.start_transaction():
-            mongo.db.lms_registrations.update_one(
-                {"_id": ObjectId(student_id),
-                "payments._id": ObjectId(payment_id)},
-                {"$set": {
-                    "payments.$.status": "for_approval"
-                }}, session=session)
-
-            mongo.db.auth_users.update_one(
-                {"_id": current_user.id,
-                "earnings.payment_id": payment_id
-                },
-                {"$set": {
-                    "earnings.$.payment_id": ObjectId(payment_id),
-                    "earnings.$.status": "for_approval"
-                }}, session=session)
-
-            mongo.db.auth_users.update_one(
-                {"_id": current_user.id,
-                "earnings.payment_id": ObjectId(payment_id)
-                },
-                {"$set": {
-                    "earnings.$.payment_id": ObjectId(payment_id),
-                    "earnings.$.status": "for_approval"
-                }}, session=session)
-
-            mongo.db.auth_users.update_one(
-                {"_id": current_user.id,
-                "earnings.payment": ObjectId(payment_id)
-                },
-                {"$set": {
-                    "earnings.$.payment_id": ObjectId(payment_id),
-                    "earnings.$.status": "for_approval"
-                }}, session=session)
-            
-            current_user_details =  mongo.db.auth_users.find_one({"_id": current_user.id})
-
-            mongo.db.lms_system_transactions.insert_one({
-                "_id": ObjectId(),
-                "date": get_date_now(),
-                "current_user": current_user.id,
-                "description": current_user_details['fname'] + "- Request for claim",
-                "from_module": "Earnings"
-            }, session=session)
-
-            response = {
-                'result': True
-            }
-
+    earning_helper.request_for_claim(payment_id)
+    response = {
+        'result': True
+    }
     return jsonify(response)
 
 
 @bp_lms.route('/branches/<string:branch_id>/marketers/<string:marketer_id>/earnings/approve-earnings', methods=['POST'])
 def approve_marketer_earnings(branch_id, marketer_id):
     password = request.json['password']
-    print("password: ", password)
     if not current_user.check_password(password):
         return jsonify({
             'status': 'error',
             'message': "Invalid password!"
         }), 500
     
-    try:
-        marketer: User = User.objects.get(id=marketer_id)
-
-        with mongo.cx.start_session() as session:
-            with session.start_transaction():
-                with decimal.localcontext(D128_CTX):
-                    earning: auth_user_earning
-                    for earning in marketer.earnings:
-                        if earning.payment_mode == "profit_sharing":
-                            continue
-
-                        if earning.status == "for_approval":
-                            student: Registration = Registration.objects.get(id=earning.client.id)
-                            
-                            if str(student.branch.id) != branch_id:
-                                continue
-                            
-                            mongo.db.lms_registrations.update_one(
-                            {"_id": earning.client.id,
-                            "payments._id": ObjectId(earning.payment_id)},
-                            {"$set": {
-                                "payments.$.status": "approved"
-                            }}, session=session)
-
-                            mongo.db.auth_users.update_one(
-                                {"_id": marketer.id,
-                                "earnings.payment_id": earning.payment_id
-                                },
-                                {"$set": {
-                                    "earnings.$.status": "approved"
-                                }}, session=session)
-
-                            mongo.db.auth_users.update_one(
-                                {"_id": marketer.id,
-                                "earnings.payment_id": ObjectId(earning.payment_id)
-                                },
-                                {"$set": {
-                                    "earnings.$.status": "approved"
-                                }}, session=session)
-
-                            mongo.db.auth_users.update_one(
-                                {"_id": marketer.id,
-                                "earnings.payment": ObjectId(earning.payment_id)
-                                },
-                                {"$set": {
-                                    "earnings.$.status": "approved"
-                                }}, session=session)
-
-                            mongo.db.lms_system_transactions.insert_one({
-                                "_id": ObjectId(),
-                                "date": get_date_now(),
-                                "current_user": current_user.id,
-                                "description": "Approve claim -" + marketer.fname,
-                                "from_module": "Earnings"
-                            }, session=session)
-
-        response = {
-            'status': 'success',
-            'message': ""
-        }
-        return jsonify(response), 200
-    except Exception as err:
-        return jsonify({
-            'status': 'error',
-            'message': "Please refresh the page then try again!"
-        }), 500
+    # try:
+    earning_helper.approve_marketer_requests(marketer_id, branch_id)
+    response = {
+        'status': 'success',
+        'message': ""
+    }
+    return jsonify(response), 200
+    # except Exception as err:
+    #     return jsonify({
+    #         'status': 'error',
+    #         'message': "Please refresh the page then try again!"
+    #     }), 500
 
 
 @bp_lms.route('/api/approve-claim-earning', methods=['POST'])
 @login_required
 def approve_claim_earning():
-    student_id = request.json['student_id']
-    payment_id = request.json['payment_id']
-    marketer_id = request.json['marketer_id']
+    """(DEPRECATED)
 
-    print("student id: ", student_id)
-    print('payment_id: ', payment_id)
-    print('contact person id: ', marketer_id)
+    Returns:
+        _type_: _description_
+    """
+    pass
+    # student_id = request.json['student_id']
+    # payment_id = request.json['payment_id']
+    # marketer_id = request.json['marketer_id']
 
-    with mongo.cx.start_session() as session:
-        with session.start_transaction():
-            with decimal.localcontext(D128_CTX):
-                mongo.db.lms_registrations.update_one(
-                {"_id": ObjectId(student_id),
-                "payments._id": ObjectId(payment_id)},
-                {"$set": {
-                    "payments.$.status": "approved"
-                }}, session=session)
+    # print("student id: ", student_id)
+    # print('payment_id: ', payment_id)
+    # print('contact person id: ', marketer_id)
 
-                mongo.db.auth_users.update_one(
-                    {"_id": ObjectId(marketer_id),
-                    "earnings.payment_id": payment_id
-                    },
-                    {"$set": {
-                        "earnings.$.status": "approved"
-                    }}, session=session)
+    # with mongo.cx.start_session() as session:
+    #     with session.start_transaction():
+    #         with decimal.localcontext(D128_CTX):
+    #             mongo.db.lms_registrations.update_one(
+    #             {"_id": ObjectId(student_id),
+    #             "payments._id": ObjectId(payment_id)},
+    #             {"$set": {
+    #                 "payments.$.status": "approved"
+    #             }}, session=session)
 
-                mongo.db.auth_users.update_one(
-                    {"_id": ObjectId(marketer_id),
-                    "earnings.payment_id": ObjectId(payment_id)
-                    },
-                    {"$set": {
-                        "earnings.$.status": "approved"
-                    }}, session=session)
+    #             mongo.db.auth_users.update_one(
+    #                 {"_id": ObjectId(marketer_id),
+    #                 "earnings.payment_id": payment_id
+    #                 },
+    #                 {"$set": {
+    #                     "earnings.$.status": "approved"
+    #                 }}, session=session)
 
-                mongo.db.auth_users.update_one(
-                    {"_id": ObjectId(marketer_id),
-                    "earnings.payment": ObjectId(payment_id)
-                    },
-                    {"$set": {
-                        "earnings.$.status": "approved"
-                    }}, session=session)
+    #             mongo.db.auth_users.update_one(
+    #                 {"_id": ObjectId(marketer_id),
+    #                 "earnings.payment_id": ObjectId(payment_id)
+    #                 },
+    #                 {"$set": {
+    #                     "earnings.$.status": "approved"
+    #                 }}, session=session)
 
-                marketer_details =  mongo.db.auth_users.find_one({"_id": ObjectId(marketer_id)})
+    #             mongo.db.auth_users.update_one(
+    #                 {"_id": ObjectId(marketer_id),
+    #                 "earnings.payment": ObjectId(payment_id)
+    #                 },
+    #                 {"$set": {
+    #                     "earnings.$.status": "approved"
+    #                 }}, session=session)
 
-                payment_details = mongo.db.auth_users.find_one(
-                    {"_id": ObjectId(marketer_id),
-                    "earnings.payment": ObjectId(payment_id)
-                    }, session=session)
+    #             marketer_details =  mongo.db.auth_users.find_one({"_id": ObjectId(marketer_id)})
 
-                mongo.db.lms_system_transactions.insert_one({
-                    "_id": ObjectId(),
-                    "date": get_date_now(),
-                    "current_user": current_user.id,
-                    "description": "Approve claim -" + marketer_details['fname'],
-                    "from_module": "Earnings"
-                }, session=session)
+    #             payment_details = mongo.db.auth_users.find_one(
+    #                 {"_id": ObjectId(marketer_id),
+    #                 "earnings.payment": ObjectId(payment_id)
+    #                 }, session=session)
+
+    #             mongo.db.lms_system_transactions.insert_one({
+    #                 "_id": ObjectId(),
+    #                 "date": get_date_now(),
+    #                 "current_user": current_user.id,
+    #                 "description": "Approve claim -" + marketer_details['fname'],
+    #                 "from_module": "Earnings"
+    #             }, session=session)
                 
-                response = {
-                    'result': True
-                }
+    #             response = {
+    #                 'result': True
+    #             }
 
-    return jsonify(response)
+    # return jsonify(response)
 
 
 @bp_lms.route('/api/get-earning-transaction-history', methods=['GET'])
