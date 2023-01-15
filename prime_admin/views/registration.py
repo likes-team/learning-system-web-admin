@@ -186,6 +186,7 @@ def register():
             "payment_by": ObjectId(client_id),
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
+            "branch": ObjectId(client.branch.id)
         }
 
         contact_person_earning = {

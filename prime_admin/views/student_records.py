@@ -113,7 +113,22 @@ def get_dtbl_members():
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         else:
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
+            print("datetime.utcnow().today():::", get_date_now().today())
+            query_sales_today = list(mongo.db.lms_registration_payments.aggregate([
+                {"$match": {
+                    "date": {"$gte": get_date_now().today()}
+                    }
+                },
+                {"$group": {
+                    "_id": None,
+                    'sales_today': {"$sum": "$amount"}
+                }}
+            ]))
+            if len(query_sales_today) > 0:
+                sales_today = query_sales_today[0].get('sales_today')
+            else:
+                sales_today = 0.00
+            
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -592,6 +607,7 @@ def new_payment():
             "payment_by": ObjectId(client_id),
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
+            "branch": ObjectId(client.branch.id)
         }
 
         contact_person_earning = {
@@ -757,6 +773,7 @@ def upgrade_to_premium():
             "payment_by": ObjectId(client_id),
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
+            "branch": ObjectId(client.branch.id)
         }
 
         contact_person_earning = {
