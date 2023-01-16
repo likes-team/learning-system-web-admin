@@ -40,6 +40,7 @@ def dt_monthly_transactions():
 
     query = mongo_table.find(_filter).skip(start).limit(length)
     
+    fund_request_total = 0
     table_data = []
     for supply in query:
         one, two, three, four, five = 0, 0, 0, 0, 0
@@ -134,7 +135,9 @@ def dt_monthly_transactions():
             elif date.day == 31:
                 thone += quantity
             total_used += quantity
-
+            
+        fund_request_total += total_used
+        
         if supplies_type == "office_supplies":
             row = [
                 str(supply['_id']),
@@ -175,6 +178,7 @@ def dt_monthly_transactions():
         'recordsTotal': filtered_records,
         'recordsFiltered': total_records,
         'data': table_data,
+        'fundRequestTotal': fund_request_total
     }
 
     return jsonify(response)
