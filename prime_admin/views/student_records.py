@@ -113,10 +113,9 @@ def get_dtbl_members():
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         else:
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-            print("datetime.utcnow().today():::", get_date_now().today())
             query_sales_today = list(mongo.db.lms_registration_payments.aggregate([
                 {"$match": {
-                    "date": {"$gte": get_date_now().today()}
+                    "date": {"$gte": get_sales_today_date().replace(hour=0, minute=0)}
                     }
                 },
                 {"$group": {

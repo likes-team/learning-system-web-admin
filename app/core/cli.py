@@ -351,8 +351,12 @@ def items():
 
     print("success!")
 
+
 @bp_core.cli.command('move_payments')
 def move_payments():
+    from bson import ObjectId
+    
+    import pymongo
     students = mongo.db.lms_registrations.find({})
     
     for student in students:
@@ -369,5 +373,13 @@ def move_payments():
             #     "earnings": Decimal128(str(earnings)),
             #     "savings": Decimal128(str(savings)),
             # }
-            mongo.db.lms_registration_payments.insert(payment)
             print("{} {} success!".format(student['fname'], str(payment['_id'])))
+            payment_by = payment.get('payment_by')
+            if payment_by is None:
+                payment['payment_by'] = ObjectId(student['_id'])
+            else:
+                payment['payment_by'] = ObjectId(payment_by)
+                
+            payment['branch'] = ObjectId(student['branch'])
+            payment['payment_by'] = ObjectId(payment['payment_by'])
+            mongo.db.lms_registration_payments.insert_one(payment)
