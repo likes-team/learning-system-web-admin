@@ -71,6 +71,7 @@ def get_dtbl_earnings_members():
     total_savings = 0
     total_earnings_claimed = 0
     total_savings_claimed = 0
+    total_not_yet_claimed = 0
     branches_total_earnings = []
 
 
@@ -88,11 +89,15 @@ def get_dtbl_earnings_members():
             total_savings = Decimal128('0.00')
             total_earnings_claimed = Decimal128('0.00')
             total_savings_claimed = Decimal128('0.00')
+            total_not_yet_claimed = Decimal128('0.00')
 
             for contact_person in contact_persons:
                 for earning in contact_person.earnings:
                     if earning.payment_mode == "profit_sharing":
                         continue
+                    
+                    if earning.status is None:
+                        total_not_yet_claimed = Decimal128(total_not_yet_claimed.to_decimal() + earning.earnings)
 
                     if earning.status is None or earning.status == "for_approval":
                         total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
@@ -125,10 +130,14 @@ def get_dtbl_earnings_members():
             total_savings = Decimal128('0.00')
             total_earnings_claimed = Decimal128('0.00')
             total_savings_claimed = Decimal128('0.00')
+            total_not_yet_claimed = Decimal128('0.00')
 
             for earning in contact_person.earnings:
                 if earning.payment_mode == "profit_sharing":
                     continue
+
+                if earning.status is None:
+                    total_not_yet_claimed = Decimal128(total_not_yet_claimed.to_decimal() + earning.earnings)
 
                 if earning.status is None or earning.status == "for_approval":
                     total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
@@ -245,7 +254,8 @@ def get_dtbl_earnings_members():
         'totalSavings': str(total_savings),
         'totalEarningsClaimed': str(total_earnings_claimed),
         'totalSavingsClaimed': str(total_savings_claimed),
-        'branchesTotalEarnings': branches_total_earnings
+        'branchesTotalEarnings': branches_total_earnings,
+        'totalNotYetClaimed': str(total_not_yet_claimed)
     }
 
     return jsonify(response)
