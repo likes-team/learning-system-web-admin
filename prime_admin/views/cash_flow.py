@@ -355,6 +355,14 @@ def withdraw():
                     "group": new_withdraw.group,
                     "created_at": new_withdraw.created_at,
                 }, session=session)
+                
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": "Withdrawal - account_no: {}, by_who: {}, amount: {}".format(new_withdraw.account_no, new_withdraw.by_who, str(new_withdraw.amount)),
+                    "from_module": "Cash Flow"
+                }, session=session)
 
         flash('Withdraw Successfully!','success')
     except Exception as exc:

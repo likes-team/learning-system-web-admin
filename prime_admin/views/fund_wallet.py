@@ -432,6 +432,13 @@ def fund_wallet_add_fund():
                     'created_by': current_user.fname + " " + current_user.lname
                 },session=session)
                 
+                mongo.db.lms_system_transactions.insert_one({
+                    "_id": ObjectId(),
+                    "date": get_date_now(),
+                    "current_user": current_user.id,
+                    "description": "Add fund - transaction no: {}, account no: {}, amount: {}".format(transaction_no, account_no, str(amount_received)),
+                    "from_module": "Fund Wallet"
+                }, session=session)
         response = {
             'status': 'success',
             'message': "Fund added successfully!"
@@ -521,6 +528,14 @@ def fund_wallet_add_expenses():
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)
+            
+            mongo.db.lms_system_transactions.insert_one({
+                "_id": ObjectId(),
+                "date": get_date_now(),
+                "current_user": current_user.id,
+                "description": "Add expenses - description: {}, category: {}, amount: {}".format(description, category, str(total_amount_due)),
+                "from_module": "Fund Wallet"
+            }, session=session)
     response = {
         'status': 'success',
         'message': "Expenses added successfully!"
