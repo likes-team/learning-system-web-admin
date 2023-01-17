@@ -139,7 +139,7 @@ def get_dtbl_earnings_members():
                 if earning.status is None:
                     total_not_yet_claimed = Decimal128(total_not_yet_claimed.to_decimal() + earning.earnings)
 
-                if earning.status is None or earning.status == "for_approval":
+                if earning.status == "for_approval":
                     total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
                     total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
                     
@@ -404,42 +404,39 @@ def get_marketer_total_earnings(marketer_id):
             marketer: User
             earning: Payment
             for earning in marketer.earnings:
-                try:
-                    if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
-                        continue
-                    
-                    if earning.payment_mode == "profit_sharing":
-                        continue
-
-                    # if earning.status is not None and earning.status == "for_approval":
-                    if earning.status == "for_approval":
-                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                        
-                        if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                            branches_total_earnings.append(
-                                {
-                                    'id': str(earning.branch.id),
-                                    'name': earning.branch.name,
-                                    'totalEarnings': earning.earnings
-                                }
-                            )
-                        else:
-                            for x in branches_total_earnings:
-                                if x['id'] == str(earning['branch'].id):
-                                    if type(x['totalEarnings']) == decimal.Decimal:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                    else:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                    elif earning.status is None:
-                        total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
-                    
-                    elif earning.status == "approved":
-                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-                except Exception as err:
+                if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
                     continue
-            
+                
+                if earning.payment_mode == "profit_sharing":
+                    continue
+
+                # if earning.status is not None and earning.status == "for_approval":
+                if earning.status == "for_approval":
+                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                    
+                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
+                        branches_total_earnings.append(
+                            {
+                                'id': str(earning.branch.id),
+                                'name': earning.branch.name,
+                                'totalEarnings': earning.earnings
+                            }
+                        )
+                    else:
+                        for x in branches_total_earnings:
+                            if x['id'] == str(earning['branch'].id):
+                                if type(x['totalEarnings']) == decimal.Decimal:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                else:
+                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                elif earning.status is None:
+                    total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
+                
+                elif earning.status == "approved":
+                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
+        
     for other_branch_id in marketer.branches:
         if not any(d['id'] == str(other_branch_id) for d in branches_total_earnings):
             branch = Branch.objects.get(id=other_branch_id)
