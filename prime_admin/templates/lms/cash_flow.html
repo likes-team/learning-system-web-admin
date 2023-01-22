@@ -7,6 +7,7 @@
     VIEW_MODAL = "{{TABLE_OPTIONS['view_modal']}}";
     JS_FIELDS = `{{MODAL_DATA['js_fields'] | tojson}}`;
     VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
+    CURRENT_USER_ROLE = "{{current_user.role.name}}";
 </script>
 {% endblock %}
 
@@ -73,14 +74,10 @@
             "hideMethod": "fadeOut"
         }
 
-        var dtbl_statement = $('#tbl_statement').DataTable({
-            "dom": 'rtip',
-            "pageLength": 100,
-            "order": [[1, 'asc']],
-            "processing": true,
-            "serverSide": true,
-            "ordering": false,
-            "columnDefs": [
+        var columnDefs;
+        var fundColumnDefs;
+        if(CURRENT_USER_ROLE == "Secretary"){
+            columnDefs = [
                 { "visible": false, "targets": 0 },
                 { "visible": false, "targets": 9 },
                 {
@@ -95,7 +92,42 @@
                         `
                     }
                 },
-            ],
+            ];
+            fundColumnDefs = [
+                { "visible": false, "targets": 9 },
+                { "visible": false, "targets": 0 },
+            ];
+        } else if (CURRENT_USER_ROLE == "Admin"){
+            columnDefs = [
+                { "visible": false, "targets": 0 },
+                { "visible": false, "targets": 12 },
+                {
+                    "targets": 13,
+                    "className": "text-center",
+                    "render": function (data, type, row) {
+                        if (!data) {
+                            return `<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_view_cash_flow" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>`
+                        }
+                        return `
+                        <div></div>
+                        `
+                    }
+                },
+            ];
+            fundColumnDefs = [
+                { "visible": false, "targets": 0 },
+                { "visible": false, "targets": 13 },
+            ];
+        }
+
+        var dtbl_statement = $('#tbl_statement').DataTable({
+            "dom": 'rtip',
+            "pageLength": 100,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "ordering": false,
+            "columnDefs": columnDefs,
             "ajax": {
                 "url": "/learning-management/dtbl/get-cash-flow",
                 "data": function (d) {
@@ -126,6 +158,8 @@
             }
         });
 
+
+
         var dtbl_fund_statement = $('#tbl_fund_statement').DataTable({
             "dom": 'rtip',
             "pageLength": 100,
@@ -133,10 +167,7 @@
             "processing": true,
             "serverSide": true,
             "ordering": false,
-            "columnDefs": [
-                { "visible": false, "targets": 9 },
-                { "visible": false, "targets": 0 },
-            ],
+            "columnDefs": fundColumnDefs,
             "ajax": {
                 "url": "/learning-management/dtbl/get-cash-flow",
                 "data": function (d) {

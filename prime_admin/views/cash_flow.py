@@ -531,7 +531,7 @@ def get_cash_flow():
                     total_withdrawal = total_withdrawal + amount
                 
                 _table_data.append((
-                    str(id),
+                    str(_id),
                     date_deposit,
                     '' if _type == 'withdraw' else str(amount),
                     '' if _type == 'withdraw' else from_what,
@@ -852,11 +852,8 @@ def get_partners_percent():
 
 @bp_lms.route('/api/cash-flow/<string:cash_flow_id>', methods=['GET'])
 def get_cash_flow_by_id(cash_flow_id):
-    
     bank_statement = CashFlow.objects.get_or_404(id=cash_flow_id)
-
     payments = []
-
     for payment in bank_statement.payments:
         if type(payment.date) == datetime:
             local_datetime = payment.date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
