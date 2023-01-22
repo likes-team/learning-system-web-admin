@@ -449,6 +449,14 @@ def get_member(client_id):
             id_materials += " ID Lace"
     else:
         id_materials = "None"
+        
+    if client.reviewers:
+        if client.reviewers['reading']:
+            reviewers = "Reading"
+        if client.reviewers['listening']:
+            reviewers += " Listening"
+    else:
+        reviewers = "None"    
 
     payments = []
 
@@ -506,7 +514,8 @@ def get_member(client_id):
         'civil_status': client.civil_status,
         'gender': client.gender,
         'registration_no': client.full_registration_number,
-        'is_paid': is_paid
+        'is_paid': is_paid,
+        'reviewers': reviewers
     }
     response = {
         'data': data

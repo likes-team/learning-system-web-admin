@@ -66,6 +66,7 @@ class Registration(Base, Admin):
     books = db.DictField()
     uniforms = db.DictField()
     id_materials = db.DictField()
+    reviewers = db.DictField()
     payment_mode = db.StringField()
     status = db.StringField()
     is_oriented = db.BooleanField()

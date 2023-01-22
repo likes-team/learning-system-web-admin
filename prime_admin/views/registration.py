@@ -104,7 +104,6 @@ def register():
         client.set_registration_date()
 
         books = request.form.getlist('books')
-        
         client.books = {
             'book_none': True if 'book_none' in books else False,
             'volume1': True if 'volume1' in books else False,
@@ -112,7 +111,6 @@ def register():
         }
 
         uniforms = request.form.getlist('uniforms')
-
         client.uniforms = {
             'uniform_none': True if 'uniform_none' in uniforms else False,
             'uniform_xs': True if 'uniform_xs' in uniforms else False,
@@ -124,12 +122,17 @@ def register():
         }
 
         id_materials = request.form.getlist('id_materials')
-
         client.id_materials = {
             'id_card': True if 'id_card' in id_materials else False,
             'id_lace': True if 'id_lace' in id_materials else False,
         }
-
+        
+        reviewers = request.form.getlist('reviewers')
+        client.reviewers = {
+            'reading': True if 'reading' in reviewers else False,
+            'listening': True if 'listening' in reviewers else False,
+        }
+        
         if client.level == "first":
             earnings_percent = decimal.Decimal(0.14)
             savings_percent = decimal.Decimal(0.00286)
@@ -233,7 +236,8 @@ def register():
                     "sle": Decimal128(str(client.sle)),
                     "civil_status": client.civil_status,
                     "gender": client.gender,
-                    "session": client.session
+                    "session": client.session,
+                    'reviewers': client.reviewers
                     }}, session=session)
                 
                 Payment.pay_registration(payment, session=session)

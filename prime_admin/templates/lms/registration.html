@@ -56,8 +56,10 @@
         });
     
         $('input[type=radio][name=payment_modes]').change(function() {
+            $('#reading').prop('checked', false);
+            $('#listening').prop('checked', false);
+
             var balance;
-    
             if (this.value == 'full_payment') {
                 $("#amount").val(8500);
                 $("#amount").prop('readonly', true);
@@ -70,8 +72,8 @@
     
                 $("#uniform_m").prop("checked", true);
     
-                $('#id_card').prop('checked', false);
-                $('#id_lace').prop('checked', false);
+                $('#id_card').prop('checked', true);
+                $('#id_lace').prop('checked', true);
             }
             else if (this.value == 'installment') {
                 $("#amount").val(1000);
@@ -101,6 +103,9 @@
     
                 $('#id_card').prop('checked', true);
                 $('#id_lace').prop('checked', true);
+
+                $('#reading').prop('checked', true);
+                $('#listening').prop('checked', true);
             } else if (this.value == 'full_payment_promo') {
                 $("#amount").val(5500);
                 $("#amount").prop('readonly', true);
@@ -113,8 +118,8 @@
     
                 $("#uniform_m").prop("checked", true);
     
-                $('#id_card').prop('checked', false);
-                $('#id_lace').prop('checked', false);
+                $('#id_card').prop('checked', true);
+                $('#id_lace').prop('checked', true);
             } else if (this.value == 'installment_promo') {
                 $("#amount").val(4000);
                 $("#amount").prop('readonly', false);
@@ -143,6 +148,8 @@
     
                 $('#id_card').prop('checked', true);
                 $('#id_lace').prop('checked', true);
+                $('#reading').prop('checked', true);
+                $('#listening').prop('checked', true);
             }
     
             $("#balance").val(balance);
@@ -671,13 +678,13 @@
                         <div class="position-relative form-group">
                             <label for="books" class="">Select Book</label>
                             <div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book_none" name="books" value="book_none" class="custom-control-input"><label class="custom-control-label" for="book_none">
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="book_none" name="books" value="book_none" class="custom-control-input"><label class="custom-control-label" for="book_none">
                                     No book
                                 </label></div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book1" name="books" value="volume1" class="custom-control-input"><label class="custom-control-label" for="book1">
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="book1" name="books" value="volume1" class="custom-control-input"><label class="custom-control-label" for="book1">
                                     Volume 1
                                 </label></div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="book2" name="books" value="volume2" class="custom-control-input"><label class="custom-control-label" for="book2">
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="book2" name="books" value="volume2" class="custom-control-input"><label class="custom-control-label" for="book2">
                                     Volume 2
                                 </label></div>
                             </div>
@@ -687,13 +694,13 @@
                         <div class="position-relative form-group">
                             <label for="uniforms" class="">Select Uniform</label>
                             <div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_none" name="uniforms" value="uniform_none" class="custom-control-input"><label class="custom-control-label" for="uniform_none">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_none" name="uniforms" value="uniform_none" class="custom-control-input"><label class="custom-control-label" for="uniform_none">
                                     No Uniform
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xs" name="uniforms" value="uniform_xs" class="custom-control-input"><label class="custom-control-label" for="uniform_xs">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_xs" name="uniforms" value="uniform_xs" class="custom-control-input"><label class="custom-control-label" for="uniform_xs">
                                     XS
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_s" name="uniforms" value="uniform_s" class="custom-control-input"><label class="custom-control-label" for="uniform_s">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_s" name="uniforms" value="uniform_s" class="custom-control-input"><label class="custom-control-label" for="uniform_s">
                                     S
                                 </label></div>
                             </div>
@@ -704,17 +711,30 @@
                         <div class="position-relative form-group">
                             <label for="uniforms" class="">&nbsp</label>
                             <div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_m" name="uniforms" value="uniform_m" class="custom-control-input"><label class="custom-control-label" for="uniform_m">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_m" name="uniforms" value="uniform_m" class="custom-control-input"><label class="custom-control-label" for="uniform_m">
                                     M
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_l" name="uniforms" value="uniform_l" class="custom-control-input"><label class="custom-control-label" for="uniform_l">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_l" name="uniforms" value="uniform_l" class="custom-control-input"><label class="custom-control-label" for="uniform_l">
                                     L
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xl" name="uniforms" value="uniform_xl" class="custom-control-input"><label class="custom-control-label" for="uniform_xl">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_xl" name="uniforms" value="uniform_xl" class="custom-control-input"><label class="custom-control-label" for="uniform_xl">
                                     XL
                                 </label></div>
-                                <div class="custom-radio custom-control"><input required type="radio" id="uniform_xxl" name="uniforms" value="uniform_xxl" class="custom-control-input"><label class="custom-control-label" for="uniform_xxl">
+                                <div class="custom-checkbox custom-control"><input type="radio" id="uniform_xxl" name="uniforms" value="uniform_xxl" class="custom-control-input"><label class="custom-control-label" for="uniform_xxl">
                                     XXL
+                                </label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label class="">Reviewer</label>
+                            <div>
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="reading" name="reviewers" value="reading" class="custom-control-input"><label class="custom-control-label" for="reading">
+                                    Reading
+                                </label></div>
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="listening" name="reviewers" value="listening" class="custom-control-input"><label class="custom-control-label" for="listening">
+                                    Listening
                                 </label></div>
                             </div>
                         </div>
@@ -723,10 +743,10 @@
                         <div class="position-relative form-group">
                             <label class="">Others</label>
                             <div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_card" name="id_materials" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="id_card" name="id_materials" value="id_card" class="custom-control-input"><label class="custom-control-label" for="id_card">
                                     ID Card
                                 </label></div>
-                                <div class="custom-radio custom-control"><input onclick="return false;" type="checkbox" id="id_lace" name="id_materials" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
+                                <div class="custom-checkbox custom-control"><input onclick="return false;" type="checkbox" id="id_lace" name="id_materials" value="id_lace" class="custom-control-input"><label class="custom-control-label" for="id_lace">
                                     ID Lace
                                 </label></div>
                             </div>
