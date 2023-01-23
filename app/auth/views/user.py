@@ -41,29 +41,22 @@ def users():
 @bp_auth.route('/users/<string:user_id>', methods=['GET'])
 @login_required
 def get_user(user_id):
-    try:
-        user: User = User.objects.get(id=user_id)
+    user: User = User.objects.get(id=user_id)
 
-        response = {
-            'status': 'success',
-            'data': {
-                'id': str(user.id),
-                'fname': user.fname,
-                'lname': user.lname,
-                'role': user.role.name,
-                'employee_id': user.full_employee_id,
-                'username': user.username,
-                'email': user.email,
-            },
-            'message': ""
-        }
-        return jsonify(response), 200
-    except Exception as err:
-        print(err)
-        return jsonify({
-            'status': 'error',
-            'message': str(err)
-        }), 500
+    response = {
+        'status': 'success',
+        'data': {
+            'id': str(user.id),
+            'fname': user.fname,
+            'lname': user.lname,
+            'role': user.role.name,
+            'employee_id': user.full_employee_id,
+            'username': user.username,
+            'email': user.email,
+        },
+        'message': ""
+    }
+    return jsonify(response), 200
 
 
 # @bp_auth.route('/get-view-user-data', methods=['GET'])

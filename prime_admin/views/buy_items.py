@@ -58,7 +58,6 @@ def buy_items():
                         qty = int(form.get("qty_{}".format(item_id)))
                         price = decimal.Decimal(form.get("price_{}".format(item_id)))
                         amount = qty * price
-                        print(item)
                         items.append({
                             "_id": ObjectId(),
                             'item': ObjectId(item_id),

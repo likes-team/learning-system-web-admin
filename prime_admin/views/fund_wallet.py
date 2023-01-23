@@ -228,7 +228,6 @@ def fetch_add_funds_transactions_dt(branch_id):
 #                     remarks,
 #                 ])
 #             except Exception as e:
-#                 print(str(e))
 #                 continue
 
 #     response = {
@@ -312,7 +311,6 @@ def fetch_business_expenses_dt(branch_id):
                 total_amount_due = transaction.get('total_amount_due', 0.00)
                 
                 month_index = transaction_date.month - 1
-                print("transaction_date.month:::" + str(transaction_date.month))
                 if category == "utilities":
                     total_utilities = total_utilities + total_amount_due.to_decimal()
                     expenses_data['UTILITIES'][month_index] += total_amount_due.to_decimal()
@@ -330,7 +328,6 @@ def fetch_business_expenses_dt(branch_id):
                     total_other_expenses = total_other_expenses + total_amount_due.to_decimal()
                     expenses_data['OTHER EXPENSES'][month_index] += total_amount_due.to_decimal()
             except Exception as e:
-                print(str(e))
                 continue
     
     expenses_data['UTILITIES'][12] = total_utilities
@@ -385,11 +382,6 @@ def fund_wallet_add_fund():
                         new_total_fund_wallet = previous_fund_wallet.to_decimal() + decimal.Decimal(amount_received)
                         balance = Decimal128(Decimal128(
                             str(accounting["total_fund_wallet"] if 'total_fund_wallet' in accounting else 0.00)).to_decimal() + Decimal128(str(amount_received)).to_decimal())
-                        
-                        print("amount_received: ", amount_received)
-                        print("previous_fund_wallet: ", previous_fund_wallet)
-                        print("new_total_fund_wallet: ", new_total_fund_wallet)
-                        print("balance: ", balance)                        
                         
                         mongo.db.lms_accounting.update_one({
                             "branch": ObjectId(branch_id)

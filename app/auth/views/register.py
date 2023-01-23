@@ -15,16 +15,6 @@ from prime_admin.models import Branch
 
 @bp_auth.route('/register', methods=['GET', 'POST'])
 def register():
-    # registration_generated_number = ""
-    
-    # last_registration_number = User.objects().order_by('-id_number').first()
-
-    # if last_registration_number:
-    #     print(last_registration_number)
-    #     registration_generated_number = generate_number(date_now, last_registration_number.registration_number)
-    # else:
-    #     registration_generated_number = str(date_now.year) + '%02d' % date_now.month + "0001"
-
     form = RegisterForm()
 
     if request.method == "GET":

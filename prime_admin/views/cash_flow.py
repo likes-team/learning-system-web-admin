@@ -128,13 +128,10 @@ def deposit():
                                         client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
-                                    print("Payment updated", client['amount_deposit'])
-
                                     has_payment_updated = True
                                     payments.append(payment)
 
                             if has_payment_updated:
-                                print(str(client["_id"]))
                                 mongo.db.lms_registrations.update_one(
                                     {"_id": client["_id"]},
                                     {"$set": {
@@ -201,8 +198,6 @@ def deposit():
                                         client['amount_deposit'] = Decimal128(Decimal128(str(client['amount_deposit'])).to_decimal() + Decimal128(str(payment['amount'])).to_decimal())
                                     else:
                                         client['amount_deposit'] = payment['amount']
-
-                                    print("Payment updated", client['amount_deposit'])
                                     has_payment_updated = True
                                     payments.append(payment)
 
@@ -212,7 +207,6 @@ def deposit():
                                         session=session)
 
                             if has_payment_updated:
-                                print(str(client["_id"]))
                                 mongo.db.lms_registrations.update_one(
                                     {"_id": client["_id"]},
                                     {"$set": {
@@ -436,7 +430,6 @@ def get_cash_flow():
                 # bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         
         if date_from != "":
-            print('date_from: ' + date_from)
             filter['date_deposit'] = {"$gt": convert_to_utc(date_from, 'date_from')}
         
         if date_to != "":
@@ -548,11 +541,6 @@ def get_cash_flow():
                 ))
             
     total_current_balance = total_deposit - total_withdrawal
-
-    print("total_deposit:")
-    print(total_deposit)
-
-
     response = {
         'draw': draw,
         'recordsTotal': recordsTotal,
@@ -862,8 +850,6 @@ def get_cash_flow_by_id(cash_flow_id):
             local_datetime = to_date.strftime("%B %d, %Y")
         else: 
             local_datetime = ''
-        
-        print("TESTETS",payment.payment_by)
         payment_by = Registration.objects(id=payment.payment_by.id).get()
 
         payments.append({

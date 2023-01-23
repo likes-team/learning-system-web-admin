@@ -75,7 +75,6 @@ def get_dashboard_users():
     table_data = []
 
     for data in query:
-        print(data)
         id = data.get('_id', '')
         full_employee_id = data.get('full_employee_id', '')
         lname = data.get('lname', '')

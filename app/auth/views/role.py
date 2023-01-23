@@ -120,7 +120,6 @@ def edit_role(oid,**options):
         return redirect(url_for('bp_auth.roles'))
 
     form_data = request.form
-    print(form_data)
     permissions = []
 
     models = CoreModel.objects

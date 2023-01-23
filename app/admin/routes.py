@@ -64,24 +64,12 @@ def delete_data():
 @bp_admin.route('/_get_view_modal_data',methods=["GET"])
 @cross_origin()
 def get_view_modal_data():
-    try:
-
-        table,column,id = request.args.get('table'),request.args.get('column'), request.args.get('id')
-        print(table, column, id)
-        # query = "select {} from {} where id = {} limit 1".format(column,table,id)
-        query = mongo.db[table].find_one({'id': id}, {column: True})
-
-        print(query)
-
-        sql = text(query)
-        row = db.engine.execute(sql)
-        res = [x[0] if x[0] is not None else '' for x in row]
-        resp = jsonify(result=str(res[0]),column=column)
-        resp.headers.add('Access-Control-Allow-Origin', '*')
-        resp.status_code = 200
-        return resp
-    except Exception as e:
-        resp = jsonify(result="")
-        resp.headers.add('Access-Control-Allow-Origin', '*')
-        resp.status_code = 200
-        return resp
+    table,column,id = request.args.get('table'),request.args.get('column'), request.args.get('id')
+    query = mongo.db[table].find_one({'id': id}, {column: True})
+    sql = text(query)
+    row = db.engine.execute(sql)
+    res = [x[0] if x[0] is not None else '' for x in row]
+    resp = jsonify(result=str(res[0]),column=column)
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    resp.status_code = 200
+    return resp

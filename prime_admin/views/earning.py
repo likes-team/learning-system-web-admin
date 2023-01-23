@@ -288,8 +288,6 @@ def fetch_marketer_payment_records_dt(marketer_id):
         }}
     ]))
     
-    print("query", query)
-    
     filtered_records = len(query)
     
     total_records = len(list(mongo.db.lms_fund_wallet_transactions.aggregate([
@@ -316,15 +314,12 @@ def fetch_marketer_payment_records_dt(marketer_id):
             'PAID',
             '',
         ])
-        
-    print("data", data)
     response = {
         'draw': draw,
         'recordsTotal': filtered_records,
         'recordsFiltered': total_records,
         'data': data
     }
-    
     return jsonify(response)
 
 
@@ -465,7 +460,6 @@ def get_marketer_total_earnings(marketer_id):
 
 @bp_lms.route('/branches/<string:branch_id>/marketers/<string:marketer_id>/earnings')
 def get_marketer_earnings(branch_id, marketer_id):
-    print(marketer_id)
     total_earnings = 0
     total_savings = 0
     
@@ -533,7 +527,6 @@ def get_marketer_earnings(branch_id, marketer_id):
 @login_required
 def claim_earning():
     payment_id = request.json['payment_id']
-    print('payment_id: ', payment_id)
     earning_helper.request_for_claim(payment_id)
     response = {
         'result': True
@@ -576,10 +569,6 @@ def approve_claim_earning():
     # student_id = request.json['student_id']
     # payment_id = request.json['payment_id']
     # marketer_id = request.json['marketer_id']
-
-    # print("student id: ", student_id)
-    # print('payment_id: ', payment_id)
-    # print('contact person id: ', marketer_id)
 
     # with mongo.cx.start_session() as session:
     #     with session.start_transaction():

@@ -11,11 +11,7 @@ from app import csrf
 def api_login():
     username = request.json['username']
     password = request.json['password']
-
-    print(username,password)
-
     user = User.query.filter_by(username=username).first()
-
     if user is None or not user.check_password(password):
         abort(401)
 
@@ -25,9 +21,7 @@ def api_login():
         'lname': user.lname,
         'email': user.email,
         'is_admin': user.is_admin}})
-        
     response.headers.add('Access-Control-Allow-Origin', '*')
-
     return response
 
 

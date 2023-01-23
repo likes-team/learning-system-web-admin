@@ -142,11 +142,8 @@ def to_pre_deposit():
                         },{
                             "payments": {"$elemMatch": {"_id": ObjectId(selected_payment['payment_id'])}}
                         }, session=session)
-
-                        print(payment)
-                        
                         amount = Decimal128(amount.to_decimal() + decimal.Decimal(str(payment['payments'][0]['amount'])))
-                        print(amount)
+
                 elif source == "store_items_sold":
                     for selected_payment in payments_selected:
                         mongo.db.lms_store_buyed_items.update_one({
@@ -159,11 +156,7 @@ def to_pre_deposit():
                         payment = mongo.db.lms_store_buyed_items.find_one({
                             "_id": ObjectId(selected_payment['payment_id']),
                         }, session=session)
-
-                        print(payment)
-                        
                         amount = Decimal128(amount.to_decimal() + payment['total_amount'].to_decimal())
-                        print(amount)
 
                 elif source == "accommodation":
                     for selected_payment in payments_selected:
@@ -178,14 +171,9 @@ def to_pre_deposit():
                             "_id": ObjectId(selected_payment['payment_id']),
                         }, session=session)
 
-                        print(payment)
-                        
                         amount = Decimal128(amount.to_decimal() + payment['total_amount'].to_decimal())
-                        print(amount)
-
 
                 accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
-
                 if accounting:
                     mongo.db.lms_accounting.update_one({
                         "_id": accounting["_id"],

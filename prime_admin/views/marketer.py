@@ -70,25 +70,18 @@ def fetch_marketers_dt():
 @bp_lms.route('/marketers/<string:marketer_id>', methods=['GET'])
 @login_required
 def get_marketer(marketer_id):
-    try:
-        marketer: User = User.objects.get(id=marketer_id)
+    marketer: User = User.objects.get(id=marketer_id)
 
-        response = {
-            'status': 'success',
-            'data': {
-                'id': str(marketer.id),
-                'fname': marketer.fname,
-                'lname': marketer.lname,
-            },
-            'message': ""
-        }
-        return jsonify(response), 200
-    except Exception as err:
-        print(err)
-        return jsonify({
-            'status': 'error',
-            'message': str(err)
-        }), 500
+    response = {
+        'status': 'success',
+        'data': {
+            'id': str(marketer.id),
+            'fname': marketer.fname,
+            'lname': marketer.lname,
+        },
+        'message': ""
+    }
+    return jsonify(response), 200
 
 
 @bp_lms.route('/marketers/<string:marketer_id>/branches/dt')

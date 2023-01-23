@@ -26,12 +26,9 @@ def load_permissions(user_id):
     
     else:
         role_permissions = Role.objects(id=user.role.id).get().permissions
-        print(role_permissions)
         for role_permission in role_permissions:
             session['permissions'][role_permission['model_name']] = {"read": role_permission['read'], "create": role_permission['create'], \
                 "write": role_permission['write'], "delete": role_permission['delete']}
-    
-    print(session['permissions'])
     return True
 
 

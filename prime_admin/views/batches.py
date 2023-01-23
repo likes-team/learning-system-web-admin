@@ -136,19 +136,11 @@ def edit_batch(oid):
 @login_required
 def set_active(batch_id):
     status = request.json['status']
-    print(status)
     response = jsonify({
         'result': True
     })
-
-    try:
-        batch = Batch.objects.get(id=batch_id)
-
-        batch.active = True if status == 1 else False 
-        batch.save()
-
-    except Exception:
-        return jsonify({'result': False})
-
+    batch = Batch.objects.get(id=batch_id)
+    batch.active = True if status == 1 else False 
+    batch.save()
     return response
     
