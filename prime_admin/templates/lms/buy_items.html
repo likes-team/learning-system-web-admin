@@ -4,6 +4,14 @@
 {% block scripts %}
 <script>
     $(document).ready(function(){
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+    
         $("#li_buy_items").addClass('mm-active');
 
         var dtbl_search = $("#tbl_mdl_clients").DataTable({
@@ -50,8 +58,11 @@
                                         <td>${item.maintaining}</td>
                                         <td>${item.description}</td>
                                         <td>
-                                            <input readonly name="price_${item.id}" style="font-weight: bold;" type="number"
-                                                class="form-control price" value="${item.price}">
+                                            <div class="input-group"><input readonly name="price_${item.id}" value="${item.price}" type="number" class="form-control price" style="font-weight: bold;">
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-info btn-update-price">Edit</button>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <input name="qty_${item.id}" style="font-weight: bold;" type="number"
@@ -95,6 +106,49 @@
                 });
                 $("#total").val(total);
             }, 500);
+        });
+
+        $("#tbl_items tbody").on('click', ' .btn-update-price', function(){
+            var row = $(this).closest('tr');
+            var item = row.find('.price');
+            
+            if($(this).text() == "Edit"){
+                item.attr('readonly', false);
+                $(this).html('Save');
+                return;
+            }
+            var itemId = item.attr('name').replace('price_', '');
+            var itemPrice = item.val();
+
+            $(this).html('Edit');
+            item.attr('readonly', true);
+
+            swal({
+                title: `Confirm update?`,
+                text: "Are you sure you want to continue?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Confirm!",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            }, function(){
+                setTimeout(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/learning-management/update-price',
+                        dataType: 'json',
+                        data: JSON.stringify({'item_id': itemId, 'new_price': itemPrice}),
+                        contentType: "application/json; charset=utf-8",
+                        success: function (response) {
+                            swal("Success!", "Price updated successfully!", "success");
+                        },
+                        error: function (data) {
+                            swal("Error Occured!", "Please refresh the page then try again!", "error");
+                        },
+                    });
+                }, 500);
+            });
         });
     });
 </script>

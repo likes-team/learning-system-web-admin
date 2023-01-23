@@ -2,6 +2,7 @@ import decimal
 from bson.objectid import ObjectId
 from prime_admin.globals import get_date_now
 from flask_login import login_required, current_user
+from flask_cors import cross_origin
 from app.admin.templating import admin_render_template
 from prime_admin import bp_lms
 from prime_admin.models import BuyItems, StudentSupply, Registration
@@ -128,8 +129,23 @@ def get_student_supplies():
             'price': str(supply.get('price', 0))
         })
     
-    print("result:::", result)
     return jsonify({
         'status': 'success',
         'data': result
+    }), 200
+    
+
+@bp_lms.route('/update-price', methods=['POST'])
+@login_required
+@cross_origin()
+def update_price():
+    item_id = request.json['item_id']
+    new_price = Decimal128(request.json['new_price'])
+
+    mongo.db.lms_student_supplies.update_one({'_id': ObjectId(item_id)}, {"$set": {
+        'price': new_price
+    }})
+    
+    return jsonify({
+        'status': 'success'
     }), 200
