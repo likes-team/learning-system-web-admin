@@ -136,6 +136,17 @@ class Registration(Base, Admin):
         return self.fname + " " + self.lname
 
 
+    def get_reviewers(self):
+        reviewers: list = []
+        if self.reviewers['reading']:
+            reviewers.append("Reading")
+        if self.reviewers['listening']:
+            reviewers.append("Listening")
+        if len(reviewers) == 0:
+            return "None"
+        return ','.join(reviewers)
+
+
 class Branch(Base, Admin):
     meta = {
         'collection': 'lms_branches',
