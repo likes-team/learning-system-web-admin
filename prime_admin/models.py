@@ -138,9 +138,9 @@ class Registration(Base, Admin):
 
     def get_reviewers(self):
         reviewers: list = []
-        if self.reviewers['reading']:
+        if self.reviewers.get('reading', False):
             reviewers.append("Reading")
-        if self.reviewers['listening']:
+        if self.reviewers.get('listening', False):
             reviewers.append("Listening")
         if len(reviewers) == 0:
             return "None"
