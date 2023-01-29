@@ -603,3 +603,11 @@ class Accommodation(Base, Admin):
             local_datetime = ''
 
         return local_datetime
+        
+        
+class Settings(Admin):
+    __tablename__ = 'lms_buy_items'
+    __amname__ = 'buy_items'
+    __amdescription__ = 'Buy Items'
+    __amicon__ = 'pe-7s-calculator'
+    __view_url__ = 'lms.buy_items'
