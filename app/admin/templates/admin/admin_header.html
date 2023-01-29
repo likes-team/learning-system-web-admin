@@ -32,6 +32,7 @@
     </div>
     <div class="app-header__content">
         <div class="app-header-right">
+            {% if current_user.role.name == "Admin" %}
             <ul class="header-menu nav">
                 <li class="btn-group nav-item">
                     <a href="{{url_for('bp_auth.users')}}" class="nav-link">
@@ -52,6 +53,7 @@
                     </a>
                 </li>
             </ul>
+            {% endif %}
             <div class="header-btn-lg pr-0">
                 <div class="widget-content p-0">
                     <div class="widget-content-wrapper">
