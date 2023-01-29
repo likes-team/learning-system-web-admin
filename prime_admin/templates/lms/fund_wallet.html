@@ -1,7 +1,7 @@
 {% extends "admin/admin_base.html" %}
 
-
 {% block modals %}
+
 {% include 'lms/add_funds_modal.html' %}
 {% include 'lms/add_expenses_modal.html' %}
 {% endblock %}
@@ -443,67 +443,50 @@
                 $("#qty").closest('.col-md-4').hide();
                 $("#unit_price").closest('.col-md-4').hide();
             } else if (selectedCategory == "other_expenses") {
-                $("#description").append($('<option></option>').attr("value", "TRANSPORTATION BUDGET").text("TRANSPORTATION BUDGET"));
-                $("#description").append($('<option></option>').attr("value", "REMITTANCE CHARGE").text("REMITTANCE CHARGE"));
-                $("#description").append($('<option></option>').attr("value", "C.M. LOAD BUDGET").text("C.M. LOAD BUDGET"));
-                $("#description").append($('<option></option>').attr("value", "GASUL").text("GASUL"));
-                $("#description").append($('<option></option>').attr("value", "GRADUATION CAKE").text("GRADUATION CAKE"));
-                $("#description").append($('<option></option>').attr("value", "TRASHBAG").text("TRASHBAG"));
-                $("#description").append($('<option></option>').attr("value", "AIRFRESHENER").text("AIRFRESHENER"));
-                $("#description").append($('<option></option>').attr("value", "ALCOHOL").text("ALCOHOL"));
-                $("#description").append($('<option></option>').attr("value", "BATHROOM CLEANER").text("BATHROOM CLEANER"));
-                $("#description").append($('<option></option>').attr("value", "AIRCON CLEANING").text("AIRCON CLEANING"));
-                $("#description").append($('<option></option>').attr("value", "ADVERTISING FEE").text("ADVERTISING FEE"));
-                $("#description").append($('<option></option>').attr("value", "TARPAULEN").text("TARPAULEN"));
-                $("#description").append($('<option></option>').attr("value", "COMPUTER REPAIR").text("COMPUTER REPAIR"));
-                $("#description").append($('<option></option>').attr("value", "BUCKET").text("BUCKET"));
-                $("#description").append($('<option></option>').attr("value", "GAS STOVE").text("GAS STOVE"));
-                $("#description").append($('<option></option>').attr("value", "BULB").text("BULB"));
-                $("#description").append($('<option></option>').attr("value", "BATTERY").text("BATTERY"));
-                $("#description").append($('<option></option>').attr("value", "DUCT TAPE").text("DUCT TAPE"));
-                $("#description").append($('<option></option>').attr("value", "CERTIFICATE HOLDER").text("CERTIFICATE HOLDER"));
-                $("#description").append($('<option></option>').attr("value", "WALL PAPER").text("WALL PAPER"));
-                $("#description").append($('<option></option>').attr("value", "RUGBY").text("RUGBY"));
-                $("#description").append($('<option></option>').attr("value", "TABLE").text("TABLE"));
-                $("#description").append($('<option></option>').attr("value", "DIVIDER").text("DIVIDER"));
-                $("#description").append($('<option></option>').attr("value", "DIVIDER").text("DIVIDER"));
-                $("#description").append($('<option></option>').attr("value", "SNPL PASSPORT FEE").text("SNPL PASSPORT FEE"));
-                $("#description").append($('<option></option>').attr("value", "SNPL EPS-TOPIK TEST FEE").text("SNPL EPS-TOPIK TEST FEE"));
-                $("#description").append($('<option></option>').attr("value", "MALETA").text("MALETA"));
-                $("#description").append($('<option></option>').attr("value", "RUG").text("RUG"));
-                $("#description").append($('<option></option>').attr("value", "EXTENSION WIRE").text("EXTENSION WIRE"));
-                $("#description").append($('<option></option>').attr("value", "PC MOUSE").text("PC MOUSE"));
-                $("#description").append($('<option></option>').attr("value", "FOOD ALLOWANCE").text("FOOD ALLOWANCE"));
-                $("#description").append($('<option></option>').attr("value", "SNPL ALLOWANCE FOR TEACHER").text("SNPL ALLOWANCE FOR TEACHER"));
-                $("#description").append($('<option></option>').attr("value", "OUTING FUND").text("OUTING FUND"));
-                $("#description").append($('<option></option>').attr("value", "ATTY FEE FOR CASH ASSISTANCE").text("ATTY FEE FOR CASH ASSISTANCE"));
-                $("#description").append($('<option></option>').attr("value", "PRINTED REVIEWER/BOOK AT PRINTER SHOP").text("PRINTED REVIEWER/BOOK AT PRINTER SHOP"));
-                $("#description").append($('<option></option>').attr("value", "SOFTWARE MAINTENANCE").text("SOFTWARE MAINTENANCE"));
-                $("#description").append($('<option></option>').attr("value", "ELECTRIC FAN").text("ELECTRIC FAN"));
-                $("#description").append($('<option></option>').attr("value", "AIRCON MAINTENANCE").text("AIRCON MAINTENANCE"));
-                $("#description").append($('<option></option>').attr("value", "CCTV INSTALLATION").text("CCTV INSTALLATION"));
-                $("#description").append($('<option></option>').attr("value", "CCTV MAINTENANCE").text("CCTV MAINTENANCE"));
-                $("#description").append($('<option></option>').attr("value", "BIR").text("BIR"));
-                $("#description").append($('<option></option>').attr("value", "MAYORS PERMIT").text("MAYORS PERMIT"));
-                $("#description").append($('<option></option>').attr("value", "BUSINESS PERMIT").text("BUSINESS PERMIT"));
-                $("#description").append($('<option></option>').attr("value", "CEDULA").text("CEDULA"));
-                $("#description").append($('<option></option>').attr("value", "BRGY CLEARANCE").text("BRGY CLEARANCE"));
-                $("#description").append($('<option></option>').attr("value", "FIRE CERTIFICATE").text("FIRE CERTIFICATE"));
-                $("#description").append($('<option></option>').attr("value", "ELECTRICAL FEE").text("ELECTRICAL FEE"));
-                $("#description").append($('<option></option>').attr("value", "OTHERS INSPECTION FEE").text("OTHERS INSPECTION FEE"));
-                
-                
+                $.getJSON(`/learning-management/fetch-other-expenses-items`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.description).text(item.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
 
                 $("#billing_month_from").rules('remove');
                 $("#billing_month_to").rules('remove');
                 $("#billing_month_from").closest('.col-md-3').hide();
                 $("#billing_month_to").closest('.col-md-3').hide();
-                $("#lbl_account_no").html('Supplier');
+            } else if(
+                selectedCategory == "BIR" || 
+                selectedCategory == "Business Permit" || 
+                selectedCategory == "Employee Benefits" ||
+                selectedCategory == "Bookeeper Retainer Fee"){
+                $.getJSON(`/learning-management/fetch-bookeeper-items?category=${selectedCategory}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.description).text(item.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+                if (selectedCategory == "BIR"){
+                } else if(selectedCategory == "Business Permit"){
+                } else if(selectedCategory == "Employee Benefits"){
+                } else if(selectedCategory == "Bookeeper's Retainers Fee"){
+                }
             }
         });
 
         $("#description").change(function(){
             $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){
+                if(response.status == "error"){
+                    return;
+                }
                 $("#unit_price").val(response.data.price);
                 $("#unit_price").change();
             });

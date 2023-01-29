@@ -1034,6 +1034,9 @@ def get_supplies():
 def get_supply(description):
     query = mongo.db.lms_office_supplies.find_one({'description': description})
 
+    if query is None:
+        return jsonify({'status': 'error'}), 200
+
     product = {
         'id': str(query['_id']),
         'description': query['description'],
@@ -1045,3 +1048,38 @@ def get_supply(description):
         'data': product,
         'message': ""
     }), 200
+    
+
+@bp_lms.route('/fetch-other-expenses-items', methods=['GET'])
+def fetch_other_expenses_items():
+    query = mongo.db.lms_other_expenses_items.find({})
+    
+    items_list = []
+    
+    for row in query:
+        items_list.append({
+            'id': str(row['_id']),
+            'description': row['description']
+        })
+        
+    return jsonify({
+        'status': 'success',
+        'data': items_list
+    }), 200
+    
+
+@bp_lms.route('/fetch-bookeeper-items', methods=['GET'])
+def fetch_bookeeper_items():
+    category = request.args.get('category')
+    query = mongo.db.lms_bookeeper_items.find_one({'category': category})
+    
+    items_list = []
+    for row in query['items']:
+        items_list.append({
+             'description': row['description']
+        })
+        
+    return jsonify({
+        'status': 'success',
+        'data': items_list
+    })
