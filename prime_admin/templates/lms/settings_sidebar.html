@@ -36,17 +36,22 @@
                 {% if debug %}
                 <li class="app-sidebar__heading" style="color: red;">DEVELOPMENT MODE</li>
                 {% endif %}
-                
+                <li>
+                    <a href="{{url_for('lms.dashboard')}}" class="">
+                        <i class="metismenu-icon pe-7s-back icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                        Back to Dashboard
+                    </a>
+                </li>
                 <li id="header_dashboard" class="app-sidebar__heading">Settings</li>
                 <li>
-                    <a id="li_settings" href="" class="">
-                        <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                    <a id="li_settings" href="{{url_for('lms.settings')}}" class="">
+                        <i class="metismenu-icon pe-7s-settings icon-gradient bg-premium-dark" aria-hidden="true"></i>
                         General
                     </a>
                 </li>
                 <li>
-                    <a id="li_settings" href="" class="">
-                        <i class="metismenu-icon pe-7s-graph2 icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                    <a id="li_other_expenses" href="{{url_for('lms.other_expenses_settings')}}" class="">
+                        <i class="metismenu-icon pe-7s-settings icon-gradient bg-premium-dark" aria-hidden="true"></i>
                         Other Expenses
                     </a>
                 </li>

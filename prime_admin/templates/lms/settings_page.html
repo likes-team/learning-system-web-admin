@@ -19,9 +19,14 @@
     });
 
     $(document).ready(function(){
-        $("#li_logs").addClass("mm-active");
+        $("#li_settings").addClass("mm-active");
     });
 </script>
+{% endblock %}
+
+
+{% block sidebar %}
+{% include 'lms/settings_sidebar.html' %}
 {% endblock %}
 
 
@@ -34,7 +39,7 @@
                     <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    Settings
+                    General Settings
                     <div class="page-title-subheading">
                         Manage system settings
                     </div>
@@ -47,7 +52,10 @@
     <div class="row">
         <div class="col-md-12">
             <div class="main-card mb-3 card">
-              <h1>Settings</h1>>
+                <h5 class="card-header">General Settings</h5>
+                <div class="card-body">
+                    <h1>Coming soon...</h1>
+                </div>
             </div>
         </div>
     </div>

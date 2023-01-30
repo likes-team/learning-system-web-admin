@@ -22,6 +22,7 @@
         $("#li_logs").addClass("mm-active");
         
         var dt_logs = $('#tbl_logs').DataTable({
+            'searching': false,
             "pageLength": 25,
             "processing": true,
             "serverSide": true,
@@ -31,33 +32,10 @@
             "ajax": {
                 "url": "/admin/dtbl/system-logs",
             },
-            "language": {
-                "searchPlaceholder": "By last name",
-            },
             "columnDefs": [
                 { "visible": false, "targets": 0 },
             ],
-            initComplete : function() {
-                var input = $('.dataTables_filter input').unbind(),
-                    self = this.api(),
-                    $searchButton = $('<button>')
-                               .text('search')
-                               .click(function() {
-                                  self.search(input.val()).draw();
-                               }),
-                    $clearButton = $('<button>')
-                               .text('clear')
-                               .click(function() {
-                                  input.val('');
-                                  $searchButton.click(); 
-                               }) 
-                $('.dataTables_filter').append($searchButton, $clearButton);
-            }  
         });
-
-        dt_logs.on( 'search.dt', function () {
-            dt_logs.search();
-        } );
     });
 </script>
 {% endblock %}
