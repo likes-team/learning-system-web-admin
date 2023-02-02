@@ -168,7 +168,12 @@ def fetch_business_expenses_dt(branch_id):
     total_office_supplies = decimal.Decimal(0)
     total_salaries_and_rebates = decimal.Decimal(0)
     total_other_expenses = decimal.Decimal(0)
-    
+    total_refund = decimal.Decimal(0)
+    total_bir = decimal.Decimal(0)
+    total_business_permit = decimal.Decimal(0)
+    total_employee_benefits = decimal.Decimal(0)
+    total_bookeper_retainers_fee = decimal.Decimal(0)
+    total_expenditure = decimal.Decimal(0)
     expenses_data = {
         'UTILITIES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
         'OFFICE SUPPLIES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -177,47 +182,65 @@ def fetch_business_expenses_dt(branch_id):
         'REFUND': [0,0,0,0,0,0,0,0,0,0,0,0,0],
         'BOOKEEPER': [0,0,0,0,0,0,0,0,0,0,0,0,0],
         'OTHER EXPENSES': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'BIR': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'BUSINESS PERMIT': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'EMPLOYEE BENEFITS': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        'BOOKEEPERs RETAINERS FEE': [0,0,0,0,0,0,0,0,0,0,0,0,0],
         'TOTAL OF EXPENDITURE': [0,0,0,0,0,0,0,0,0,0,0,0,0]
     }
     
     with decimal.localcontext(D128_CTX):
         for transaction in query:
-            try:
-                transaction_date: datetime = transaction.get('date', None)
-                description = transaction.get('description', '')
-                category = transaction.get('category', '')
-                account_no = transaction.get('account_no', '')
-                unit_price = transaction.get('unit_price', '')
-                qty = transaction.get('qty', 0)
-                billing_month_from = transaction.get('billing_month_from', '')
-                billing_month_to = transaction.get('billing_month_to', '')
-                settled_by = transaction.get('settled_by', '')
-                total_amount_due = transaction.get('total_amount_due', 0.00)
-                
-                month_index = transaction_date.month - 1
-                if category == "utilities":
-                    total_utilities = total_utilities + total_amount_due.to_decimal()
-                    expenses_data['UTILITIES'][month_index] += total_amount_due.to_decimal()
-                elif category == "office_supply":
-                    total_office_supplies = total_office_supplies + total_amount_due.to_decimal()
-                    expenses_data['OFFICE SUPPLIES'][month_index] += total_amount_due.to_decimal()
-                elif category == "salary_and_rebates" or category == "salary":
-                    total_salaries_and_rebates = total_salaries_and_rebates + total_amount_due.to_decimal()
-                    contact_person : User = User.objects.get(id=description)
-                    description = contact_person.full_name
-                    expenses_data['SALARY'][month_index] += total_amount_due.to_decimal()
-                elif category == "rebates":
-                    expenses_data['REBATES'][month_index] += total_amount_due.to_decimal()
-                elif category == "other_expenses":
-                    total_other_expenses = total_other_expenses + total_amount_due.to_decimal()
-                    expenses_data['OTHER EXPENSES'][month_index] += total_amount_due.to_decimal()
-            except Exception as e:
-                continue
-    
+            transaction_date: datetime = transaction.get('date', None)
+            description = transaction.get('description', '')
+            category = transaction.get('category', '')
+            total_amount_due = transaction['total_amount_due'].to_decimal()
+            
+            month_index = transaction_date.month - 1
+            if category == "utilities":
+                total_utilities = total_utilities + total_amount_due
+                expenses_data['UTILITIES'][month_index] += total_amount_due
+            elif category == "office_supply":
+                total_office_supplies = total_office_supplies + total_amount_due
+                expenses_data['OFFICE SUPPLIES'][month_index] += total_amount_due
+            elif category == "salary_and_rebates" or category == "salary":
+                total_salaries_and_rebates = total_salaries_and_rebates + total_amount_due
+                contact_person : User = User.objects.get(id=description)
+                description = contact_person.full_name
+                expenses_data['SALARY'][month_index] += total_amount_due
+            elif category == "rebates":
+                expenses_data['REBATES'][month_index] += total_amount_due
+            elif category == "other_expenses":
+                total_other_expenses = total_other_expenses + total_amount_due
+                expenses_data['OTHER EXPENSES'][month_index] += total_amount_due
+            elif category == "refund":
+                total_refund += total_amount_due
+                expenses_data['REFUND'][month_index] += total_amount_due
+            elif category == "BIR":
+                total_bir += total_amount_due
+                expenses_data['BIR'][month_index] += total_amount_due
+            elif category == "Business Permit":
+                total_business_permit += total_amount_due
+                expenses_data['BUSINESS PERMIT'][month_index] += total_amount_due
+            elif category == "Employee Benefits":
+                total_employee_benefits += total_amount_due
+                expenses_data['EMPLOYEE BENEFITS'][month_index] += total_amount_due
+            elif category == "Bookeeper Retainer Fee":
+                total_bookeper_retainers_fee += total_amount_due
+                expenses_data['BOOKEEPERs RETAINERS FEE'][month_index] += total_amount_due
+            total_expenditure += total_amount_due
+            expenses_data['TOTAL OF EXPENDITURE'][month_index] += total_amount_due
+            
     expenses_data['UTILITIES'][12] = total_utilities
     expenses_data['OFFICE SUPPLIES'][12] = total_office_supplies
     expenses_data['SALARY'][12] = total_salaries_and_rebates
     expenses_data['OTHER EXPENSES'][12] = total_other_expenses
+    expenses_data['REFUND'][12] = total_refund
+    expenses_data['BIR'][12] = total_bir
+    expenses_data['BUSINESS PERMIT'][12] = total_business_permit
+    expenses_data['EMPLOYEE BENEFITS'][12] = total_employee_benefits
+    expenses_data['BOOKEEPERs RETAINERS FEE'][12] = total_bookeper_retainers_fee
+    expenses_data['TOTAL OF EXPENDITURE'][12] = total_expenditure
     
     for key, value in expenses_data.items():
         row = [key] + [str(val) for val in value]
@@ -233,7 +256,6 @@ def fetch_business_expenses_dt(branch_id):
         'totalSalariesAndRebates': str(total_salaries_and_rebates),
         'totalOtherExpenses': str(total_other_expenses)
         }
-
     return jsonify(response)
 
 
