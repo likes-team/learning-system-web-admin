@@ -1311,9 +1311,9 @@ def modify_and_download_certificate():
     # address
     can.setFont('Black Chancery', font_address)
     if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.drawCentredString(455, 182, address)
+        can.drawString(360, 182, address)
     else:
-        can.drawCentredString(460, 182, address)
+        can.drawString(370, 182, address)
     
     # teacher
     can.setFont('Arial', font_teacher_name)
