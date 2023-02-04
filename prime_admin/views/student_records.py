@@ -16,7 +16,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, Registration, Member
-from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory
+from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory, send_file
 from app import mongo
 from datetime import datetime
 from bson.decimal128 import Decimal128, create_decimal128_context
@@ -1347,6 +1347,5 @@ def modify_and_download_certificate():
     outputStream = open(dst_dir, "wb")
     output.write(outputStream)
     outputStream.close()
-
-    return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=file_name,as_attachment=True)
+    return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=file_name)
 
