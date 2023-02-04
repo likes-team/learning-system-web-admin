@@ -35,7 +35,7 @@ D128_CTX = create_decimal128_context()
 def members():
     _table_columns = [
         'id', 'date', 'registration','name of student', 'batch no.', 'branch', 'schedule', 'remark',
-        'amount','balance', 'paid/not paid', 'Deposit','contact person', 'book', 'Uniform', 'cashier', 'actions'
+        'amount','balance', 'paid/not paid', 'Deposit','contact person', 'session', 'contact no.', 'cashier', 'actions'
         ]
 
     fields = []
@@ -184,9 +184,6 @@ def get_dtbl_members():
     _table_data = []
 
     for registration in registrations:
-        books = ""
-        uniforms = ""
-
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
@@ -210,38 +207,6 @@ def get_dtbl_members():
         branch = registration.branch
         contact_person = registration.contact_person
 
-        if registration.books:
-            books = "None"
-
-            if registration.books['volume1']:
-                books = "Vol. 1"
-            if registration.books['volume2']:
-                books += " Vol. 2"
-            if registration.books['book_none']:
-                books = "None"
-        else:
-            books = "None"
-
-        if registration.uniforms:
-            uniforms = "None"
-
-            if registration.uniforms['uniform_none']:
-                uniforms = "None"
-            elif registration.uniforms['uniform_xs']:
-                uniforms = "XS"
-            elif registration.uniforms['uniform_s']:
-                uniforms = "S"
-            elif registration.uniforms['uniform_m']:
-                uniforms = "M"
-            elif registration.uniforms['uniform_l']:
-                uniforms = "L"
-            elif registration.uniforms['uniform_xl']:
-                uniforms = "XL"
-            elif registration.uniforms['uniform_xxl']:
-                uniforms = "XXL"
-        else:
-            uniforms = "None"
-        
         payment_mode = ""
         if registration.payment_mode == 'full_payment':
             payment_mode = "Full Payment"
@@ -277,8 +242,8 @@ def get_dtbl_members():
             paid,
             deposit,
             contact_person.fname if contact_person is not None else '',
-            books,
-            uniforms,
+            registration.session,
+            registration.contact_number,
             registration.created_by,
             actions
         ])
