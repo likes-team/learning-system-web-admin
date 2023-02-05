@@ -20,8 +20,16 @@ def _register_arial_font():
     font_path = basedir + '/prime_admin/static/font/arial.ttf'
     pdfmetrics.registerFont(TTFont('Arial', font_path))
 
+
+def _register_calibri_font():
+    font_path = basedir + '/prime_admin/static/font/CALIBRIB.TTF'
+    pdfmetrics.registerFont(TTFont('Calibri', font_path))
+
+
 _register_old_english_font()
 _register_arial_font()
+_register_calibri_font()
+
 
 class Config(object):
     load_dotenv()

@@ -24,6 +24,7 @@ from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
 from config import TIMEZONE
 from prime_admin.helpers import Payment
+from prime_admin.services.printing import Certificate
 
 
 
@@ -1214,8 +1215,8 @@ def update_agreement_form_settings():
     return redirect(url_for('lms.members'))
 
 
-@bp_lms.route('modify_and_download_certificate')
-def modify_and_download_certificate():
+@bp_lms.route('/print-certificate')
+def print_certificate():
     fname = request.args.get('fname', '')
     mname = request.args.get('mname', '')
     lname = request.args.get('lname', '')
@@ -1234,88 +1235,13 @@ def modify_and_download_certificate():
     font_teacher_name = int(request.args.get('font_teacher_name'))
     font_address = int(request.args.get('font_address'))
     
-    # Delete old pdfs
-    old_files = glob.glob(current_app.config['PDF_FOLDER'] + 'generated/*.pdf')
-    for file in old_files:
-        os.remove(file)
-
-    if cert_type == 'no_partner_no_underline':
-        src_dir = current_app.config['PDF_FOLDER'] + 'cert_no_partner_no_underline.pdf'
-    elif cert_type == 'partner_underline':
-        src_dir = current_app.config['PDF_FOLDER'] + 'cert_partner_underline.pdf'
-    elif cert_type == 'partner_no_underline':
-        src_dir = current_app.config['PDF_FOLDER'] + 'cert_partner_no_underline.pdf'
-    elif cert_type == 'no_partner_underline':
-        src_dir = current_app.config['PDF_FOLDER'] + 'cert_no_partner_underline.pdf'
-
-    # Copy template
-    file_name = "generated/" +"cert_" + str(datetime.timestamp(datetime.utcnow())) + '.pdf'
-    dst_dir = os.path.join(current_app.config['PDF_FOLDER'], file_name)
-    copyfile(src_dir,dst_dir)
-
-    # Add texts on the new PDF     
-    # Create a new PDF with Reportlab
-    packet = io.BytesIO()
-    inch = 72.0
-    can = canvas.Canvas(packet, pagesize=(14.76*inch, 11.33*inch))
-    
-    # Full name
-    can.setFont('Black Chancery', font_full_name)
-    can.drawCentredString(320, 270, full_name)
-    
-    # day, month, year
-    can.setFont('Black Chancery', 18)
-    if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.drawCentredString(150, 182, day)
-        can.drawCentredString(247, 182, month)
-        can.drawCentredString(312, 182, year)
-    elif cert_type == "no_partner_underline":
-        can.drawCentredString(150, 182, day)
-        can.drawCentredString(245, 182, month)
-        can.drawCentredString(312, 182, year)
-    else:
-        can.drawCentredString(160, 182, day)
-        can.drawCentredString(255, 182, month)
-        can.drawCentredString(322, 182, year)
-    
-    # address
-    can.setFont('Black Chancery', font_address)
-    if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.drawString(360, 182, address)
-    else:
-        can.drawString(370, 182, address)
-    
-    # teacher
-    can.setFont('Arial', font_teacher_name)
-    if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.drawCentredString(140, 105, teacher_name)
-    else:
-        can.drawCentredString(225, 75, teacher_name)
-
-    # manager
-    if cert_type in ['partner_underline', 'partner_no_underline']:
-        can.setFont('Arial', font_manager_name)
-        can.drawCentredString(507, 105, manager_name)
-        
-    # certificate no.
-    can.setFont('Black Chancery', 15)
-    can.drawString(682, 498, prime_registration)
-
-    can.showPage()
-    can.save()
-    # Move to the beginning of the StringIO buffer
-    packet.seek(0)
-    new_pdf = PdfFileReader(packet)
-    # Read your existing PDF
-    existing_pdf = PdfFileReader(open(src_dir, "rb"))
-    output = PdfFileWriter()
-    # Add the "watermark" (which is the new pdf) on the existing page
-    page = existing_pdf.getPage(0)
-    page.mergePage(new_pdf.getPage(0))
-    output.addPage(page)
-    # Finally, write "output" to a real file
-    outputStream = open(dst_dir, "wb")
-    output.write(outputStream)
-    outputStream.close()
-    return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=file_name)
-
+    certificate: Certificate = Certificate(cert_type)
+    certificate.create()
+    certificate.set_full_name(full_name, font_full_name)
+    certificate.set_date(day, month, year)
+    certificate.set_address(address, font_address)
+    certificate.set_teacher(teacher_name, font_teacher_name)
+    certificate.set_manager(manager_name, font_manager_name)
+    certificate.set_certificate_no(prime_registration)
+    certificate.save()
+    return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=certificate.get_file_name())
