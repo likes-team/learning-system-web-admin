@@ -93,7 +93,7 @@ class Certificate:
     
     
     def set_teacher(self, name, font_size):
-        self.pdf.setFont('Calibri', font_size)
+        self.pdf.setFont('ArialTh', font_size)
         if self.cert_type in ['partner_underline', 'partner_no_underline']:
             self.pdf.drawCentredString(140, 105, name)
         else:
@@ -102,7 +102,7 @@ class Certificate:
 
     def set_manager(self, name, font_size):
         if self.cert_type in ['partner_underline', 'partner_no_underline']:
-            self.pdf.setFont('Calibri', font_size)
+            self.pdf.setFont('ArialTh', font_size)
             self.pdf.drawCentredString(507, 105, name)
     
     
