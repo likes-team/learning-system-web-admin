@@ -137,6 +137,7 @@
                     d.date_to = $("#date_to").val();
                     d.payment_status = $("#payment_status").val();
                     d.payment_mode = $("#payment_mode").val();
+                    d.session = $("#filter_session").val();
                 },
                 "dataSrc": function (json) {
                     $("#total_installment").html("₱" + json.totalInstallment);
@@ -924,6 +925,10 @@
             table.ajax.reload();
         });
 
+        $('#filter_session').change(function () {
+            table.ajax.reload();
+        });
+
         $("#btn_refund").click(function () {
             $("#viewModal .close").click();
             var marketerID = $("#select_marketer").val();
@@ -1226,7 +1231,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-2 col-xs-2">
+                <div class="col-md-1 col-xs-2">
                     <div class="position-relative form-group">
                         <label for="date_from" class="">Date From</label>
                         <input id="date_from" type="date" class="form-control">
@@ -1238,7 +1243,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2 col-xs-2">
+                <div class="col-md-1 col-xs-2">
                     <div class="position-relative form-group">
                         <label for="date_to" class="">Date To</label>
                         <input id="date_to" type="date" class="form-control">
@@ -1265,6 +1270,19 @@
                             <option value="{{ branch.id }}">
                                 {{ branch.name }}
                             </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="position-relative form-group">
+                        <label for="filter_session" class="">Session</label>
+                        <select name="filter_session" id="filter_session" class="form-control" required>
+                            <option value='all'>All</option>
+                            {% for session in TABLE_OPTIONS['sessions'] %}
+                                <option value="{{session}}">
+                                    {{session}}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>

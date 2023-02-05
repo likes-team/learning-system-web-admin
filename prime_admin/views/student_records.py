@@ -51,13 +51,13 @@ def members():
         batch_numbers = Batch.objects()
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
-        batch_numbers = Batch.objects()        
+        batch_numbers = Batch.objects()
 
     settings = mongo.db.lms_configurations.find_one({'name': 'agreement_form_pdf_setting'})['settings']
+    sessions = mongo.db.lms_configurations.find_one({'name': 'sessions'})['values']
     payment_rules = settings.get('payment_rules')
     mode_of_payment = settings.get('mode_of_payment')
     refunds_and_withdrawals = settings.get('refunds_and_withdrawals')
-    print(payment_rules)
     return admin_table(
         Member,
         fields=fields,
@@ -72,8 +72,9 @@ def members():
         schedules=['WDC', 'SDC'],
         payment_rules=payment_rules,
         mode_of_payment=mode_of_payment,
-        refunds_and_withdrawals=refunds_and_withdrawals
-        )
+        refunds_and_withdrawals=refunds_and_withdrawals,
+        sessions=sessions
+    )
 
 
 @bp_lms.route('/dtbl/members')
@@ -88,15 +89,13 @@ def get_dtbl_members():
     date_to = request.args.get('date_to')
     payment_status = request.args.get('payment_status')
     payment_mode = request.args.get('payment_mode')
+    session = request.args.get('session')
     
     sales_today = 0
     # TODO: add promos
     installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
     full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
     premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
-
-    print(get_sales_today_date())
-    print(get_date_now())
 
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
@@ -127,7 +126,12 @@ def get_dtbl_members():
                 sales_today = query_sales_today[0].get('sales_today')
             else:
                 sales_today = 0.00
-            
+
+    if session != 'all':
+        registrations = registrations.filter(session=session)
+        installment_registrations = installment_registrations.filter(session=session)
+        full_payment_registrations = full_payment_registrations.filter(session=session)
+        premium_payment_registrations = premium_payment_registrations.filter(session=session)
 
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
@@ -184,6 +188,7 @@ def get_dtbl_members():
     _table_data = []
 
     for registration in registrations:
+        print("registration:::", registration)
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
