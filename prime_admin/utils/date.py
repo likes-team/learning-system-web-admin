@@ -61,4 +61,14 @@ def convert_date_input_to_utc(date_str, date_type):
 
     utc_dt = local_dt.astimezone(pytz.utc)
     return utc_dt
-    
+
+
+def format_utc_to_local(date, date_format="%B %d, %Y"):
+    if type(date == datetime):
+        local_dt = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime(date_format)
+    elif type(date == str):
+        naive = datetime.strptime(date, "%Y-%m-%d")
+        local_dt = TIMEZONE.localize(naive, is_dst=None).strftime(date_format)
+    else:
+        local_dt = ''
+    return local_dt

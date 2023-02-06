@@ -143,18 +143,9 @@
 
         var dtbl_business_expenses = $("#tbl_business_expenses").DataTable({
             "dom": '',
-            "processing": true,
             "autoWidth": false,
-            "serverSide": true,
             "ajax": {
                 "url": "/learning-management/branches/all/expenses-transactions/dt",
-                "dataSrc": function (json) {
-                    $("#total_utilities").html("₱" + json.totalUtilities);
-                    $("#total_office_supplies").html("₱" + json.totalOfficeSupplies);
-                    $("#total_salaries_and_rebates").html("₱" + json.totalSalariesAndRebates);
-                    $("#total_other_expenses").html("₱" + json.totalOtherExpenses);
-                    return json.data;
-                },
                 "data": function (d) {
                     d.year = $("#filter_tab3_year").val();
                 }
@@ -964,66 +955,6 @@
                     </div>
                 </div>
             </div>
-            <!-- 
-            <div class="row">
-                <div class="col-lg-6 col-xl-6">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">Utilities</div>
-                                <div class="widget-subheading">Rental fee, Electric and Water bills</div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-danger"><span id="total_utilities">₱ 0.00</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-xl-6">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">Office Supplies</div>
-                                <div class="widget-subheading">Total</div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-danger"><span id="total_office_supplies">₱ 0.00</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-            <!-- <div class="row">
-                <div class="col-lg-6 col-xl-6">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">Salaries and Marketer Rebates</div>
-                                <div class="widget-subheading">Total</div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-danger"><span id="total_salaries_and_rebates">₱ 0.00</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-xl-6">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">Other Expenses</div>
-                                <div class="widget-subheading">Total</div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-danger"><span id="total_other_expenses">₱ 0.00</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-
             <div class="mb-12 card">
                 <div class="card-body">
                     <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
@@ -1184,13 +1115,13 @@
                                             <th class="text-center">MAR</th>
                                             <th class="text-center">APR</th>
                                             <th class="text-center">MAY</th>
-                                            <th class="text-center">JUNE</th>
-                                            <th class="text-center">JULY</th>
-                                            <th class="text-center">AUGUST</th>
-                                            <th class="text-center">SEPTEMBER</th>
-                                            <th class="text-center">OCTOBER</th>
-                                            <th class="text-center">NOVEMBER</th>
-                                            <th class="text-center">DECEMBER</th>
+                                            <th class="text-center">JUN</th>
+                                            <th class="text-center">JUL</th>
+                                            <th class="text-center">AUG</th>
+                                            <th class="text-center">SEP</th>
+                                            <th class="text-center">OCT</th>
+                                            <th class="text-center">NOV</th>
+                                            <th class="text-center">DEC</th>
                                             <th class="text-center">TOTAL</th>
                                         </tr>
                                     </thead>
