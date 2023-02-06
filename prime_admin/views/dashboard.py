@@ -1,7 +1,7 @@
 from datetime import datetime
 import decimal
 from prime_admin.globals import get_date_now
-from flask import redirect, url_for
+from flask import request
 from flask.json import jsonify
 from flask.templating import render_template
 from flask_login import login_required, current_user
@@ -9,7 +9,6 @@ from prime_admin import bp_lms
 from prime_admin.models import Branch, CashFlow, Dashboard, Registration
 from app.admin.templating import admin_dashboard, DashboardBox
 from mongoengine.queryset.visitor import Q
-from config import TIMEZONE
 from prime_admin.services.dashboard import DashboardService, ChartService
 
 
@@ -49,6 +48,7 @@ def dashboard():
 
     dashboard_service = DashboardService()
     sales_today = dashboard_service.get_sales_today()
+    dashboard_service.reset_match()
     total_installment = dashboard_service.get_total_installment()
     total_full_payment = dashboard_service.get_total_full_payment()
     total_premium_payment = dashboard_service.get_total_premium_payment()
@@ -80,6 +80,29 @@ def fetch_chart_sales_today():
     response = {
         'status': 'success',
         'data': data
+    }
+    return jsonify(response), 200
+
+
+@bp_lms.route('/dashboard/fetch-sales-breakdown', methods=['GET'])
+def fetch_sales_breakdown():
+    date_from = request.args['date_from'] if request.args['date_from'] != '' else None
+    date_to = request.args['date_to'] if request.args['date_to'] != '' else None
+
+    dashboard_service = DashboardService(date_from=date_from, date_to=date_to)
+    total_installment = dashboard_service.get_total_installment()
+    total_full_payment = dashboard_service.get_total_full_payment()
+    total_premium_payment = dashboard_service.get_total_premium_payment()
+    total = dashboard_service.get_total()
+
+    response = {
+        'status': 'success',
+        'data': {
+            'total_installment': total_installment,
+            'total_full_payment': total_full_payment,
+            'total_premium_payment': total_premium_payment,
+            'total': total
+        }
     }
     return jsonify(response), 200
 

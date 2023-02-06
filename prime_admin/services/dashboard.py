@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask_login import current_user
 from app import mongo
 from prime_admin.utils.date import (
-    get_utc_today_end_date, get_utc_today_start_date, get_last_7_days
+    get_utc_today_end_date, get_utc_today_start_date, get_last_7_days, convert_date_input_to_utc
 )
 from prime_admin.utils.currency import format_to_str_php
 from prime_admin.models import Branch
@@ -12,12 +12,30 @@ from prime_admin.models import Branch
 
 
 class DashboardService:
-    def __init__(self, branch=None):
+    def __init__(self, branch=None, date_from=None, date_to=None):
         self.reset_match()
         
         if branch:
             self.set_branch(branch)
+        self.set_date(date_from, date_to)
 
+
+    def set_date(self, date_from, date_to):
+        if isinstance(date_from, str):
+            date_from = convert_date_input_to_utc(date_from, 'date_from')
+        
+        if isinstance(date_to, str):
+            date_to = convert_date_input_to_utc(date_to, 'date_to')
+        
+        if date_from:
+            self.match['date'] = {'$gte': date_from}
+
+        if date_to:
+            self.match['date'] = {'$lte': date_to}
+
+        if date_from and date_to:
+            self.match['date'] = {'$gte': date_from, '$lte': date_to}
+            
 
     def set_branch(self, branch):
         self.match['branch'] = ObjectId(branch)
@@ -36,7 +54,7 @@ class DashboardService:
     def get_sales_today(self, date=None, branch=None):
         start_date = get_utc_today_start_date(date)
         end_date = get_utc_today_end_date(date)
-        self.match['date'] = {"$gte": start_date, "$lte": end_date}
+        self.set_date(start_date, end_date)
 
         if branch:
             self.set_branch(branch)
@@ -44,21 +62,18 @@ class DashboardService:
 
 
     def get_total_installment(self):
-        self.reset_match()
         self.match['payment_mode'] = 'installment'
         self.total_installment = self._calculate()
         return format_to_str_php(self.total_installment)
 
 
     def get_total_full_payment(self):
-        self.reset_match()
         self.match['payment_mode'] = 'full_payment'
         self.total_full_payment = self._calculate()
         return format_to_str_php(self.total_full_payment)
     
     
     def get_total_premium_payment(self):
-        self.reset_match()
         self.match['payment_mode'] = 'premium'
         self.total_premium_payment = self._calculate()
         return format_to_str_php(self.total_premium_payment)

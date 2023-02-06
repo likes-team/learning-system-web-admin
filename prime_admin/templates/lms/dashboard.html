@@ -41,11 +41,11 @@
 
         function loadChartSalesToday() {
             $.getJSON(
-                `/learning-management/dashboard/fetch-chart-sales-today`, function(response){
-                updateData(myChart, response.data.labels, response.data.datasets);
-            }).fail(function() {
-                Swal.fire({title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error"});
-            });
+                `/learning-management/dashboard/fetch-chart-sales-today`, function (response) {
+                    updateData(myChart, response.data.labels, response.data.datasets);
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
+                });
         }
 
         function updateData(chart, labels, datasets) {
@@ -54,7 +54,7 @@
             chart.config.data.datasets = datasets;
             chart.update();
         }
-    
+
         function removeData(chart) {
             chart.data.labels.pop();
             chart.data.datasets.forEach((dataset) => {
@@ -62,6 +62,30 @@
             });
             chart.update();
         }
+
+        function updateSalesBreakdown(){
+            var dateFrom = $("#filter_date_from").val();
+            var dateTo = $("#filter_date_to").val();
+
+            $.getJSON(
+                `/learning-management/dashboard/fetch-sales-breakdown?date_from=${dateFrom}&date_to=${dateTo}`, function (response) {
+                    $("#total_installment").html(response.data.total_installment);
+                    $("#total_full_payment").html(response.data.total_full_payment);
+                    $("#total_premium_payment").html(response.data.total_premium_payment);
+                    $("#total").html(response.data.total);
+                    console.log("Success!");
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
+                });
+        }
+
+        $("#filter_date_from").change(function(){
+            updateSalesBreakdown();
+        });
+
+        $("#filter_date_to").change(function(){
+            updateSalesBreakdown();
+        });
     });
 </script>
 {% endblock %}
@@ -131,6 +155,30 @@
                         <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
                         Sales
                     </div>
+                    <div class="btn-actions-pane-right text-capitalize actions-icon-btn">
+                        <div class="btn-group dropdown">
+                            <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                class="btn-icon btn-icon-only btn btn-link">
+                                <i class="pe-7s-filter btn-icon-wrapper"></i>
+                            </button>
+                            <div tabindex="-1" role="menu" aria-hidden="true"
+                                class="dropdown-menu-right rm-pointers dropdown-menu-shadow dropdown-menu-hover-link dropdown-menu">
+                                <h6 tabindex="-1" class="dropdown-header">Filter</h6>
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_date_from" class="">Date From</label>
+                                        <input id="filter_date_from" type="date" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_date_to" class="">Date To</label>
+                                        <input id="filter_date_to" type="date" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
@@ -143,7 +191,9 @@
                                             <div class="widget-subheading">Total</div>
                                         </div>
                                         <div class="widget-content-right">
-                                            <div class="widget-numbers text-success">₱ {{options['total_installment']}} </div>
+                                            <div class="widget-numbers text-success">
+                                                ₱ <span id="total_installment">{{options['total_installment']}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -158,7 +208,9 @@
                                             <div class="widget-subheading">Total</div>
                                         </div>
                                         <div class="widget-content-right">
-                                            <div class="widget-numbers text-primary">₱ {{options['total_full_payment']}}</div>
+                                            <div class="widget-numbers text-primary">
+                                                ₱ <span id="total_full_payment">{{options['total_full_payment']}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -173,7 +225,9 @@
                                             <div class="widget-subheading">Total</div>
                                         </div>
                                         <div class="widget-content-right">
-                                            <div class="widget-numbers text-danger">₱ {{options['total_premium_payment']}}</div>
+                                            <div class="widget-numbers text-danger">
+                                                ₱ <span id="total_premium_payment">{{options['total_premium_payment']}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -188,7 +242,9 @@
                                             <div class="widget-subheading">Overall total</div>
                                         </div>
                                         <div class="widget-content-right">
-                                            <div class="widget-numbers text-warning">₱ {{options['total']}}</div>
+                                            <div class="widget-numbers text-warning">
+                                                ₱ <span id="total">{{options['total']}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
