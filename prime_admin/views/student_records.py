@@ -92,104 +92,47 @@ def get_dtbl_members():
     payment_mode = request.args.get('payment_mode')
     session = request.args.get('session')
     
-    sales_today = 0
-    # TODO: add promos
-    installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
-    full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
-    premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
-
     if branch_id != 'all':
         registrations = Registration.objects(branch=branch_id).filter(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-        sales_today = registrations.filter(registration_date__gte=get_date_now().date()).sum('amount')
-
-        installment_registrations = installment_registrations.filter(branch=branch_id)
-        full_payment_registrations = full_payment_registrations.filter(branch=branch_id)
-        premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
     else:
         if current_user.role.name == "Marketer":
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-            sales_today = registrations.filter(registration_date__gte=get_date_now().date()).filter(branch__in=current_user.branches).sum('amount')
         elif current_user.role.name == "Partner":
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
         else:
             registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-            query_sales_today = list(mongo.db.lms_registration_payments.aggregate([
-                {"$match": {
-                    "date": {"$gte": get_sales_today_date().replace(hour=0, minute=0), "$lte": get_sales_today_date().replace(hour=23, minute=59)}
-                    }
-                },
-                {"$group": {
-                    "_id": None,
-                    'sales_today': {"$sum": "$amount"}
-                }}
-            ]))
-            if len(query_sales_today) > 0:
-                sales_today = query_sales_today[0].get('sales_today')
-            else:
-                sales_today = 0.00
 
     if session != 'all':
         registrations = registrations.filter(session=session)
-        installment_registrations = installment_registrations.filter(session=session)
-        full_payment_registrations = full_payment_registrations.filter(session=session)
-        premium_payment_registrations = premium_payment_registrations.filter(session=session)
-
+      
     if batch_no != 'all':
         registrations = registrations.filter(batch_number=batch_no)
-        installment_registrations = installment_registrations.filter(batch_number=batch_no)
-        full_payment_registrations = full_payment_registrations.filter(batch_number=batch_no)
-        premium_payment_registrations = premium_payment_registrations.filter(batch_number=batch_no)
-
+   
     if schedule != 'all':
         registrations = registrations.filter(schedule=schedule)
-        installment_registrations = installment_registrations.filter(schedule=schedule)
-        full_payment_registrations = full_payment_registrations.filter(schedule=schedule)
-        premium_payment_registrations = premium_payment_registrations.filter(schedule=schedule)
-
+   
     if search_value != "":
         registrations = registrations.filter(lname__icontains=search_value)
-        installment_registrations = installment_registrations.filter(lname__icontains=search_value)
-        full_payment_registrations = full_payment_registrations.filter(lname__icontains=search_value)
-        premium_payment_registrations = premium_payment_registrations.filter(lname__icontains=search_value)
 
     if date_from !="":
         registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        installment_registrations = installment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        full_payment_registrations = full_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        premium_payment_registrations = premium_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-
+ 
     if date_to != "":
         registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        installment_registrations = installment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        full_payment_registrations = full_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        premium_payment_registrations = premium_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-
+        
     if payment_status == 'PAID':
         registrations = registrations.filter(balance__lte=0)
-        installment_registrations = installment_registrations.filter(balance__lte=0)
-        full_payment_registrations = full_payment_registrations.filter(balance__lte=0)
-        premium_payment_registrations = premium_payment_registrations.filter(balance__lte=0)
     elif payment_status == "NOT PAID":
         registrations = registrations.filter(balance__gt=0)
-        installment_registrations = installment_registrations.filter(balance__gt=0)
-        full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
-        premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
     elif payment_status == "REFUNDED":
         registrations = registrations.filter(payment_mode='refund')
-        installment_registrations = installment_registrations.filter(payment_mode='refund')
-        full_payment_registrations = full_payment_registrations.filter(payment_mode='refund')
-        premium_payment_registrations = premium_payment_registrations.filter(payment_mode='refund')
-    
+
     if payment_mode != "all":
         registrations = registrations.filter(payment_mode=payment_mode)
-        installment_registrations = installment_registrations.filter(payment_mode=payment_mode)
-        full_payment_registrations = full_payment_registrations.filter(payment_mode=payment_mode)
-        premium_payment_registrations = premium_payment_registrations.filter(payment_mode=payment_mode)
 
     _table_data = []
 
     for registration in registrations:
-        print("registration:::", registration)
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
@@ -253,27 +196,12 @@ def get_dtbl_members():
             registration.created_by,
             actions
         ])
-
-
-    total_installment = Decimal128(str(installment_registrations.sum('amount')))
-    total_full_payment = Decimal128(str(full_payment_registrations.sum('amount')))
-    total_premium_payment = Decimal128(str(premium_payment_registrations.sum('amount')))
-
-    with decimal.localcontext(D128_CTX):
-        total_payment = total_installment.to_decimal() + total_full_payment.to_decimal() + total_premium_payment.to_decimal()
-
     response = {
         'draw': draw,
         'recordsTotal': registrations.count(),
         'recordsFiltered': registrations.count(),
         'data': _table_data,
-        'totalInstallment': str(total_installment),
-        'totalFullPayment': str(total_full_payment),
-        'totalPremiumPayment': str(total_premium_payment),
-        'totalPayment': str(total_payment),
-        'salesToday': str(sales_today)
     }
-
     return jsonify(response)
 
 

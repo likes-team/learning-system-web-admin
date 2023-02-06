@@ -3,8 +3,65 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         $("#li_dashboard").addClass('mm-active');
+
+        const DATA_COUNT = 7;
+        const NUMBER_CFG = { count: DATA_COUNT, min: -100, max: 100 };
+        const data = {
+            labels: [],
+            datasets: []
+        };
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: ''
+                    },
+                },
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            }
+        };
+
+        const ctx = document.getElementById('chart_sales_today');
+        const myChart = new Chart(ctx, config);
+
+        loadChartSalesToday();
+
+        function loadChartSalesToday() {
+            $.getJSON(
+                `/learning-management/dashboard/fetch-chart-sales-today`, function(response){
+                updateData(myChart, response.data.labels, response.data.datasets);
+            }).fail(function() {
+                Swal.fire({title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error"});
+            });
+        }
+
+        function updateData(chart, labels, datasets) {
+            removeData(chart);
+            chart.config.data.labels = labels;
+            chart.config.data.datasets = datasets;
+            chart.update();
+        }
+    
+        function removeData(chart) {
+            chart.data.labels.pop();
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.pop();
+            });
+            chart.update();
+        }
     });
 </script>
 {% endblock %}
@@ -27,124 +84,177 @@
             </div>
         </div>
     </div>
-    <!-- <div class="row">
-        <div class="col-md-6 col-xl-4">
-            <div class="card mb-3 widget-content bg-midnight-bloom">
-                <div class="widget-content-wrapper text-white">
-                    <div class="widget-content-left">
-                        <div class="widget-heading">{{ options['box1'].heading }}</div>
-                        <div class="widget-subheading">{{ options['box1'].subheading }}</div>
-                    </div>
-                    <div class="widget-content-right">
-                        <div class="widget-numbers text-white"><span>{{ options['box1'].number }}</span></div>
+    <div class="row">
+        <div class="col-md-12 col-lg-6">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header-tab-animation card-header">
+                    <div class="card-header-title">
+                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
+                        Sales Today
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card mb-3 widget-content bg-arielle-smile">
-                <div class="widget-content-wrapper text-white">
-                    <div class="widget-content-left">
-                        <div class="widget-heading">{{ options['box2'].heading }}</div>
-                        <div class="widget-subheading">{{ options['box2'].subheading }}</div>
-                    </div>
-                    <div class="widget-content-right">
-                        <div class="widget-numbers text-white"><span>{{ options['box2'].number }}</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card mb-3 widget-content bg-grow-early">
-                <div class="widget-content-wrapper text-white">
-                    <div class="widget-content-left">
-                        <div class="widget-heading">{{ options['box3'].heading }}</div>
-                        <div class="widget-subheading">{{ options['box3'].subheading }}</div>
-                    </div>
-                    <div class="widget-content-right">
-                        <div class="widget-numbers text-white"><span>{{ options['box3'].number }}</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="d-xl-none d-lg-block col-md-6 col-xl-4">
-            <div class="card mb-3 widget-content bg-premium-dark">
-                <div class="widget-content-wrapper text-white">
-                    <div class="widget-content-left">
-                        <div class="widget-heading">Extra Card</div>
-                        <div class="widget-subheading">Replace card</div>
-                    </div>
-                    <div class="widget-content-right">
-                        <div class="widget-numbers text-warning"><span>#</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
+                <div class="card-body">
+                    <div class="col-sm-12 col-md-12">
+                        <div class="card-border border-light no-shadow card">
+                            <div class="widget-content">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">Today</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers line-height-1 text-success">
+                                                <span>₱ {{options['sales_today']}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3 widget-chart widget-chart2 text-left w-100">
+                        <div class="widget-chat-wrapper-outer">
+                            <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                <canvas id="chart_sales_today"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if current_user.role.name in ['Admin', 'Partner'] %}
+        <div class="col-md-12 col-lg-6">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header-tab-animation card-header">
+                    <div class="card-header-title">
+                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
+                        Sales
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">Total of Installment</div>
+                                            <div class="widget-subheading">Total</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers text-success">₱ {{options['total_installment']}} </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">Total of Full Payment</div>
+                                            <div class="widget-subheading">Total</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers text-primary">₱ {{options['total_full_payment']}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">Total Of Premium Payment</div>
+                                            <div class="widget-subheading">Total</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers text-danger">₱ {{options['total_premium_payment']}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-outer">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">Total</div>
+                                            <div class="widget-subheading">Overall total</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <div class="widget-numbers text-warning">₱ {{options['total']}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% if current_user.role.name in ['Admin', 'Partner'] %}
     <div class="row">
         <div class="col-md-12">
             <div class="main-card mb-3 card">
-                <div class="card-header"><i class="header-icon lnr-gift icon-gradient bg-grow-early"> </i>SALES & EXPENSES
+                <div class="card-header"><i class="header-icon lnr-gift icon-gradient bg-grow-early"> </i>SALES &
+                    EXPENSES
                     <div class="btn-actions-pane-right">
                         <div class="nav">
                             {% for branch in options['branches'] %}
-                                <button value="{{branch.id}}" class="{{branch.name}} btn-branch border-0 btn-transition btn btn-outline-primary">{{branch.name}}</button>
+                            <button value="{{branch.id}}"
+                                class="{{branch.name}} btn-branch border-0 btn-transition btn btn-outline-primary">{{branch.name}}</button>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-                <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-                    <h5 class="card-title"></h5>
-                    <canvas id="chart_sales" height="400" class="chartjs-render-monitor" style="display: block; width: 378px; height: 300px;" width="378"></canvas>                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="main-card mb-3 card">
                 <div class="card-body">
-                    <!-- <h5 class="card-title">Table bordered</h5> -->
+                    <div class="chartjs-size-monitor"
+                        style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                        <div class="chartjs-size-monitor-expand"
+                            style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                        </div>
+                        <div class="chartjs-size-monitor-shrink"
+                            style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                        </div>
+                    </div>
+                    <h5 class="card-title"></h5>
+                    <canvas id="chart_sales" height="400" class="chartjs-render-monitor"
+                        style="display: block; width: 378px; height: 300px;" width="378"></canvas>
                     <table id="tbl_dashboard" class="mb-0 table table-bordered">
                         <thead>
-                        <tr>
-                            <th style="width: 10px;"></th>
-                            <th>JAN</th>
-                            <th>FEB</th>
-                            <th>MAR</th>
-                            <th>APR</th>
-                            <th>MAY</th>
-                            <th>JUN</th>
-                            <th>JULY</th>
-                            <th>AUG</th>
-                            <th>SEP</th>
-                            <th>OCT</th>
-                            <th>NOV</th>
-                            <th>DEC</th>
-                        </tr>
+                            <tr>
+                                <th style="width: 10px;"></th>
+                                <th>JAN</th>
+                                <th>FEB</th>
+                                <th>MAR</th>
+                                <th>APR</th>
+                                <th>MAY</th>
+                                <th>JUN</th>
+                                <th>JULY</th>
+                                <th>AUG</th>
+                                <th>SEP</th>
+                                <th>OCT</th>
+                                <th>NOV</th>
+                                <th>DEC</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <!-- <tr>
-                            <th scope="row">GROSS SALES</th>
-                        </tr>
-                        <tr>
-                            <th scope="row">EXPENSES</th>
-                        </tr>
-                        <tr>
-                            <th scope="row">NET</th>
-                        </tr>
-                        <tr>
-                            <th scope="row">MAINTAINING SALE 85K</th>
-                        </tr>
-                        <tr>
-                            <th scope="row">NO. OF STUDENTS</th>
-                        </tr> -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

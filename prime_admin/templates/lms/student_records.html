@@ -138,15 +138,6 @@
                     d.payment_status = $("#payment_status").val();
                     d.payment_mode = $("#payment_mode").val();
                     d.session = $("#filter_session").val();
-                },
-                "dataSrc": function (json) {
-                    $("#total_installment").html("₱" + json.totalInstallment);
-                    $("#total_full_payment").html("₱" + json.totalFullPayment);
-                    $("#total_premium_payment").html("₱" + json.totalPremiumPayment);
-                    $("#total_payment").html("₱" + json.totalPayment);
-                    $("#sales_today").html("₱" + json.salesToday);
-
-                    return json.data;
                 }
             },
             "createdRow": function (row, data, dataIndex) {
@@ -1077,99 +1068,6 @@
             {% endblock %}
         </div>
     </div>
-
-    {% if current_user.role.name == "Marketer" %}
-    <!-- Pass -->
-    {% else %}
-    <div class="main-card mb-3 card">
-        <h5 class="card-header">Sales</h5>
-
-        <div class="card-body">
-            <div class="row">
-                <div class="col-lg-6 col-xl-4"></div>
-
-                <div class="col-lg-6 col-xl-4">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">SALES TODAY</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span id="sales_today">₱ 0.00</span></div>
-                                <!-- <div class="widget-numbers text-danger"><span>Ongoing Maintenance</span></div> -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-xl-4"></div>
-
-            </div>
-            {% if current_user.role.name != "Secretary" %}
-            <div class="row">
-                <div class="col-lg-6 col-xl-3">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">TOTAL OF INSTALLMENT</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_installment">₱ 0.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-xl-3">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">TOTAL OF FULL PAYMENT</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_full_payment">₱ 0.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-xl-3">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">TOTAL OF PREMIUM PAYMENT</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_premium_payment">₱ 0.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-xl-3">
-                    <div class="card mb-3 widget-content">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left">
-                                <div class="widget-heading">TOTAL</div>
-                                <div class="widget-subheading"></div>
-                            </div>
-                            <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_payment">₱ 0.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
     <div class="main-card mb-3 card">
         <div class="card-body">
             <div class="form-row">

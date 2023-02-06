@@ -5,13 +5,12 @@ from flask import redirect, url_for
 from flask.json import jsonify
 from flask.templating import render_template
 from flask_login import login_required, current_user
-from werkzeug.wrappers import ResponseStream
-from app.core.models import CoreModule, CoreModel
 from prime_admin import bp_lms
 from prime_admin.models import Branch, CashFlow, Dashboard, Registration
 from app.admin.templating import admin_dashboard, DashboardBox
 from mongoengine.queryset.visitor import Q
 from config import TIMEZONE
+from prime_admin.services.dashboard import DashboardService, ChartService
 
 
 
@@ -45,29 +44,44 @@ DECEND = datetime(2021, 12, 31)
 @bp_lms.route('/dashboard')
 @login_required
 def dashboard():
-    if current_user.role.name == "Secretary":
-        return redirect(url_for('lms.members'))
-
-    if current_user.role.name != "Admin":
+    if current_user.role.name not in ["Admin", 'Secretary', 'Partner']:
         return render_template('auth/authorization_error.html')
 
-    from app.auth.models import User
+    dashboard_service = DashboardService()
+    sales_today = dashboard_service.get_sales_today()
+    total_installment = dashboard_service.get_total_installment()
+    total_full_payment = dashboard_service.get_total_full_payment()
+    total_premium_payment = dashboard_service.get_total_premium_payment()
+    total = dashboard_service.get_total()
     
     options = {
         'branches': Branch.objects(),
         'box1': DashboardBox("Number of enrollees","Current", 0),
         'box2': DashboardBox("Total Sales","Montly", 0),
         'box3': DashboardBox("Gross Income","Total users", 0),
-        'scripts': [{'lms.static': 'js/utils.js'}, {'lms.static': 'js/dashboard.js'}]
+        'scripts': [{'lms.static': 'js/utils.js'}, {'lms.static': 'js/dashboard.js'}],
+        'sales_today': sales_today,
+        'total_installment': total_installment,
+        'total_full_payment': total_full_payment,
+        'total_premium_payment': total_premium_payment,
+        'total': total
     }
-
     return admin_dashboard(
         Dashboard,
         **options,
         dashboard_template="lms/dashboard.html",
-        module="learning_management",
-        
+        module="learning_management"
     )
+
+
+@bp_lms.route('/dashboard/fetch-chart-sales-today', methods=['GET'])
+def fetch_chart_sales_today():
+    data = ChartService.fetch_chart_sales_today()
+    response = {
+        'status': 'success',
+        'data': data
+    }
+    return jsonify(response), 200
 
 
 @bp_lms.route('/api/dashboard/get-chart-data/<string:branch_id>', methods=['GET'])
