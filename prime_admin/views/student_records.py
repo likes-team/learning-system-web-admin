@@ -25,6 +25,7 @@ from flask_weasyprint import HTML, render_pdf
 from config import TIMEZONE
 from prime_admin.helpers import Payment
 from prime_admin.services.printing import Certificate
+from prime_admin.utils.date import format_utc_to_local
 
 
 
@@ -384,7 +385,7 @@ def get_member(client_id):
         'schedule': client.schedule,
         'branch': client.branch.name,
         'contact_person': client.contact_person.fname,
-        'birth_date': client.birth_date,
+        'birth_date': format_utc_to_local(client.birth_date),
         'passport': client.passport,
         'contact_no': client.contact_number,
         'email': client.email,
@@ -943,7 +944,6 @@ def print_students_pdf():
             registration.email, # 27
             registration.birth_date if registration.birth_date else '', #28
         ])
-        print(books)
 
     total_installment = Decimal128(str(installment_registrations.sum('amount')))
     total_full_payment = Decimal128(str(full_payment_registrations.sum('amount')))
@@ -1173,3 +1173,11 @@ def print_certificate():
     certificate.set_certificate_no(prime_registration)
     certificate.save()
     return send_from_directory(directory=current_app.config['PDF_FOLDER'],filename=certificate.get_file_name())
+
+
+@bp_lms.route('/attendance_list.pdf')
+def print_attendance_list_pdf():
+    html = render_template(
+        'lms/pdfs/attendance_list_pdf.html'
+    )
+    return render_pdf(HTML(string=html))

@@ -8,6 +8,7 @@ from app import db
 from app.admin.models import Admin
 from app.core.models import Base
 from bson.objectid import ObjectId
+from prime_admin.utils.date import format_utc_to_local
 
 
 
@@ -62,7 +63,7 @@ class Registration(Base, Admin):
     passport = db.StringField()
     contact_number = db.StringField()
     email = db.StringField()
-    birth_date = db.DateField()
+    birth_date = db.DateTimeField()
     books = db.DictField()
     uniforms = db.DictField()
     id_materials = db.DictField()
@@ -88,6 +89,11 @@ class Registration(Base, Admin):
     gender = db.StringField()
     session = db.StringField()
     
+    
+    def get_birth_date(self):
+        return format_utc_to_local(self.birth_date)
+
+
     @property
     def age(self):
         today = datetime.today()
