@@ -18,6 +18,7 @@ from datetime import date, datetime
 from mongoengine.queryset.visitor import Q
 from bson import Decimal128
 from app import mongo
+from prime_admin.utils.date import format_utc_to_local
 
 
 
@@ -201,13 +202,10 @@ def to_pre_deposit():
 
 @bp_lms.route('/api/dtbl/student-payments', methods=['GET'])
 def get_dtbl_student_payments():
-    draw = request.args.get('draw')
-    # start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
 
     if branch_id == 'all':
         response = {
-            'draw': draw,
             'recordsTotal': 0,
             'recordsFiltered': 0,
             'totalStudentPayments': " 0.00",
@@ -243,18 +241,10 @@ def get_dtbl_student_payments():
             for payment in student_payments:
                 payment_deposited = payment.get('deposited')
                 if payment_deposited == "Pre Deposit":
-                    if type(payment['date']) == datetime:
-                        local_datetime = payment['date'].replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
-                    elif type(payment['date'] == str):
-                        to_date = datetime.strptime(payment['date'], "%Y-%m-%d")
-                        local_datetime = to_date.strftime("%B %d, %Y")
-                    else: 
-                        local_datetime = ''
-                        
                     total_student_payments += payment['amount'].to_decimal()
 
                     _data.append([
-                        local_datetime,
+                        format_utc_to_local(payment['date']),
                         str(client.full_registration_number),
                         client.full_name,
                         client.batch_number.number,
@@ -276,9 +266,6 @@ def get_dtbl_student_payments():
     total_cash_on_hand = total_student_payments + total_items_sold + total_accommodations
 
     response = {
-        'draw': draw,
-        'recordsTotal': 0,
-        'recordsFiltered': 0,
         'data': _data,
         'totalStudentPayments': str(total_student_payments),
         'totalCashOnHand': str(total_cash_on_hand),

@@ -21,7 +21,7 @@ def get_utc_today_start_date(date=None):
     else:
         local = get_local_date_now()
 
-    local_start_date = local.replace(hour=0, minute=0)
+    local_start_date = local.replace(hour=0, minute=0, second=0, microsecond=0)
     utc_start_date = local_start_date.astimezone(pytz.utc)
     return utc_start_date
 
@@ -32,7 +32,7 @@ def get_utc_today_end_date(date=None):
     else:
         local = get_local_date_now()
 
-    local_end_date = local.replace(hour=23, minute=59)
+    local_end_date = local.replace(hour=23, minute=59, second=59)
     utc_end_date = local_end_date.astimezone(pytz.utc)
     return utc_end_date
 
