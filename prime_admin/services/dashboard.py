@@ -62,19 +62,19 @@ class DashboardService:
 
 
     def get_total_installment(self):
-        self.match['payment_mode'] = 'installment'
+        self.match['payment_mode'] = {'$in': ['installment', 'installment_promo']}
         self.total_installment = self._calculate()
         return format_to_str_php(self.total_installment)
 
 
     def get_total_full_payment(self):
-        self.match['payment_mode'] = 'full_payment'
+        self.match['payment_mode'] = {'$in': ['full_payment', 'full_payment_promo']}
         self.total_full_payment = self._calculate()
         return format_to_str_php(self.total_full_payment)
     
     
     def get_total_premium_payment(self):
-        self.match['payment_mode'] = 'premium'
+        self.match['payment_mode'] = {'$in': ['premium', 'premium_promo']}
         self.total_premium_payment = self._calculate()
         return format_to_str_php(self.total_premium_payment)
     
