@@ -12,4 +12,6 @@ def format_to_str_php(number, replacement='0.00'):
 
 
 def convert_decimal128_to_decimal(number):
+    if number is None:
+        return Decimal('0.00')
     return Decimal(str(number))

@@ -50,6 +50,7 @@
     STUDENTS_AUDIT_PDF_URL = "{{url_for('lms.print_students_pdf')}}";
     STUDENT_AGREEMENT_FORM = "{{url_for('lms.print_student_agreement_form')}}";
     CERTIFICATE_PDF = "{{url_for('lms.print_certificate')}}";
+    ATTENDANCE_LIST_PDF = "{{url_for('lms.print_attendance_list_pdf')}}";
     ROLE = "{{current_user.role.name}}";
 </script>
 <script>
@@ -551,6 +552,12 @@
             );
         });
 
+        $("#btn_print_attendance_list").click(function(){
+            window.open(`
+                ${ATTENDANCE_LIST_PDF}
+            `)
+        });
+
         $('input[type=radio][name=cert_type]').change(function () {
             if (this.value == "no_partner_no_underline" || this.value == "no_partner_underline") {
                 $("#print_manager_name").prop('readonly', true);
@@ -1009,6 +1016,9 @@
             <!-- Pass -->
             {% else %}
             <div class="page-title-actions">
+                <button disabled id="btn_print_attendance_list" type="button" class="btn-shadow mr-3 btn btn-primary">
+                    <i class="fa fa-print"> Print attendance list</i>
+                </button>
 
                 <button id="btn_print" type="button" class="btn-shadow mr-3 btn btn-primary">
                     <i class="fa fa-print"> Print Student Records</i>

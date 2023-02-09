@@ -9,6 +9,7 @@ from app.admin.models import Admin
 from app.core.models import Base
 from bson.objectid import ObjectId
 from prime_admin.utils.date import format_utc_to_local
+from prime_admin.utils.currency import convert_decimal128_to_decimal, format_to_str_php
 
 
 
@@ -32,6 +33,107 @@ class Payment(db.EmbeddedDocument):
             return ''
 
         return str(self._id)
+
+
+class Student(object):
+    def __init__(self, data):
+        self.data = data
+        self.__dict__.update(data)
+
+
+    def get_id(self):
+        return self.data['_id']
+    
+    def get_registration_date(self, date_format="%B %d, %Y %I:%M %p"):
+        return format_utc_to_local(self.data.get('registration_date'), date_format=date_format)
+
+    
+    def get_session(self):
+        return self.data.get('session', '')
+
+    def get_payment_mode(self):
+        payment_mode = ""
+        if self.payment_mode == 'full_payment':
+            payment_mode = "Full Payment"
+        elif self.payment_mode == 'installment':
+            payment_mode = "Installment"
+        elif self.payment_mode == 'premium':
+            payment_mode = "Premium Payment"
+        elif self.payment_mode == 'full_payment_promo':
+            payment_mode = "Full Payment - Promo"
+        elif self.payment_mode == 'installment_promo':
+            payment_mode = "Installment - Promo"
+        elif self.payment_mode == 'premium_promo':
+            payment_mode = "Premium Payment - Promo"
+        elif self.payment_mode == "refund":
+            payment_mode = "Refunded"
+        return payment_mode
+
+    def get_is_deposited(self):
+        if self.amount == self.get_amount_deposit():
+            deposit = "Yes"
+        else:
+            deposit = "No"
+        return deposit
+    
+    def get_balance(self, currency=False):
+        if currency:
+            return format_to_str_php(self.data.get('balance'))
+        return convert_decimal128_to_decimal(self.data.get('balance'))
+
+    def get_amount(self, currency=False):
+        if currency:
+            return format_to_str_php(self.data.get('amount'))
+        return convert_decimal128_to_decimal(self.data.get('amount'))
+
+    def get_amount_deposit(self):
+        return convert_decimal128_to_decimal(self.data.get('amount_deposit'))
+    
+    
+    def get_payment_status(self):
+        if self.get_balance() <= 0.00:
+            return 'PAID'
+        return 'NOT PAID'
+    
+    def get_full_name(self):
+        if self.mname:
+            return self.fname + " " + self.mname + " " + self.lname
+        return self.fname + " " + self.lname
+
+    def get_reviewers(self):
+        reviewers: list = []
+        if self.reviewers.get('reading', False):
+            reviewers.append("Reading")
+        if self.reviewers.get('listening', False):
+            reviewers.append("Listening")
+        if len(reviewers) == 0:
+            return "None"
+        return ','.join(reviewers)
+
+    def get_batch_no(self):
+        # TODO: change to object class
+        if 'batch_no' not in self.data:
+            return ''
+        if len(self.data['batch_no']) == 0:
+            return ''
+        return self.data['batch_no'][0]['number']
+
+    def get_branch_name(self):
+        # TODO: change to object class
+        if 'branch' not in self.data:
+            return ''
+        if len(self.data['branch']) == 0:
+            return ''
+        return self.data['branch'][0]['name']
+        
+    def get_contact_person_name(self):
+        # TODO: change to object class
+        if 'contact_person' not in self.data:
+            return ''
+        if len(self.data['contact_person']) == 0:
+            return ''
+        return self.data['contact_person'][0]['fname'] + " " + self.data['contact_person'][0]['fname']
+                
 
 
 class Registration(Base, Admin):
@@ -92,7 +194,32 @@ class Registration(Base, Admin):
     
     def get_birth_date(self):
         return format_utc_to_local(self.birth_date)
+    
 
+    def get_payment_mode(self):
+        payment_mode = ""
+        if self.payment_mode == 'full_payment':
+            payment_mode = "Full Payment"
+        elif self.payment_mode == 'installment':
+            payment_mode = "Installment"
+        elif self.payment_mode == 'premium':
+            payment_mode = "Premium Payment"
+        elif self.payment_mode == 'full_payment_promo':
+            payment_mode = "Full Payment - Promo"
+        elif self.payment_mode == 'installment_promo':
+            payment_mode = "Installment - Promo"
+        elif self.payment_mode == 'premium_promo':
+            payment_mode = "Premium Payment - Promo"
+        elif self.payment_mode == "refund":
+            payment_mode = "Refunded"
+        return payment_mode
+
+    def get_is_deposited(self):
+        if self.amount == self.amount_deposit:
+            deposit = "Yes"
+        else:
+            deposit = "No"
+        return deposit
 
     @property
     def age(self):

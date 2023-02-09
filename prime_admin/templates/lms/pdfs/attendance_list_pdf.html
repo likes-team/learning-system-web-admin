@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin-right: .5cm;
+      margin-left: .5cm;
+      margin-top: 1cm;
+      margin-bottom: .5cm;
+    }
+
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td,
+    th {
+      height: 10px;
+      border: 1px solid black;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+
+    .Row {
+      display: table;
+      width: 100%;
+      /*Optional*/
+      table-layout: fixed;
+      /*Optional*/
+      border-spacing: 5px;
+      /*Optional*/
+    }
+
+    .Column {
+      display: table-cell;
+      font-size: 11px;
+      /*Optional*/
+    }
+
+		.line{
+			width: 310px;
+			height: 30px;
+			border-bottom: 1px solid black;
+			}
+
+
+      #div_logo {
+        height: auto;
+        left: 0px;
+        right: 0px;
+        align-items: left;
+        text-align: left;
+        margin-bottom: 0px;
+      }
+  
+      #img_logo {
+        position: absolute;
+        width: 10%;
+        height: auto;
+        top: 0px;
+        left: 40px;
+        right: 0px;
+      }
+  </style>
+</head>
+
+<body>
+  <img id="img_logo" src="{{url_for('lms.static', filename='img/logo.png')}}" alt="logo" width="15%" height="15%">
+  <div style="text-align: center;">
+    <h3 style="margin-bottom: 5px;">Prime Korean Language and Review Center Inc.</h3>
+    <h6 style="font-weight:lighter;margin-top: 5px;">SEC. REG. NO.: CS201817522</h6>
+    <h5 style="font-weight:bold;margin-top: 10px;">STUDENT DAILY ATTENDANCE</h5>
+  </div>
+  <div class="Row">
+    <div class="Column" style="margin-bottom: 0px !important;">TEACHER: {{teacher}}</div>
+    <div class="Column">DATE: {{date}}</div>
+  </div>
+  <div class="Row">
+    <div class="Column">BATCH NO.: {{batch_no}}</div>
+    <div class="Column">TIME: {{time}}</div>
+  </div>
+  <div class="Row">
+    <div class="Column">SCHEDULE: {{schedule}}</div>
+    <div class="Column">SESSION: {{session}}</div>
+  </div>
+  <div class="Row">
+    <div class="Column">BRANCH: {{branch}}</div>
+  </div>
+  <div style="text-align: center;">
+    <h5 style="font-weight:bold; margin: 30px 0px 10px 0px;">MANDATORY</h5>
+  </div>
+  <table style="margin-top: 5px;">
+    <thead>
+      <tr>
+        <th>NO.</th>
+        <th>NAME OF STUDENT</th>
+        <th>SESSION</th>
+        <th>TIME IN</th>
+        <th>TIME OUT</th>
+        <th>STUDENT'S SIGNATURE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for _ in range(7) %}
+        <tr>
+          <td>{{loop.index}}</td>
+          {% for _ in range(5) %}
+          <td></td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="text-align: center;">
+    <h5 style="font-weight:bold; margin: 30px 0px 10px 0px;">SET INS</h5>
+  </div>
+
+  <table style="margin-top: 5px;">
+    <thead>
+      <tr>
+        <th>NO.</th>
+        <th>NAME OF STUDENT</th>
+        <th>SESSION</th>
+        <th>TIME IN</th>
+        <th>TIME OUT</th>
+        <th>STUDENT'S SIGNATURE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for _ in range(10) %}
+        <tr>
+          <td>{{loop.index}}</td>
+          {% for _ in range(5) %}
+          <td></td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="Row">
+    <div class="Column">
+      <div style="text-align: left; font-size: 12px; margin-top: 30px; margin-bottom: 0px;">
+        <div class="line"></div>
+        SECRETARY SIGNATURE OVER PRINTED NAME
+      </div>
+    </div>
+
+    <div class="Column">
+      <div style="text-align: left; font-size: 10px; margin-top:20px;">
+        RECEIVED BY:
+      </div>
+    
+      <div style="text-align: left; margin-left: 50px; font-size: 12px; margin-top:0px; margin-bottom: 0px;">
+        <div class="line"></div>
+        <div style="text-align: center;">
+          ADMINISTRATOR
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

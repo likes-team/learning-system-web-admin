@@ -49,6 +49,8 @@ def get_last_7_days():
 
 
 def convert_date_input_to_utc(date_str, date_type):
+    if date_str == '':
+        return None
     naive = datetime.strptime(date_str, "%Y-%m-%d")
     local_dt = TIMEZONE.localize(naive, is_dst=None)
 

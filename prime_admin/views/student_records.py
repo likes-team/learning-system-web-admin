@@ -15,7 +15,7 @@ from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, Traini
 from flask_login import login_required, current_user
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from prime_admin import bp_lms
-from prime_admin.models import Batch, Branch, Registration, Member
+from prime_admin.models import Batch, Branch, Registration, Member, Student
 from flask import json, redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory, send_file
 from app import mongo
 from datetime import datetime
@@ -26,7 +26,8 @@ from config import TIMEZONE
 from prime_admin.helpers import Payment
 from prime_admin.services.printing import Certificate
 from prime_admin.utils.date import format_utc_to_local
-
+from prime_admin.helpers.query_filter import StudentQueryFilter
+from prime_admin.services.student import StudentService
 
 
 D128_CTX = create_decimal128_context()
@@ -82,125 +83,53 @@ def members():
 @bp_lms.route('/dtbl/members')
 def get_dtbl_members():
     draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
-    search_value = request.args.get("search[value]")
-    branch_id = request.args.get('branch')
-    batch_no = request.args.get('batch_no')
-    schedule = request.args.get('schedule')
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
-    payment_status = request.args.get('payment_status')
-    payment_mode = request.args.get('payment_mode')
-    session = request.args.get('session')
-    
-    if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-    else:
-        if current_user.role.name == "Marketer":
-            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-        elif current_user.role.name == "Partner":
-            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(branch__in=current_user.branches).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-        else:
-            registrations = Registration.objects(Q(status='registered') | Q(status='refunded')).filter(is_archived__ne=True).order_by("-registration_date").skip(start).limit(length)
-
-    if session != 'all':
-        registrations = registrations.filter(session=session)
-      
-    if batch_no != 'all':
-        registrations = registrations.filter(batch_number=batch_no)
-   
-    if schedule != 'all':
-        registrations = registrations.filter(schedule=schedule)
-   
-    if search_value != "":
-        registrations = registrations.filter(lname__icontains=search_value)
-
-    if date_from !="":
-        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
- 
-    if date_to != "":
-        registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        
-    if payment_status == 'PAID':
-        registrations = registrations.filter(balance__lte=0)
-    elif payment_status == "NOT PAID":
-        registrations = registrations.filter(balance__gt=0)
-    elif payment_status == "REFUNDED":
-        registrations = registrations.filter(payment_mode='refund')
-
-    if payment_mode != "all":
-        registrations = registrations.filter(payment_mode=payment_mode)
-
+    query_filter = StudentQueryFilter.from_request(request)
+    service = StudentService.find_students(query_filter)
+    students = service.get_data()
     _table_data = []
 
-    for registration in registrations:
+    student: Student
+    for student in students:
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
 
-        paid = 'NOT PAID'
 
-        if registration.balance <= 0.00:
-            paid = 'PAID'
         
         if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
-            if registration.payment_mode == "premium" or registration.payment_mode == "premium_promo":
+            if student.payment_mode == "premium" or student.payment_mode == "premium_promo":
                 actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-            elif registration.payment_mode == "full_payment" or registration.payment_mode == "full_payment_promo":
+            elif student.payment_mode == "full_payment" or student.payment_mode == "full_payment_promo":
                 actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
                 <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-            elif (registration.payment_mode == "installment" or registration.payment_mode == "installment_promo") and registration.balance <= 0.00:
+            elif (student.payment_mode == "installment" or student.payment_mode == "installment_promo") and student.get_balance() <= 0.00:
                 actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#upgradeModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-warning btn-upgrade"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
                     <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
         else: # Marketers
             actions = ""
-
-        branch = registration.branch
-        contact_person = registration.contact_person
-
-        payment_mode = ""
-        if registration.payment_mode == 'full_payment':
-            payment_mode = "Full Payment"
-        elif registration.payment_mode == 'installment':
-            payment_mode = "Installment"
-        elif registration.payment_mode == 'premium':
-            payment_mode = "Premium Payment"
-        elif registration.payment_mode == 'full_payment_promo':
-            payment_mode = "Full Payment - Promo"
-        elif registration.payment_mode == 'installment_promo':
-            payment_mode = "Installment - Promo"
-        elif registration.payment_mode == 'premium_promo':
-            payment_mode = "Premium Payment - Promo"
-        elif registration.payment_mode == "refund":
-            payment_mode = "Refunded"
-
-        if registration.amount == registration.amount_deposit:
-            deposit = "Yes"
-        else: 
-            deposit = "No"
-
+            
         _table_data.append([
-            str(registration.id),
-            registration.registration_date_local_string,
-            registration.full_registration_number,
-            registration.full_name,
-            registration.batch_number.number if registration.batch_number is not None else "",
-            branch.name if branch is not None else '',
-            registration.schedule,
-            payment_mode,
-            str(registration.amount),
-            str(registration.balance),
-            paid,
-            deposit,
-            contact_person.fname if contact_person is not None else '',
-            registration.session,
-            registration.contact_number,
-            registration.created_by,
+            str(student.get_id()),
+            student.get_registration_date(),
+            student.full_registration_number,
+            student.get_full_name(),
+            student.get_batch_no(),
+            student.get_branch_name(),
+            student.schedule,
+            student.get_payment_mode(),
+            student.get_amount(currency=True),
+            student.get_balance(currency=True),
+            student.get_payment_status(),
+            student.get_is_deposited(),
+            student.get_contact_person_name(),
+            student.get_session(),
+            student.contact_number,
+            student.created_by,
             actions
         ])
     response = {
         'draw': draw,
-        'recordsTotal': registrations.count(),
-        'recordsFiltered': registrations.count(),
+        'recordsTotal': service.total_count(),
+        'recordsFiltered': service.total_filtered(),
         'data': _table_data,
     }
     return jsonify(response)
@@ -1177,7 +1106,16 @@ def print_certificate():
 
 @bp_lms.route('/attendance_list.pdf')
 def print_attendance_list_pdf():
+    teacher = request.args.get('teacher')
+    batch_no = request.args.get('batch_no')
+    schedule = request.args.get('schedule')
+    session = request.args.get('session')
+
     html = render_template(
-        'lms/pdfs/attendance_list_pdf.html'
+        'lms/pdfs/attendance_list_pdf.html',
+        teacher=teacher,
+        batch_no=batch_no,
+        schedule=schedule,
+        session=session
     )
     return render_pdf(HTML(string=html))
