@@ -11,6 +11,8 @@ class StudentQueryFilter:
         date_from='', date_to='', search_value='', start=None, length=None
     ):
         self.match = None
+        self.start = None
+        self.length = None
 
         match = {
             'status': {'$in': ['registered', 'refunded']},
@@ -32,16 +34,16 @@ class StudentQueryFilter:
         if schedule != 'all':
             match['schedule'] = schedule
             
-        if search_value != '':
+        if search_value and search_value != '':
             match['lname'] = {'$regex': search_value}
         
-        if date_from != "":
+        if date_from and date_from != "":
             match['registration_date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
         
-        if date_to != '':
+        if date_to and date_to != '':
             match['registration_date'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
-        if date_from != '' and date_to != '':
+        if date_from and date_from != '' and date_to and date_to != '':
             match['date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
         if payment_mode != 'all':
@@ -54,6 +56,11 @@ class StudentQueryFilter:
         elif payment_status == 'REFUNDED':
             match['payment_mode'] = 'refund'
         self.match = match
+        
+        if start:
+            self.start = int(start)
+        if length:
+            self.length = int(length)
 
 
     @classmethod
@@ -68,10 +75,16 @@ class StudentQueryFilter:
             payment_status = request.args.get('payment_status'),
             payment_mode = request.args.get('payment_mode'),
             session = request.args.get('session'),
-            start = int(request.args.get('start')),
-            length = int(request.args.get('length')),
+            start = request.args.get('start'),
+            length = request.args.get('length'),
         )
 
 
     def get_filter(self):
         return self.match
+    
+    def get_start(self):
+        return self.start
+    
+    def get_length(self):
+        return self.length

@@ -137,12 +137,14 @@
       </tr>
     </thead>
     <tbody>
-      {% for _ in range(10) %}
+      {% for student in students %}
         <tr>
           <td>{{loop.index}}</td>
-          {% for _ in range(5) %}
-          <td></td>
-          {% endfor %}
+          <td>{{student.get_full_name()}}</td>
+          <td>{{student.get_session()}}</td>
+          <td></td> <!-- Time in --> 
+          <td></td> <!-- Time out --> 
+          <td></td> <!-- Signature -->
         </tr>
       {% endfor %}
     </tbody>

@@ -90,10 +90,9 @@ def get_dtbl_members():
 
     student: Student
     for student in students:
+        # TODO Move this to JS
         actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
             <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-
-
         
         if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
             if student.payment_mode == "premium" or student.payment_mode == "premium_promo":
@@ -128,7 +127,7 @@ def get_dtbl_members():
         ])
     response = {
         'draw': draw,
-        'recordsTotal': service.total_count(),
+        'recordsTotal': service.total_filtered(),
         'recordsFiltered': service.total_filtered(),
         'data': _table_data,
     }
@@ -1111,11 +1110,16 @@ def print_attendance_list_pdf():
     schedule = request.args.get('schedule')
     session = request.args.get('session')
 
+    query_filter = StudentQueryFilter.from_request(request)
+    service = StudentService.find_students(query_filter)
+    students = service.get_data()
+
     html = render_template(
         'lms/pdfs/attendance_list_pdf.html',
         teacher=teacher,
         batch_no=batch_no,
         schedule=schedule,
-        session=session
+        session=session,
+        students=students
     )
     return render_pdf(HTML(string=html))

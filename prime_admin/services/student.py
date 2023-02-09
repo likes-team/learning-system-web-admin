@@ -15,7 +15,6 @@ class StudentService:
 
     @classmethod
     def find_students(cls, query_filter: StudentQueryFilter):
-        query = list(mongo.db.lms_registrations.find(query_filter.get_filter()).sort('registration_date', DESCENDING))
         query = list(mongo.db.lms_registrations.aggregate([
             {'$match': query_filter.get_filter()},
             {"$lookup": {
@@ -36,11 +35,12 @@ class StudentService:
                 'foreignField': '_id',
                 'as': 'contact_person'
             }},
+            {'$skip': query_filter.get_start()},
+            {'$limit': query_filter.get_length()},
             {'$sort': {
                 'registration_date': DESCENDING
             }}
         ]))
-
         data = []
         for row in query:
             data.append(Student(row))
