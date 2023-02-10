@@ -11,6 +11,7 @@ from prime_admin.helpers.query_filter import StudentQueryFilter
 class StudentService:
     def __init__(self, data, **kwargs):
         self.data = data
+        self.query_filter = kwargs.get('query_filter')
 
 
     @classmethod
@@ -44,7 +45,7 @@ class StudentService:
         data = []
         for row in query:
             data.append(Student(row))
-        return cls(data)
+        return cls(data, query_filter=query_filter)
 
     
     def get_data(self):
@@ -56,4 +57,4 @@ class StudentService:
     
     
     def total_filtered(self):
-        return len(self.data)
+        return mongo.db.lms_registrations.find(self.query_filter.get_filter()).count()
