@@ -102,20 +102,22 @@
     <thead>
       <tr>
         <th>NO.</th>
-        <th>NAME OF STUDENT</th>
-        <th>SESSION</th>
-        <th>TIME IN</th>
-        <th>TIME OUT</th>
+        <th style="width: 40%;">NAME OF STUDENT</th>
+        <th style="width: 1%;">SESSION</th>
+        <th style="width: 12%;">TIME IN</th>
+        <th style="width: 12%;">TIME OUT</th>
         <th>STUDENT'S SIGNATURE</th>
       </tr>
     </thead>
     <tbody>
-      {% for _ in range(7) %}
+      {% for student in students %}
         <tr>
           <td>{{loop.index}}</td>
-          {% for _ in range(5) %}
-          <td></td>
-          {% endfor %}
+          <td>{{student.get_full_name()}}</td>
+          <td>{{student.get_session()}}</td>
+          <td></td> <!-- Time in --> 
+          <td></td> <!-- Time out --> 
+          <td></td> <!-- Signature -->
         </tr>
       {% endfor %}
     </tbody>
@@ -129,22 +131,20 @@
     <thead>
       <tr>
         <th>NO.</th>
-        <th>NAME OF STUDENT</th>
-        <th>SESSION</th>
-        <th>TIME IN</th>
-        <th>TIME OUT</th>
+        <th style="width: 40%;">NAME OF STUDENT</th>
+        <th style="width: 1%;">SESSION</th>
+        <th style="width: 12%;">TIME IN</th>
+        <th style="width: 12%;">TIME OUT</th>
         <th>STUDENT'S SIGNATURE</th>
       </tr>
     </thead>
     <tbody>
-      {% for student in students %}
+      {% for _ in range(10) %}
         <tr>
           <td>{{loop.index}}</td>
-          <td>{{student.get_full_name()}}</td>
-          <td>{{student.get_session()}}</td>
-          <td></td> <!-- Time in --> 
-          <td></td> <!-- Time out --> 
-          <td></td> <!-- Signature -->
+          {% for _ in range(5) %}
+          <td></td>
+          {% endfor %}
         </tr>
       {% endfor %}
     </tbody>

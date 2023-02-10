@@ -13,7 +13,7 @@ class StudentService:
 
     @classmethod
     def find_students(cls, query_filter: StudentQueryFilter):
-        query = list(mongo.db.lms_registrations.aggregate([
+        aggregate_query = [
             {'$match': query_filter.get_filter()},
             {"$lookup": {
                 'from': 'lms_batches',
@@ -35,11 +35,18 @@ class StudentService:
             }},
             {'$sort': {
                 'registration_date': pymongo.DESCENDING
-            }},
-            {'$skip': query_filter.get_start()},
-            {'$limit': query_filter.get_length()}
-        ]))
+            }}
+        ]
+
+        if query_filter.get_start():
+            aggregate_query.append({'$skip': query_filter.get_start()})
+
+        if query_filter.get_length():
+            aggregate_query.append({'$limit': query_filter.get_length()})
+
+        query = list(mongo.db.lms_registrations.aggregate(aggregate_query))
         data = []
+
         for row in query:
             data.append(Student(row))
         return cls(data, query_filter=query_filter)

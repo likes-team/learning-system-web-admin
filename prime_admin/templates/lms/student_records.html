@@ -7,6 +7,7 @@
 {% include "lms/client_upgrade_modal.html" %}
 {% include "lms/agreement_form_settings_modal.html" %}
 {% include "lms/print_certificate_modal.html" %}
+{% include "lms/print_attendance_list_modal.html" %}
 {% endblock %}
 
 
@@ -553,8 +554,18 @@
         });
 
         $("#btn_print_attendance_list").click(function(){
+            var teacher = $("#attendance_list_teacher").val();
+            var branch = $("#branch").val();
+            var batch_no = $("#batch_no").val();
+            var session = $("#filter_session").val();
+            var schedule = $("#schedule").val();
+            if (branch == 'all' || batch_no == 'all' || session == 'all' || schedule == 'all'){
+                swal("Error Occured!", "Must select branch, batch, session and schedule!", "error");
+                return;
+            }
+
             window.open(`
-                ${ATTENDANCE_LIST_PDF}
+                ${ATTENDANCE_LIST_PDF}?teacher=${teacher}&branch=${branch}&batch_no=${batch_no}&session=${session}&schedule=${schedule}
             `)
         });
 
@@ -1016,7 +1027,7 @@
             <!-- Pass -->
             {% else %}
             <div class="page-title-actions">
-                <button disabled id="btn_print_attendance_list" type="button" class="btn-shadow mr-3 btn btn-primary">
+                <button data-toggle="modal" data-target="#mdlPrintAttendanceList" type="button" class="btn-shadow mr-3 btn btn-primary">
                     <i class="fa fa-print"> Print attendance list</i>
                 </button>
 

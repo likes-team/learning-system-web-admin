@@ -74,3 +74,7 @@ def format_utc_to_local(date, date_format="%B %d, %Y"):
     else:
         local_dt = ''
     return local_dt
+    
+
+def format_date(date: datetime, date_format="%B %d, %Y"):
+    return date.strftime(date_format)

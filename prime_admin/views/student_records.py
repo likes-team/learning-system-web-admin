@@ -1,7 +1,4 @@
 import decimal
-import os
-import glob
-import io
 from shutil import copyfile
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen import canvas
@@ -24,7 +21,7 @@ from app.auth.models import Earning, User
 from flask_weasyprint import HTML, render_pdf
 from config import TIMEZONE
 from prime_admin.helpers import Payment
-from prime_admin.services.printing import Certificate
+from prime_admin.services.printing import Certificate, AttendanceList
 from prime_admin.utils.date import format_utc_to_local
 from prime_admin.helpers.query_filter import StudentQueryFilter
 from prime_admin.services.student import StudentService
@@ -1105,21 +1102,8 @@ def print_certificate():
 
 @bp_lms.route('/attendance_list.pdf')
 def print_attendance_list_pdf():
-    teacher = request.args.get('teacher')
-    batch_no = request.args.get('batch_no')
-    schedule = request.args.get('schedule')
-    session = request.args.get('session')
-
     query_filter = StudentQueryFilter.from_request(request)
-    service = StudentService.find_students(query_filter)
-    students = service.get_data()
-
-    html = render_template(
-        'lms/pdfs/attendance_list_pdf.html',
-        teacher=teacher,
-        batch_no=batch_no,
-        schedule=schedule,
-        session=session,
-        students=students
-    )
-    return render_pdf(HTML(string=html))
+    service = AttendanceList.fetch(query_filter)
+    print("teacher:::", request.args.get('teacher'))
+    service.set_teacher(request.args.get('teacher'))
+    return service.generate_pdf()

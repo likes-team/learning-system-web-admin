@@ -6,32 +6,34 @@ from prime_admin.utils.date import convert_date_input_to_utc
 
 class StudentQueryFilter:
     def __init__(
-        self, branch='all', batch_no='all', schedule='all',
-        payment_status='all', payment_mode='all', session='all',
-        date_from='', date_to='', search_value='', start=None, length=None
+        self, branch=None, batch_no=None, schedule=None,
+        payment_status=None, payment_mode=None, session=None,
+        date_from=None, date_to=None, search_value=None, start=None, length=None
     ):
         self.match = None
-        self.start = None
-        self.length = None
-
+        self.start = start
+        self.length = length
+        self.branch = branch
+        self.batch_no = batch_no
+        self.session = session
         match = {
             'status': {'$in': ['registered', 'refunded']},
             'is_archived': {'$ne': True}
         }
         
-        if branch != 'all':
+        if branch and branch != 'all':
             match['branch'] = ObjectId(branch)
         else:
             if current_user.role.name in ["Marketer", 'Partner']:
                 match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
         
-        if session != 'all':
+        if session and session != 'all':
             match['session'] = session
         
-        if batch_no != 'all':
+        if batch_no and batch_no != 'all':
             match['batch_number'] = ObjectId(batch_no)
         
-        if schedule != 'all':
+        if schedule and schedule != 'all':
             match['schedule'] = schedule
             
         if search_value and search_value != '':
@@ -46,7 +48,7 @@ class StudentQueryFilter:
         if date_from and date_from != '' and date_to and date_to != '':
             match['date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
-        if payment_mode != 'all':
+        if payment_mode and payment_mode != 'all':
             match['payment_mode'] = payment_mode
 
         if payment_status == 'PAID':
