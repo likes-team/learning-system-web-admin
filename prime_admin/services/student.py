@@ -1,8 +1,5 @@
-from bson import ObjectId
-from pymongo import DESCENDING
-from flask_login import current_user
+import pymongo
 from app import mongo
-from prime_admin.utils.date import convert_date_input_to_utc
 from prime_admin.models import Student
 from prime_admin.helpers.query_filter import StudentQueryFilter
 
@@ -36,11 +33,11 @@ class StudentService:
                 'foreignField': '_id',
                 'as': 'contact_person'
             }},
-            {'$skip': query_filter.get_start()},
-            {'$limit': query_filter.get_length()},
             {'$sort': {
-                'registration_date': DESCENDING
-            }}
+                'registration_date': pymongo.DESCENDING
+            }},
+            {'$skip': query_filter.get_start()},
+            {'$limit': query_filter.get_length()}
         ]))
         data = []
         for row in query:
