@@ -63,10 +63,10 @@
                 },
                 {
                     'targets': 1,
+                    "className": "text-center",
                     'render': function(data, row, type){
                         return `
-                        <button style="margin-bottom: 8px; margin-left:5px;" type="button" data-toggle="modal" data-target="#mdl_inbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
-                        <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_outbound" class="mr-2 btn-icon btn-icon-only btn btn-outline-danger btn-outbound"><i class="pe-7s-upload btn-icon-wrapper"> </i></button>
+                        <button type="button" class="btn-inbound btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
                         `
                     }
                 }
