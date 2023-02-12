@@ -1,21 +1,20 @@
 import decimal
-import uuid
 from bson.objectid import ObjectId
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_utc, get_date_now
 from prime_admin.functions import generate_number
-from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
+from prime_admin.forms import RegistrationForm
 from flask_login import login_required, current_user
-from app.admin.templating import admin_render_template, admin_table, admin_edit
+from app.admin.templating import admin_render_template
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, Registration
-from app.auth.models import Earning, Role, User
-from flask import redirect, url_for, request, current_app, flash, jsonify, abort
-from app import db, mongo
-from datetime import datetime
+from app.auth.models import User
+from flask import redirect, url_for, request, flash, jsonify, abort
+from app import mongo
 from bson.decimal128 import Decimal128
 from mongoengine.queryset.visitor import Q
-from config import TIMEZONE
 from prime_admin.helpers import Payment
+from prime_admin.services.inventory import InventoryService
+from prime_admin.services.registration import RegistrationService
 
 
 
@@ -29,7 +28,6 @@ def register():
     date_now = get_date_now()
 
     if last_registration_number:
-        print(last_registration_number)
         registration_generated_number = generate_number(date_now, last_registration_number.registration_number)
     else:
         registration_generated_number = str(date_now.year) + '%02d' % date_now.month + "0001"
@@ -69,141 +67,65 @@ def register():
             modals=_modals,
             title="Registration"
             )
-
-    # SAVE STUDENT DATA
-    try:
+    elif request.method == "POST":
+        # SAVE STUDENT DATA
         client_id = request.form['client_id']
-        earnings = 0
-        savings = 0
-
-        client: Registration = Registration.objects.get(id=client_id)
-        
+        registration = RegistrationService.fill_up_form(
+            client_id,
+            form,
+            last_registration_number=last_registration_number,
+            registration_generated_number=registration_generated_number,
+            payment_mode=request.form['payment_modes']
+        )
+        client = registration.get_student()
+        print("client.status:", client.status)
         if client.status == "registered":
             return redirect(url_for('lms.members'))
+
+        registration.set_books(request.form.getlist('books'))
+        registration.set_uniform(request.form.getlist('uniforms'))
+        registration.set_id_materials(request.form.getlist('id_materials'))
+        registration.set_reviewers(request.form.getlist('reviewers'))
         
-        client.mname = form.mname.data
-        client.suffix = form.suffix.data
-        client.address = form.address.data
-        client.contact_number = form.contact_number.data
-        client.email = form.email.data
-        client.birth_date = form.birth_date.data
-        client.e_registration = form.e_registration.data
-        client.registration_number = last_registration_number.registration_number + 1 if last_registration_number is not None else 1
-        client.full_registration_number = registration_generated_number
-        client.schedule = form.schedule.data
-        client.branch = Branch.objects.get(id=form.branch.data)
-        client.batch_number = Batch.objects.get(id=form.batch_number.data)
-        client.passport = form.passport.data
-        client.status = "registered"
-        client.amount = form.amount.data
-        client.payment_mode = request.form['payment_modes']
-        client.created_by = "{} {}".format(current_user.fname,current_user.lname)
-        client.civil_status = form.civil_status.data
-        client.gender = form.gender.data
-        client.session = form.session.data
-        client.set_registration_date()
+        if client.books['volume1']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'volume1', 1):
+                flash("Not enough BOOK 1 stocks!", 'error')
+                return redirect(url_for('lms.register'))
 
-        books = request.form.getlist('books')
-        client.books = {
-            'book_none': True if 'book_none' in books else False,
-            'volume1': True if 'volume1' in books else False,
-            'volume2': True if 'volume2' in books else False,
-        }
+        if client.books['volume2']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'volume2', 1):
+                flash("Not enough BOOK 2 stocks!", 'error')
+                return redirect(url_for('lms.register'))
 
-        uniforms = request.form.getlist('uniforms')
-        client.uniforms = {
-            'uniform_none': True if 'uniform_none' in uniforms else False,
-            'uniform_xs': True if 'uniform_xs' in uniforms else False,
-            'uniform_s': True if 'uniform_s' in uniforms else False,
-            'uniform_m': True if 'uniform_m' in uniforms else False,
-            'uniform_l': True if 'uniform_l' in uniforms else False,
-            'uniform_xl': True if 'uniform_xl' in uniforms else False,
-            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-        }
+        if not client.uniforms['uniform_none']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'uniform', 1):
+                flash("Not enough UNIFORM stocks!", 'error')
+                return redirect(url_for('lms.register'))
 
-        id_materials = request.form.getlist('id_materials')
-        client.id_materials = {
-            'id_card': True if 'id_card' in id_materials else False,
-            'id_lace': True if 'id_lace' in id_materials else False,
-        }
+        if client.id_materials['id_card']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'id_card', 1):
+                flash("Not enough ID CARD stocks!", 'error')
+                return redirect(url_for('lms.register'))
+
+        if client.id_materials['id_lace']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'id_lace', 1):
+                flash("Not enough ID LACE stocks!", 'error')
+                return redirect(url_for('lms.register'))
         
-        reviewers = request.form.getlist('reviewers')
-        client.reviewers = {
-            'reading': True if 'reading' in reviewers else False,
-            'listening': True if 'listening' in reviewers else False,
-        }
+        if client.reviewers['reading']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'reading', 1):
+                flash("Not enough REVIEWER READING stocks!", 'error')
+                return redirect(url_for('lms.register'))
+
+        if client.reviewers['listening']:
+            if not InventoryService.is_student_supply_available(client.branch.id, 'listening', 1):
+                flash("Not enough REVIEWER LISTENING stocks!", 'error')
+                return redirect(url_for('lms.register'))
+
+        registration.compute_marketer_earnings()
+        registration.set_payment()
+        registration.set_marketer_earning()
         
-        if client.level == "first":
-            earnings_percent = decimal.Decimal(0.14)
-            savings_percent = decimal.Decimal(0.00286)
-        elif client.level == "second":
-            earnings_percent = decimal.Decimal(0.0286)
-            savings_percent = decimal.Decimal(0.00)
-        else:
-            earnings_percent = decimal.Decimal(0.00)
-            savings_percent = decimal.Decimal(0.00)
-
-        if client.payment_mode == "full_payment":
-            client.balance = 8500 - client.amount
-            earnings = 8500 * earnings_percent
-            savings = 8500 * savings_percent
-        elif client.payment_mode == "installment":
-            client.balance = 9000 - client.amount
-            earnings = client.amount * earnings_percent
-            savings = client.amount * savings_percent
-        elif client.payment_mode == 'premium':
-            client.balance = 10000 - client.amount
-            earnings = 10000 * earnings_percent
-            savings = 10000 * savings_percent
-        elif client.payment_mode == "full_payment_promo":
-            client.balance = 5500 - client.amount
-            earnings = 5500 * earnings_percent
-            savings = 5500 * savings_percent
-        elif client.payment_mode == "installment_promo":
-            client.balance = 6300 - client.amount
-            earnings = client.amount * earnings_percent
-            savings = client.amount * savings_percent
-        elif client.payment_mode == 'premium_promo':
-            client.balance = 7000 - client.amount
-            earnings = 7000 * earnings_percent
-            savings = 7000 * savings_percent
-
-        if client.level == "first":
-            client.fle = earnings
-            client.sle = decimal.Decimal(0.00)
-        elif client.level == "second":
-            client.sle = earnings
-            client.fle = decimal.Decimal(0.00)
-        else:
-            client.fle = decimal.Decimal(0.00)
-            client.sle = decimal.Decimal(0.00)
-
-        payment = {
-            "_id": ObjectId(),
-            "deposited": "Pre Deposit",
-            "payment_mode": client.payment_mode,
-            "amount": Decimal128(str(client.amount)),
-            "current_balance": Decimal128(str(client.balance)),
-            "confirm_by": current_user.id,
-            "date": get_date_now(),
-            "payment_by": ObjectId(client_id),
-            "earnings": Decimal128(str(earnings)),
-            "savings": Decimal128(str(savings)),
-            "branch": ObjectId(client.branch.id)
-        }
-
-        contact_person_earning = {
-            "_id": ObjectId(),
-            "payment_mode": client.payment_mode,
-            "savings": Decimal128(str(savings)),
-            "earnings": Decimal128(str(earnings)),
-            "branch": client.branch.id,
-            "client": client.id,
-            "date": get_date_now(),
-            "registered_by": current_user.id,
-            "payment_id": payment["_id"]
-        }
-
         with mongo.cx.start_session() as session:
             with session.start_transaction():
                 mongo.db.lms_registrations.update_one({
@@ -222,7 +144,7 @@ def register():
                     "schedule": client.schedule,
                     "batch_number": client.batch_number.id,
                     "passport": client.passport,
-                    "status": client.status,
+                    "status": 'registered',
                     "amount": Decimal128(str(client.amount)),
                     "payment_mode": client.payment_mode,
                     "created_by": client.created_by,
@@ -240,13 +162,15 @@ def register():
                     'reviewers': client.reviewers
                     }}, session=session)
                 
-                Payment.pay_registration(payment, session=session)
+                Payment.pay_registration(registration.get_payment_dict(), session=session)
                 
                 mongo.db.auth_users.update_one({"_id": client.contact_person.id},
                 {"$push": {
-                    "earnings": contact_person_earning
+                    "earnings": registration.get_marketer_earning_dict()
                 }}, session=session)
                 
+                registration.process_supplies(session)
+
                 register_description = "New student - {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
                     lname=client.lname,
                     fname=client.fname,
@@ -281,10 +205,9 @@ def register():
                     "from_module": "Registration"
                 }, session=session)
 
-
                 earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
-                    earnings="{:.2f}".format(earnings),
-                    savings="{:.2f}".format(savings),
+                    earnings="{:.2f}".format(registration.get_earnings()),
+                    savings="{:.2f}".format(registration.get_savings()),
                     contact_person=client.contact_person.fname + " " + client.contact_person.lname,
                     student=client.lname + " " + client.fname,
                     payment_mode=client.payment_mode,
@@ -298,23 +221,8 @@ def register():
                     "description": earning_description,
                     "from_module": "Registration"
                 }, session=session)
-
-                # minus stocks
-                # if client.uniforms['uniform_xs'] or client.uniforms['uniform_s'] or client.uniforms['uniform_m'] \
-                #     or client.uniforms['uniform_l'] or client.uniforms['uniform_xl'] or client.uniforms['uniform_xxl']:
-
-                #     mongo.db.lms_inventories.update_one({
-                #         "description": "UNIFORM"
-                #     },
-                #     {"$inc": {
-                #         "remaining": -1
-                #     }}, session=session)
-
         flash("Registered added successfully!", 'success')
-    except Exception as e:
-        raise e
-
-    return redirect(url_for('lms.members'))
+        return redirect(url_for('lms.members'))
 
 
 @bp_lms.route('/api/dtbl/mdl-pre-registered-clients-registration', methods=['GET'])
