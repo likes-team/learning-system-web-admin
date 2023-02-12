@@ -568,6 +568,15 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
                     $("#tbl_payment_history > tbody").empty();
+                    console.log(response.data.payments.length);
+                    if(response.data.payments.length <= 0){
+                        $('#tbl_payment_history > tbody:first').append(
+                            `<tr>
+                            <td colspan="4" class="text-center">No payments found</td>
+                            </tr>`
+                        );                        
+                        return;
+                    }
 
                     for (i = 0; i < response.data.payments.length; i++) {
                         $('#tbl_payment_history > tbody:first').append(

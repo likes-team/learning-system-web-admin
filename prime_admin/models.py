@@ -26,6 +26,7 @@ class Payment(db.EmbeddedDocument):
     earnings = db.DecimalField()
     savings = db.DecimalField()
     status = db.StringField()
+    branch = db.ReferenceField('Branch')
 
     @property
     def id(self):
