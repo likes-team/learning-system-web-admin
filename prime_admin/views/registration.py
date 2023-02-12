@@ -78,14 +78,13 @@ def register():
             payment_mode=request.form['payment_modes']
         )
         client = registration.get_student()
-        print("client.status:", client.status)
         if client.status == "registered":
             return redirect(url_for('lms.members'))
 
-        registration.set_books(request.form.getlist('books'))
-        registration.set_uniform(request.form.getlist('uniforms'))
-        registration.set_id_materials(request.form.getlist('id_materials'))
-        registration.set_reviewers(request.form.getlist('reviewers'))
+        client.update_books_from_form(request.form.getlist('books'))
+        client.update_uniform_from_form(request.form.getlist('uniforms'))
+        client.update_id_materials(request.form.getlist('id_materials'))
+        client.update_reviewers(request.form.getlist('reviewers'))
         
         if client.books['volume1']:
             if not InventoryService.is_student_supply_available(client.branch.id, 'volume1', 1):

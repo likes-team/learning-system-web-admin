@@ -280,6 +280,36 @@ class Registration(Base, Admin):
             return "None"
         return ','.join(reviewers)
 
+    def update_books_from_form(self, books):
+        self.books = {
+            'book_none': True if 'book_none' in books else False,
+            'volume1': True if 'volume1' in books else False,
+            'volume2': True if 'volume2' in books else False,
+        }
+
+    def update_uniform_from_form(self, uniforms):
+        self.uniforms = {
+            'uniform_none': True if 'uniform_none' in uniforms else False,
+            'uniform_xs': True if 'uniform_xs' in uniforms else False,
+            'uniform_s': True if 'uniform_s' in uniforms else False,
+            'uniform_m': True if 'uniform_m' in uniforms else False,
+            'uniform_l': True if 'uniform_l' in uniforms else False,
+            'uniform_xl': True if 'uniform_xl' in uniforms else False,
+            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
+        }
+
+    def update_id_materials(self, id_materials):
+        self.id_materials = {
+            'id_card': True if 'id_card' in id_materials else False,
+            'id_lace': True if 'id_lace' in id_materials else False,
+        }
+        
+    def update_reviewers(self, reviewers):
+        self.reviewers = {
+            'reading': True if 'reading' in reviewers else False,
+            'listening': True if 'listening' in reviewers else False,
+        }
+
 
 class Branch(Base, Admin):
     meta = {

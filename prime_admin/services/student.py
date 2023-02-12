@@ -1,8 +1,8 @@
 import pymongo
 from app import mongo
-from prime_admin.models import Student
+from prime_admin.models import Student, Registration
 from prime_admin.helpers.query_filter import StudentQueryFilter
-
+from prime_admin.services.inventory import InventoryService
 
 
 class StudentService:
@@ -10,6 +10,10 @@ class StudentService:
         self.data = data
         self.query_filter = kwargs.get('query_filter')
 
+    @classmethod
+    def find_student(cls, oid):
+        client = Registration.objects.get_or_404(id=oid)
+        return cls(client)
 
     @classmethod
     def find_students(cls, query_filter: StudentQueryFilter):
@@ -54,7 +58,11 @@ class StudentService:
     
     def get_data(self):
         return self.data
-
+    
+    def get_student(self):
+        if not isinstance(self.data, Registration):
+            return None
+        return self.data
 
     def total_count(self):
         return mongo.db.lms_registrations.find().count()
@@ -62,3 +70,28 @@ class StudentService:
     
     def total_filtered(self):
         return mongo.db.lms_registrations.find(self.query_filter.get_filter()).count()
+
+    def process_supplies(self, session):
+        if self.data.books['volume1']:
+            InventoryService.minus_stocks(self.data.branch.id, 'volume1', 1, session)
+
+        if self.data.books['volume2']:
+            InventoryService.minus_stocks(self.data.branch.id, 'volume2', 1, session)
+
+        if not self.data.uniforms['uniform_none']:
+            InventoryService.minus_stocks(self.data.branch.id, 'uniform', 1, session)
+         
+        if self.data.id_materials['id_card']:
+            InventoryService.minus_stocks(self.data.branch.id, 'id_card', 1, session)
+       
+        if self.data.id_materials['id_lace']:
+            InventoryService.minus_stocks(self.data.branch.id, 'id_lace', 1, session)
+      
+        if self.data.reviewers['reading']:
+            InventoryService.minus_stocks(self.data.branch.id, 'reading', 1, session)
+     
+        if self.data.reviewers['listening']:
+            InventoryService.minus_stocks(self.data.branch.id, 'listening', 1, session)
+
+    # def new_payment(self):
+        

@@ -49,38 +49,8 @@ class RegistrationService:
 
     def get_student(self):
         return self.student
-    
-    
-    def set_books(self, books):
-        self.student.books = {
-            'book_none': True if 'book_none' in books else False,
-            'volume1': True if 'volume1' in books else False,
-            'volume2': True if 'volume2' in books else False,
-        }
-        
-    def set_uniform(self, uniforms):
-        self.student.uniforms = {
-            'uniform_none': True if 'uniform_none' in uniforms else False,
-            'uniform_xs': True if 'uniform_xs' in uniforms else False,
-            'uniform_s': True if 'uniform_s' in uniforms else False,
-            'uniform_m': True if 'uniform_m' in uniforms else False,
-            'uniform_l': True if 'uniform_l' in uniforms else False,
-            'uniform_xl': True if 'uniform_xl' in uniforms else False,
-            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-        }
-        
-    def set_id_materials(self, id_materials):
-        self.student.id_materials = {
-            'id_card': True if 'id_card' in id_materials else False,
-            'id_lace': True if 'id_lace' in id_materials else False,
-        }
-        
-    def set_reviewers(self, reviewers):
-        self.student.reviewers = {
-            'reading': True if 'reading' in reviewers else False,
-            'listening': True if 'listening' in reviewers else False,
-        }
-        
+
+
     def compute_marketer_earnings(self):
         earnings = 0
         savings = 0
@@ -194,6 +164,6 @@ class RegistrationService:
      
         if self.student.reviewers['listening']:
             InventoryService.minus_stocks(self.student.branch.id, 'listening', 1, session)
-   
+
     # def process_enrollment():
         # TODO

@@ -616,7 +616,11 @@
 
                         $('#id_card').prop('checked', false);
                         $('#id_lace').prop('checked', false);
-
+                        $('#reading').prop('checked', false);
+                        $('#listening').prop('checked', false);
+            
+                        $("#reading").attr('onclick', "return false;");
+                        $("#listening").attr('onclick', "return false;");
                         $("#id_lace").attr('onclick', "return false;");
                         $("#id_card").attr('onclick', "return false;");
                         $("#book_none").attr('onclick', "return false;");
@@ -679,6 +683,9 @@
 
                         $("#uniform_m").prop("checked", true);
 
+                        $('#reading').prop('checked', true);
+                        $('#listening').prop('checked', true);
+
                         $('#id_card').prop('checked', true);
                         $('#id_lace').prop('checked', true);
 
@@ -687,6 +694,8 @@
                         $("#book_none").attr('onclick', "return false;");
                         $("#book1").attr('onclick', "return false;");
                         $("#book2").attr('onclick', "return false;");
+                        $("#reading").attr('onclick', "return false;");
+                        $("#listening").attr('onclick', "return false;");
 
                         ISLOADING = false;
                         $("#chkbox_upgrade").attr('onclick', "");
@@ -708,8 +717,13 @@
             $('#id_card').prop('checked', false);
             $('#id_lace').prop('checked', false);
 
+            $('#reading').prop('checked', false);
+            $('#listening').prop('checked', false);
+
             $("#id_lace").attr('onclick', "");
             $("#id_card").attr('onclick', "");
+            $("#reading").attr('onclick', "");
+            $("#listening").attr('onclick', "");
             $("#book_none").attr('onclick', "");
             $("#book1").attr('onclick', "");
             $("#book2").attr('onclick', "");
