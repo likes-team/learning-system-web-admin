@@ -131,15 +131,14 @@ def reject_user():
     from app.auth.models import User
 
     user_id = request.json['user_id']
-
-    user = User.objects.get_or_404(id=user_id)
-
-    user.is_deleted = True
-    user.is_archived = True
-    user.status = "rejected"
-
-    user.save()
-
+    mongo.db.auth_users.update_one({
+        '_id': ObjectId(user_id)
+    },
+    {'$set': {
+        'is_deleted': True,
+        'is_archived': True,
+        'status': 'rejected'
+    }})
     return jsonify(True)
 
 
