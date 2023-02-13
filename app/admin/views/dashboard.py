@@ -59,8 +59,7 @@ def get_dashboard_users():
             'fname': pymongo.ASCENDING
         }}
     ]))
-    total_records = len(query)
-    filtered_records = len(query)
+    filtered_records = mongo.db.auth_users.find(_filter).count()
 
     table_data = []
 
@@ -88,7 +87,7 @@ def get_dashboard_users():
     response = {
         'draw': draw,
         'recordsTotal': filtered_records,
-        'recordsFiltered': total_records,
+        'recordsFiltered': filtered_records,
         'data': table_data,
     }
 
