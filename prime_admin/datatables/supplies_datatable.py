@@ -1,11 +1,10 @@
-import pymongo
 import decimal
 from bson import ObjectId, Decimal128
 from flask import request, jsonify
-from flask_login import current_user
 from app import mongo
 from prime_admin import bp_lms
-from prime_admin.globals import convert_to_utc, D128_CTX
+from prime_admin.globals import D128_CTX
+from prime_admin.utils.date import convert_utc_to_local
 
 
 
@@ -56,12 +55,12 @@ def dt_monthly_transactions():
         
         for trans in transactions:
             date = trans.get('date', None)
-            
-            if date is None:
+            local_date = convert_utc_to_local(date)
+            if local_date is None:
                 continue
             
-            year = date.year
-            month = date.month
+            year = local_date.year
+            month = local_date.month
 
             if filter_year != "all":
                 if year != int(filter_year):
@@ -72,67 +71,67 @@ def dt_monthly_transactions():
                     continue
             
             quantity = trans.get('quantity', 0)
-            if date.day == 1:
+            if local_date.day == 1:
                 one += quantity
-            elif date.day == 2:
+            elif local_date.day == 2:
                 two += quantity
-            elif date.day == 3:
+            elif local_date.day == 3:
                 three += quantity
-            elif date.day == 4:
+            elif local_date.day == 4:
                 four += quantity
-            elif date.day == 5:
+            elif local_date.day == 5:
                 five += quantity
-            elif date.day == 6:
+            elif local_date.day == 6:
                 six += quantity
-            elif date.day == 7:
+            elif local_date.day == 7:
                 seven += quantity
-            elif date.day == 8:
+            elif local_date.day == 8:
                 eight += quantity
-            elif date.day == 9:
+            elif local_date.day == 9:
                 nine += quantity
-            elif date.day == 10:
+            elif local_date.day == 10:
                 ten += quantity
-            elif date.day == 11:
+            elif local_date.day == 11:
                 eleven += quantity
-            if date.day == 12:
+            if local_date.day == 12:
                 twelve += quantity
-            elif date.day == 13:
+            elif local_date.day == 13:
                 thirteen += quantity
-            if date.day == 14:
+            if local_date.day == 14:
                 fourteen += quantity
-            elif date.day == 15:
+            elif local_date.day == 15:
                 fifteen += quantity
-            if date.day == 16:
+            if local_date.day == 16:
                 sixteen += quantity
-            elif date.day == 17:
+            elif local_date.day == 17:
                 seventeen += quantity
-            if date.day == 18:
+            if local_date.day == 18:
                 eighteen += quantity
-            elif date.day == 19:
+            elif local_date.day == 19:
                 nineteen += quantity
-            if date.day == 20:
+            if local_date.day == 20:
                 twenty += quantity
-            elif date.day == 21:
+            elif local_date.day == 21:
                 tone += quantity
-            if date.day == 22:
+            if local_date.day == 22:
                 ttwo += quantity
-            elif date.day == 23:
+            elif local_date.day == 23:
                 tthree += quantity
-            if date.day == 24:
+            if local_date.day == 24:
                 tfour += quantity
-            elif date.day == 25:
+            elif local_date.day == 25:
                 tfive += quantity
-            elif date.day == 26:
+            elif local_date.day == 26:
                 tsix += quantity
-            elif date.day == 27:
+            elif local_date.day == 27:
                 tseven += quantity
-            elif date.day == 28:
+            elif local_date.day == 28:
                 teight += quantity
-            elif date.day == 29:
+            elif local_date.day == 29:
                 tnine += quantity
-            elif date.day == 30:
+            elif local_date.day == 30:
                 thirty += quantity
-            elif date.day == 31:
+            elif local_date.day == 31:
                 thone += quantity
             total_used += quantity
             
