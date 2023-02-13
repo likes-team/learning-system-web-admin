@@ -158,20 +158,6 @@ def create_marketer():
     return redirect(url_for('lms.marketers'))
 
 
-# @bp_lms.route('/get-view-contact-person-data', methods=['GET'])
-# @login_required
-# def get_view_contact_person_data():
-#     _column, _id = request.args.get('column'), request.args.get('id')
-
-#     _data = User.objects(id=_id).values_list(_column)
-
-#     response = jsonify(result=str(_data[0]),column=_column)
-
-#     response.headers.add('Access-Control-Allow-Origin', '*')
-#     response.status_code = 200
-#     return response
-
-
 @bp_lms.route('/marketers/<string:oid>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_marketer(oid):

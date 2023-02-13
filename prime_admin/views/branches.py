@@ -1,5 +1,3 @@
-from config import TIMEZONE
-from app.auth.views.user import edit_user
 from flask.json import jsonify
 from prime_admin.forms import BranchEditForm, BranchForm, PartnerForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
 from flask_login import login_required, current_user

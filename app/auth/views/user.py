@@ -12,30 +12,14 @@ from app.auth import auth_urls
 from app.auth.permissions import load_permissions, check_create
 from app.admin.templating import admin_render_template, admin_table, admin_edit
 from bson.objectid import ObjectId
+from prime_admin.utils.globals import ROLES
 
 
 
 @bp_auth.route('/users')
 @login_required
 def users():
-    # form = UserForm()
-    # fields = ['id', 'username', 'fname', 'lname', 'role', 'email']
-    # models = [User]
-
-    # _users = User.objects
-
-    # _table_data = []
-
-    # for user in _users:
-    #     _table_data.append((
-    #         user.id,
-    #         user.username,
-    #         user.fname,
-    #         user.lname,
-    #         user.role.name,
-    #         user.email
-    #     ))
-    return render_template('auth/users/users.html', title='Users')
+    return render_template('auth/users/users.html', title='Users', roles=ROLES)
 
 
 @bp_auth.route('/users/<string:user_id>', methods=['GET'])
@@ -57,23 +41,6 @@ def get_user(user_id):
         'message': ""
     }
     return jsonify(response), 200
-
-
-# @bp_auth.route('/get-view-user-data', methods=['GET'])
-# @login_required
-# def get_view_user_data():
-#     _column, _id = request.args.get('column'), request.args.get('id')
-
-#     _data = User.objects(id=_id).values_list(_column)
-
-#     response = jsonify(result=str(_data[0]),column=_column)
-
-#     if _column == "role":
-#         response = jsonify(result=str(_data[0].id),column=_column)
-
-#     response.headers.add('Access-Control-Allow-Origin', '*')
-#     response.status_code = 200
-#     return response
 
 
 @bp_auth.route('/users/create', methods=['POST'])
@@ -127,14 +94,13 @@ def edit_user(oid,**kwargs):
     form = UserEditForm(obj=user)
 
     if request.method == "GET":
-        # user_permissions = UserPermission.query.filter_by(user_id=oid).all()
-        # form.permission_inline.data = user_permissions
-
+        if user.role.name == "Marketer":
+            return redirect(url_for('lms.edit_marketer', oid=oid))
+        
         _scripts = [
             {'bp_auth.static': 'js/auth.js'},
             {'bp_admin.static': 'js/admin_edit.js'}
         ]
-
         return admin_edit(User, form, auth_urls['edit'], oid, auth_urls['users'],action_template="auth/user_edit_action.html", \
             modals=['auth/user_change_password_modal.html'], scripts=_scripts, **kwargs)
     

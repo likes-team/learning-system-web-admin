@@ -2,22 +2,22 @@
 
 
 {% block modals %}
-    {% include 'auth/users/user_view_modal.html' %}
+{% include 'auth/users/user_view_modal.html' %}
 {% endblock %}
 
 {% block scripts %}
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         $("#li_users").addClass('mm-active');
 
         $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
+            beforeSend: function (xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
                 }
             }
         });
-    
+
         var selectedUserID;
 
         toastr.options = {
@@ -36,9 +36,10 @@
             "hideEasing": "linear",
             "showMethod": "fadeIn",
             "hideMethod": "fadeOut"
-            }
-    
+        }
+
         var dtbl_user_status = $('#tbl_user_status').DataTable({
+            "dom": "rtip",
             "pageLength": 25,
             "processing": true,
             "serverSide": true,
@@ -46,32 +47,34 @@
             "responsive": true,
             "autoWidth": false,
             "ajax": {
-                "url": "/admin/dashboard/get-dashboard-users", // To be continued
+                "url": "/admin/dashboard/get-dashboard-users",
+                "data": function(d){
+                    d.role = $("#filter_roles").val();
+                }
             },
             "language": {
                 "searchPlaceholder": "By last name",
             },
-            initComplete : function() {
+            initComplete: function () {
                 var input = $('.dataTables_filter input').unbind(),
                     self = this.api(),
                     $searchButton = $('<button>')
-                               .text('search')
-                               .click(function() {
-                                  self.search(input.val()).draw();
-                               }),
+                        .text('search')
+                        .click(function () {
+                            self.search(input.val()).draw();
+                        }),
                     $clearButton = $('<button>')
-                               .text('clear')
-                               .click(function() {
-                                  input.val('');
-                                  $searchButton.click(); 
-                               }) 
+                        .text('clear')
+                        .click(function () {
+                            input.val('');
+                            $searchButton.click();
+                        })
                 $('.dataTables_filter').append($searchButton, $clearButton);
             },
             "columnDefs": [
                 {
                     "targets": 0,
-                    "className": "text-center text-muted",
-                    "width": "10px"
+                    "visible": false
                 },
                 {
                     "targets": 1,
@@ -79,7 +82,7 @@
                 },
                 {
                     "targets": 2,
-                    "render": function(data, type, row){
+                    "render": function (data, type, row) {
                         return `<td>
                             <div class="widget-content p-0">
                                 <div class="widget-content-wrapper">
@@ -103,8 +106,8 @@
                 {
                     "targets": 4,
                     "className": "text-center",
-                    "render": function(data, type, row){
-                        if(data){
+                    "render": function (data, type, row) {
+                        if (data) {
                             return `<div class="badge badge-success">Approved</div>`
                         }
                         return `<div class="badge badge-danger">Not Approved</div>`
@@ -113,14 +116,14 @@
                 {
                     "targets": 5,
                     "className": "text-center",
-                    "render": function(data, type, row){
-                        if(!data){
+                    "render": function (data, type, row) {
+                        if (!data) {
                             return `
                             <button type="button" class="btn btn-primary btn-sm btn-approve">Approve</button>
                             <button type="button" class="btn btn-danger btn-sm btn-decline">Decline</button>
                             `
                         }
-                        
+
                         var id = row[0];
                         return `
                         <a href="/auth/users/${id}/edit" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
@@ -130,16 +133,20 @@
                 },
             ],
         });
-    
-        dtbl_user_status.on( 'search.dt', function () {
-            dtbl_user_status.search();
-        } );
 
-        $("#tbl_user_status tbody").on('click', '.btn-approve', function(){
-            var data = dtbl_user_status.row( $(this).parents('tr')).data();
-            
+        dtbl_user_status.on('search.dt', function () {
+            dtbl_user_status.search();
+        });
+
+        $("#filter_roles").change(function(){
+            dtbl_user_status.ajax.reload();
+        });
+
+        $("#tbl_user_status tbody").on('click', '.btn-approve', function () {
+            var data = dtbl_user_status.row($(this).parents('tr')).data();
+
             console.log(data[0]);
-    
+
             $.confirm({
                 title: 'User Approval',
                 content: 'Approve user?',
@@ -148,9 +155,9 @@
                         text: 'Approve',
                         btnClass: 'btn-blue',
                         keys: ['enter', 'shift'],
-                        action: function(){
+                        action: function () {
                             console.log(data[0]);
-    
+
                             $.ajax({
                                 url: "/admin/dashboard/approve-user",
                                 type: "POST",
@@ -159,11 +166,11 @@
                                     "user_id": data[0]
                                 }),
                                 contentType: "application/json; charset=utf-8",
-                                success: function(response){
-                                    if(response){
+                                success: function (response) {
+                                    if (response) {
                                         dtbl_user_status.ajax.reload();
                                         toastr.success("User Approved Successfully!");
-                                    }else{
+                                    } else {
                                         toastr.error("Error Occured!, Approving Failed");
                                     }
                                 }
@@ -176,12 +183,12 @@
                 }
             });
         });
-    
-        $("#tbl_user_status tbody").on('click', '.btn-decline', function(){
-            var data = dtbl_user_status.row( $(this).parents('tr')).data();
-            
+
+        $("#tbl_user_status tbody").on('click', '.btn-decline', function () {
+            var data = dtbl_user_status.row($(this).parents('tr')).data();
+
             console.log(data[0]);
-    
+
             $.confirm({
                 title: 'User Approval',
                 content: 'Decline user?',
@@ -190,8 +197,8 @@
                         text: 'Decline',
                         btnClass: 'btn-red',
                         keys: ['enter', 'shift'],
-                        action: function(){
-    
+                        action: function () {
+
                             $.ajax({
                                 url: "/admin/dashboard/reject-user",
                                 type: "POST",
@@ -200,11 +207,11 @@
                                     "user_id": data[0]
                                 }),
                                 contentType: "application/json; charset=utf-8",
-                                success: function(response){
-                                    if(response){
+                                success: function (response) {
+                                    if (response) {
                                         dtbl_user_status.ajax.reload();
                                         toastr.success("User Declined Successfully!");
-                                    }else{
+                                    } else {
                                         toastr.error("Error Occured!, Declining Failed");
                                     }
                                 }
@@ -235,22 +242,22 @@
             $("#employee_id").val('');
             $("#username").val('');
             $("#email").val('');
-            
+
             $.getJSON(
-                `/auth/users/${selectedUserID}`, function(response){
-                if(response.status == "success"){
-                    $("#fname").val(response.data.fname);
-                    $("#lname").val(response.data.lname);
-                    $("#role").val(response.data.role);
-                    $("#employee_id").val(response.data.employee_id);
-                    $("#username").val(response.data.username);
-                    $("#email").val(response.data.email);
-                } else if(response.status == "error"){
+                `/auth/users/${selectedUserID}`, function (response) {
+                    if (response.status == "success") {
+                        $("#fname").val(response.data.fname);
+                        $("#lname").val(response.data.lname);
+                        $("#role").val(response.data.role);
+                        $("#employee_id").val(response.data.employee_id);
+                        $("#username").val(response.data.username);
+                        $("#email").val(response.data.email);
+                    } else if (response.status == "error") {
+                        swal("Error Occured!", "Please refresh the page then try again!", "error");
+                    }
+                }).fail(function () {
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
-                }
-            }).fail(function() {
-                swal("Error Occured!", "Please refresh the page then try again!", "error");
-            });
+                });
         });
     });
 </script>
@@ -266,9 +273,9 @@
                     <i class="pe-7s-graph2 icon-gradient bg-mean-fruit">
                     </i>
                 </div>
-                <div>User Control Panel
+                <div>Users And Employees
                     <div class="page-title-subheading">
-                        Approve or deactivate system users
+                        Approve, deactivate, edit, create system users and employees
                     </div>
                 </div>
             </div>
@@ -278,23 +285,54 @@
     <div class="row">
         <div class="col-md-12">
             <div class="main-card mb-3 card">
-                <div class="card-header">User Status
-                </div>
-                <div class="table-responsive">
-                    <table id="tbl_user_status" class="align-middle mb-0 table table-borderless table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th class="text-center">SYSTEM ID</th>
-                            <th class="text-center">EMPLOYEE ID</th>
-                            <th>NAME</th>
-                            <th class="text-center">POSITION</th>
-                            <th class="text-center">STATUS</th>
-                            <th class="text-center">ACTIONS</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-2">
+                            <div class="position-relative form-group">
+                                <label for="lname" class="">Search</label>
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <input id="search_input" placeholder="Last Name" type="text"
+                                            class="form-control">
+                                        <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                            </i></button>
+                                        <button id="btn_clear_entry"
+                                            class="border-0 btn-transition btn btn-outline-danger"><i
+                                                class="pe-7s-close">
+                                            </i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="position-relative form-group">
+                                <label for="filter_roles" class="">Position</label>
+                                <select id="filter_roles" class="form-control">
+                                    <option value="all">All</option>
+                                    {% for role in roles %}
+                                    <option value="{{role['_id']}}">{{role['name']}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="tbl_user_status"
+                            class="align-middle mb-0 table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">SYSTEM ID</th>
+                                    <th class="text-center">EMPLOYEE ID</th>
+                                    <th>NAME</th>
+                                    <th class="text-center">POSITION</th>
+                                    <th class="text-center">STATUS</th>
+                                    <th class="text-center">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

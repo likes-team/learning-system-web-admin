@@ -1,7 +1,5 @@
 import pymongo
-from flask_migrate import current
-from config import TIMEZONE
-from datetime import datetime
+from bson import ObjectId
 from flask import redirect, url_for, request, jsonify
 from flask.templating import render_template
 from flask_login import login_required, current_user
@@ -38,38 +36,30 @@ def dashboard():
 
 @bp_admin.route('/dashboard/get-dashboard-users', methods=['GET'])
 def get_dashboard_users():
-    from app.auth.models import User
-
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     search_value = request.args.get("search[value]")
+    role = request.args.get('role')
 
-    # users = User.objects(is_deleted__ne=True).order_by('active').skip(start).limit(length)
+    _filter = {}
 
     if search_value != '':
-        query = list(mongo.db.auth_users.aggregate([
-            {"$match": {
-                "lname": {"$regex": search_value}
-            }},
-            {"$lookup": {"from": "auth_user_roles", "localField": "role",
-                         "foreignField": "_id", 'as': "role"}},
-            {"$sort": {
-                'fname': pymongo.ASCENDING
-            }}
-        ]))
-        total_records = len(query)
-    else:
-        query = list(mongo.db.auth_users.aggregate([
-            {"$lookup": {"from": "auth_user_roles", "localField": "role",
-                         "foreignField": "_id", 'as': "role"}},
-            {"$skip": start},
-            {"$limit": length},
-            {"$sort": {
-                'fname': pymongo.ASCENDING
-            }}
-        ]))
-        total_records = mongo.db.auth_users.find().count()
-        
+        _filter['lname'] = {"$regex": search_value}
+    
+    if role != 'all':
+        _filter['role'] = ObjectId(role)
+
+    query = list(mongo.db.auth_users.aggregate([
+        {"$match": _filter},
+        {"$lookup": {"from": "auth_user_roles", "localField": "role",
+                        "foreignField": "_id", 'as': "role"}},
+        {"$skip": start},
+        {"$limit": length},
+        {"$sort": {
+            'fname': pymongo.ASCENDING
+        }}
+    ]))
+    total_records = len(query)
     filtered_records = len(query)
 
     table_data = []
