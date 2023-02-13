@@ -41,7 +41,9 @@ def get_dashboard_users():
     search_value = request.args.get("search[value]")
     role = request.args.get('role')
 
-    _filter = {}
+    _filter = {
+        'status': {'$ne': 'rejected'}
+    }
 
     if search_value != '':
         _filter['lname'] = {"$regex": search_value}

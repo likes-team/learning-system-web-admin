@@ -145,8 +145,6 @@
         $("#tbl_user_status tbody").on('click', '.btn-approve', function () {
             var data = dtbl_user_status.row($(this).parents('tr')).data();
 
-            console.log(data[0]);
-
             $.confirm({
                 title: 'User Approval',
                 content: 'Approve user?',
@@ -156,8 +154,6 @@
                         btnClass: 'btn-blue',
                         keys: ['enter', 'shift'],
                         action: function () {
-                            console.log(data[0]);
-
                             $.ajax({
                                 url: "/admin/dashboard/approve-user",
                                 type: "POST",
@@ -198,7 +194,6 @@
                         btnClass: 'btn-red',
                         keys: ['enter', 'shift'],
                         action: function () {
-
                             $.ajax({
                                 url: "/admin/dashboard/reject-user",
                                 type: "POST",
