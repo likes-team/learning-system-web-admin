@@ -195,8 +195,9 @@ def edit_marketer(oid):
             oid,
             'lms.marketers',
             scripts=_scripts,
-            edit_template="lms/marketers/marketer_edit.html"
-            )
+            edit_template="lms/marketers/marketer_edit.html",
+            modals=['auth/user_change_password_modal.html']
+        )
     
     if not form.validate_on_submit():
         for key, value in form.errors.items():
