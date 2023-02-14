@@ -109,21 +109,29 @@ def edit_user(oid,**kwargs):
             flash(str(key) + str(value), 'error')
         return redirect(url_for(auth_urls['users']))
         
-    try:
-        user.username = form.username.data
-        user.fname = form.fname.data
-        user.lname = form.lname.data
-        user.email = form.email.data if not form.email.data == '' else None
-        user.set_updated_at()
-        user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
+    user.username = form.username.data
+    user.fname = form.fname.data
+    user.lname = form.lname.data
+    user.email = form.email.data if not form.email.data == '' else None
+    user.is_employee = True if form.is_employee.data == 'on' else False
+    user.is_teacher = True if form.is_teacher.data == 'on' else False
+    user.set_updated_at()
+    user.updated_by = "{} {}".format(current_user.fname,current_user.lname)
 
-        user.save()
-        flash('User update Successfully!','success')
-        create_log('User update',"UserID={}".format(oid))
-
-    except Exception as e:
-        flash(str(e),'error')
-    
+    mongo.db.auth_users.update_one(
+        {"_id": user.id},
+        {"$set": {
+            "username": user.username,
+            "fname": user.fname,
+            "lname": user.lname,
+            "email": user.email,
+            "updated_at": user.updated_at,
+            "updated_by": user.updated_by,
+            "is_employee": user.is_employee,
+            "is_teacher": user.is_teacher
+    }})
+    flash('User update Successfully!','success')
+    create_log('User update',"UserID={}".format(oid))
     return redirect(url_for(auth_urls['users']))
 
 

@@ -72,7 +72,9 @@ def get_dashboard_users():
         fname = data.get('fname', '')
         username = data.get('username', '')
         role = data.get('role', '')
-        active = data.get('active', '')
+        active = data.get('active', False)
+        is_employee = data.get('is_employee', False)
+        is_teacher = data.get('is_teacher', False)
         
         table_data.append([
             str(id),
@@ -82,6 +84,8 @@ def get_dashboard_users():
                 'username': username
             },
             role[0]['name'],
+            is_employee,
+            is_teacher,
             active,
             active
         ])

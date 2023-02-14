@@ -279,7 +279,8 @@ class ContactPersonEditForm(AdminEditForm):
 
     fname = AdminField(label="First Name", validators=[DataRequired()])
     lname = AdminField(label="Last Name", validators=[DataRequired()])
-    
+    is_employee = AdminField(label="Is Employee?", validators=[DataRequired()], type='checkbox')
+    is_teacher = AdminField(label="Is Teacher?", validators=[DataRequired()], type='checkbox')
     branches_inline = BranchesInlineForm()
     add_branches_inline = AddBranchesInline()
 
@@ -289,7 +290,7 @@ class ContactPersonEditForm(AdminEditForm):
 
     @property
     def fields(self):
-        return [[self.fname, self.lname]]
+        return [[self.fname, self.lname], [self.is_employee], [self.is_teacher]]
 
 
 class PartnerForm(AdminTableForm):

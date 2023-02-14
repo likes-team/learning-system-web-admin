@@ -1,20 +1,13 @@
 from bson.objectid import ObjectId
-from flask_mongoengine import json
 import pymongo
-from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
-from app.auth.models import User
-from prime_admin.functions import generate_number
-from prime_admin.forms import RegistrationForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
+from prime_admin.globals import convert_to_local
 from flask_login import login_required, current_user
-from app.admin.templating import admin_render_template, admin_table, admin_edit
+from app.admin.templating import admin_table
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, Registration, Batch, StoreRecords
-from flask import redirect, url_for, request, current_app, flash, jsonify
+from prime_admin.models import Branch, Registration, Batch, StoreRecords
+from flask import request, jsonify
 from app import mongo
-from datetime import datetime, timedelta
-from bson.decimal128 import Decimal128, create_decimal128_context
-import decimal
-from mongoengine.queryset.visitor import Q
+from bson.decimal128 import create_decimal128_context
 
 
 

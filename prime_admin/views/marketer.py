@@ -207,6 +207,8 @@ def edit_marketer(oid):
     # try:
     contact_person.fname = form.fname.data
     contact_person.lname = form.lname.data
+    contact_person.is_employee = True if form.is_employee.data == 'on' else False
+    contact_person.is_teacher = True if form.is_teacher.data == 'on' else False
     
     branches = []
     branch_ids = request.form.getlist('branches[]')
@@ -229,7 +231,9 @@ def edit_marketer(oid):
             "lname": contact_person.lname,
             "branches": contact_person.branches,
             "updated_at": contact_person.updated_at,
-            "updated_by": contact_person.updated_by
+            "updated_by": contact_person.updated_by,
+            "is_employee": contact_person.is_employee,
+            "is_teacher": contact_person.is_teacher
         }})
     
     flash('Contact Person Updated Successfully!','success')
@@ -237,4 +241,4 @@ def edit_marketer(oid):
     # except Exception as e:
     #     flash(str(e),'error')
 
-    return redirect(url_for('lms.marketers'))
+    return redirect(url_for('bp_auth.users'))

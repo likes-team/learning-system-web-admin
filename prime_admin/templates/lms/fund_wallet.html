@@ -83,6 +83,31 @@
         });
     }
 
+    function getEmployees(branch, from) {
+        var selectDescriptionId = "#description";
+
+        if (from == "filter") {
+            selectDescriptionId = "#filter_description";
+        } else if (from == "filter_tab3") {
+            selectDescriptionId = "#filter_tab3_description";
+        }
+
+        $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
+            if (response.data.length > 0) {
+                $(selectDescriptionId).append(newOption);
+
+                for (i = 0; i < response.data.length; i++) {
+                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].full_name}</option>`);
+                    $(selectDescriptionId).append(newOption);
+                }
+            } else {
+                $(selectDescriptionId).empty();
+                var newOption = $('<option value="">No employees available</option>');
+                $(selectDescriptionId).append(newOption);
+            }
+        });
+    }
+
     function init() {
     }
 
@@ -402,7 +427,7 @@
                     $(this).val('');
                     return;
                 }
-                getContactPersons($("#branch_expenses").val(), "add_expenses");
+                getEmployees($("#branch_expenses").val(), "add_expenses");
 
                 $("#lbl_billing_month_from").html("Cut-off Month From");
                 $("#lbl_billing_month_to").html("Cut-off Month to");
@@ -496,7 +521,9 @@
         });
 
         $("#branch_expenses").change(function () {
-            if ($("#category").val() == "salary" || $("#category").val() == "rebates") {
+            if ($("#category").val() == "salary"){
+                getEmployees($("#branch_expenses").val(), "add_expenses");
+            } else if ($("#category").val() == "rebates") {
                 getContactPersons($("#branch_expenses").val(), "add_expenses");
             }
         });

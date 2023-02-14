@@ -16,6 +16,7 @@ from prime_admin import bp_lms
 from prime_admin.models import Branch, FundWallet, Registration
 from prime_admin.services.fund_wallet import BusinessExpensesService
 from prime_admin.utils.date import format_utc_to_local
+from prime_admin.helpers.employee import get_employees
 
 
 
@@ -861,3 +862,19 @@ def fetch_bookeeper_items():
         'status': 'success',
         'data': items_list
     })
+    
+    
+@bp_lms.route('/fetch-employees')
+def fetch_employees():
+    branch = request.args.get('branch')
+    employees = get_employees(branch)
+    data = []
+    for employee in employees:
+        data.append({
+            'id': str(employee.id),
+            'full_name': employee.full_name
+        })
+    response = {
+        'data': data
+    }
+    return jsonify(response)    

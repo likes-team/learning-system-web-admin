@@ -35,13 +35,12 @@ class UserEditForm(AdminEditForm):
     email = AdminField(label='Email', type='email',required=False)
     fname = AdminField(label='First Name', validators=[DataRequired()])
     lname = AdminField(label='Last Name', validators=[DataRequired()])
-    # role = AdminField(label='Role',validators=[DataRequired()],type='number',model=Role)
-
-    # permission_inline = PermissionInlineForm()
+    is_employee = AdminField(label="Is Employee?", validators=[DataRequired()], type='checkbox')
+    is_teacher = AdminField(label="Is Teacher?", validators=[DataRequired()], type='checkbox')
 
     @property
     def fields(self):
-        return [[self.fname, self.lname],[self.username,self.email]]
+        return [[self.fname, self.lname],[self.username,self.email], [self.is_employee], [self.is_teacher]]
 
     # @property
     # def inlines(self):
