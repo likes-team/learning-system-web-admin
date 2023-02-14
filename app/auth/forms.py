@@ -35,8 +35,8 @@ class UserEditForm(AdminEditForm):
     email = AdminField(label='Email', type='email',required=False)
     fname = AdminField(label='First Name', validators=[DataRequired()])
     lname = AdminField(label='Last Name', validators=[DataRequired()])
-    is_employee = AdminField(label="Is Employee?", validators=[DataRequired()], type='checkbox')
-    is_teacher = AdminField(label="Is Teacher?", validators=[DataRequired()], type='checkbox')
+    is_employee = AdminField(label="Is Employee?", type='checkbox')
+    is_teacher = AdminField(label="Is Teacher?", type='checkbox')
 
     @property
     def fields(self):
