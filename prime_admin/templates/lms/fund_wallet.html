@@ -91,7 +91,7 @@
         } else if (from == "filter_tab3") {
             selectDescriptionId = "#filter_tab3_description";
         }
-
+        $(selectDescriptionId).empty();
         $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
             if (response.data.length > 0) {
                 $(selectDescriptionId).append(newOption);
@@ -101,7 +101,6 @@
                     $(selectDescriptionId).append(newOption);
                 }
             } else {
-                $(selectDescriptionId).empty();
                 var newOption = $('<option value="">No employees available</option>');
                 $(selectDescriptionId).append(newOption);
             }
