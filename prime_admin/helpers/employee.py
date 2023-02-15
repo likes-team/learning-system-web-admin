@@ -8,7 +8,7 @@ def get_employees(branch_id='all'):
     if branch_id == "all":
         contact_persons = User.objects(Q(is_superuser=False) & Q(id__ne=current_user.id) & Q(is_employee=True))
     else:
-        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(is_superuser=False) & Q(id__ne=current_user.id) & Q(is_employee=True))
+        contact_persons = User.objects((Q(branches__in=[branch_id]) | Q(branch=branch_id)) & Q(is_superuser=False) & Q(id__ne=current_user.id) & Q(is_employee=True))
 
     if contact_persons is None:
         return []
