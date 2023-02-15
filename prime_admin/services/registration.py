@@ -114,7 +114,8 @@ class RegistrationService:
             "payment_by": ObjectId(self.student.id),
             "earnings": Decimal128(str(self.earnings)),
             "savings": Decimal128(str(self.savings)),
-            "branch": ObjectId(self.student.branch.id)
+            "branch": ObjectId(self.student.branch.id),
+            "created_at": get_date_now()
         }
         
     def get_payment_dict(self):

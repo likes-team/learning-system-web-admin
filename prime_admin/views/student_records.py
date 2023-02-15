@@ -440,7 +440,8 @@ def new_payment():
         "payment_by": ObjectId(client_id),
         "earnings": Decimal128(str(earnings)),
         "savings": Decimal128(str(savings)),
-        "branch": ObjectId(client.branch.id)
+        "branch": ObjectId(client.branch.id),
+        "created_at": get_date_now()
     }
 
     contact_person_earning = {
@@ -452,7 +453,8 @@ def new_payment():
         "client": ObjectId(client_id),
         "date": convert_to_utc(date, "date_from"),
         "registered_by": current_user.id,
-        "payment_id": payment["_id"]
+        "payment_id": payment["_id"],
+        "created_at": get_date_now()
     }
 
     with mongo.cx.start_session() as session:
@@ -594,7 +596,8 @@ def upgrade_to_premium():
             "payment_by": ObjectId(client_id),
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
-            "branch": ObjectId(client.branch.id)
+            "branch": ObjectId(client.branch.id),
+            "created_at": get_date_now()
         }
 
         contact_person_earning = {
@@ -606,7 +609,8 @@ def upgrade_to_premium():
             "client": ObjectId(client_id),
             "date": convert_to_utc(date, "date_from"),
             "registered_by": current_user.id,
-            "payment_id": payment["_id"]
+            "payment_id": payment["_id"],
+            "created_at": get_date_now()
         }
 
         with mongo.cx.start_session() as session:
