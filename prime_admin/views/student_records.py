@@ -441,7 +441,8 @@ def new_payment():
         "earnings": Decimal128(str(earnings)),
         "savings": Decimal128(str(savings)),
         "branch": ObjectId(client.branch.id),
-        "created_at": get_date_now()
+        "created_at": get_date_now(),
+        "contact_person": ObjectId(client.contact_person.id)
     }
 
     contact_person_earning = {
@@ -597,7 +598,8 @@ def upgrade_to_premium():
             "earnings": Decimal128(str(earnings)),
             "savings": Decimal128(str(savings)),
             "branch": ObjectId(client.branch.id),
-            "created_at": get_date_now()
+            "created_at": get_date_now(),
+            "contact_person": ObjectId(client.contact_person.id)
         }
 
         contact_person_earning = {
