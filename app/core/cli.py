@@ -11,8 +11,8 @@ from app import mongo
 from . import bp_core
 from .models import CoreCity,CoreProvince
 from app.auth.models import Earning, User, Role
-
-
+from bson import ObjectId
+from bson.errors import InvalidId
 
 def core_install():
     """
@@ -383,3 +383,45 @@ def move_payments():
             payment['branch'] = ObjectId(student['branch'])
             payment['payment_by'] = ObjectId(payment['payment_by'])
             mongo.db.lms_registration_payments.insert_one(payment)
+            
+            
+@bp_core.cli.command('move_earnings')
+@click.argument("oid")
+def move_earnings(oid):
+    _id = oid
+    query = mongo.db.auth_users.find_one({'_id': ObjectId(_id)})
+    earnings = query.get('earnings')
+    if earnings is None:
+        return None
+    
+    total_updated = 0
+    total_failed = 0
+    for earning in earnings:
+        try:
+            payment = earning['payment_id']
+        except KeyError:
+            try:
+                payment = earning['payment']
+            except KeyError:
+                payment = earning['_id']
+        
+        try:
+            query = mongo.db.lms_registration_payments.find_one({'_id': ObjectId(payment)})
+        except InvalidId:
+            query = None
+
+        if query is None:
+            print("not found: ", payment)
+            total_failed += 1
+            continue
+        
+        mongo.db.lms_registration_payments.update_one({'_id': ObjectId(payment)}, {
+            '$set': {
+                'contact_person': ObjectId(_id)
+            }
+        })
+        total_updated += 1
+        # print("updated: ", payment)
+    print("Total failed: ", total_failed)
+    print("Total updated: ", total_updated)
+    

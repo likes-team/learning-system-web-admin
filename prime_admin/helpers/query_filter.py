@@ -3,16 +3,34 @@ from flask_login import current_user
 from prime_admin.utils.date import convert_date_input_to_utc
 
 
+class BaseQueryFilter(object):
+    def __init__(self, start, length):
+        self.match = None
+        self.start = start
+        self.length = length
 
-class StudentQueryFilter:
+        if start:
+            self.start = int(start)
+        if length:
+            self.length = int(length)
+
+    def get_filter(self):
+        return self.match
+    
+    def get_start(self):
+        return self.start
+    
+    def get_length(self):
+        return self.length
+
+
+class StudentQueryFilter(BaseQueryFilter):
     def __init__(
         self, branch=None, batch_no=None, schedule=None,
         payment_status=None, payment_mode=None, session=None,
         date_from=None, date_to=None, search_value=None, start=None, length=None
     ):
-        self.match = None
-        self.start = start
-        self.length = length
+        super(StudentQueryFilter, self).__init__(start, length)
         self.branch = branch
         self.batch_no = batch_no
         self.session = session
@@ -58,11 +76,6 @@ class StudentQueryFilter:
         elif payment_status == 'REFUNDED':
             match['payment_mode'] = 'refund'
         self.match = match
-        
-        if start:
-            self.start = int(start)
-        if length:
-            self.length = int(length)
 
 
     @classmethod
@@ -82,11 +95,42 @@ class StudentQueryFilter:
         )
 
 
-    def get_filter(self):
-        return self.match
-    
-    def get_start(self):
-        return self.start
-    
-    def get_length(self):
-        return self.length
+class PaymentQueryFilter(BaseQueryFilter):
+    def __init__(
+        self, contact_person=None,
+        branch=None, batch_no=None,
+        status=None, start=None, length=None
+    ):
+        super(PaymentQueryFilter, self).__init__(start, length)
+        self.branch = branch
+        self.batch_no = batch_no
+        match = {}
+        
+        if contact_person and contact_person != 'all':
+            match['contact_person'] = ObjectId(contact_person)
+        
+        if branch and branch != 'all':
+            match['branch._id'] = ObjectId(branch)
+            
+        if batch_no and batch_no != 'all':
+            match['batch_no._id'] = ObjectId(batch_no)
+
+        if status and status != 'all':
+            if status == 'none':
+                match['status'] = {"$exists": False}
+            else:
+                match['status'] = status
+
+        self.match = match
+
+
+    @classmethod
+    def from_request(cls, request):
+        return cls(
+            contact_person=request.args.get('contact_person'),
+            branch=request.args.get('branch'),
+            batch_no=request.args.get('batch_no'),
+            status=request.args.get('status'),
+            start=request.args.get('start'),
+            length=request.args.get('length')
+        )

@@ -1,0 +1,192 @@
+{% extends "lms/earnings/base.html" %}
+
+
+{% block card_body %}
+<div class="card-body">
+    <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+        <li class="nav-item">
+            <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
+                href="#tab-animated1-0" aria-selected="false">
+                <span class="nav-text">APPROVAL</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
+                aria-selected="false">
+                <span class="nav-text">MEMBERS RECORD</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                aria-selected="true">
+                <span class="nav-text">PAYMENT RECORD</span>
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4 col-xl-4">
+                    </div>
+                    <div class="col-lg-4 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL EARNINGS</div>
+                                    <div class="widget-subheading">Requested claims/For approval</div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-success"><span id="total_earnings">₱ 0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-xl-4">
+                    
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL NYC</div>
+                                    <div class="widget-subheading">Not yet claim</div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-warning"><span id="total_nyc">₱ 0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-xl-4">
+                    </div>
+                    <div class="col-lg-4 col-xl-4">
+                        <div class="card mb-3 widget-content">
+                            <div class="widget-content-wrapper">
+                                <div class="widget-content-left">
+                                    <div class="widget-heading">TOTAL RELEASED</div>
+                                    <div class="widget-subheading">Approved and released claims</div>
+                                </div>
+                                <div class="widget-content-right">
+                                    <div class="widget-numbers text-warning" id="total_earnings_claimed"><span>₱ 0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 
+                </div>
+                <ul id="list_branches_total_earnings" class="list-group">
+                    {% for branch in branches %}
+                    <li class="list-group-item">
+                        <div class="widget-content p-0">
+                            <div class="widget-content-outer">
+                                <div class="widget-content-wrapper">
+                                    <div class="widget-content-left">
+                                        <div class="widget-heading">{{branch.name}}</div>
+                                        <div class="widget-subheading">Current Earnings</div>
+                                    </div>
+                                    <div class="widget-content-right">
+                                        <div class="widget-numbers text-primary">₱ 0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="margin-top:20px;"></div>
+            </div>
+        </div>
+        <div class="tab-pane show" id="tab-animated1-1" role="tabpanel">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="branch" class="">Branch</label>
+                            <select name="branch" id="branch" class="form-control" required>
+                                {% if current_user.role.name == "Secretary" %}
+                                <!-- Pass -->
+                                {% else %}
+                                    <option value="all">All</option>
+                                {% endif %}
+    
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}">
+                                    {{ branch.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="batch_no" class="">Batch No.</label>
+                            <select name="batch_no" id="batch_no" class="form-control" required>
+                                <option value="all">Please select branch first</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="status" class="">Status</label>
+                            <select name="status" id="status" class="form-control" required>
+                                    <option value="all">All</option>
+                                    <option value="none">Not Yet Claim</option>
+                                    <option value="for_approval">For Approval</option>
+                                    <option value="approved">Claimed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl_members" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">STUDENT ID</th>
+                                <th class="text-center">PAYMENT ID</th>
+                                <th class="text-center">BRANCH</th>
+                                <th class="text-center">FULL NAME</th>
+                                <th class="text-center">BATCH NO.</th>
+                                <th class="text-center">FLE</th>
+                                <th class="text-center">SLE</th>
+                                <th class="text-center">SCHEDULE</th>
+                                <th class="text-center">REMARKS</th>
+                                <th class="text-center">STATUS</th>
+                                <th class="text-center">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- load with json -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+            <div class="table-responsive">
+                <table id="tbl_payments" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">DATE</th>
+                            <th class="text-center">ACCOUNT NO. / PARTICULAR</th>
+                            <th class="text-center">REFERENCE NO.</th>
+                            <th class="text-center">OTC</th>
+                            <th class="text-center">AMOUNT</th>
+                            <th class="text-center">STATUS</th>
+                            <th class="text-center">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- load with json -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -37,17 +37,18 @@ class Payment(db.EmbeddedDocument):
 
 
 class Student(object):
-    def __init__(self, data):
-        self.data = data
-        self.__dict__.update(data)
+    def __init__(self, document, branch=None, batch_no=None):
+        self.data = document
+        self.__dict__.update(document)
 
+        self.branch = branch if branch else None
+        self.batch_no = batch_no if batch_no else None
 
     def get_id(self):
         return self.data['_id']
     
     def get_registration_date(self, date_format="%B %d, %Y %I:%M %p"):
         return format_utc_to_local(self.data.get('registration_date'), date_format=date_format)
-
     
     def get_session(self):
         return self.data.get('session', '')

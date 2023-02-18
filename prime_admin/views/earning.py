@@ -15,9 +15,13 @@ from app.auth.models import Earning as auth_user_earning
 from app.admin.templating import admin_render_template
 from config import TIMEZONE
 from prime_admin import bp_lms
-from prime_admin.models import Branch, Earning, FundWallet, Marketer, Payment, Registration, Batch
+from prime_admin.models import Branch, Earning, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 from prime_admin.helpers import Earning as earning_helper
+from prime_admin.services.payment import PaymentService
+from prime_admin.helpers.query_filter import PaymentQueryFilter
+from prime_admin.models_v2 import PaymentV2
+
 
 
 D128_CTX = create_decimal128_context()
@@ -30,23 +34,22 @@ def earnings():
         branches = Branch.objects(id=current_user.branch.id)
         batch_numbers = Batch.objects(branch=current_user.branch.id)
         marketers = User.objects(Q(branches__in=[str(current_user.branch.id)]) & Q(role__ne=SECRETARYREFERENCE)).order_by('fname')
-        template = 'lms/earnings_admin.html'
+        template = 'lms/earnings/admin.html'
     elif current_user.role.name == "Marketer":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id).order_by('fname')
-        template = 'lms/earnings.html'
+        template = 'lms/earnings/marketer.html'
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
         marketers = User.objects(id=current_user.id).order_by('fname')
-        template = 'lms/earnings.html'
-    else:
+        template = 'lms/earnings/marketer.html'
+    elif current_user.role.name == "Admin":
         branches = Branch.objects()
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False)).order_by('fname')
-        template = 'lms/earnings_admin.html'
-        
+        template = 'lms/earnings/admin.html'
     return admin_render_template(
         Earning,
         template,
@@ -61,203 +64,65 @@ def earnings():
 @bp_lms.route('/dtbl/earnings/members')
 def get_dtbl_earnings_members():
     draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
     contact_person_id = request.args.get('contact_person')
-    branch_id = request.args.get('branch')
-    batch_no = request.args.get('batch_no')
-    filter_status = request.args.get('status')
-    
-    total_earnings = 0
-    total_savings = 0
-    total_earnings_claimed = 0
-    total_savings_claimed = 0
-    total_not_yet_claimed = 0
-    branches_total_earnings = []
-
-
-    if (contact_person_id == 'all'):
-        registrations = Registration.objects(status="registered").order_by("-registration_date").order_by("registration_number").skip(start).limit(length)
-        if current_user.role.name == "Admin":
-            contact_persons = User.objects()
-        elif current_user.role.name == "Partner":
-            contact_persons = User.objects(branches__in=[str(current_user.branches)])
-        elif current_user.role.name == "Secretary":
-            contact_persons = User.objects(branches__in=[str(current_user.branch.id)])
-            
-        with decimal.localcontext(D128_CTX):
-            total_earnings = Decimal128('0.00')
-            total_savings = Decimal128('0.00')
-            total_earnings_claimed = Decimal128('0.00')
-            total_savings_claimed = Decimal128('0.00')
-            total_not_yet_claimed = Decimal128('0.00')
-
-            for contact_person in contact_persons:
-                for earning in contact_person.earnings:
-                    if earning.payment_mode == "profit_sharing":
-                        continue
-                    
-                    if earning.status is None:
-                        total_not_yet_claimed = Decimal128(total_not_yet_claimed.to_decimal() + earning.earnings)
-
-                    if earning.status is None or earning.status == "for_approval":
-                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                        
-                        if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                            branches_total_earnings.append(
-                                {
-                                    'id': str(earning.branch.id),
-                                    'name': earning.branch.name,
-                                    'totalEarnings': earning.earnings
-                                } 
-                            )
-                        else:
-                            for x in branches_total_earnings:
-                                if x['id'] == str(earning['branch'].id):
-                                        if type(x['totalEarnings']) == decimal.Decimal:
-                                            x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                        else:
-                                            x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                    elif earning.status == "approved":
-                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-    else:
-        registrations = Registration.objects(contact_person=contact_person_id).order_by("-registration_date").order_by("registration_number").filter(status="registered").skip(start).limit(length)
-        contact_person = User.objects.get(id=contact_person_id)
-
-        with decimal.localcontext(D128_CTX):
-            total_earnings = Decimal128('0.00')
-            total_savings = Decimal128('0.00')
-            total_earnings_claimed = Decimal128('0.00')
-            total_savings_claimed = Decimal128('0.00')
-            total_not_yet_claimed = Decimal128('0.00')
-
-            for earning in contact_person.earnings:
-                if earning.payment_mode == "profit_sharing":
-                    continue
-
-                if earning.status is None:
-                    total_not_yet_claimed = Decimal128(total_not_yet_claimed.to_decimal() + earning.earnings)
-
-                if earning.status == "for_approval":
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                    
-                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                        branches_total_earnings.append(
-                            {
-                                'id': str(earning.branch.id),
-                                'name': earning.branch.name,
-                                'totalEarnings': earning.earnings
-                            } 
-                        )
-                    else:
-                        for x in branches_total_earnings:
-                            if x['id'] == str(earning['branch'].id):
-                                    if type(x['totalEarnings']) == decimal.Decimal:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                    else:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                elif earning.status == "approved":
-                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-
-    total_records = registrations.count()
-
-    if branch_id != 'all':
-        registrations = registrations.filter(branch=branch_id)
-
-    if batch_no != 'all':
-        registrations = registrations.filter(batch_number=batch_no)
-
+    query_filter = PaymentQueryFilter.from_request(request)
+    service = PaymentService.find_payments(query_filter)
+    payments = service.get_data()
     _table_data = []
-
-    for registration in registrations:
-        if registration.payment_mode == "full_payment":
-            remarks = "Full Payment"
-        elif registration.payment_mode == "premium":
-            remarks = "Premium"
-        elif registration.payment_mode == "installment":
-            remarks = "Installment"
-        elif registration.payment_mode == "full_payment_promo":
-            remarks = "Full Payment - Promo"
-        elif registration.payment_mode == "installment_promo":
-            remarks = "Installment - Promo"
-        elif registration.payment_mode == "premium_promo":
-            remarks = "Premium - Promo"
-
-        student_payments = mongo.db.lms_registration_payments.find({"payment_by": registration.id})
-        for payment in student_payments:
-            payment_status = payment.get('status')
-            actions = ''
-            status = ''
-
-            if filter_status != 'all':
-                if filter_status == "none":
-                    filter_status = None 
-                if payment_status != filter_status:
-                    continue
-
-            if current_user.role.name == "Secretary" or current_user.role.name == "Admin":
+    
+    for payment in payments:
+        payment: PaymentV2
+        status = ''
+        actions = ''
+        payment_status = payment.get_status()
+        if current_user.role.name == "Secretary" or current_user.role.name == "Admin":
+            if payment_status == "for_approval":
+                actions = """
+                    <button style="margin-bottom: 8px;" type="button" 
+                        class="mr-2 btn-icon btn-icon-only btn btn-outline-info 
+                        btn-approve-claim">Approve Claim</button>""" if not contact_person_id == 'all' else ''
+                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
+            elif payment_status is None:
+                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
+            elif payment_status == "approved":
+                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">RELEASED</div>"""
+        else:
+            if payment.student.batch_no.get_start_date() is None:
+                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NOT YET STARTED</div>"""
+            else:
+                start_date = payment.student.batch_no.get_start_date() + timedelta(days=3)
                 if payment_status == "for_approval":
-                    actions = """
-                        <button style="margin-bottom: 8px;" type="button" 
-                            class="mr-2 btn-icon btn-icon-only btn btn-outline-info 
-                            btn-approve-claim">Approve Claim</button>""" if not contact_person_id == 'all' else ''
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
                 elif payment_status is None:
-                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
+                    if start_date.date() <= get_date_now().date():
+                        actions = """<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon 
+                            btn-icon-only btn btn-outline-warning btn-claim">Request for Claim</button>""" if not contact_person_id == 'all' else ''
+                        status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-warning">FOR CLAIM</div>"""
+                    else:
+                        status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
                 elif payment_status == "approved":
                     status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">RELEASED</div>"""
-            else:
-                if registration.batch_number.start_date is None:
-                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NOT YET STARTED</div>"""
-                else:
-                    start_date = registration.batch_number.start_date + timedelta(days=3)
-                    if payment_status == "for_approval":
-                        status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                    elif payment_status is None:
-                        if start_date.date() <= get_date_now().date():
-                            actions = """<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon 
-                                btn-icon-only btn btn-outline-warning btn-claim">Request for Claim</button>""" if not contact_person_id == 'all' else ''
-                            status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-warning">FOR CLAIM</div>"""
-                        else:
-                            status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-secondary">NO REQUEST YET</div>"""
-                    elif payment_status == "approved":
-                        status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">RELEASED</div>"""
+        _table_data.append([
+            str(payment.student.get_id()),
+            str(payment.get_id()),
+            payment.branch.get_name(),
+            payment.student.get_full_name(),
+            payment.student.batch_no.get_no(),
+            payment.get_earnings(currency=True) if payment.student.get_fle() is not None and not payment.student.get_fle() <= 0 else '',
+            payment.get_earnings(currency=True) if payment.student.get_sle() is not None and not payment.student.get_sle() <= 0 else '',
+            payment.student.schedule,
+            payment.student.get_payment_mode(),
+            status,
+            actions
+        ])
 
-            _table_data.append([
-                str(registration.id),
-                str(payment['_id']),
-                registration.branch.name if registration.branch is not None else '',
-                registration.full_name,
-                registration.batch_number.number if registration.batch_number is not None else '',
-                str(payment['earnings']) if registration.fle is not None and not registration.fle == 0 else '',
-                str(payment['earnings']) if registration.sle is not None and not registration.sle == 0 else '',
-                registration.schedule,
-                remarks,
-                status,
-                actions
-            ])
-
-    for branch in branches_total_earnings:
-        branch['totalEarnings'] = str(branch['totalEarnings'])
-
-    filtered_records = len(_table_data)
-
+    filtered_records = service.total_filtered()
     response = {
         'draw': draw,
         'recordsTotal': filtered_records,
-        'recordsFiltered': total_records,
-        'data': _table_data,
-        'totalEarnings': str(total_earnings),
-        'totalSavings': str(total_savings),
-        'totalEarningsClaimed': str(total_earnings_claimed),
-        'totalSavingsClaimed': str(total_savings_claimed),
-        'branchesTotalEarnings': branches_total_earnings,
-        'totalNotYetClaimed': str(total_not_yet_claimed)
+        'recordsFiltered': filtered_records,
+        'data': _table_data
     }
-
     return jsonify(response)
 
 
@@ -339,7 +204,7 @@ def get_marketer_total_earnings(marketer_id):
             marketers = User.objects(branches__in=[str(current_user.branches)])
         elif current_user.role.name == "Secretary":
             marketers = User.objects(branches__in=[str(current_user.branch.id)])
-            
+
         with decimal.localcontext(D128_CTX):
             total_earnings = Decimal128('0.00')
             total_savings = Decimal128('0.00')
@@ -351,41 +216,37 @@ def get_marketer_total_earnings(marketer_id):
             for marketer in marketers:
                 earning: Payment
                 for earning in marketer.earnings:
-                    try:
-                        if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
-                            continue
-                        
-                        if earning.payment_mode == "profit_sharing":
-                            continue
-
-                        # if earning.status is not None and earning.status == "for_approval":
-                        if earning.status == "for_approval":
-                            total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                            total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                            
-                            if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                                branches_total_earnings.append(
-                                    {
-                                        'id': str(earning.branch.id),
-                                        'name': earning.branch.name,
-                                        'totalEarnings': earning.earnings
-                                    }
-                                )
-                            else:
-                                for x in branches_total_earnings:
-                                    if x['id'] == str(earning['branch'].id):
-                                        if type(x['totalEarnings']) == decimal.Decimal:
-                                            x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                        else:
-                                            x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                        elif earning.status is None:
-                            total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
-                        
-                        elif earning.status == "approved":
-                            total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                            total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-                    except Exception as err:
+                    if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
                         continue
+                    
+                    if earning.payment_mode == "profit_sharing":
+                        continue
+
+                    # if earning.status is not None and earning.status == "for_approval":
+                    if earning.status == "for_approval":
+                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                        
+                        if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
+                            branches_total_earnings.append(
+                                {
+                                    'id': str(earning.branch.id),
+                                    'name': earning.branch.name,
+                                    'totalEarnings': earning.earnings
+                                }
+                            )
+                        else:
+                            for x in branches_total_earnings:
+                                if x['id'] == str(earning['branch'].id):
+                                    if type(x['totalEarnings']) == decimal.Decimal:
+                                        x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
+                                    else:
+                                        x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
+                    elif earning.status is None:
+                        total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
+                    elif earning.status == "approved":
+                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
+                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
     else:
         marketer = User.objects.get(id=marketer_id)
 
@@ -454,7 +315,6 @@ def get_marketer_total_earnings(marketer_id):
         'totalNYC': str(total_nyc),
         'branchesTotalEarnings': branches_total_earnings
     }
-
     return jsonify(response)
 
 
