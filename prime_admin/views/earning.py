@@ -19,6 +19,8 @@ from prime_admin.models import Branch, Earning, Payment, Registration, Batch
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 from prime_admin.helpers import Earning as earning_helper
 from prime_admin.services.payment import PaymentService
+from prime_admin.services.earning import EarningService
+from prime_admin.services.saving import SavingService
 from prime_admin.helpers.query_filter import PaymentQueryFilter
 from prime_admin.models_v2 import PaymentV2
 
@@ -190,129 +192,20 @@ def fetch_marketer_payment_records_dt(marketer_id):
 
 @bp_lms.route('/marketers/<string:marketer_id>/earnings/total')
 def get_marketer_total_earnings(marketer_id):
-    total_earnings = 0
-    total_savings = 0
-    total_earnings_claimed = 0
-    total_savings_claimed = 0
-    total_nyc = 0
-    branches_total_earnings = []
-    
-    if marketer_id == 'all':
-        if current_user.role.name == "Admin":
-            marketers = User.objects()
-        elif current_user.role.name == "Partner":
-            marketers = User.objects(branches__in=[str(current_user.branches)])
-        elif current_user.role.name == "Secretary":
-            marketers = User.objects(branches__in=[str(current_user.branch.id)])
-
-        with decimal.localcontext(D128_CTX):
-            total_earnings = Decimal128('0.00')
-            total_savings = Decimal128('0.00')
-            total_earnings_claimed = Decimal128('0.00')
-            total_savings_claimed = Decimal128('0.00')
-            total_nyc = Decimal128('0.00')
-            
-            marketer: User
-            for marketer in marketers:
-                earning: Payment
-                for earning in marketer.earnings:
-                    if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
-                        continue
-                    
-                    if earning.payment_mode == "profit_sharing":
-                        continue
-
-                    # if earning.status is not None and earning.status == "for_approval":
-                    if earning.status == "for_approval":
-                        total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                        total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                        
-                        if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                            branches_total_earnings.append(
-                                {
-                                    'id': str(earning.branch.id),
-                                    'name': earning.branch.name,
-                                    'totalEarnings': earning.earnings
-                                }
-                            )
-                        else:
-                            for x in branches_total_earnings:
-                                if x['id'] == str(earning['branch'].id):
-                                    if type(x['totalEarnings']) == decimal.Decimal:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                    else:
-                                        x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                    elif earning.status is None:
-                        total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
-                    elif earning.status == "approved":
-                        total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                        total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-    else:
-        marketer = User.objects.get(id=marketer_id)
-
-        with decimal.localcontext(D128_CTX):
-            total_earnings = Decimal128('0.00')
-            total_savings = Decimal128('0.00')
-            total_earnings_claimed = Decimal128('0.00')
-            total_savings_claimed = Decimal128('0.00')
-            total_nyc = Decimal128('0.00')
-            
-            marketer: User
-            earning: Payment
-            for earning in marketer.earnings:
-                if current_user.role.name == "Secretary" and str(earning.client.branch.id) != str(current_user.branch.id):
-                    continue
-                
-                if earning.payment_mode == "profit_sharing":
-                    continue
-
-                # if earning.status is not None and earning.status == "for_approval":
-                if earning.status == "for_approval":
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                    
-                    if not any(d['id'] == str(earning.branch.id) for d in branches_total_earnings):
-                        branches_total_earnings.append(
-                            {
-                                'id': str(earning.branch.id),
-                                'name': earning.branch.name,
-                                'totalEarnings': earning.earnings
-                            }
-                        )
-                    else:
-                        for x in branches_total_earnings:
-                            if x['id'] == str(earning['branch'].id):
-                                if type(x['totalEarnings']) == decimal.Decimal:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                else:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-                elif earning.status is None:
-                    total_nyc = Decimal128(total_nyc.to_decimal() + earning.earnings)
-                
-                elif earning.status == "approved":
-                    total_earnings_claimed = Decimal128(total_earnings_claimed.to_decimal() + earning.earnings)
-                    total_savings_claimed = Decimal128(total_savings_claimed.to_decimal() + earning.savings)
-        
-    for other_branch_id in marketer.branches:
-        if not any(d['id'] == str(other_branch_id) for d in branches_total_earnings):
-            branch = Branch.objects.get(id=other_branch_id)
-            branches_total_earnings.append(
-                {
-                    'id': str(branch.id),
-                    'name': branch.name,
-                    'totalEarnings': 0.00
-                }
-            )
-
-    for branch in branches_total_earnings:
-        branch['totalEarnings'] = str(branch['totalEarnings'])
-
+    earning_service = EarningService.find_earnings(marketer_id)
+    saving_service = SavingService.find_savings(marketer_id)
+    total_earnings = earning_service.get_total_earnings(currency=True)
+    total_savings = saving_service.get_total_savings(currency=True)
+    total_earnings_claimed = earning_service.get_total_earnings_approved(currency=True)
+    total_savings_claimed = saving_service.get_total_savings_approved(currency=True)
+    total_nyc = earning_service.get_total_nyc(currency=True)
+    branches_total_earnings = earning_service.get_branch_total_earnings()
     response = {
-        'totalEarnings': str(total_earnings),
-        'totalSavings': str(total_savings),
-        'totalEarningsClaimed': str(total_earnings_claimed),
-        'totalSavingsClaimed': str(total_savings_claimed),
-        'totalNYC': str(total_nyc),
+        'totalEarnings': total_earnings,
+        'totalSavings': total_savings,
+        'totalEarningsClaimed': total_earnings_claimed,
+        'totalSavingsClaimed': total_savings_claimed,
+        'totalNYC': total_nyc,
         'branchesTotalEarnings': branches_total_earnings
     }
     return jsonify(response)
@@ -333,53 +226,48 @@ def get_marketer_earnings(branch_id, marketer_id):
         
         earning: auth_user_earning
         for earning in marketer.earnings:
-            try:
-                if earning.payment_mode == "profit_sharing":
-                    continue
-
-                if earning.status == "for_approval":
-                    total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                    total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                    student: Registration = Registration.objects.get(id=earning.client.id)
-                    
-                    if str(student.branch.id) != branch_id:
-                        continue
-                    
-                    if earning.payment_mode == "full_payment":
-                            remarks = "Full Payment"
-                    elif earning.payment_mode == "premium":
-                        remarks = "Premium"
-                    elif earning.payment_mode == "installment":
-                        remarks = "Installment"
-                    elif earning.payment_mode == "full_payment_promo":
-                        remarks = "Full Payment - Promo"
-                    elif earning.payment_mode == "installment_promo":
-                        remarks = "Installment - Promo"
-                    elif earning.payment_mode == "premium_promo":
-                        remarks = "Premium - Promo"
-                        
-                    status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                        
-                    data.append([
-                        str(earning.client.id),
-                        str(earning.payment_id),
-                        marketer.full_name,
-                        student.full_name,
-                        student.batch_number.number if student.batch_number is not None else '',
-                        str(earning.earnings),
-                        student.schedule,
-                        remarks,
-                        status,
-                    ])
-            except Exception as err:
+            if earning.payment_mode == "profit_sharing":
                 continue
+
+            if earning.status == "for_approval":
+                total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
+                total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
+                student: Registration = Registration.objects.get(id=earning.client.id)
                 
+                if str(student.branch.id) != branch_id:
+                    continue
+                
+                if earning.payment_mode == "full_payment":
+                        remarks = "Full Payment"
+                elif earning.payment_mode == "premium":
+                    remarks = "Premium"
+                elif earning.payment_mode == "installment":
+                    remarks = "Installment"
+                elif earning.payment_mode == "full_payment_promo":
+                    remarks = "Full Payment - Promo"
+                elif earning.payment_mode == "installment_promo":
+                    remarks = "Installment - Promo"
+                elif earning.payment_mode == "premium_promo":
+                    remarks = "Premium - Promo"
+                    
+                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
+                    
+                data.append([
+                    str(earning.client.id),
+                    str(earning.payment_id),
+                    marketer.full_name,
+                    student.full_name,
+                    student.batch_number.number if student.batch_number is not None else '',
+                    str(earning.earnings),
+                    student.schedule,
+                    remarks,
+                    status,
+                ])
     response = {
         'data': data,
         'totalEarnings': str(total_earnings),
         'totalSavings': str(total_savings),
     }
-
     return jsonify(response)
 
 
@@ -403,18 +291,12 @@ def approve_marketer_earnings(branch_id, marketer_id):
             'message': "Invalid password!"
         }), 500
     
-    # try:
     earning_helper.approve_marketer_requests(marketer_id, branch_id)
     response = {
         'status': 'success',
         'message': ""
     }
     return jsonify(response), 200
-    # except Exception as err:
-    #     return jsonify({
-    #         'status': 'error',
-    #         'message': "Please refresh the page then try again!"
-    #     }), 500
 
 
 @bp_lms.route('/api/approve-claim-earning', methods=['POST'])

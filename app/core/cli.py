@@ -425,3 +425,93 @@ def move_earnings(oid):
     print("Total failed: ", total_failed)
     print("Total updated: ", total_updated)
     
+@bp_core.cli.command('profit_sharing')
+def profit_sharing():
+    query = list(mongo.db.auth_users.find())
+
+    for document in query:
+        earnings = document.get('earnings')
+        if earnings is None:
+            continue
+        for earning in earnings:
+            if earning.get('payment_mode') == 'profit_sharing':
+                print(document.get('fname'))
+
+from decimal import Decimal
+
+@bp_core.cli.command('compute_earnings')
+def compute_earnings():
+    contact_person = '610027f86e8c4d7799a11cca'
+    query = mongo.db.auth_users.find_one({'_id': ObjectId(contact_person)})
+    
+    filter_branch = "60b2e35c9a8748495f5470a0"
+    branch_earnings = {}
+    ctr = 0
+    for doc in query.get('earnings'):
+        if doc.get('status') == 'for_approval':
+            branch = str(doc.get('branch'))
+            # if branch == filter_branch:
+            #     print(doc.get('payment_id'), doc.get('payment'), doc.get('_id'))
+            #     print("client: ", doc.get('client'))
+            #     print(doc.get('date'))
+                
+            if branch in branch_earnings:
+                branch_earnings[branch] = branch_earnings[branch] + Decimal(str(doc.get('earnings')))
+            else:
+                branch_earnings[branch] = Decimal(str(doc.get('earnings')))
+            ctr += 1
+                
+            # try:
+            #     payment = doc['payment_id']
+            # except KeyError:
+            #     try:
+            #         payment = doc['payment']
+            #     except KeyError:
+            #         payment = doc['_id']
+                    
+            # query = mongo.db.lms_registration_payments.find_one({'_id': ObjectId(payment)})
+            # if query is None:
+            #     continue
+            # print("earning{}: ".format(ctr), doc.get('earnings'))
+            # print("payment{}:".format(ctr), query.get('earnings'))
+
+    for key, val in branch_earnings.items():
+        branch_earnings[key] = format_to_str_php(val)
+    
+    print("from earnings: ", branch_earnings)
+    print("ctr: ", ctr)
+
+    #####
+     
+    query = list(mongo.db.lms_registration_payments.find({'contact_person': ObjectId(contact_person)}))
+    branch_earnings = {}
+    ctr = 0
+    for doc in query:
+        if doc.get('status') == 'for_approval':
+            branch = str(doc.get('branch'))
+            if branch == filter_branch:
+                print(doc.get('payment_id'), doc.get('payment'), doc.get('_id'))
+                print("client: ", doc.get('client'))
+                print(doc.get('date'))
+                
+            
+            if branch in branch_earnings:
+                branch_earnings[branch] = branch_earnings[branch] + Decimal(str(doc.get('earnings')))
+            else:
+                branch_earnings[branch] = Decimal(str(doc.get('earnings')))
+            ctr += 1
+
+    for key, val in branch_earnings.items():
+        branch_earnings[key] = format_to_str_php(val)
+    
+    print("from payments: ", branch_earnings)
+    print("ctr: ", ctr)
+
+
+def format_to_str_php(number, replacement='0.00'):
+    if isinstance(number, str):
+        return replacement
+
+    if isinstance(number, Decimal):
+        return "{:.2f}".format(number)
+    return "{:.2f}".format(Decimal(str(number)))

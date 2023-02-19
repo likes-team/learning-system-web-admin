@@ -56,7 +56,6 @@ class PaymentService:
     @classmethod
     def find_payments(cls, query_filter: PaymentQueryFilter):
         aggregate_query = _aggregation_query(query_filter)
-        print("aggregate_query:::", aggregate_query)
         if query_filter.get_start():
             aggregate_query.append({'$skip': query_filter.get_start()})
 
