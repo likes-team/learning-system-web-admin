@@ -1,6 +1,7 @@
 from bson import ObjectId
 from app import mongo
 from prime_admin.utils.currency import convert_decimal128_to_decimal, format_to_str_php
+from prime_admin.models_v2 import PaymentV2, UserV2
 
 
 
@@ -10,7 +11,51 @@ class EarningService:
         self.total_for_approval = kwargs.get('total_for_approval', 0)
         self.total_nyc = kwargs.get('total_nyc', 0)
         self.branch_total_earnings = kwargs.get('branch_total_earnings', [])
-                
+
+    
+    @staticmethod
+    def get_contact_persons_earning():
+        aggregate_query = list(mongo.db.lms_registration_payments.aggregate([
+            {
+                '$match': {
+                    'status': 'for_approval'
+                }
+            }, {
+                '$lookup': {
+                    'from': 'auth_users', 
+                    'localField': 'contact_person', 
+                    'foreignField': '_id', 
+                    'as': 'contact_person'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$contact_person'
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        'contact_person': '$contact_person'
+                    }, 
+                    'total': {
+                        '$sum': '$earnings'
+                    }
+                }
+            }
+        ]))
+        
+        if len(aggregate_query) == 0:
+            return []
+
+        data = []
+        for document in aggregate_query:
+            contact_person = UserV2(document['_id']['contact_person'])
+
+            data.append({
+                'id': str(document['_id']['contact_person']['_id']),
+                'name': contact_person.get_full_name(),
+                'totalEarnings': format_to_str_php(document['total']),
+            })
+        return data
     
     @classmethod
     def find_earnings(cls, contact_person):
@@ -59,17 +104,27 @@ class EarningService:
         aggregate_query = list(mongo.db.lms_registration_payments.aggregate([
             {'$match': match},
             {'$lookup': {
+                'from': 'lms_registrations',
+                'localField': 'payment_by',
+                'foreignField': '_id',
+                'as': 'student'
+            }},
+            {'$lookup': {
                 'from': 'lms_branches',
                 'localField': 'branch',
                 'foreignField': '_id',
                 'as': 'branch'
             }},
             {'$unwind': {
+               'path': '$student'
+            }},
+            {'$unwind': {
                'path': '$branch'
             }},
             {'$group': {
                 '_id': {"branch": "$branch"},
-                'total': {'$sum': '$earnings'}
+                'payments': {"$push": "$$ROOT"},
+                'total': {'$sum': '$earnings'},
             }}
         ]))
         branch_total_earnings = []
@@ -78,9 +133,9 @@ class EarningService:
             branch_total_earnings.append({
                 'id': str(document['_id']['branch']['_id']),
                 'name': document['_id']['branch']['name'],
-                'totalEarnings': format_to_str_php(document['total'])
+                'payments': [PaymentV2(document) for document in document['payments']],
+                'totalEarnings': format_to_str_php(document['total']),
             })
-        
         if contact_person == 'all':
             contact_person_branches = [str(branch['_id']) for branch in mongo.db.lms_branches.find()]
         else:
@@ -92,7 +147,8 @@ class EarningService:
                     {
                         'id': str(branch['_id']),
                         'name': branch['name'],
-                        'totalEarnings': format_to_str_php(0)
+                        'totalEarnings': format_to_str_php(0),
+                        'payments': []
                     }
                 )
         return branch_total_earnings

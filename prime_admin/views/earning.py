@@ -22,7 +22,7 @@ from prime_admin.services.payment import PaymentService
 from prime_admin.services.earning import EarningService
 from prime_admin.services.saving import SavingService
 from prime_admin.helpers.query_filter import PaymentQueryFilter
-from prime_admin.models_v2 import PaymentV2
+from prime_admin.models_v2 import PaymentV2, StudentV2
 
 
 
@@ -199,7 +199,11 @@ def get_marketer_total_earnings(marketer_id):
     total_earnings_claimed = earning_service.get_total_earnings_approved(currency=True)
     total_savings_claimed = saving_service.get_total_savings_approved(currency=True)
     total_nyc = earning_service.get_total_nyc(currency=True)
-    branches_total_earnings = earning_service.get_branch_total_earnings()
+    branches_total_earnings = [] 
+    for branch in earning_service.get_branch_total_earnings():
+        branch.pop('payments')
+        branches_total_earnings.append(branch)
+    
     response = {
         'totalEarnings': total_earnings,
         'totalSavings': total_savings,
@@ -213,60 +217,33 @@ def get_marketer_total_earnings(marketer_id):
 
 @bp_lms.route('/branches/<string:branch_id>/marketers/<string:marketer_id>/earnings')
 def get_marketer_earnings(branch_id, marketer_id):
-    total_earnings = 0
-    total_savings = 0
-    
-    data = []
-    
     marketer: User = User.objects.get(id=marketer_id)
+    service = PaymentService.find_payments(
+        PaymentQueryFilter(
+            contact_person=marketer_id,
+            branch=branch_id,
+            status='for_approval'
+        )
+    )
+    payments = service.get_data()
+    table_data = []
+    html_status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
 
-    with decimal.localcontext(D128_CTX):
-        total_earnings = Decimal128('0.00')
-        total_savings = Decimal128('0.00')
-        
-        earning: auth_user_earning
-        for earning in marketer.earnings:
-            if earning.payment_mode == "profit_sharing":
-                continue
-
-            if earning.status == "for_approval":
-                total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                student: Registration = Registration.objects.get(id=earning.client.id)
-                
-                if str(student.branch.id) != branch_id:
-                    continue
-                
-                if earning.payment_mode == "full_payment":
-                        remarks = "Full Payment"
-                elif earning.payment_mode == "premium":
-                    remarks = "Premium"
-                elif earning.payment_mode == "installment":
-                    remarks = "Installment"
-                elif earning.payment_mode == "full_payment_promo":
-                    remarks = "Full Payment - Promo"
-                elif earning.payment_mode == "installment_promo":
-                    remarks = "Installment - Promo"
-                elif earning.payment_mode == "premium_promo":
-                    remarks = "Premium - Promo"
-                    
-                status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-info">FOR APPROVAL</div>"""
-                    
-                data.append([
-                    str(earning.client.id),
-                    str(earning.payment_id),
-                    marketer.full_name,
-                    student.full_name,
-                    student.batch_number.number if student.batch_number is not None else '',
-                    str(earning.earnings),
-                    student.schedule,
-                    remarks,
-                    status,
-                ])
+    for payment in payments:
+        payment: PaymentV2
+        table_data.append([
+            str(payment.student.get_id()),
+            str(payment.get_id()),
+            marketer.full_name,
+            payment.student.get_full_name(),
+            payment.student.batch_no.get_no() if payment.student.batch_no is not None else '',
+            payment.get_earnings(currency=True),
+            payment.student.schedule,
+            payment.student.get_payment_mode(),
+            html_status,
+        ])
     response = {
-        'data': data,
-        'totalEarnings': str(total_earnings),
-        'totalSavings': str(total_savings),
+        'data': table_data,
     }
     return jsonify(response)
 
@@ -299,75 +276,6 @@ def approve_marketer_earnings(branch_id, marketer_id):
     return jsonify(response), 200
 
 
-@bp_lms.route('/api/approve-claim-earning', methods=['POST'])
-@login_required
-def approve_claim_earning():
-    """(DEPRECATED)
-
-    Returns:
-        _type_: _description_
-    """
-    pass
-    # student_id = request.json['student_id']
-    # payment_id = request.json['payment_id']
-    # marketer_id = request.json['marketer_id']
-
-    # with mongo.cx.start_session() as session:
-    #     with session.start_transaction():
-    #         with decimal.localcontext(D128_CTX):
-    #             mongo.db.lms_registrations.update_one(
-    #             {"_id": ObjectId(student_id),
-    #             "payments._id": ObjectId(payment_id)},
-    #             {"$set": {
-    #                 "payments.$.status": "approved"
-    #             }}, session=session)
-
-    #             mongo.db.auth_users.update_one(
-    #                 {"_id": ObjectId(marketer_id),
-    #                 "earnings.payment_id": payment_id
-    #                 },
-    #                 {"$set": {
-    #                     "earnings.$.status": "approved"
-    #                 }}, session=session)
-
-    #             mongo.db.auth_users.update_one(
-    #                 {"_id": ObjectId(marketer_id),
-    #                 "earnings.payment_id": ObjectId(payment_id)
-    #                 },
-    #                 {"$set": {
-    #                     "earnings.$.status": "approved"
-    #                 }}, session=session)
-
-    #             mongo.db.auth_users.update_one(
-    #                 {"_id": ObjectId(marketer_id),
-    #                 "earnings.payment": ObjectId(payment_id)
-    #                 },
-    #                 {"$set": {
-    #                     "earnings.$.status": "approved"
-    #                 }}, session=session)
-
-    #             marketer_details =  mongo.db.auth_users.find_one({"_id": ObjectId(marketer_id)})
-
-    #             payment_details = mongo.db.auth_users.find_one(
-    #                 {"_id": ObjectId(marketer_id),
-    #                 "earnings.payment": ObjectId(payment_id)
-    #                 }, session=session)
-
-    #             mongo.db.lms_system_transactions.insert_one({
-    #                 "_id": ObjectId(),
-    #                 "date": get_date_now(),
-    #                 "current_user": current_user.id,
-    #                 "description": "Approve claim -" + marketer_details['fname'],
-    #                 "from_module": "Earnings"
-    #             }, session=session)
-                
-    #             response = {
-    #                 'result': True
-    #             }
-
-    # return jsonify(response)
-
-
 @bp_lms.route('/api/get-earning-transaction-history', methods=['GET'])
 def get_earning_transaction_history():
     _transaction_data = []
@@ -388,114 +296,51 @@ def get_earning_transaction_history():
 @bp_lms.route('/payslip.pdf')
 def print_payslip():
     marketer_id = request.args.get('marketer_id')
-
     marketer: User = User.objects.get(id=marketer_id)
-
-    total_earnings = 0
-    branches_earnings = []
-
-    with decimal.localcontext(D128_CTX):
-        total_earnings = Decimal128('0.00')
-        total_savings = Decimal128('0.00')
-
-        for earning in marketer.earnings:
-            if earning.payment_mode == "profit_sharing":
-                continue
-
-            if earning.status != "for_approval":
-                continue
-
-            total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-            total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-            
-            if not any(d['id'] == str(earning.branch.id) for d in branches_earnings):
-                branches_earnings.append(
-                    {
-                        'id': str(earning.branch.id),
-                        'name': earning.branch.name,
-                        'totalEarnings': earning.earnings,
-                        'students': []
-                    } 
-                )
-            else:
-                for x in branches_earnings:
-                    if x['id'] == str(earning['branch'].id):
-                            if type(x['totalEarnings']) == decimal.Decimal:
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                            else:
-                                x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-
-            for x in branches_earnings:
-                if x['id'] != str(earning['branch'].id):
-                    continue
-                
-                x['students'].append({
-                    'name': earning.client.full_name,
-                    'earning': earning.earnings
-                })
-
+    earning_service = EarningService.find_earnings(marketer_id)
+    total_earnings = earning_service.get_total_earnings(currency=True)
+    branch_total_earnings = earning_service.get_branch_total_earnings()
+    table_data = []
+    
+    for branch in branch_total_earnings:
+        if len(branch['payments']) == 0:
+            continue
+         
+        data = {
+            'id': branch['id'],
+            'name': branch['name'],
+            'totalEarnings': branch['totalEarnings'],
+            'students': []
+        }
+        for payment in branch['payments']:
+            payment: PaymentV2
+            data['students'].append({
+                'name': payment.student.get_full_name(),
+                'earning': payment.get_earnings(currency=True)
+            })
+        table_data.append(data)
     
     local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
     date_now = local_datetime.strftime("%B %d, %Y")
-    
     html = render_template(
-            'lms/earnings/pdf_payslip.html',
-            branches_earnings=branches_earnings,
-            marketer=marketer,
-            date_now=date_now,
-            total_earnings=total_earnings
-            )
-
+        'lms/earnings/pdf_payslip.html',
+        branches_earnings=table_data,
+        marketer=marketer,
+        date_now=date_now,
+        total_earnings=total_earnings
+    )
     return render_pdf(HTML(string=html))
 
 
 @bp_lms.route('/available-earnings.pdf')
 def print_available_earnings():
-    marketers = User.objects()
-
-    total_earnings = 0
-    marketer_earnings = []
-
-    with decimal.localcontext(D128_CTX):
-        total_earnings = Decimal128('0.00')
-        total_savings = Decimal128('0.00')
-
-        marketer: User
-        for marketer in marketers:
-            for earning in marketer.earnings:
-                if earning.payment_mode == "profit_sharing":
-                    continue
-
-                if earning.status != "for_approval":
-                    continue
-
-                total_earnings = Decimal128(total_earnings.to_decimal() + earning.earnings)
-                total_savings = Decimal128(total_savings.to_decimal() + earning.savings)
-                
-                if not any(d['id'] == str(marketer.id) for d in marketer_earnings):
-                    marketer_earnings.append(
-                        {
-                            'id': str(marketer.id),
-                            'name': marketer.full_name,
-                            'totalEarnings': earning.earnings,
-                        }
-                    )
-                else:
-                    for x in marketer_earnings:
-                        if x['id'] == str(marketer.id):
-                                if type(x['totalEarnings']) == decimal.Decimal:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'] + earning.earnings)
-                                else:
-                                    x['totalEarnings'] = Decimal128(x['totalEarnings'].to_decimal() + earning.earnings)
-    
+    marketer_earnings = EarningService.get_contact_persons_earning()
     local_datetime = get_date_now().replace(tzinfo=pytz.utc).astimezone(TIMEZONE)
     date_now = local_datetime.strftime("%B %d, %Y")
     
     html = render_template(
-            'lms/earnings/pdf_available_earnings.html',
-            marketer_earnings=marketer_earnings,
-            date_now=date_now,
-            total_earnings=total_earnings
-            )
-
+        'lms/earnings/pdf_available_earnings.html',
+        marketer_earnings=marketer_earnings,
+        date_now=date_now,
+    )
     return render_pdf(HTML(string=html))

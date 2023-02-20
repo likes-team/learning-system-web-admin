@@ -238,25 +238,19 @@
                 var api = this.api();
                 var rows = api.rows( {page:'current'} ).nodes();
                 var last=null;
-                var total_earnings = 0.00;
                 var lastID = '';
 
                 api.column(2, {page:'current'} ).data().each( function ( group, i ) {
                     var row_data = api.rows({page:'current'} ).row(i).data();
                     var groupID = row_data[0];
 
-                    total_earnings += parseFloat(row_data[5]);
-
                     if ( last !== group ) {
-                        console.log(lastID);
                         lastID = row_data[0];
 
                         $(rows).eq( i ).before(
                             `<tr style="background-color: lightcyan !important"><td id="td_${groupID}" colspan="8"><strong>${group} Earnings: </strong></td></tr>`
                         );
-                        
                         last = group;
-                        total_earnings = 0.00;
                     }
                 } );
             },
@@ -404,6 +398,8 @@
                                     }else{
                                         toastr.error("Requesting claim Failed", "Error Occured!");
                                     }
+                                    getProfitSharingEarnings();
+                                    getMarketerTotalEarnings();
                                 }
                             });
                         }

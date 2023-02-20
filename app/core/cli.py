@@ -258,39 +258,39 @@ def update_payments():
         print("Updated:", student.full_registration_number)
 
 
-@bp_core.cli.command("move_earnings")
-def move_earnings():
-    from bson.objectid import ObjectId
+# @bp_core.cli.command("move_earnings")
+# def move_earnings():
+#     from bson.objectid import ObjectId
 
-    # old_account: User = User.objects.get(id=)
-    old_account = mongo.db.auth_users.find_one({"_id": ObjectId("6100b2fe033b20cb17477807")})
-    new_account = mongo.db.auth_users.find_one({"_id": ObjectId("6100b2346d74f9d4bc2eb056")})
-    # new_account: User = User.objects.get(id=ObjectId("61147ed9bf92c2b45fc25ed2"))
+#     # old_account: User = User.objects.get(id=)
+#     old_account = mongo.db.auth_users.find_one({"_id": ObjectId("6100b2fe033b20cb17477807")})
+#     new_account = mongo.db.auth_users.find_one({"_id": ObjectId("6100b2346d74f9d4bc2eb056")})
+#     # new_account: User = User.objects.get(id=ObjectId("61147ed9bf92c2b45fc25ed2"))
     
-    print("old account: ", old_account['earnings'])
-    print("new account: ", new_account['earnings'])
+#     print("old account: ", old_account['earnings'])
+#     print("new account: ", new_account['earnings'])
     
-    # earning: Earning
-    for earning in old_account['earnings']:
-        # print(earning)
+#     # earning: Earning
+#     for earning in old_account['earnings']:
+#         # print(earning)
         
-        contact_person_earning = {
-            "_id": earning['_id'],
-            "payment_mode": earning['payment_mode'],
-            "savings": earning['savings'],
-            "earnings": earning['earnings'],
-            "branch": earning['branch'],
-            "client": earning['client'],
-            "date": earning['date'],
-            "registered_by": ObjectId(earning['registered_by']),
-            "payment_id": ObjectId(earning['payment_id']),
-            'status': earning.get('status', '')
-        }
+#         contact_person_earning = {
+#             "_id": earning['_id'],
+#             "payment_mode": earning['payment_mode'],
+#             "savings": earning['savings'],
+#             "earnings": earning['earnings'],
+#             "branch": earning['branch'],
+#             "client": earning['client'],
+#             "date": earning['date'],
+#             "registered_by": ObjectId(earning['registered_by']),
+#             "payment_id": ObjectId(earning['payment_id']),
+#             'status': earning.get('status', '')
+#         }
         
-        mongo.db.auth_users.update_one({"_id": new_account["_id"]},
-        {"$push": {
-            "earnings": contact_person_earning,
-        }})
+#         mongo.db.auth_users.update_one({"_id": new_account["_id"]},
+#         {"$push": {
+#             "earnings": contact_person_earning,
+#         }})
     
     # print("new account updated", new_account.earnings)
     

@@ -445,19 +445,6 @@ def new_payment():
         "contact_person": ObjectId(client.contact_person.id)
     }
 
-    contact_person_earning = {
-        "_id": ObjectId(),
-        "payment_mode": client.payment_mode,
-        "savings": Decimal128(str(savings)),
-        "earnings": Decimal128(str(earnings)),
-        "branch": client.branch.id,
-        "client": ObjectId(client_id),
-        "date": convert_to_utc(date, "date_from"),
-        "registered_by": current_user.id,
-        "payment_id": payment["_id"],
-        "created_at": get_date_now()
-    }
-
     with mongo.cx.start_session() as session:
         with session.start_transaction():
             mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
@@ -474,11 +461,6 @@ def new_payment():
             }}, session=session)
 
             Payment.pay_registration(payment, session=session)
-
-            mongo.db.auth_users.update_one({"_id": client.contact_person.id},
-            {"$push": {
-                "earnings": contact_person_earning,
-            }}, session=session)
 
             service.process_supplies(session)
 
@@ -602,19 +584,6 @@ def upgrade_to_premium():
             "contact_person": ObjectId(client.contact_person.id)
         }
 
-        contact_person_earning = {
-            "_id": ObjectId(),
-            "payment_mode": client.payment_mode,
-            "savings": Decimal128(str(savings)),
-            "earnings": Decimal128(str(earnings)),
-            "branch": client.branch.id,
-            "client": ObjectId(client_id),
-            "date": convert_to_utc(date, "date_from"),
-            "registered_by": current_user.id,
-            "payment_id": payment["_id"],
-            "created_at": get_date_now()
-        }
-
         with mongo.cx.start_session() as session:
             with session.start_transaction():
                 mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
@@ -629,12 +598,6 @@ def upgrade_to_premium():
                 }}, session=session)
 
                 Payment.pay_registration(payment, session=session)
-
-                mongo.db.auth_users.update_one({"_id": client.contact_person.id},
-                {"$push": {
-                    "earnings": contact_person_earning
-                }}, session=session)
-
 
                 payment_description = "Upgrade to premium - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
                     id=client.full_registration_number,

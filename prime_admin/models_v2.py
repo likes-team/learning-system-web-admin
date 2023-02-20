@@ -11,6 +11,14 @@ class Document(object):
 
     def get_id(self):
         return self.document['_id']
+
+
+class UserV2(Document):
+    # def __init__(self, document):
+    #     super().__init__(document)
+    
+    def get_full_name(self):
+        return "{} {}".format(self.document.get('fname'), self.document.get('lname'))
     
 
 class PaymentV2(Document):

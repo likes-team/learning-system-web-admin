@@ -27,6 +27,8 @@ class Payment(db.EmbeddedDocument):
     savings = db.DecimalField()
     status = db.StringField()
     branch = db.ReferenceField('Branch')
+    created_at = db.DateTimeField()
+    contact_person = db.ReferenceField('User')
 
     @property
     def id(self):

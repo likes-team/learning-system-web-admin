@@ -163,11 +163,6 @@ def register():
                 
                 Payment.pay_registration(registration.get_payment_dict(), session=session)
                 
-                mongo.db.auth_users.update_one({"_id": client.contact_person.id},
-                {"$push": {
-                    "earnings": registration.get_marketer_earning_dict()
-                }}, session=session)
-                
                 registration.process_supplies(session)
 
                 register_description = "New student - {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
