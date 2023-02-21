@@ -415,11 +415,11 @@ def move_earnings(oid):
             total_failed += 1
             continue
         
-        mongo.db.lms_registration_payments.update_one({'_id': ObjectId(payment)}, {
-            '$set': {
-                'contact_person': ObjectId(_id)
-            }
-        })
+        # mongo.db.lms_registration_payments.update_one({'_id': ObjectId(payment)}, {
+        #     '$set': {
+        #         'contact_person': ObjectId(_id)
+        #     }
+        # })
         total_updated += 1
         # print("updated: ", payment)
     print("Total failed: ", total_failed)

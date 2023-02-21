@@ -17,6 +17,9 @@ from prime_admin.models import Branch, FundWallet, Registration
 from prime_admin.services.fund_wallet import BusinessExpensesService
 from prime_admin.utils.date import format_utc_to_local
 from prime_admin.helpers.employee import get_employees
+from prime_admin.services.student import StudentService
+from prime_admin.helpers.query_filter import StudentQueryFilter
+from prime_admin.models_v2 import StudentV2
 
 
 
@@ -877,4 +880,24 @@ def fetch_employees():
     response = {
         'data': data
     }
-    return jsonify(response)    
+    return jsonify(response)
+
+
+@bp_lms.route('/fetch-students')
+def fetch_students():
+    branch = request.args.get('branch')
+    service = StudentService.find_students(StudentQueryFilter(
+        branch=branch
+    ))
+    students = service.get_data()
+    data = []
+    
+    for student in students:
+        student: StudentV2
+        data.append({
+            'full_name': student.get_full_name()
+        })
+    response = {
+        'data': data
+    }
+    return jsonify(response)

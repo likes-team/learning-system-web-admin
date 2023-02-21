@@ -431,7 +431,7 @@
                 $("#lbl_billing_month_from").html("Cut-off Month From");
                 $("#lbl_billing_month_to").html("Cut-off Month to");
 
-                $("#label_description").html('Contact Person');
+                $("#label_description").html('Employee');
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
                 $("#qty").rules('remove');
@@ -494,6 +494,22 @@
                 } else if(selectedCategory == "Employee Benefits"){
                 } else if(selectedCategory == "Bookeeper's Retainers Fee"){
                 }
+            } else if(selectedCategory == "SNPL Fee"){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+
+                $.getJSON(`/learning-management/fetch-students?branch=${$("#branch_expenses").val()}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.full_name).text(item.full_name));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
             }
         });
 
