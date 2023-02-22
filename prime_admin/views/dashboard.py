@@ -46,6 +46,13 @@ def dashboard():
     if current_user.role.name not in ["Admin", 'Secretary', 'Partner']:
         return render_template('auth/authorization_error.html')
 
+    if current_user.role.name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Admin":
+        branches = Branch.objects
+
     dashboard_service = DashboardService()
     sales_today = dashboard_service.get_sales_today()
     dashboard_service.reset_match()
@@ -55,7 +62,7 @@ def dashboard():
     total = dashboard_service.get_total()
     
     options = {
-        'branches': Branch.objects(),
+        'branches': branches,
         'box1': DashboardBox("Number of enrollees","Current", 0),
         'box2': DashboardBox("Total Sales","Montly", 0),
         'box3': DashboardBox("Gross Income","Total users", 0),
@@ -88,8 +95,13 @@ def fetch_chart_sales_today():
 def fetch_sales_breakdown():
     date_from = request.args['date_from'] if request.args['date_from'] != '' else None
     date_to = request.args['date_to'] if request.args['date_to'] != '' else None
+    branch = request.args['branch'] if request.args['branch'] != 'all' else None
 
-    dashboard_service = DashboardService(date_from=date_from, date_to=date_to)
+    dashboard_service = DashboardService(
+        date_from=date_from,
+        date_to=date_to,
+        branch=branch
+    )
     total_installment = dashboard_service.get_total_installment()
     total_full_payment = dashboard_service.get_total_full_payment()
     total_premium_payment = dashboard_service.get_total_premium_payment()

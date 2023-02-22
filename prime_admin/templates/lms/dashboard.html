@@ -66,9 +66,10 @@
         function updateSalesBreakdown(){
             var dateFrom = $("#filter_date_from").val();
             var dateTo = $("#filter_date_to").val();
+            var branch = $("#filter_branch").val();
 
             $.getJSON(
-                `/learning-management/dashboard/fetch-sales-breakdown?date_from=${dateFrom}&date_to=${dateTo}`, function (response) {
+                `/learning-management/dashboard/fetch-sales-breakdown?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
                     $("#total_installment").html(response.data.total_installment);
                     $("#total_full_payment").html(response.data.total_full_payment);
                     $("#total_premium_payment").html(response.data.total_premium_payment);
@@ -84,6 +85,10 @@
         });
 
         $("#filter_date_to").change(function(){
+            updateSalesBreakdown();
+        });
+
+        $("#filter_branch").change(function(){
             updateSalesBreakdown();
         });
     });
@@ -174,6 +179,19 @@
                                     <div class="position-relative form-group">
                                         <label for="filter_date_to" class="">Date To</label>
                                         <input id="filter_date_to" type="date" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="position-relative form-group">
+                                        <label for="filter_branch" class="">Branch</label>
+                                        <select name="filter_branch" id="filter_branch" class="form-control">
+                                            <option value="all">All</option>
+                                            {% for branch in options['branches'] %}
+                                            <option value="{{ branch.id }}">
+                                                {{ branch.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
                             </div>
