@@ -37,9 +37,7 @@ class StudentService:
                 'foreignField': '_id',
                 'as': 'contact_person'
             }},
-            {'$sort': {
-                'registration_date': pymongo.DESCENDING
-            }}
+            {'$sort': query_filter.get_sort()}
         ]
 
         if query_filter.get_start():

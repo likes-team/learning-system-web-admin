@@ -126,10 +126,18 @@ class StudentV2(Document):
             return 'PAID'
         return 'NOT PAID'
     
-    def get_full_name(self):
-        if self.mname:
-            return self.fname + " " + self.mname + " " + self.lname
-        return self.fname + " " + self.lname
+    def get_full_name(self, reverse=False):
+        if reverse:
+            if self.mname:
+                return self.fname + " " + self.mname + " " + self.lname
+            else:
+                return self.fname + " " + self.lname
+        else:
+            if self.mname:
+                return self.lname + " " + self.mname + " " + self.fname
+            else:
+                return self.lname + " " + self.fname
+            
 
     def get_reviewers(self):
         reviewers: list = []

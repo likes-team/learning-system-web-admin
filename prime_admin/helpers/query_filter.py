@@ -1,14 +1,15 @@
+import pymongo
 from bson import ObjectId
 from flask_login import current_user
 from prime_admin.utils.date import convert_date_input_to_utc
 
 
 class BaseQueryFilter(object):
-    def __init__(self, start, length):
+    def __init__(self, start, length, sort):
         self.match = None
         self.start = start
         self.length = length
-
+        self.sort = sort
         if start:
             self.start = int(start)
         if length:
@@ -22,15 +23,21 @@ class BaseQueryFilter(object):
     
     def get_length(self):
         return self.length
+    
+    def get_sort(self):
+        return self.sort
 
 
 class StudentQueryFilter(BaseQueryFilter):
     def __init__(
         self, branch=None, batch_no=None, schedule=None,
         payment_status=None, payment_mode=None, session=None,
-        date_from=None, date_to=None, search_value=None, start=None, length=None
+        date_from=None, date_to=None, search_value=None, start=None, length=None, sort=None
     ):
-        super(StudentQueryFilter, self).__init__(start, length)
+        if sort is None:
+            sort = {'registration_date': pymongo.DESCENDING}
+        
+        super(StudentQueryFilter, self).__init__(start, length, sort)
         self.branch = branch
         self.batch_no = batch_no
         self.session = session
@@ -99,9 +106,9 @@ class PaymentQueryFilter(BaseQueryFilter):
     def __init__(
         self, contact_person=None,
         branch=None, batch_no=None,
-        status=None, start=None, length=None
+        status=None, start=None, length=None, sort=None
     ):
-        super(PaymentQueryFilter, self).__init__(start, length)
+        super(PaymentQueryFilter, self).__init__(start, length, sort)
         self.branch = branch
         self.batch_no = batch_no
         match = {}

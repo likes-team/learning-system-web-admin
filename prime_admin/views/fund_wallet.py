@@ -887,7 +887,8 @@ def fetch_employees():
 def fetch_students():
     branch = request.args.get('branch')
     service = StudentService.find_students(StudentQueryFilter(
-        branch=branch
+        branch=branch,
+        sort={'lname': pymongo.ASCENDING}
     ))
     students = service.get_data()
     data = []
@@ -895,7 +896,7 @@ def fetch_students():
     for student in students:
         student: StudentV2
         data.append({
-            'full_name': student.get_full_name()
+            'full_name': student.get_full_name(reverse=True)
         })
     response = {
         'data': data
