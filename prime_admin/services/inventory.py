@@ -37,7 +37,6 @@ class InventoryService:
         
         with mongo.cx.start_session() as session:
             with session.start_transaction():
-                print("quantity:", quantity)
                 mongo.db.lms_student_supplies.update_one(
                     {'_id': ObjectId(supply_id)},
                     {"$inc": {
@@ -52,8 +51,8 @@ class InventoryService:
                     'brand': brand,
                     'price': Decimal128(price),
                     'quantity': quantity,
-                    'total_amount_due': Decimal128(total_amount_due),
-                    'confirm_by': current_user.id
+                    'total_amount': Decimal128(total_amount_due),
+                    'confirm_by': current_user.id,
                 }, session=session)
 
 
@@ -97,8 +96,86 @@ class InventoryService:
 
 
     @staticmethod
-    def find_student_supply_transactions(supply_id, action_type):
-        query = list(mongo.db.lms_student_supplies_transactions.find({
+    def inbound_office_supply(description, branch, qty, unit_price, session=None):
+        supply = mongo.db.lms_office_supplies.find_one({
+            'description': description,
+            'branch': ObjectId(branch),
+        })
+        old_replacement = supply.get('replacement', 0)
+        if old_replacement == 0:
+            new_replacement = 0
+        else:
+            new_replacement = int(old_replacement - int(qty))
+
+        if new_replacement < 0:
+            new_replacement = 0
+            
+        # increment remaining materials value
+        mongo.db.lms_office_supplies.update_one({
+            'description': description,
+            'branch': ObjectId(branch),
+        }, {
+            '$inc': {'remaining': int(qty)},
+            '$set': {'price': Decimal128(unit_price), 'replacement': new_replacement}
+        },session=session)
+        
+        mongo.db.lms_office_supplies_transactions.insert_one({
+            'type': 'inbound',
+            'supply_id': ObjectId(supply['_id']),
+            'date': get_utc_date_now(),
+            'quantity': qty,
+            'remarks': 'from expenses',
+            'withdraw_by': current_user.id,
+            'confirm_by': current_user.id
+        }, session=session)
+
+    @staticmethod
+    def outbound_office_supply(supply_id,  quantity, session=None):
+        supply = mongo.db.lms_office_supplies.find_one({
+            '_id': ObjectId(supply_id),
+        })
+
+        old_replacement = supply.get('replacement', 0)
+        if old_replacement == 0:
+            new_replacement = 0
+        else:
+            new_replacement = int(old_replacement - int(quantity))
+
+        if new_replacement < 0:
+            new_replacement = 0
+
+        mongo.db.lms_office_supplies.update_one({
+            '_id': ObjectId(supply['_id']),
+        },
+        {'$set': {
+            'replacement': new_replacement
+        },
+        '$inc': {
+            'remaining': 0 - quantity,
+            'released': quantity
+        }}, session=session)
+        
+        mongo.db.lms_office_supplies_transactions.insert_one({
+            'type': 'outbound',
+            'supply_id': ObjectId(supply['_id']),
+            'date': get_utc_date_now(),
+            'quantity': quantity,
+            'remarks': '',
+            'withdraw_by': current_user.id,
+            'confirm_by': current_user.id
+        }, session=session)
+
+
+    @staticmethod
+    def find_supply_transactions(supply_id, action_type, from_what):
+        if from_what == 'student_supplies':
+            table = mongo.db.lms_student_supplies_transactions
+        elif from_what == 'office_supplies':
+            table = mongo.db.lms_office_supplies_transactions
+        else:
+            raise("Inception Error: invalid from_what value")
+
+        query = list(table.find({
             'supply_id': ObjectId(supply_id),
             'type': action_type
         }))

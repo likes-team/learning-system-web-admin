@@ -515,3 +515,39 @@ def format_to_str_php(number, replacement='0.00'):
     if isinstance(number, Decimal):
         return "{:.2f}".format(number)
     return "{:.2f}".format(Decimal(str(number)))
+
+from prime_admin.services.inventory import InventoryService
+
+
+@bp_core.cli.command('move_supply_transactions')
+def move_supply_transactions():
+    query = mongo.db.lms_student_supplies.find()
+    
+    for document in query:
+        transactions = document.get('transactions', [])
+        # transactions = InventoryService.find_supply_transactions(document['_id'], 'inbound', supplies_type)
+
+        for transact in transactions:
+            date = transact.get('date')
+            if date is None:
+                mongo.db.lms_student_supplies_transactions.insert_one({
+                    'type': 'inbound',
+                    'supply_id': ObjectId(document['_id']),
+                    'brand': transact.get('brand'),
+                    'price': transact.get('price'),
+                    'quantity': transact.get('quantity'),
+                    'total_amount': transact.get('total_amount'),
+                    'confirm_by': transact.get('confirm_by')
+                })
+            else:
+                mongo.db.lms_student_supplies_transactions.insert_one({
+                    'type': 'outbound',
+                    'supply_id': ObjectId(document['_id']),
+                    'date': transact.get('date'),
+                    'quantity': transact.get('quantity'),
+                    'remarks': '',
+                    'withdraw_by': transact.get('withdraw_by'),
+                    'confirm_by': transact.get('confirm_by')
+                })
+            
+        print("Success!")

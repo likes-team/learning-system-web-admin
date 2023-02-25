@@ -16,6 +16,7 @@ from prime_admin.models import InboundOutbound, Branch
 from flask_weasyprint import HTML, render_pdf
 from app import mongo
 from prime_admin.globals import convert_to_utc, D128_CTX
+from prime_admin.services.inventory import InventoryService
 
 
 
@@ -55,29 +56,8 @@ def office_supplies():
 def outbound_office_supply():
     supply_id = request.form['outbound_supply_id']
     quantity = int(request.form['quantity'])
-    supply : OfficeSupply = OfficeSupply.objects.get(id=supply_id)
 
-    if supply is None:
-        raise Exception("Product cannot be found")
-    
-    supply.remaining = supply.remaining - quantity
-    supply.released = supply.released + quantity if supply.released is not None else quantity
-
-    if supply.replacement is None:
-        supply.replacement = int(quantity)
-    else:
-        supply.replacement = int(supply.replacement + quantity)
-
-    supply.transactions.append(
-        InboundOutbound(
-            quantity=quantity,
-            date=datetime.utcnow(),
-            remarks='',
-            withdraw_by='',
-            confirm_by=User.objects.get(id=current_user.id)
-        )
-    )
-    supply.save()
+    InventoryService.outbound_office_supply(supply_id, quantity)
     flash('Process Successfully!','success')
     return redirect(url_for('lms.office_supplies'))
 
@@ -116,8 +96,8 @@ def print_office_supplies_summary():
     with decimal.localcontext(D128_CTX):
         for supply in query:
             total_used = 0
-            transactions = supply.get('transactions', [])
-
+            
+            transactions = InventoryService.find_supply_transactions(supply['_id'], 'outbound', 'office_supplies')
             for trans in transactions:
                 quantity = trans.get('quantity', 0)
                 date = trans.get('date', None)

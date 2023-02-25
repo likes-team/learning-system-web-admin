@@ -50,13 +50,9 @@ def dt_monthly_transactions():
         tone, ttwo, tthree, tfour, tfive = 0, 0, 0, 0, 0
         tsix,tseven,teight, tnine, thirty = 0, 0, 0, 0, 0
         thone = 0
-        
-        if supplies_type == "student_supplies":
-            transactions = InventoryService.find_student_supply_transactions(supply['_id'], 'outbound')
-        else:
-            transactions = supply.get('transactions', [])
         total_used = 0
         
+        transactions = InventoryService.find_supply_transactions(supply['_id'], 'outbound', supplies_type)
         for trans in transactions:
             date = trans.get('date', None)
             local_date = convert_utc_to_local(date)
@@ -230,11 +226,7 @@ def dt_summary():
             thone = 0
             total_used = 0
             
-            if supplies_type == "student_supplies":
-                transactions = InventoryService.find_student_supply_transactions(supply['_id'], 'inbound')
-            else:
-                transactions = supply.get('transactions', [])
-
+            transactions = InventoryService.find_supply_transactions(supply['_id'], 'inbound', supplies_type)
             for trans in transactions:
                 local_date = convert_utc_to_local(trans.get('date', None))
                 if local_date is None:
