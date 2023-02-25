@@ -46,6 +46,7 @@ class BusinessExpensesService:
             'Business Permit': initial.copy(),
             'Employee Benefits': initial.copy(),
             'Bookeeper Retainer Fee': initial.copy(),
+            'SNPL Fee': initial.copy(),
             'total': initial.copy()
         }
         self.data_conversion = {
@@ -60,6 +61,7 @@ class BusinessExpensesService:
             'Business Permit': 'BUSINESS PERMIT',
             'Employee Benefits': 'EMPLOYEE BENEFITS',
             'Bookeeper Retainer Fee': 'BOOKEEPERs RETAINERS FEE',
+            'SNPL Fee': "SNPL FEE",
             'total': 'TOTAL OF EXPENDITURE'
         }
 
