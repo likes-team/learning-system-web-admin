@@ -223,9 +223,41 @@
         </div>
         <div class="mb-12 card">
             <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-1 col-xs-1">
+                        <div class="position-relative form-group">
+                            <label for="filter_year" class="">Year</label>
+                            <select id="filter_year" class="form-control" required>
+                                <option value="all">All</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-1 col-xs-2">
+                        <div class="position-relative form-group">
+                            <label for="filter_month" class="">Month</label>
+                            <select id="filter_month" class="form-control" required>
+                                <option value="all">All</option>
+                                <option value="1">Jan</option>
+                                <option value="2">Feb</option>
+                                <option value="3">Mar</option>
+                                <option value="4">Apr</option>
+                                <option value="5">May</option>
+                                <option value="6">Jun</option>
+                                <option value="7">Jul</option>
+                                <option value="8">Aug</option>
+                                <option value="9">Sep</option>
+                                <option value="10">Oct</option>
+                                <option value="11">Nov</option>
+                                <option value="12">Dec</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-lg-6 col-xl-4"></div>
-    
                     <div class="col-lg-6 col-xl-4">
                         <div class="card mb-3 widget-content">
                             <div class="widget-content-wrapper">
@@ -260,39 +292,6 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
-                        <div class="form-row">
-                            <div class="col-md-1 col-xs-1">
-                                <div class="position-relative form-group">
-                                    <label for="filter_year" class="">Year</label>
-                                    <select id="filter_year" class="form-control" required>
-                                        <option value="all">All</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2021">2021</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-1 col-xs-2">
-                                <div class="position-relative form-group">
-                                    <label for="filter_month" class="">Month</label>
-                                    <select id="filter_month" class="form-control" required>
-                                        <option value="all">All</option>
-                                        <option value="1">Jan</option>
-                                        <option value="2">Feb</option>
-                                        <option value="3">Mar</option>
-                                        <option value="4">Apr</option>
-                                        <option value="5">May</option>
-                                        <option value="6">Jun</option>
-                                        <option value="7">Jul</option>
-                                        <option value="8">Aug</option>
-                                        <option value="9">Sep</option>
-                                        <option value="10">Oct</option>
-                                        <option value="11">Nov</option>
-                                        <option value="12">Dec</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
                         <div class="table-responsive">
                             <table id="tbl_supplies"
                                 class="align-middle mb-0 table table-bordered table-striped table-hover">

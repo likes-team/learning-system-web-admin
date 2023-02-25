@@ -15,6 +15,14 @@ def get_local_date_now():
     return local
 
 
+def get_utc_date_now():
+    date_string = str(datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"))
+    naive = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+    local_dt = TIMEZONE.localize(naive, is_dst=None)
+    utc_dt = local_dt.astimezone(pytz.utc)
+    return utc_dt
+
+
 def get_utc_today_start_date(date=None):
     if date:
         local = date

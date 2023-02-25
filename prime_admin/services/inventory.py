@@ -1,7 +1,9 @@
+import decimal
 from bson import ObjectId
+from bson.decimal128 import Decimal128
 from flask_login import current_user
 from app import mongo
-from prime_admin.utils.date import get_local_date_now
+from prime_admin.utils.date import get_utc_date_now
 
 
 
@@ -30,8 +32,29 @@ class InventoryService:
 
 
     @staticmethod
-    def inbound_student_supply(supply_id, quantity, brand=None, price=None):
-        pass
+    def inbound_student_supply(supply_id, quantity, brand=None, price=0):
+        total_amount_due = decimal.Decimal(price) * int(quantity)
+        
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                print("quantity:", quantity)
+                mongo.db.lms_student_supplies.update_one(
+                    {'_id': ObjectId(supply_id)},
+                    {"$inc": {
+                        'reserve':  quantity
+                    }},
+                    session=session
+                )
+                mongo.db.lms_student_supplies_transactions.insert_one({
+                    'type': 'inbound',
+                    'supply_id': ObjectId(supply_id),
+                    'date': get_utc_date_now(),
+                    'brand': brand,
+                    'price': Decimal128(price),
+                    'quantity': quantity,
+                    'total_amount_due': Decimal128(total_amount_due),
+                    'confirm_by': current_user.id
+                }, session=session)
 
 
     @staticmethod
@@ -49,8 +72,8 @@ class InventoryService:
 
         if new_replacement < 0:
             new_replacement = 0
-            
-        return mongo.db.lms_student_supplies.update_one({
+
+        mongo.db.lms_student_supplies.update_one({
             'branch': ObjectId(branch),
             'description': student_supply_descriptions[description],
         },
@@ -60,14 +83,60 @@ class InventoryService:
         '$inc': {
             'remaining': 0 - quantity,
             'released': quantity
-        },
-        '$push': {
-            'transactions': {
-                '_id': ObjectId(),
-                'quantity': quantity,
-                'date': get_local_date_now(),
-                'remarks': '',
-                'withdraw_by': 'Registration',
-                'confirm_by': current_user.id
-            }
         }}, session=session)
+        
+        mongo.db.lms_student_supplies_transactions.insert_one({
+            'type': 'outbound',
+            'supply_id': ObjectId(supply['_id']),
+            'date': get_utc_date_now(),
+            'quantity': quantity,
+            'remarks': '',
+            'withdraw_by': 'Registration',
+            'confirm_by': current_user.id
+        }, session=session)
+
+
+    @staticmethod
+    def find_student_supply_transactions(supply_id, action_type):
+        query = list(mongo.db.lms_student_supplies_transactions.find({
+            'supply_id': ObjectId(supply_id),
+            'type': action_type
+        }))
+        data = []
+        for document in query:
+            # TODO: Convert to class object
+            data.append(document)
+        return data
+    
+    
+    @staticmethod
+    def deposit_stocks(supply_id):
+        query = mongo.db.lms_student_supplies.find_one({'_id': ObjectId(supply_id)})
+        reserve = query.get('reserve', 0)
+        if reserve == 0:
+            raise ValueError("0 reserve stocks!")
+        
+        remaining = query.get('remaining', 0)
+        new_remaining = int(reserve + remaining)
+        
+        with mongo.cx.start_session() as session:
+            with session.start_transaction():
+                mongo.db.lms_student_supplies_deposits.insert_one({
+                    'supply_id': ObjectId(supply_id),
+                    'previous_reserve': reserve,
+                    'new_reserve': 0,
+                    'previous_remaining': remaining,
+                    'new_remaining': new_remaining,
+                    'date': get_utc_date_now(),
+                })
+                
+                mongo.db.lms_student_supplies.update_one({
+                        '_id': ObjectId(supply_id)
+                    },
+                    {"$set": {
+                       'reserve': 0
+                    },
+                    "$inc": {
+                        'remaining': reserve
+                    }}, session=session
+                )

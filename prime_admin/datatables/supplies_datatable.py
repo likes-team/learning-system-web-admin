@@ -5,6 +5,7 @@ from app import mongo
 from prime_admin import bp_lms
 from prime_admin.globals import D128_CTX
 from prime_admin.utils.date import convert_utc_to_local
+from prime_admin.services.inventory import InventoryService
 
 
 
@@ -50,7 +51,10 @@ def dt_monthly_transactions():
         tsix,tseven,teight, tnine, thirty = 0, 0, 0, 0, 0
         thone = 0
         
-        transactions = supply.get('transactions', [])
+        if supplies_type == "student_supplies":
+            transactions = InventoryService.find_student_supply_transactions(supply['_id'], 'outbound')
+        else:
+            transactions = supply.get('transactions', [])
         total_used = 0
         
         for trans in transactions:
@@ -217,19 +221,28 @@ def dt_summary():
     
     with decimal.localcontext(D128_CTX):
         for supply in query:
+            one, two, three, four, five = 0, 0, 0, 0, 0
+            six, seven, eight, nine, ten = 0, 0, 0, 0, 0
+            eleven, twelve, thirteen, fourteen, fifteen = 0, 0, 0, 0, 0
+            sixteen, seventeen, eighteen, nineteen, twenty = 0, 0, 0, 0, 0
+            tone, ttwo, tthree, tfour, tfive = 0, 0, 0, 0, 0
+            tsix,tseven,teight, tnine, thirty = 0, 0, 0, 0, 0
+            thone = 0
             total_used = 0
-            transactions = supply.get('transactions', [])
+            
+            if supplies_type == "student_supplies":
+                transactions = InventoryService.find_student_supply_transactions(supply['_id'], 'inbound')
+            else:
+                transactions = supply.get('transactions', [])
 
             for trans in transactions:
-                quantity = trans.get('quantity', 0)
-                date = trans.get('date', None)
-                
-                if date is None:
+                local_date = convert_utc_to_local(trans.get('date', None))
+                if local_date is None:
                     continue
                 
-                year = date.year
-                month = date.month
-
+                year = local_date.year
+                month = local_date.month
+         
                 if filter_year != "all":
                     if year != int(filter_year):
                         continue
@@ -237,6 +250,70 @@ def dt_summary():
                 if filter_month != "all":
                     if month != int(filter_month):
                         continue
+
+                quantity = trans.get('quantity', 0)
+                if local_date.day == 1:
+                    one += quantity
+                elif local_date.day == 2:
+                    two += quantity
+                elif local_date.day == 3:
+                    three += quantity
+                elif local_date.day == 4:
+                    four += quantity
+                elif local_date.day == 5:
+                    five += quantity
+                elif local_date.day == 6:
+                    six += quantity
+                elif local_date.day == 7:
+                    seven += quantity
+                elif local_date.day == 8:
+                    eight += quantity
+                elif local_date.day == 9:
+                    nine += quantity
+                elif local_date.day == 10:
+                    ten += quantity
+                elif local_date.day == 11:
+                    eleven += quantity
+                if local_date.day == 12:
+                    twelve += quantity
+                elif local_date.day == 13:
+                    thirteen += quantity
+                if local_date.day == 14:
+                    fourteen += quantity
+                elif local_date.day == 15:
+                    fifteen += quantity
+                if local_date.day == 16:
+                    sixteen += quantity
+                elif local_date.day == 17:
+                    seventeen += quantity
+                if local_date.day == 18:
+                    eighteen += quantity
+                elif local_date.day == 19:
+                    nineteen += quantity
+                if local_date.day == 20:
+                    twenty += quantity
+                elif local_date.day == 21:
+                    tone += quantity
+                if local_date.day == 22:
+                    ttwo += quantity
+                elif local_date.day == 23:
+                    tthree += quantity
+                if local_date.day == 24:
+                    tfour += quantity
+                elif local_date.day == 25:
+                    tfive += quantity
+                elif local_date.day == 26:
+                    tsix += quantity
+                elif local_date.day == 27:
+                    tseven += quantity
+                elif local_date.day == 28:
+                    teight += quantity
+                elif local_date.day == 29:
+                    tnine += quantity
+                elif local_date.day == 30:
+                    thirty += quantity
+                elif local_date.day == 31:
+                    thone += quantity
                 total_used += quantity
                         
             if supplies_type == "office_supplies":
@@ -257,10 +334,20 @@ def dt_summary():
                     str(supply['_id']),
                     '',
                     supply['description'],
+                    one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+                    eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
+                    supply.get('reserve', ''),
+                    '',
                     supply.get('remaining', ''),
                     supply.get('replacement', ''),
                 ]
                 
+            # Replace zeros to empty string
+            i = 0
+            for x in row:
+                if x == 0:
+                    row[i] = ''
+                i += 1
             table_data.append(row)
         
     total_records = mongo_table.find(_filter).count()
