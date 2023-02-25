@@ -1,6 +1,7 @@
 import decimal
 from bson import ObjectId, Decimal128
 from flask import request, jsonify
+from flask_cors import cross_origin
 from app import mongo
 from prime_admin import bp_lms
 from prime_admin.globals import D128_CTX
@@ -10,6 +11,7 @@ from prime_admin.services.inventory import InventoryService
 
 
 @bp_lms.route('/datatables/supplies/monthly-transactions')
+@cross_origin()
 def dt_monthly_transactions():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
@@ -184,6 +186,7 @@ def dt_monthly_transactions():
 
 
 @bp_lms.route('/datatables/supplies/summary')
+@cross_origin()
 def dt_summary():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
