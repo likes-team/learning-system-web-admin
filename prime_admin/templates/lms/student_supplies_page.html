@@ -14,11 +14,19 @@
     $(document).ready(function () {
         $("#li_student_supplies").addClass('mm-active');
 
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+
         var dtbl_supplies = $("#tbl_supplies").DataTable({
             "dom": 'rtip',
             "processing": true,
             "autoWidth": false,
-            "serverSide": true,
+            "paging": false,
             "ajax": {
                 "url": "/learning-management/datatables/supplies/monthly-transactions",
                 "data": function (d) {
@@ -28,7 +36,7 @@
                     d.branch = $("#btn_marketer_label").val();
                 }
             },
-            "pageLength": 50,
+            "pageLength": 500,
             "ordering": false,
             "order": [[0, 'asc']],
             "columnDefs": [
@@ -43,7 +51,7 @@
             "dom": 'rtip',
             "processing": true,
             "autoWidth": false,
-            "serverSide": true,
+            "paging": false,
             "ajax": {
                 "url": "/learning-management/datatables/supplies/summary",
                 "data": function (d) {
@@ -53,7 +61,7 @@
                     d.branch = $("#btn_marketer_label").val();
                 }
             },
-            "pageLength": 50,
+            "pageLength": 500,
             "ordering": false,
             "order": [[0, 'asc']],
             "columnDefs": [

@@ -14,7 +14,6 @@ from prime_admin.services.inventory import InventoryService
 @cross_origin()
 def dt_monthly_transactions():
     draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
     supplies_type = request.args.get('supplies_type')
@@ -40,7 +39,7 @@ def dt_monthly_transactions():
     elif supplies_type == "student_supplies":
         mongo_table =  mongo.db.lms_student_supplies
 
-    query = mongo_table.find(_filter).skip(start).limit(length)
+    query = mongo_table.find(_filter)
     
     fund_request_total = 0
     table_data = []
@@ -189,7 +188,6 @@ def dt_monthly_transactions():
 @cross_origin()
 def dt_summary():
     draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
     filter_year = request.args.get('year', 'all')
     filter_month = request.args.get('month', 'all')
     supplies_type = request.args.get('supplies_type')
@@ -214,7 +212,7 @@ def dt_summary():
         mongo_table =  mongo.db.lms_office_supplies
     elif supplies_type == "student_supplies":
         mongo_table =  mongo.db.lms_student_supplies
-    query = mongo_table.find(_filter).skip(start).limit(length)
+    query = mongo_table.find(_filter)
 
     table_data = []
     
