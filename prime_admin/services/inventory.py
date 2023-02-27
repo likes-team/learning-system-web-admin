@@ -132,7 +132,7 @@ class InventoryService:
             'type': 'inbound',
             'supply_id': ObjectId(supply['_id']),
             'date': get_utc_date_now(),
-            'quantity': qty,
+            'quantity': int(qty),
             'remarks': 'from expenses',
             'withdraw_by': current_user.id,
             'confirm_by': current_user.id
