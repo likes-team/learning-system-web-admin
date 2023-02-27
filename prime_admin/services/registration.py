@@ -147,25 +147,25 @@ class RegistrationService:
     
     def process_supplies(self, session):
         if self.student.books['volume1']:
-            InventoryService.minus_stocks(self.student.branch.id, 'volume1', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='volume1', quantity=1, session=session)
 
         if self.student.books['volume2']:
-            InventoryService.minus_stocks(self.student.branch.id, 'volume2', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='volume2', quantity=1, session=session)
 
         if not self.student.uniforms['uniform_none']:
-            InventoryService.minus_stocks(self.student.branch.id, 'uniform', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='uniform', quantity=1, session=session)
          
         if self.student.id_materials['id_card']:
-            InventoryService.minus_stocks(self.student.branch.id, 'id_card', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='id_card', quantity=1, session=session)
        
         if self.student.id_materials['id_lace']:
-            InventoryService.minus_stocks(self.student.branch.id, 'id_lace', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='id_lace', quantity=1, session=session)
       
         if self.student.reviewers['reading']:
-            InventoryService.minus_stocks(self.student.branch.id, 'reading', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='reading', quantity=1, session=session)
      
         if self.student.reviewers['listening']:
-            InventoryService.minus_stocks(self.student.branch.id, 'listening', 1, session)
+            InventoryService.minus_stocks(branch=self.student.branch.id, description='listening', quantity=1, session=session)
 
     # def process_enrollment():
         # TODO

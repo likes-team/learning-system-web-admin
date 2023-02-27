@@ -87,37 +87,37 @@ def register():
         client.update_reviewers(request.form.getlist('reviewers'))
         
         if client.books['volume1']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'volume1', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='volume1', value=1):
                 flash("Not enough BOOK 1 stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
         if client.books['volume2']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'volume2', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='volume2', value=1):
                 flash("Not enough BOOK 2 stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
         if not client.uniforms['uniform_none']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'uniform', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='uniform', value=1):
                 flash("Not enough UNIFORM stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
         if client.id_materials['id_card']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'id_card', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='id_card', value=1):
                 flash("Not enough ID CARD stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
         if client.id_materials['id_lace']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'id_lace', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='id_lace', value=1):
                 flash("Not enough ID LACE stocks!", 'error')
                 return redirect(url_for('lms.register'))
         
         if client.reviewers['reading']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'reading', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='reading', value=1):
                 flash("Not enough REVIEWER READING stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
         if client.reviewers['listening']:
-            if not InventoryService.is_student_supply_available(client.branch.id, 'listening', 1):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='listening', value=1):
                 flash("Not enough REVIEWER LISTENING stocks!", 'error')
                 return redirect(url_for('lms.register'))
 

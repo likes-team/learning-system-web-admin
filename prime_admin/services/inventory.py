@@ -20,8 +20,12 @@ student_supply_descriptions = {
 
 class InventoryService:
     @staticmethod
-    def is_student_supply_available(branch, description, value):
-        query = mongo.db.lms_student_supplies.find_one({'branch': ObjectId(branch), 'description': student_supply_descriptions[description]})
+    def is_student_supply_available(branch=None, description=None, value=None, supply_id=None):
+        if supply_id:
+            query = mongo.db.lms_student_supplies.find_one({'_id': ObjectId(supply_id)})
+        else:
+            query = mongo.db.lms_student_supplies.find_one({'branch': ObjectId(branch), 'description': student_supply_descriptions[description]})
+
         if query is None:
             return False
 
@@ -57,11 +61,16 @@ class InventoryService:
 
 
     @staticmethod
-    def minus_stocks(branch, description, quantity, session=None):
-        supply = mongo.db.lms_student_supplies.find_one({
-            'description': student_supply_descriptions[description],
-            'branch': ObjectId(branch),
-        })
+    def minus_stocks(branch=None, description=None, quantity=None, session=None, supply_id=None):
+        if supply_id:
+            supply = mongo.db.lms_student_supplies.find_one({
+                '_id': ObjectId(supply_id),
+            })
+        else:
+            supply = mongo.db.lms_student_supplies.find_one({
+                'description': student_supply_descriptions[description],
+                'branch': ObjectId(branch),
+            })
 
         old_replacement = supply.get('replacement', 0)
         if old_replacement == 0:
