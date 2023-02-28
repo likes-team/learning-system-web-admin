@@ -521,7 +521,7 @@ from prime_admin.services.inventory import InventoryService
 
 @bp_core.cli.command('move_supply_transactions')
 def move_supply_transactions():
-    query = mongo.db.lms_student_supplies.find()
+    query = mongo.db.lms_office_supplies.find()
     
     for document in query:
         transactions = document.get('transactions', [])
@@ -530,17 +530,18 @@ def move_supply_transactions():
         for transact in transactions:
             date = transact.get('date')
             if date is None:
-                mongo.db.lms_student_supplies_transactions.insert_one({
+                print("date is none: ", document['_id'])
+                mongo.db.lms_office_supplies_transactions.insert_one({
                     'type': 'inbound',
                     'supply_id': ObjectId(document['_id']),
-                    'brand': transact.get('brand'),
+                    'date': transact.get('date'),
                     'price': transact.get('price'),
                     'quantity': transact.get('quantity'),
                     'total_amount': transact.get('total_amount'),
                     'confirm_by': transact.get('confirm_by')
                 })
             else:
-                mongo.db.lms_student_supplies_transactions.insert_one({
+                mongo.db.lms_office_supplies_transactions.insert_one({
                     'type': 'outbound',
                     'supply_id': ObjectId(document['_id']),
                     'date': transact.get('date'),

@@ -262,6 +262,13 @@ def fund_wallet_add_expenses():
             if accounting:
                 with decimal.localcontext(D128_CTX):
                     previous_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else Decimal128('0.00')
+
+                    if decimal.Decimal(total_amount_due) > previous_fund_wallet.to_decimal():
+                        return jsonify({
+                            'status': 'error',
+                            'message': "Insufficient fund wallet balance"
+                        }), 400
+                        
                     new_total_fund_wallet = previous_fund_wallet.to_decimal() - decimal.Decimal(total_amount_due)
                     balance = Decimal128(previous_fund_wallet.to_decimal() - Decimal128(str(total_amount_due)).to_decimal())
 

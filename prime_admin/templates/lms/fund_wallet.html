@@ -343,7 +343,11 @@
                                 clearCreateModal();
                             },
                             error: function (data) {
-                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                                if (data.responseJSON == undefined){
+                                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                                } else {
+                                    swal(data.responseJSON.message, "Add expenses failed!", "error");
+                                }
                             },
                         });
                     }, 500);
