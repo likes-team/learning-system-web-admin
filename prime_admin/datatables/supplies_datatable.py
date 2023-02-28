@@ -1,11 +1,12 @@
 import decimal
+import pymongo
 from bson import ObjectId, Decimal128
 from flask import request, jsonify
 from flask_cors import cross_origin
 from app import mongo
 from prime_admin import bp_lms
 from prime_admin.globals import D128_CTX
-from prime_admin.utils.date import convert_utc_to_local
+from prime_admin.utils.date import convert_utc_to_local, format_utc_to_local
 from prime_admin.services.inventory import InventoryService
 
 
@@ -350,6 +351,87 @@ def dt_summary():
         'draw': draw,
         'recordsTotal': filtered_records,
         'recordsFiltered': total_records,
+        'data': table_data,
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('datatables/supplies/deposit-transactions', methods=['GET'])
+def dt_deposit_transactions():
+    draw = request.args.get('draw')
+    start, length = int(request.args['start']), int(request.args['length'])
+    filter_year = request.args.get('year', 'all')
+    filter_month = request.args.get('month', 'all')
+    branch_id = request.args.get('branch')
+
+    if branch_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+        }
+        return jsonify(response)
+    
+    _filter = {'supply.branch': ObjectId(branch_id)}
+    
+    if filter_year != 'all':
+        _filter['year'] = int(filter_year)
+    if filter_month != 'all':
+        _filter['month'] = int(filter_month)
+    
+    aggregate_query = [
+        {
+            '$lookup': {
+                'from': 'lms_student_supplies',
+                'localField': 'supply_id',
+                'foreignField': '_id',
+                'as': 'supply'
+            }
+        },
+        {
+            '$unwind': {
+                'path': '$supply'
+            }
+        },
+        {
+            '$project': {
+                'supply': 1,
+                'date': 1,
+                'previous_reserve': 1,
+                'month': {
+                    '$month': '$date'
+                },
+                'year': {
+                    '$year': '$date'
+                }
+            }
+        }, {
+            '$match': _filter
+        }, {
+            '$sort': {'date': pymongo.DESCENDING}
+        }
+    ]
+
+    total_records = len(list(mongo.db.lms_student_supplies_deposits.aggregate(aggregate_query)))
+    
+    aggregate_query.append({'$skip': start})
+    aggregate_query.append({'$limit': length})
+    query = list(mongo.db.lms_student_supplies_deposits.aggregate(aggregate_query))
+
+    table_data = []
+    for document in query:
+        table_data.append([
+            format_utc_to_local(document.get('date')),
+            document['supply']['description'],
+            document['previous_reserve']
+        ])
+    
+    filtered_records = len(query)
+    response = {
+        'draw': draw,
+        'recordsTotal': total_records,
+        'recordsFiltered': filtered_records,
         'data': table_data,
     }
     return jsonify(response)

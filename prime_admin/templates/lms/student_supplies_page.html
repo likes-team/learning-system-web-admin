@@ -90,6 +90,25 @@
             ],
         });
 
+        var dtbl_deposits = $("#tbl_deposits").DataTable({
+            "dom": 'rtip',
+            "serverSide": true,
+            "processing": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/deposit-transactions",
+                "data": function (d) {
+                    d.year = $("#filter_year").val();
+                    d.month = $("#filter_month").val();
+                    d.supplies_type = "student_supplies";
+                    d.branch = $("#btn_marketer_label").val();
+                }
+            },
+            "pageLength": 500,
+            "ordering": false,
+            "order": [[0, 'asc']],
+        });
+
         $('#tbl_summaries tbody').on('click', '.btn-inbound', function () {
             var data = dtbl_summaries.row( $(this).parents('tr') ).data();
 
@@ -99,11 +118,13 @@
         $("#filter_year").change(function(){
             dtbl_supplies.ajax.reload();
             dtbl_summaries.ajax.reload();
+            dtbl_deposits.ajax.reload();
         });
 
         $("#filter_month").change(function(){
             dtbl_supplies.ajax.reload();
             dtbl_summaries.ajax.reload();
+            dtbl_deposits.ajax.reload();
         });
 
         $("#div_marketer_buttons").on('click', '.btn-marketer', function () {
@@ -120,6 +141,7 @@
         $("#btn_marketer_label").change(function(){
             dtbl_supplies.ajax.reload();
             dtbl_summaries.ajax.reload();
+            dtbl_deposits.ajax.reload();
         });
 
         $('#tbl_summaries tbody').on('click', '.btn-deposit',function(){
@@ -340,6 +362,12 @@
                             <span class="nav-text">SUMMARY</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                            aria-selected="false">
+                            <span class="nav-text">DEPOSIT TRANSACTIONS</span>
+                        </a>
+                    </li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane show active" id="tab-animated1-0" role="tabpanel">
@@ -434,6 +462,21 @@
                                         <th class="text-center">DEPOSIT</th>
                                         <th class="text-center">REMAINING</th>
                                         <th class="text-center">REPLACEMENT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+                        <div class="table-responsive">
+                            <table id="tbl_deposits" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">DATE</th>
+                                        <th class="text-center">DESCRIPTION</th>
+                                        <th class="text-center">DEPOSITED QTY</th>
                                     </tr>
                                 </thead>
                                 <tbody>
