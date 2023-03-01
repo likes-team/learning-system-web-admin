@@ -71,7 +71,7 @@ class StudentQueryFilter(BaseQueryFilter):
             match['registration_date'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
         if date_from and date_from != '' and date_to and date_to != '':
-            match['date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
+            match['registration_date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
         if payment_mode and payment_mode != 'all':
             match['payment_mode'] = payment_mode
