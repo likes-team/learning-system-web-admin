@@ -39,19 +39,23 @@ def buy_items():
         return redirect(url_for('lms.buy_items'))
 
     items = []
-    item_list = form.getlist('items[]')
+    order_line = form.getlist('items[]')
     total_amount = decimal.Decimal(0.00)
     
     with mongo.cx.start_session() as session:
         with session.start_transaction():
-            if item_list:
-                for item_id in form.getlist('items[]'):
+            if order_line:
+                print("order_line:::", order_line)
+                for item_id in order_line:
+                    qty = int(form.get("qty_{}".format(item_id)))
+                    if qty <= 0:
+                        continue
+                    
                     if not InventoryService.is_student_supply_available(supply_id=item_id, value=1):
                         item = mongo.db.lms_student_supplies.find_one({'_id': ObjectId(item_id)})
                         flash("Not enough {} stocks!".format(item['description']), 'error')
                         return redirect(url_for('lms.store'))
                     
-                    qty = int(form.get("qty_{}".format(item_id)))
                     price = decimal.Decimal(form.get("price_{}".format(item_id)))
                     amount = qty * price
                     items.append({

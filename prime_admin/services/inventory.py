@@ -62,16 +62,16 @@ class InventoryService:
 
     @staticmethod
     def minus_stocks(branch=None, description=None, quantity=None, session=None, supply_id=None):
+        _filter = None
         if supply_id:
-            supply = mongo.db.lms_student_supplies.find_one({
-                '_id': ObjectId(supply_id),
-            })
+            _filter = {'_id': ObjectId(supply_id)}
         else:
-            supply = mongo.db.lms_student_supplies.find_one({
+            _filter = {
                 'description': student_supply_descriptions[description],
                 'branch': ObjectId(branch),
-            })
-
+            }
+            
+        supply = mongo.db.lms_student_supplies.find_one(_filter)
         old_replacement = supply.get('replacement', 0)
         if old_replacement == 0:
             new_replacement = 0
@@ -81,10 +81,7 @@ class InventoryService:
         if new_replacement < 0:
             new_replacement = 0
 
-        mongo.db.lms_student_supplies.update_one({
-            'branch': ObjectId(branch),
-            'description': student_supply_descriptions[description],
-        },
+        mongo.db.lms_student_supplies.update_one(_filter,
         {'$set': {
             'replacement': new_replacement
         },

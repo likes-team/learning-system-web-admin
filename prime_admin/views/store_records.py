@@ -18,7 +18,7 @@ D128_CTX = create_decimal128_context()
 @login_required
 def store_records():
     _table_columns = [
-        'id', 'date','Registration No.', 'Full Name', 'branch','batch no.', 'schedule', 'uniform', 'id lace', 'id card','module 1'
+        'id', 'date','Registration No.', 'Full Name', 'branch','batch no.', 'schedule', 'items purchased'
     ]
 
     if current_user.role.name == "Secretary":
@@ -64,7 +64,18 @@ def get_dtbl_store_records():
 
     for record in _store_records:
         student = Registration.objects(id=record['client_id']).get()
+        items_purchased = []
 
+        for item in record.get('items'):
+            supply = mongo.db.lms_student_supplies.find_one({'_id': ObjectId(item['item'])})
+            if supply is None:
+                continue
+
+            qty = int(str(item.get('qty')))
+            if qty <= 0:
+                continue
+            items_purchased.append("{}: {} <br>".format(supply['description'], qty))
+         
         table_data.append([
             str(record['_id']),
             convert_to_local(record['created_at']),
@@ -73,13 +84,7 @@ def get_dtbl_store_records():
             student.branch.name,
             student.batch_number.number,
             student.schedule,
-            record['uniforms'],
-            record['id_lace'],
-            record['id_card'],
-            record['module_1'],
-            record['module_2'],
-            record['reviewer_l'],
-            record['reviewer_r'],
+            items_purchased
         ])
 
 
