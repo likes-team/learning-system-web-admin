@@ -103,13 +103,13 @@ def edit_batch(oid):
     form = BatchEditForm(obj=batch)
 
     if request.method == "GET":
-        
         return admin_edit(
             Batch,
             form,
             'lms.edit_batch',
             oid,
             'lms.batches',
+            action_template="lms/batch_edit_action.html"
             )
     
     if not form.validate_on_submit():
