@@ -312,14 +312,18 @@ def dt_summary():
                         
             if supplies_type == "office_supplies":
                 unit_price = Decimal128(str(supply.get('price', 0)))
-                replacement = Decimal128(str(supply.get('replacement', 0)))
-                total_price = replacement.to_decimal() * unit_price.to_decimal()
-                
+                replacement = InventoryService.supply_total_used(
+                    supply_id=supply['_id'],
+                    from_what=supplies_type,
+                    year=filter_year,
+                    month=filter_month
+                )
+                total_price = replacement * unit_price.to_decimal()
                 row = [
                     str(supply['_id']),
                     supply['description'],
                     supply.get('remaining', ''),
-                    supply.get('replacement', ''),
+                    replacement,
                     str(unit_price),
                     str(total_price)
                 ]

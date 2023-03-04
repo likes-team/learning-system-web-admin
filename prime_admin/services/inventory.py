@@ -223,3 +223,50 @@ class InventoryService:
                         'remaining': reserve
                     }}, session=session
                 )
+                
+        
+    @staticmethod
+    def supply_total_used(supply_id=None, from_what=None, year=None, month=None):
+        if from_what == 'student_supplies':
+            table = mongo.db.lms_student_supplies_transactions
+        elif from_what == 'office_supplies':
+            table = mongo.db.lms_office_supplies_transactions
+        else:
+            raise("Inception Error: invalid from_what value")
+
+        _filter = {
+            'supply_id': ObjectId(supply_id),
+            'type': 'outbound'
+        }
+        
+        if year != 'all':
+            _filter['year'] = int(year)
+        if month != 'all':
+            _filter['month'] = int(month)
+
+        query = list(table.aggregate([
+            {'$project': {
+                'type': 1,
+                'supply_id': 1,
+                'quantity': 1,
+                'month': {
+                    '$month': '$date'
+                },
+                'year': {
+                    '$year': '$date'
+                }
+            }},
+            {'$match': _filter},
+            {'$group': {
+                '_id': None,
+                'total': {
+                    '$sum': '$quantity'
+                }
+            }},
+        ]))
+        
+        if len(query) == 0:
+            return 0
+        else:
+            return query[0]['total']
+        
