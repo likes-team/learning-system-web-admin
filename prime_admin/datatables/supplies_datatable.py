@@ -8,6 +8,7 @@ from prime_admin import bp_lms
 from prime_admin.globals import D128_CTX
 from prime_admin.utils.date import convert_utc_to_local, format_utc_to_local
 from prime_admin.services.inventory import InventoryService
+from prime_admin.utils.currency import format_to_str_php
 
 
 
@@ -137,8 +138,6 @@ def dt_monthly_transactions():
                 thone += quantity
             total_used += quantity
             
-        fund_request_total += total_used
-        
         if supplies_type == "office_supplies":
             row = [
                 str(supply['_id']),
@@ -179,7 +178,6 @@ def dt_monthly_transactions():
         'recordsTotal': filtered_records,
         'recordsFiltered': total_records,
         'data': table_data,
-        'fundRequestTotal': fund_request_total
     }
 
     return jsonify(response)
@@ -216,6 +214,7 @@ def dt_summary():
     query = mongo_table.find(_filter)
 
     table_data = []
+    fund_request_total = 0
     
     with decimal.localcontext(D128_CTX):
         for supply in query:
@@ -319,6 +318,7 @@ def dt_summary():
                     month=filter_month
                 )
                 total_price = replacement * unit_price.to_decimal()
+                fund_request_total += total_price
                 row = [
                     str(supply['_id']),
                     supply['description'],
@@ -343,19 +343,14 @@ def dt_summary():
             # Replace zeros to empty string
             i = 0
             for x in row:
-                if x == 0:
+                if x == 0 or x == "0":
                     row[i] = ''
                 i += 1
             table_data.append(row)
-        
-    total_records = mongo_table.find(_filter).count()
-    filtered_records = query.count()
-
     response = {
         'draw': draw,
-        'recordsTotal': filtered_records,
-        'recordsFiltered': total_records,
         'data': table_data,
+        'fundRequestTotal': format_to_str_php(fund_request_total)
     }
     return jsonify(response)
 
