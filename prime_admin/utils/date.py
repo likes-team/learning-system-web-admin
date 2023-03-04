@@ -74,6 +74,9 @@ def convert_date_input_to_utc(date_str, date_type):
 
 
 def format_utc_to_local(date, date_format="%B %d, %Y"):
+    if date is None:
+        return ''
+    
     if type(date == datetime):
         local_dt = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime(date_format)
     elif type(date == str):

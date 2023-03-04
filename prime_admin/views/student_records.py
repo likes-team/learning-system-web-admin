@@ -290,7 +290,7 @@ def get_member(client_id):
             'deposited': payment['deposited'] if payment['deposited'] is not None else 'No',
         })
         
-    if client.balance <= 0:
+    if client.balance is not None and client.balance <= 0:
         is_paid = True
     else:
         is_paid = False
