@@ -759,11 +759,16 @@
                             $('#upgrade_id_card').prop('checked', true);
                             $('#upgrade_id_lace').prop('checked', true);
 
+                            $('#upgrade_reading').prop('checked', true);
+                            $('#upgrade_listening').prop('checked', true);
+
                             $("#upgrade_id_lace").attr('onclick', "return false;");
                             $("#upgrade_id_card").attr('onclick', "return false;");
                             $("#upgrade_book_none").attr('onclick', "return false;");
                             $("#upgrade_book1").attr('onclick', "return false;");
                             $("#upgrade_book2").attr('onclick', "return false;");
+                            $("#upgrade_reading").attr('onclick', "return false;");
+                            $("#upgrade_listening").attr('onclick', "return false;");
                         } else {
                             var new_amount = parseInt(response.data.balance) + 1000;
 
@@ -777,11 +782,16 @@
                             $('#upgrade_id_card').prop('checked', true);
                             $('#upgrade_id_lace').prop('checked', true);
 
+                            $('#upgrade_reading').prop('checked', true);
+                            $('#upgrade_listening').prop('checked', true);
+
                             $("#upgrade_id_lace").attr('onclick', "return false;");
                             $("#upgrade_id_card").attr('onclick', "return false;");
                             $("#upgrade_book_none").attr('onclick', "return false;");
                             $("#upgrade_book1").attr('onclick', "return false;");
                             $("#upgrade_book2").attr('onclick', "return false;");
+                            $("#upgrade_reading").attr('onclick', "return false;");
+                            $("#upgrade_listening").attr('onclick', "return false;");
                         }
 
                         ISLOADING = false;
@@ -865,11 +875,16 @@
             $('#upgrade_id_card').prop('checked', false);
             $('#upgrade_id_lace').prop('checked', false);
 
+            $('#upgrade_reading').prop('checked', false);
+            $('#upgrade_listening').prop('checked', false);
+
             $("#upgrade_id_lace").attr('onclick', "");
             $("#upgrade_id_card").attr('onclick', "");
             $("#upgrade_book_none").attr('onclick', "");
             $("#upgrade_book1").attr('onclick', "");
             $("#upgrade_book2").attr('onclick', "");
+            $("#upgrade_reading").attr('onclick', "");
+            $("#upgrade_listening").attr('onclick', "");
         });
 
         $("#book_none").click(function () {

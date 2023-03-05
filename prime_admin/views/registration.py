@@ -163,7 +163,10 @@ def register():
                 
                 Payment.pay_registration(registration.get_payment_dict(), session=session)
                 
-                registration.process_supplies(session)
+                InventoryService.buy_items(
+                    student=client,
+                    session=session
+                )
 
                 register_description = "New student - {id} {lname} {fname} {batch} {branch} {contact_person} {mode_of_payment}".format(id=client.full_registration_number,
                     lname=client.lname,

@@ -462,7 +462,10 @@ def new_payment():
 
             Payment.pay_registration(payment, session=session)
 
-            service.process_supplies(session)
+            InventoryService.buy_items(
+                student=client,
+                session=session
+            )
 
             payment_description = "Update payment - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
                 id=client.full_registration_number,
@@ -513,130 +516,153 @@ def upgrade_to_premium():
     amount = decimal.Decimal(request.form['upgrade_new_amount'])
     date = request.form['upgrade_date']
 
-    try:
-        client = Registration.objects.get_or_404(id=client_id)
+    service = StudentService.find_student(client_id)
+    client = service.get_student()
+    
+    client.update_books_from_form(request.form.getlist('upgrade_books'))
+    client.update_uniform_from_form(request.form.getlist('upgrade_uniforms'))
+    client.update_id_materials(request.form.getlist('upgrade_others'))
+    client.update_reviewers(request.form.getlist('upgrade_reviewers'))
+
+    existing_item = mongo.db.lms_registrations.find_one({'_id': ObjectId(client.id)})
+
+    if client.books['volume1']:
+        if not existing_item['books'].get('volume1'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='volume1', value=1):
+                flash("Not enough BOOK 1 stocks!", 'error')
+                return redirect(url_for('lms.members'))
+
+    if client.books['volume2']:
+        if not existing_item['books'].get('volume2'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='volume2', value=1):
+                flash("Not enough BOOK 2 stocks!", 'error')
+                return redirect(url_for('lms.members'))
+
+    if not client.uniforms['uniform_none']:
+        if existing_item['uniforms'].get('uniform_none'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='uniform', value=1):
+                flash("Not enough UNIFORM stocks!", 'error')
+                return redirect(url_for('lms.members'))
+
+    if client.id_materials['id_card']:
+        if not existing_item['id_materials'].get('id_card'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='id_card', value=1):
+                flash("Not enough ID CARD stocks!", 'error')
+                return redirect(url_for('lms.members'))
+
+    if client.id_materials['id_lace']:
+        if not existing_item['id_materials'].get('id_lace'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='id_lace', value=1):
+                flash("Not enough ID LACE stocks!", 'error')
+                return redirect(url_for('lms.members'))
         
-        if client.payment_mode == "full_payment_promo" or client.payment_mode == "installment_promo":
-            client.payment_mode = 'premium_promo'
-        else:
-            client.payment_mode = 'premium'
-        
-        client.amount += amount
-        
-        if client.level == "first":
-            earnings_percent = decimal.Decimal(0.14)
-            savings_percent = decimal.Decimal(0.00286)
-        elif client.level == "second":
-            earnings_percent = decimal.Decimal(0.0286)
-            savings_percent = decimal.Decimal(0.00)
-        else:
-            earnings_percent = decimal.Decimal(0.00)
-            savings_percent = decimal.Decimal(0.00)
+    if client.reviewers['reading']:
+        if not existing_item['reviewers'].get('reading'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='reading', value=1):
+                flash("Not enough REVIEWER READING stocks!", 'error')
+                return redirect(url_for('lms.members'))
 
-        earnings = amount * earnings_percent
-        savings = amount * savings_percent
+    if client.reviewers['listening']:
+        if not existing_item['reviewers'].get('listening'):
+            if not InventoryService.is_student_supply_available(branch=client.branch.id, description='listening', value=1):
+                flash("Not enough REVIEWER LISTENING stocks!", 'error')
+                return redirect(url_for('lms.members'))
+            
+    if client.payment_mode == "full_payment_promo" or client.payment_mode == "installment_promo":
+        client.payment_mode = 'premium_promo'
+    else:
+        client.payment_mode = 'premium'
+    
+    client.amount += amount
+    
+    if client.level == "first":
+        earnings_percent = decimal.Decimal(0.14)
+        savings_percent = decimal.Decimal(0.00286)
+    elif client.level == "second":
+        earnings_percent = decimal.Decimal(0.0286)
+        savings_percent = decimal.Decimal(0.00)
+    else:
+        earnings_percent = decimal.Decimal(0.00)
+        savings_percent = decimal.Decimal(0.00)
 
-        if client.level == "first":
-            client.fle = client.fle + earnings
-        elif client.level == "second":
-            client.sle = client.sle + earnings
+    earnings = amount * earnings_percent
+    savings = amount * savings_percent
 
-        books = request.form.getlist('upgrade_books')
-        
-        client.books = {
-            'book_none': True if 'book_none' in books else False,
-            'volume1': True if 'volume1' in books else False,
-            'volume2': True if 'volume2' in books else False,
-        }
+    if client.level == "first":
+        client.fle = client.fle + earnings
+    elif client.level == "second":
+        client.sle = client.sle + earnings
 
-        uniforms = request.form.getlist('upgrade_uniforms')
+    payment = {
+        "_id": ObjectId(),
+        "deposited": "Pre Deposit",
+        "payment_mode": client.payment_mode,
+        "amount": Decimal128(str(amount)),
+        "current_balance": Decimal128(str(client.balance)),
+        "confirm_by": current_user.id,
+        "date": convert_to_utc(date, "date_from"),
+        "payment_by": ObjectId(client_id),
+        "earnings": Decimal128(str(earnings)),
+        "savings": Decimal128(str(savings)),
+        "branch": ObjectId(client.branch.id),
+        "created_at": get_date_now(),
+        "contact_person": ObjectId(client.contact_person.id)
+    }
 
-        client.uniforms = {
-            'uniform_none': True if 'uniform_none' in uniforms else False,
-            'uniform_xs': True if 'uniform_xs' in uniforms else False,
-            'uniform_s': True if 'uniform_s' in uniforms else False,
-            'uniform_m': True if 'uniform_m' in uniforms else False,
-            'uniform_l': True if 'uniform_l' in uniforms else False,
-            'uniform_xl': True if 'uniform_xl' in uniforms else False,
-            'uniform_xxl': True if 'uniform_xxl' in uniforms else False,
-        }
+    with mongo.cx.start_session() as session:
+        with session.start_transaction():
+            mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
+            {"$set": {
+                "payment_mode": client.payment_mode,
+                "amount": Decimal128(str(client.amount)),
+                "fle": Decimal128(str(client.fle)),
+                "sle": Decimal128(str(client.sle)),
+                "books": client.books,
+                "uniforms": client.uniforms,
+                "id_materials": client.id_materials,
+            }}, session=session)
 
-        id_materials = request.form.getlist('upgrade_others')
+            Payment.pay_registration(payment, session=session)
 
-        client.id_materials = {
-            'id_card': True if 'upgrade_id_card' in id_materials else False,
-            'id_lace': True if 'upgrade_id_lace' in id_materials else False,
-        }
+            InventoryService.buy_items(
+                student=client,
+                session=session
+            )
 
-        payment = {
-            "_id": ObjectId(),
-            "deposited": "Pre Deposit",
-            "payment_mode": client.payment_mode,
-            "amount": Decimal128(str(amount)),
-            "current_balance": Decimal128(str(client.balance)),
-            "confirm_by": current_user.id,
-            "date": convert_to_utc(date, "date_from"),
-            "payment_by": ObjectId(client_id),
-            "earnings": Decimal128(str(earnings)),
-            "savings": Decimal128(str(savings)),
-            "branch": ObjectId(client.branch.id),
-            "created_at": get_date_now(),
-            "contact_person": ObjectId(client.contact_person.id)
-        }
+            payment_description = "Upgrade to premium - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
+                id=client.full_registration_number,
+                lname=client.lname,
+                fname=client.fname,
+                branch=client.branch.name,
+                batch=client.batch_number.number,
+                amount=str(amount)
+            )
 
-        with mongo.cx.start_session() as session:
-            with session.start_transaction():
-                mongo.db.lms_registrations.update_one({"_id": ObjectId(client_id)},
-                {"$set": {
-                    "payment_mode": client.payment_mode,
-                    "amount": Decimal128(str(client.amount)),
-                    "fle": Decimal128(str(client.fle)),
-                    "sle": Decimal128(str(client.sle)),
-                    "books": client.books,
-                    "uniforms": client.uniforms,
-                    "id_materials": client.id_materials,
-                }}, session=session)
+            mongo.db.lms_system_transactions.insert_one({
+                "_id": ObjectId(),
+                "date": get_date_now(),
+                "current_user": current_user.id,
+                "description": payment_description,
+                "from_module": "Student Records"
+            }, session=session)
 
-                Payment.pay_registration(payment, session=session)
-
-                payment_description = "Upgrade to premium - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
-                    id=client.full_registration_number,
-                    lname=client.lname,
-                    fname=client.fname,
-                    branch=client.branch.name,
-                    batch=client.batch_number.number,
-                    amount=str(amount)
-                )
-
-                mongo.db.lms_system_transactions.insert_one({
-                    "_id": ObjectId(),
-                    "date": get_date_now(),
-                    "current_user": current_user.id,
-                    "description": payment_description,
-                    "from_module": "Student Records"
-                }, session=session)
-
-                earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
-                    earnings="{:.2f}".format(earnings),
-                    savings="{:.2f}".format(savings),
-                    contact_person=client.contact_person.fname + " " + client.contact_person.lname,
-                    student=client.lname + " " + client.fname,
-                    payment_mode=client.payment_mode,
-                    amount=str(amount)
-                )
-                
-                mongo.db.lms_system_transactions.insert_one({
-                    "_id": ObjectId(),
-                    "date": get_date_now(),
-                    "current_user": current_user.id,
-                    "description": earning_description,
-                    "from_module": "Student Records"
-                }, session=session)
-
-        flash("Client's payment upgraded successfully!", 'success')
-    except Exception as err:
-        flash(str(err), 'error')
-
+            earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
+                earnings="{:.2f}".format(earnings),
+                savings="{:.2f}".format(savings),
+                contact_person=client.contact_person.fname + " " + client.contact_person.lname,
+                student=client.lname + " " + client.fname,
+                payment_mode=client.payment_mode,
+                amount=str(amount)
+            )
+            
+            mongo.db.lms_system_transactions.insert_one({
+                "_id": ObjectId(),
+                "date": get_date_now(),
+                "current_user": current_user.id,
+                "description": earning_description,
+                "from_module": "Student Records"
+            }, session=session)
+    flash("Client's payment upgraded successfully!", 'success')
     return redirect(url_for('lms.members'))
 
 

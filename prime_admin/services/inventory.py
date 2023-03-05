@@ -4,6 +4,7 @@ from bson.decimal128 import Decimal128
 from flask_login import current_user
 from app import mongo
 from prime_admin.utils.date import get_utc_date_now
+from prime_admin.utils.currency import convert_decimal128_to_decimal
 
 
 
@@ -270,3 +271,122 @@ class InventoryService:
         else:
             return query[0]['total']
         
+    
+    @staticmethod
+    def buy_items(student, items=None, session=None):
+        total_amount = 0
+        
+        if items is None:
+            items = []
+            existing_item = mongo.db.lms_registrations.find_one({'_id': ObjectId(student.id)})
+            
+            if student.books['volume1']:
+                if not existing_item['books'].get('volume1'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='volume1', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['volume1']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+
+            if student.books['volume2']:
+                if not existing_item['books'].get('volume2'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='volume2', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['volume2']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+
+            if not student.uniforms['uniform_none']:
+                if existing_item['uniforms'].get('uniform_none'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='uniform', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['uniform']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+            
+            if student.id_materials['id_card']:
+                if not existing_item['id_materials'].get('id_card'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='id_card', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['id_card']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+            
+            if student.id_materials['id_lace']:
+                if not existing_item['id_materials'].get('id_lace'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='id_lace', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['id_lace']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+        
+            if student.reviewers['reading']:
+                if not existing_item['reviewers'].get('reading'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='reading', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['reading']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+        
+            if student.reviewers['listening']:
+                if not existing_item['reviewers'].get('listening'):
+                    InventoryService.minus_stocks(branch=student.branch.id, description='listening', quantity=1, session=session)
+                    item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['listening']})
+                    price = convert_decimal128_to_decimal(item.get('price', 0))
+                    total_amount += price
+                    items.append({
+                        "_id": ObjectId(),
+                        'item': ObjectId(item['_id']),
+                        'qty': int(1),
+                        'price': Decimal128(str(price)),
+                        'amount': Decimal128(str(price))
+                    })
+                
+        if len(items) == 0:
+            return None
+        
+        mongo.db.lms_store_buyed_items.insert_one({
+            "created_at": get_utc_date_now(),
+            "cashier": current_user.id,
+            'branch': ObjectId(student.branch.id),
+            "client_id": ObjectId(student.id),
+            "items": items,
+            "total_amount": Decimal128(total_amount),
+            'deposited': "Pre Deposit"
+        }, session=session)
