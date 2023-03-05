@@ -328,6 +328,12 @@ def dt_summary():
                     str(total_price)
                 ]
             elif supplies_type == "student_supplies":
+                replacement = InventoryService.supply_total_used(
+                    supply_id=supply['_id'],
+                    from_what=supplies_type,
+                    year=filter_year,
+                    month=filter_month
+                )
                 row = [
                     str(supply['_id']),
                     '',
@@ -337,7 +343,7 @@ def dt_summary():
                     supply.get('reserve', ''),
                     '',
                     supply.get('remaining', ''),
-                    supply.get('replacement', ''),
+                    replacement,
                 ]
                 
             # Replace zeros to empty string
