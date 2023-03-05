@@ -18,7 +18,9 @@ D128_CTX = create_decimal128_context()
 @login_required
 def store_records():
     _table_columns = [
-        'id', 'date','Registration No.', 'Full Name', 'branch','batch no.', 'schedule', 'items purchased'
+        'id', 'date','Registration No.', 'Full Name', 'branch','batch no.', 
+        'schedule', 'uniform', 'id lace', 'id card', 'book 1', 'book 2',
+        'listening', 'reading' 
     ]
 
     if current_user.role.name == "Secretary":
@@ -64,7 +66,15 @@ def get_dtbl_store_records():
 
     for record in _store_records:
         student = Registration.objects(id=record['client_id']).get()
-        items_purchased = []
+        items_purchased = {
+            'UNIFORM': 0,
+            'ID LACE': 0,
+            'ID CARD': 0,
+            'BOOK 1': 0,
+            'BOOK 2': 0,
+            'REVIEWER READING': 0,
+            'REVIEWER LISTENING': 0
+        }
 
         for item in record.get('items'):
             supply = mongo.db.lms_student_supplies.find_one({'_id': ObjectId(item['item'])})
@@ -74,7 +84,8 @@ def get_dtbl_store_records():
             qty = int(str(item.get('qty')))
             if qty <= 0:
                 continue
-            items_purchased.append("{}: {} <br>".format(supply['description'], qty))
+            
+            items_purchased[supply['description']] += qty
          
         table_data.append([
             str(record['_id']),
@@ -84,9 +95,14 @@ def get_dtbl_store_records():
             student.branch.name,
             student.batch_number.number,
             student.schedule,
-            items_purchased
+            items_purchased['UNIFORM'],
+            items_purchased['ID LACE'],
+            items_purchased['ID CARD'],
+            items_purchased['BOOK 1'],
+            items_purchased['BOOK 2'],
+            items_purchased['REVIEWER LISTENING'],
+            items_purchased['REVIEWER READING'],
         ])
-
 
     response = {
         'draw': draw,
@@ -94,5 +110,4 @@ def get_dtbl_store_records():
         'recordsFiltered': _store_records.count(),
         'data': table_data,
     }
-
     return jsonify(response)
