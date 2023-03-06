@@ -388,5 +388,6 @@ class InventoryService:
             "client_id": ObjectId(student.id),
             "items": items,
             "total_amount": Decimal128(total_amount),
-            'deposited': "Pre Deposit"
+            'deposited': "Yes",
+            'remarks': 'from registration'
         }, session=session)
