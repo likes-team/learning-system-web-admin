@@ -387,7 +387,7 @@ class InventoryService:
             'branch': ObjectId(student.branch.id),
             "client_id": ObjectId(student.id),
             "items": items,
-            "total_amount": Decimal128(total_amount),
+            "total_amount": Decimal128("0"),
             'deposited': "Yes",
             'remarks': 'from registration'
         }, session=session)
