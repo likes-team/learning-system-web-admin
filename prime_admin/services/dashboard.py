@@ -101,6 +101,67 @@ class DashboardService:
 
 class ChartService:
     @staticmethod
+    def get_expenses_per_month(date_from='', date_to='', branch='all'):
+        group = {
+            'month': '$month',
+            'year': '$year'
+        }
+        match = {
+            'type': 'expenses'
+        }
+        if date_from != "":
+            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
+        
+        if date_to != '':
+            match['date_deposit'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if date_from != '' and date_to != '':
+            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if branch != 'all':
+            match['branch'] = ObjectId(branch)
+        
+        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+            {
+                '$match': match
+            }, {
+                '$project': {
+                    'total_amount_due': 1,
+                    'branch': 1,
+                    'date': 1,
+                    'month': {
+                        '$month': '$date'
+                    }, 
+                    'year': {
+                        '$year': '$date'
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        'month': '$month',
+                        'year': '$year'
+                    }, 
+                    'total': {
+                        '$sum': '$total_amount_due'
+                    }
+                }
+            }
+        ]))
+        
+        if len(query) == 0:
+            return []
+        
+        results = []
+        for document in query:
+            results.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': convert_decimal128_to_decimal(document['total'])
+            })
+        return results
+            
+    
+    @staticmethod
     def get_gross_sales_per_month(date_from='', date_to='', branch='all'):
         group = {
             'month': '$month',
@@ -152,7 +213,7 @@ class ChartService:
         for document in query:
             results.append({
                 'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': format_to_str_php(document['total_gross_sale'])
+                'amount': convert_decimal128_to_decimal(document['total_gross_sale'])
             })
         return results
             
