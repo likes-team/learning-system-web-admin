@@ -66,7 +66,7 @@ def dashboard():
         'box1': DashboardBox("Number of enrollees","Current", 0),
         'box2': DashboardBox("Total Sales","Montly", 0),
         'box3': DashboardBox("Gross Income","Total users", 0),
-        'scripts': [{'lms.static': 'js/utils.js'}, {'lms.static': 'js/dashboard.js'}],
+        'scripts': [{'lms.static': 'js/utils.js'}],
         'sales_today': sales_today,
         'total_installment': total_installment,
         'total_full_payment': total_full_payment,
@@ -122,11 +122,33 @@ def fetch_sales_breakdown():
 @bp_lms.route('/api/dashboard/get-chart-data/<string:branch_id>', methods=['GET'])
 @login_required
 def get_chart_data(branch_id):
-    gross_sales = []
+    date_from = request.args['date_from']
+    date_to = request.args['date_to']
+    
+    labels = ChartService.get_month_labels(date_from, date_to)
+    labels_count = len(labels)
+    gross_sales = ['' for _ in range(labels_count)]
     expenses = []
     maintaining_sales = []
     net = []
     no_of_students = []
+    raw_gross_sales = ChartService.get_gross_sales_per_month(date_from=date_from, date_to=date_to ,branch=branch_id)
+    print(raw_gross_sales)
+    print(labels)
+    
+    for gross_sale in raw_gross_sales:
+        index = labels.index(gross_sale['date'])
+        gross_sales[index] = gross_sale['amount']
+
+    response = {
+        'labels': labels,
+        'gross_sales': gross_sales,
+        'net': [],
+        'maintaining_sales': [],
+        'expenses': [],
+        'no_of_students': no_of_students
+    }
+    return jsonify(response), 200
 
     sale_jan = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=JANSTART) & Q(date_deposit__lte=JANEND)).order_by("-date_deposit").first()
     sale_feb = CashFlow.objects(branch=branch_id).filter(Q(date_deposit__gte=FEBSTART) & Q(date_deposit__lte=FEBEND)).order_by("-date_deposit").first()
@@ -271,7 +293,6 @@ def get_chart_data(branch_id):
     maintaining_sales = [
         85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,85000,
     ]
-
     month_count = get_date_now().month
 
     response = {
@@ -281,5 +302,4 @@ def get_chart_data(branch_id):
         'expenses': expenses[:month_count],
         'no_of_students': no_of_students
     }
-
-    return jsonify(response)
+    return jsonify(response), 200

@@ -80,16 +80,127 @@
                 });
         }
 
+        var ctx_chart_sales = document.getElementById('chart_sales');
+        ctx_chart_sales.height = 150;
+    
+        var maintaining_sales_data;
+        var gross_sales_data;
+        var expenses_data;
+
+        init();
+
+        function init(){
+            updateSalesAndExpenses();
+        }
+
+        function updateSalesAndExpenses(){
+            var branch = $("#filter_branch").val();
+            var dateFrom = $("#filter_date_from").val();
+            var dateTo = $("#filter_date_to").val();
+
+            $.ajax({
+                url: `/learning-management/api/dashboard/get-chart-data/${branch}?date_from=${dateFrom}&date_to=${dateTo}`,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    maintaining_sales_data = response.maintaining_sales;
+                    gross_sales_data = response.gross_sales;
+                    expenses_data = response.expenses;
+                    net_data = response.net;
+                    var labels = response.labels;
+                    console.log(response.labels);
+    
+                    $("#tbl_dashboard > tbody").empty();
+                    
+                    $('#tbl_dashboard > tbody:first').append(
+                        `<tr>
+                        <th scope="row">GROSS SALES</th>
+                        <td>${response.gross_sales[0] || ""}</td>
+                        <td>${response.gross_sales[1] || ""}</td>
+                        <td>${response.gross_sales[2] || ""}</td>
+                        <td>${response.gross_sales[3] || ""}</td>
+                        <td>${response.gross_sales[4] || ""}</td>
+                        <td>${response.gross_sales[5] || ""}</td>
+                        <td>${response.gross_sales[6] || ""}</td>
+                        <td>${response.gross_sales[7] || ""}</td>
+                        <td>${response.gross_sales[8] || ""}</td>
+                        <td>${response.gross_sales[9] || ""}</td>
+                        <td>${response.gross_sales[10] || ""}</td>
+                        <td>${response.gross_sales[11] || ""}</td>
+                        </tr>`
+                        );
+        
+                    const data = {
+                    labels: labels,
+                    datasets: [
+                        {
+                        label: 'Gross Sales',
+                        data: gross_sales_data,
+                        borderColor: 'rgba(0, 120, 246, 1)',
+                        backgroundColor: 'rgba(0, 120, 246, 0.5)',
+                        fill: false,
+        
+                        },
+                        {
+                        label: 'Expenses',
+                        data: expenses_data,
+                        borderColor: 'rgba(247, 255, 0, 1)',
+                        backgroundColor: 'rgba(247, 255, 0, 0.5)',
+                        fill: false,
+                        },
+                        {
+                            label: 'NET',
+                            data: net_data,
+                            borderColor: 'rgba(251, 145, 79, 1)',
+                            backgroundColor: 'rgba(251, 145, 79, 0.5)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Maintaining Sales',
+                            data: maintaining_sales_data,
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                            fill: false,
+                        }
+                    ]
+                    };
+        
+                    const config = {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Chart.js Line Chart'
+                        }
+                        }
+                    },
+                    };
+        
+                    var chart_sales = new Chart(ctx_chart_sales, config);
+        
+                }
+            });
+        }
+
         $("#filter_date_from").change(function(){
             updateSalesBreakdown();
+            updateSalesAndExpenses();
         });
 
         $("#filter_date_to").change(function(){
             updateSalesBreakdown();
+            updateSalesAndExpenses();
         });
 
         $("#filter_branch").change(function(){
             updateSalesBreakdown();
+            updateSalesAndExpenses();
         });
     });
 </script>
@@ -114,7 +225,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12 col-lg-6">
+        <div class="col-md-6">
             <div class="mb-3 card">
                 <div class="card-header-tab card-header-tab-animation card-header">
                     <div class="card-header-title">
@@ -152,179 +263,175 @@
                 </div>
             </div>
         </div>
-        {% if current_user.role.name in ['Admin', 'Partner'] %}
-        <div class="col-md-12 col-lg-6">
-            <div class="mb-3 card">
-                <div class="card-header-tab card-header-tab-animation card-header">
-                    <div class="card-header-title">
-                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
-                        Sales
-                    </div>
-                    <div class="btn-actions-pane-right text-capitalize actions-icon-btn">
-                        <div class="btn-group dropdown">
-                            <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                class="btn-icon btn-icon-only btn btn-link">
-                                <i class="pe-7s-filter btn-icon-wrapper"></i>
-                            </button>
-                            <div tabindex="-1" role="menu" aria-hidden="true"
-                                class="dropdown-menu-right rm-pointers dropdown-menu-shadow dropdown-menu-hover-link dropdown-menu">
-                                <h6 tabindex="-1" class="dropdown-header">Filter</h6>
-                                <div class="col-md-12 col-xs-12">
-                                    <div class="position-relative form-group">
-                                        <label for="filter_date_from" class="">Date From</label>
-                                        <input id="filter_date_from" type="date" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-md-12 col-xs-12">
-                                    <div class="position-relative form-group">
-                                        <label for="filter_date_to" class="">Date To</label>
-                                        <input id="filter_date_to" type="date" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-md-12 col-xs-12">
-                                    <div class="position-relative form-group">
-                                        <label for="filter_branch" class="">Branch</label>
-                                        <select name="filter_branch" id="filter_branch" class="form-control">
-                                            <option value="all">All</option>
-                                            {% for branch in options['branches'] %}
-                                            <option value="{{ branch.id }}">
-                                                {{ branch.name }}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <div class="widget-content p-0">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">Total of Installment</div>
-                                            <div class="widget-subheading">Total</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers text-success">
-                                                ₱ <span id="total_installment">{{options['total_installment']}}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="widget-content p-0">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">Total of Full Payment</div>
-                                            <div class="widget-subheading">Total</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers text-primary">
-                                                ₱ <span id="total_full_payment">{{options['total_full_payment']}}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="widget-content p-0">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">Total Of Premium Payment</div>
-                                            <div class="widget-subheading">Total</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers text-danger">
-                                                ₱ <span id="total_premium_payment">{{options['total_premium_payment']}}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="widget-content p-0">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">Total</div>
-                                            <div class="widget-subheading">Overall total</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers text-warning">
-                                                ₱ <span id="total">{{options['total']}}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
     {% if current_user.role.name in ['Admin', 'Partner'] %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="main-card mb-3 card">
-                <div class="card-header"><i class="header-icon lnr-gift icon-gradient bg-grow-early"> </i>SALES &
-                    EXPENSES
-                    <div class="btn-actions-pane-right">
-                        <div class="nav">
+    <div class="main-card mb-3 card">
+        <div class="card-header">
+            Your Overview
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="filter_date_from" class="">Date From</label>
+                        <input id="filter_date_from" type="date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="filter_date_to" class="">Date To</label>
+                        <input id="filter_date_to" type="date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="filter_branch" class="">Branch</label>
+                        <select name="filter_branch" id="filter_branch" class="form-control" required>
+                            <option value="all">All</option>
                             {% for branch in options['branches'] %}
-                            <button value="{{branch.id}}"
-                                class="{{branch.name}} btn-branch border-0 btn-transition btn btn-outline-primary">{{branch.name}}</button>
+                            <option value="{{ branch.id }}">
+                                {{ branch.name }}
+                            </option>
                             {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                Sales Breakdown
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total of Installment</div>
+                                                    <div class="widget-subheading">Total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers text-success">
+                                                        ₱ <span id="total_installment">{{options['total_installment']}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total of Full Payment</div>
+                                                    <div class="widget-subheading">Total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers text-primary">
+                                                        ₱ <span id="total_full_payment">{{options['total_full_payment']}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total Of Premium Payment</div>
+                                                    <div class="widget-subheading">Total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers text-danger">
+                                                        ₱ <span id="total_premium_payment">{{options['total_premium_payment']}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total</div>
+                                                    <div class="widget-subheading">Overall total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers text-warning">
+                                                        ₱ <span id="total">{{options['total']}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="chartjs-size-monitor"
-                        style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
-                        <div class="chartjs-size-monitor-expand"
-                            style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
-                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3 card">
+                        <div class="card-header">SALES & EXPENSES (CHART)
                         </div>
-                        <div class="chartjs-size-monitor-shrink"
-                            style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
-                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                        <div class="card-body">
+                            <div class="chartjs-size-monitor"
+                                style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                <div class="chartjs-size-monitor-expand"
+                                    style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                    <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                </div>
+                                <div class="chartjs-size-monitor-shrink"
+                                    style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                    <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                </div>
+                            </div>
+                            <canvas id="chart_sales" height="400" class="chartjs-render-monitor"
+                                style="display: block; width: 378px; height: 300px;" width="378"></canvas>
                         </div>
                     </div>
-                    <h5 class="card-title"></h5>
-                    <canvas id="chart_sales" height="400" class="chartjs-render-monitor"
-                        style="display: block; width: 378px; height: 300px;" width="378"></canvas>
-                    <table id="tbl_dashboard" class="mb-0 table table-bordered">
-                        <thead>
-                            <tr>
-                                <th style="width: 10px;"></th>
-                                <th>JAN</th>
-                                <th>FEB</th>
-                                <th>MAR</th>
-                                <th>APR</th>
-                                <th>MAY</th>
-                                <th>JUN</th>
-                                <th>JULY</th>
-                                <th>AUG</th>
-                                <th>SEP</th>
-                                <th>OCT</th>
-                                <th>NOV</th>
-                                <th>DEC</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3 card">
+                        <div class="card-header">SALES & EXPENSES (TABLE)
+                        </div>
+                        <div class="card-body">
+                            <table id="tbl_dashboard" class="mb-0 table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10px;"></th>
+                                        <th>JAN</th>
+                                        <th>FEB</th>
+                                        <th>MAR</th>
+                                        <th>APR</th>
+                                        <th>MAY</th>
+                                        <th>JUN</th>
+                                        <th>JULY</th>
+                                        <th>AUG</th>
+                                        <th>SEP</th>
+                                        <th>OCT</th>
+                                        <th>NOV</th>
+                                        <th>DEC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

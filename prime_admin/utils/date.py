@@ -3,6 +3,21 @@ from datetime import datetime, timedelta
 from config import TIMEZONE
 
 
+DATES = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+]
+
 
 def get_local_date_now():
     """Get local date now from a UTC date

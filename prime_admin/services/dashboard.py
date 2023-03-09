@@ -1,14 +1,15 @@
 from decimal import Decimal
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from bson import ObjectId
 from flask_login import current_user
 from app import mongo
 from prime_admin.utils.date import (
-    get_utc_today_end_date, get_utc_today_start_date, get_last_7_days, convert_date_input_to_utc
+    get_utc_today_end_date, get_utc_today_start_date, get_last_7_days, 
+    convert_date_input_to_utc, get_local_date_now, DATES
 )
-from prime_admin.utils.currency import format_to_str_php
+from prime_admin.utils.currency import format_to_str_php, convert_decimal128_to_decimal
 from prime_admin.models import Branch
-
 
 
 class DashboardService:
@@ -99,6 +100,80 @@ class DashboardService:
 
 
 class ChartService:
+    @staticmethod
+    def get_gross_sales_per_month(date_from='', date_to='', branch='all'):
+        group = {
+            'month': '$month',
+            'year': '$year'
+        }
+        match = {}
+
+        if date_from != "":
+            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
+        
+        if date_to != '':
+            match['date_deposit'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if date_from != '' and date_to != '':
+            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if branch != 'all':
+            match['branch'] = ObjectId(branch)
+
+        query = list(mongo.db.lms_bank_statements.aggregate([
+            {'$match': match},
+            {
+                '$project': {
+                    'branch': 1,
+                    'date_deposit': 1,
+                    'amount': 1,
+                    'month': {
+                        '$month': '$date_deposit'
+                    },
+                    'year': {
+                        '$year': '$date_deposit'
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': group,
+                    'total_gross_sale': {
+                        '$sum': '$amount'
+                    }
+                }
+            },
+        ]))
+        if len(query) == 0:
+            return []
+        
+        # results = [format_to_str_php(0) for _ in range(12)]
+        results = []
+        for document in query:
+            results.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': format_to_str_php(document['total_gross_sale'])
+            })
+        return results
+            
+            
+    @staticmethod
+    def get_month_labels(date_from, date_to):
+        if date_from == '':
+            date_from = "2021-03-01"
+        if date_to == '':
+            date_to = get_local_date_now().strftime("%Y-%m-%d")
+            
+        date_from = convert_date_input_to_utc(date_from, 'date_from')
+        date_to = convert_date_input_to_utc(date_to, 'date_to') + relativedelta(months=1)
+        
+        results = []
+        while date_from < date_to:
+            results.append(date_from.strftime("%b %Y"))
+            date_from += relativedelta(months=1)
+        return results
+        
+
     @staticmethod
     def fetch_chart_sales_today():
         dashboard_service = DashboardService()
