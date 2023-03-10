@@ -37,11 +37,11 @@
         const ctx = document.getElementById('chart_sales_today');
         const myChart = new Chart(ctx, config);
 
-        loadChartSalesToday();
+        function updateChartSalesToday() {
+            var branch = $("#filter_branch").val();
 
-        function loadChartSalesToday() {
             $.getJSON(
-                `/learning-management/dashboard/fetch-chart-sales-today`, function (response) {
+                `/learning-management/dashboard/fetch-chart-sales-today?branch=${branch}`, function (response) {
                     updateData(myChart, response.data.labels, response.data.datasets);
                 }).fail(function () {
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
@@ -80,18 +80,19 @@
                 });
         }
 
+        init();
+
+        function init(){
+            updateSalesAndExpenses();
+            updateChartSalesToday();
+        }
+
         var ctx_chart_sales = document.getElementById('chart_sales');
         ctx_chart_sales.height = 150;
     
         var maintaining_sales_data;
         var gross_sales_data;
         var expenses_data;
-
-        init();
-
-        function init(){
-            updateSalesAndExpenses();
-        }
 
         function updateSalesAndExpenses(){
             var branch = $("#filter_branch").val();
@@ -183,6 +184,7 @@
         $("#filter_branch").change(function(){
             updateSalesBreakdown();
             updateSalesAndExpenses();
+            updateChartSalesToday();
         });
     });
 </script>
@@ -206,47 +208,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3 card">
-                <div class="card-header-tab card-header-tab-animation card-header">
-                    <div class="card-header-title">
-                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
-                        Sales Today
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="col-sm-12 col-md-12">
-                        <div class="card-border border-light no-shadow card">
-                            <div class="widget-content">
-                                <div class="widget-content-outer">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left">
-                                            <div class="widget-heading">Today</div>
-                                        </div>
-                                        <div class="widget-content-right">
-                                            <div class="widget-numbers line-height-1 text-success">
-                                                <span>₱ {{options['sales_today']}}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card mb-3 widget-chart widget-chart2 text-left w-100">
-                        <div class="widget-chat-wrapper-outer">
-                            <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
-                                <canvas id="chart_sales_today"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if current_user.role.name in ['Admin', 'Partner'] %}
+    
     <div class="main-card mb-3 card">
         <div class="card-header">
             Your Overview
@@ -279,7 +241,48 @@
                     </div>
                 </div>
             </div>
+
             <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
+                                Sales Today
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card-border border-light no-shadow card">
+                                    <div class="widget-content">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Today</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers line-height-1 text-success">
+                                                        <span>₱ {{options['sales_today']}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+        
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-3 widget-chart widget-chart2 text-left w-100">
+                                <div class="widget-chat-wrapper-outer">
+                                    <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                        <canvas id="chart_sales_today"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if current_user.role.name in ['Admin', 'Partner'] %}
                 <div class="col-md-6">
                     <div class="mb-3 card">
                         <div class="card-header-tab card-header-tab-animation card-header">
@@ -361,7 +364,10 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
+
+            {% if current_user.role.name in ['Admin', 'Partner'] %}
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-3 card">
@@ -385,6 +391,9 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+
+            {% if current_user.role.name in ['Admin', 'Partner'] %}
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-3 card">
@@ -416,8 +425,8 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}

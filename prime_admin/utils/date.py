@@ -60,11 +60,11 @@ def get_utc_today_end_date(date=None):
     return utc_end_date
 
 
-def get_last_7_days():
+def get_last_n_days(days=7):
     now = get_local_date_now()
     results = []
     
-    for x in range(7):
+    for x in range(days):
         day = now - timedelta(days=x)
         results.append(day)
     results.reverse()

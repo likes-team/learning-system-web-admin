@@ -5,7 +5,7 @@ from bson import ObjectId
 from flask_login import current_user
 from app import mongo
 from prime_admin.utils.date import (
-    get_utc_today_end_date, get_utc_today_start_date, get_last_7_days, 
+    get_utc_today_end_date, get_utc_today_start_date, get_last_n_days, 
     convert_date_input_to_utc, get_local_date_now, DATES
 )
 from prime_admin.utils.currency import format_to_str_php, convert_decimal128_to_decimal
@@ -236,43 +236,42 @@ class ChartService:
         
 
     @staticmethod
-    def fetch_chart_sales_today():
+    def fetch_chart_sales_today(branch=None):
         dashboard_service = DashboardService()
 
-        if current_user.role.name == 'Secretary':
-            last_7_days = get_last_7_days()
-            labels = [day.strftime("%B %d") for day in last_7_days]
-            datasets = [{
-                'label': "Last 7 days",
-                'data': [],
-                'backgroundColor': 'rgb(75, 192, 192)'
-            }]
-            
-            for day in last_7_days:
-                sales_today = dashboard_service.get_sales_today(date=day)
-                datasets[0]['data'].append(sales_today)
-            return {
-                'labels': labels,
-                'datasets': datasets
-            }
-        
-        if current_user.role.name == 'Admin':
-            branches = Branch.objects
-        elif current_user.role.name == 'Partner':
-            branches = Branch.objects(id__in=current_user.branches)
-        else:
-            raise ValueError("InceptionError: current_user role is not supported yet")
-
-        labels = [branch.city for branch in branches]
+        last_30_days = get_last_n_days(30)
+        labels = [day.strftime("%B %d") for day in last_30_days]
         datasets = [{
-            'label': "Branches",
+            'label': "Last 30 days",
             'data': [],
             'backgroundColor': 'rgb(75, 192, 192)'
         }]
-        for branch in branches:
-            sales_today = dashboard_service.get_sales_today(branch=branch.id)
+        
+        for day in last_30_days:
+            sales_today = dashboard_service.get_sales_today(date=day, branch=branch)
             datasets[0]['data'].append(sales_today)
         return {
             'labels': labels,
             'datasets': datasets
         }
+        
+        # if current_user.role.name == 'Admin':
+        #     branches = Branch.objects
+        # elif current_user.role.name == 'Partner':
+        #     branches = Branch.objects(id__in=current_user.branches)
+        # else:
+        #     raise ValueError("InceptionError: current_user role is not supported yet")
+
+        # labels = [branch.city for branch in branches]
+        # datasets = [{
+        #     'label': "Branches",
+        #     'data': [],
+        #     'backgroundColor': 'rgb(75, 192, 192)'
+        # }]
+        # for branch in branches:
+        #     sales_today = dashboard_service.get_sales_today(branch=branch.id)
+        #     datasets[0]['data'].append(sales_today)
+        # return {
+        #     'labels': labels,
+        #     'datasets': datasets
+        # }

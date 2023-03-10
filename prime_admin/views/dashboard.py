@@ -84,7 +84,8 @@ def dashboard():
 
 @bp_lms.route('/dashboard/fetch-chart-sales-today', methods=['GET'])
 def fetch_chart_sales_today():
-    data = ChartService.fetch_chart_sales_today()
+    branch = request.args['branch'] if request.args['branch'] != 'all' else None
+    data = ChartService.fetch_chart_sales_today(branch)
     response = {
         'status': 'success',
         'data': data
