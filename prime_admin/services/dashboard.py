@@ -102,10 +102,6 @@ class DashboardService:
 class ChartService:
     @staticmethod
     def get_expenses_per_month(date_from='', date_to='', branch='all'):
-        group = {
-            'month': '$month',
-            'year': '$year'
-        }
         match = {
             'type': 'expenses'
         }

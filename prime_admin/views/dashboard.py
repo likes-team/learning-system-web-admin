@@ -1,43 +1,14 @@
 from datetime import datetime
-import decimal
-from prime_admin.globals import get_date_now
 from flask import request
 from flask.json import jsonify
 from flask.templating import render_template
 from flask_login import login_required, current_user
 from prime_admin import bp_lms
-from prime_admin.models import Branch, CashFlow, Dashboard, Registration
+from prime_admin.models import Branch, Dashboard
 from app.admin.templating import admin_dashboard, DashboardBox
-from mongoengine.queryset.visitor import Q
 from prime_admin.services.dashboard import DashboardService, ChartService
 from prime_admin.utils import currency
 
-
-
-JANSTART = datetime(2021, 1, 1)
-JANEND = datetime(2021, 1, 31)
-FEBSTART = datetime(2021, 2, 1)
-FEBEND = datetime(2021, 2, 28)
-MARSTART = datetime(2021, 3, 1)
-MAREND = datetime(2021, 3, 31)
-APRSTART = datetime(2021, 4, 1)
-APREND = datetime(2021, 4, 30)
-MAYSTART = datetime(2021, 5, 1)
-MAYEND = datetime(2021, 5, 31)
-JUNSTART = datetime(2021, 6, 1)
-JUNEND = datetime(2021, 6, 30)
-JULSTART = datetime(2021, 7, 1)
-JULEND = datetime(2021, 7, 31)
-AUGSTART = datetime(2021, 8, 1)
-AUGEND = datetime(2021, 8, 31)
-SEPSTART = datetime(2021, 9, 1)
-SEPEND = datetime(2021, 9, 30)
-OCTSTART = datetime(2021, 10, 1)
-OCTEND = datetime(2021, 10, 31)
-NOVSTART = datetime(2021, 11, 1)
-NOVEND = datetime(2021, 11, 30)
-DECSTART = datetime(2021, 12, 1)
-DECEND = datetime(2021, 12, 31)
 
 
 @bp_lms.route('/')
