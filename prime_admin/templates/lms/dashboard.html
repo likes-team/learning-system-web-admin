@@ -37,6 +37,29 @@
         const ctx = document.getElementById('chart_sales_today');
         const myChart = new Chart(ctx, config);
 
+        const ctx_chart_sales = document.getElementById('chart_sales');
+        ctx_chart_sales.height = 150;
+
+        const chart_sales = new Chart(ctx_chart_sales, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                }
+                }
+            },
+        });
+
         function updateChartSalesToday() {
             var branch = $("#filter_branch").val();
 
@@ -87,9 +110,6 @@
             updateChartSalesToday();
         }
 
-        var ctx_chart_sales = document.getElementById('chart_sales');
-        ctx_chart_sales.height = 150;
-    
         var maintaining_sales_data;
         var gross_sales_data;
         var expenses_data;
@@ -109,27 +129,23 @@
                     expenses_data = response.expenses;
                     net_data = response.net;
                     var labels = response.labels;
-                    console.log(response.labels);
     
                     $("#tbl_dashboard > tbody").empty();
 
-                    const data = {
-                    labels: labels,
-                    datasets: [
+                    updateData(chart_sales, response.labels, [
                         {
-                        label: 'Gross Sales',
-                        data: gross_sales_data,
-                        borderColor: 'rgba(0, 120, 246, 1)',
-                        backgroundColor: 'rgba(0, 120, 246, 0.5)',
-                        fill: false,
-        
+                            label: 'Gross Sales',
+                            data: gross_sales_data,
+                            borderColor: 'rgba(0, 120, 246, 1)',
+                            backgroundColor: 'rgba(0, 120, 246, 0.5)',
+                            fill: false,
                         },
                         {
-                        label: 'Expenses',
-                        data: expenses_data,
-                        borderColor: 'rgba(247, 255, 0, 1)',
-                        backgroundColor: 'rgba(247, 255, 0, 0.5)',
-                        fill: false,
+                            label: 'Expenses',
+                            data: expenses_data,
+                            borderColor: 'rgba(247, 255, 0, 1)',
+                            backgroundColor: 'rgba(247, 255, 0, 0.5)',
+                            fill: false,
                         },
                         {
                             label: 'NET',
@@ -145,28 +161,7 @@
                             backgroundColor: 'rgba(255, 0, 0, 0.5)',
                             fill: false,
                         }
-                    ]
-                    };
-        
-                    const config = {
-                    type: 'line',
-                    data: data,
-                    options: {
-                        responsive: true,
-                        plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Chart.js Line Chart'
-                        }
-                        }
-                    },
-                    };
-        
-                    var chart_sales = new Chart(ctx_chart_sales, config);
-        
+                    ]);
                 }
             });
         }
