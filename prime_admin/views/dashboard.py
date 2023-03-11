@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from prime_admin import bp_lms
 from prime_admin.models import Branch, Dashboard
 from app.admin.templating import admin_dashboard, DashboardBox
-from prime_admin.services.dashboard import DashboardService, ChartService
+from prime_admin.services.dashboard import DashboardService, ChartService, SalesAndExpensesChart
 from prime_admin.utils import currency
 
 
@@ -98,39 +98,16 @@ def get_chart_data(branch_id):
     date_from = request.args['date_from']
     date_to = request.args['date_to']
     
-    labels = ChartService.get_month_labels(date_from, date_to)
-    labels_count = len(labels)
-    gross_sales = [0 for _ in range(labels_count)]
-    expenses = [0 for _ in range(labels_count)]
-    maintaining_sales = [85000 for _ in range(labels_count)]
-    nets = [0 for _ in range(labels_count)]
-    no_of_students = []
-    raw_gross_sales = ChartService.get_gross_sales_per_month(date_from=date_from, date_to=date_to ,branch=branch_id)
-    raw_expenses = ChartService.get_expenses_per_month(date_from=date_from, date_to=date_to ,branch=branch_id)
+    chart = SalesAndExpensesChart(date_from=date_from, date_to=date_to, branch=branch_id)
+    chart.calculate_sales_and_expenses_per_month()
 
-    for gross_sale in raw_gross_sales:
-        index = labels.index(gross_sale['date'])
-        gross_sales[index] = gross_sale['amount']
-        
-    for expense in raw_expenses:
-        index = labels.index(expense['date'])
-        expenses[index] = expense['amount']
-    
-    for i in range(labels_count):
-        nets[i] = currency.format_to_str_php(gross_sales[i] - expenses[i])
-    
-    for i in range(len(expenses)):
-        expenses[i] = currency.format_to_str_php(expenses[i])
-    
-    for i in range(len(gross_sales)):
-        gross_sales[i] = currency.format_to_str_php(gross_sales[i])
-    
+    no_of_students = []
     response = {
-        'labels': labels,
-        'gross_sales': gross_sales,
-        'net': nets,
-        'maintaining_sales': maintaining_sales,
-        'expenses': expenses,
+        'labels': chart.get_month_labels(),
+        'gross_sales': chart.get_gross_sales_per_month(),
+        'net': chart.get_nets(),
+        'maintaining_sales': chart.get_maintaining_sales(),
+        'expenses': chart.get_expenses(),
         'no_of_students': no_of_students
     }
     return jsonify(response), 200

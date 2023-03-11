@@ -8,8 +8,8 @@ from prime_admin.utils.date import (
     get_utc_today_end_date, get_utc_today_start_date, get_last_n_days, 
     convert_date_input_to_utc, get_local_date_now, DATES
 )
-from prime_admin.utils.currency import format_to_str_php, convert_decimal128_to_decimal
 from prime_admin.models import Branch
+from prime_admin.utils import currency
 
 
 class DashboardService:
@@ -59,25 +59,25 @@ class DashboardService:
 
         if branch:
             self.set_branch(branch)
-        return format_to_str_php(self._calculate())
+        return currency.format_to_str_php(self._calculate())
 
 
     def get_total_installment(self):
         self.match['payment_mode'] = {'$in': ['installment', 'installment_promo']}
         self.total_installment = self._calculate()
-        return format_to_str_php(self.total_installment)
+        return currency.format_to_str_php(self.total_installment)
 
 
     def get_total_full_payment(self):
         self.match['payment_mode'] = {'$in': ['full_payment', 'full_payment_promo']}
         self.total_full_payment = self._calculate()
-        return format_to_str_php(self.total_full_payment)
+        return currency.format_to_str_php(self.total_full_payment)
     
     
     def get_total_premium_payment(self):
         self.match['payment_mode'] = {'$in': ['premium', 'premium_promo']}
         self.total_premium_payment = self._calculate()
-        return format_to_str_php(self.total_premium_payment)
+        return currency.format_to_str_php(self.total_premium_payment)
     
     
     def _calculate(self):
@@ -96,141 +96,10 @@ class DashboardService:
 
     def get_total(self):
         total = self.total_installment + self.total_full_payment + self.total_premium_payment 
-        return format_to_str_php(total)
+        return currency.format_to_str_php(total)
 
 
 class ChartService:
-    @staticmethod
-    def get_expenses_per_month(date_from='', date_to='', branch='all'):
-        match = {
-            'type': 'expenses'
-        }
-        if date_from != "":
-            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
-        
-        if date_to != '':
-            match['date_deposit'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
-
-        if date_from != '' and date_to != '':
-            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
-
-        if branch != 'all':
-            match['branch'] = ObjectId(branch)
-        
-        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
-            {
-                '$match': match
-            }, {
-                '$project': {
-                    'total_amount_due': 1,
-                    'branch': 1,
-                    'date': 1,
-                    'month': {
-                        '$month': '$date'
-                    }, 
-                    'year': {
-                        '$year': '$date'
-                    }
-                }
-            }, {
-                '$group': {
-                    '_id': {
-                        'month': '$month',
-                        'year': '$year'
-                    }, 
-                    'total': {
-                        '$sum': '$total_amount_due'
-                    }
-                }
-            }
-        ]))
-        
-        if len(query) == 0:
-            return []
-        
-        results = []
-        for document in query:
-            results.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': convert_decimal128_to_decimal(document['total'])
-            })
-        return results
-            
-    
-    @staticmethod
-    def get_gross_sales_per_month(date_from='', date_to='', branch='all'):
-        group = {
-            'month': '$month',
-            'year': '$year'
-        }
-        match = {}
-
-        if date_from != "":
-            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
-        
-        if date_to != '':
-            match['date_deposit'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
-
-        if date_from != '' and date_to != '':
-            match['date_deposit'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
-
-        if branch != 'all':
-            match['branch'] = ObjectId(branch)
-
-        query = list(mongo.db.lms_bank_statements.aggregate([
-            {'$match': match},
-            {
-                '$project': {
-                    'branch': 1,
-                    'date_deposit': 1,
-                    'amount': 1,
-                    'month': {
-                        '$month': '$date_deposit'
-                    },
-                    'year': {
-                        '$year': '$date_deposit'
-                    }
-                }
-            },
-            {
-                '$group': {
-                    '_id': group,
-                    'total_gross_sale': {
-                        '$sum': '$amount'
-                    }
-                }
-            },
-        ]))
-        if len(query) == 0:
-            return []
-        
-        # results = [format_to_str_php(0) for _ in range(12)]
-        results = []
-        for document in query:
-            results.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': convert_decimal128_to_decimal(document['total_gross_sale'])
-            })
-        return results
-            
-            
-    @staticmethod
-    def get_month_labels(date_from, date_to):
-        if date_from == '':
-            date_from = "2021-03-01"
-        if date_to == '':
-            date_to = get_local_date_now().strftime("%Y-%m-%d")
-            
-        date_from = convert_date_input_to_utc(date_from, 'date_from')
-        date_to = convert_date_input_to_utc(date_to, 'date_to') + relativedelta(months=1)
-        
-        results = []
-        while date_from < date_to:
-            results.append(date_from.strftime("%b %Y"))
-            date_from += relativedelta(months=1)
-        return results
-        
-
     @staticmethod
     def fetch_chart_sales_today(branch=None):
         dashboard_service = DashboardService()
@@ -271,3 +140,281 @@ class ChartService:
         #     'labels': labels,
         #     'datasets': datasets
         # }
+
+
+class SalesAndExpensesChart:
+    def __init__(self, date_from='', date_to='', branch='all'):
+        self.gross_sales = []
+        self.expenses = []
+        self.nets = []
+        self.maintaining_sales = []
+
+        self.date_from = date_from
+        self.date_to = date_to
+        self.branch = branch
+        self.date_filter = None
+        self.group = {
+            'month': '$month',
+            'year': '$year'
+        }
+        match = {}
+
+        if date_from != "":
+            self.date_filter = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
+        
+        if date_to != '':
+            self.date_filter = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if date_from != '' and date_to != '':
+            self.date_filter = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if branch != 'all':
+            match['branch'] = ObjectId(branch)
+        self.match = match
+
+        
+    def get_month_labels(self):
+        if self.date_from == '':
+            self.date_from = "2021-03-01"
+        if self.date_to == '':
+            self.date_to = get_local_date_now().strftime("%Y-%m-%d")
+            
+        date_from = convert_date_input_to_utc(self.date_from, 'date_from')
+        date_to = convert_date_input_to_utc(self.date_to, 'date_to') + relativedelta(months=1)
+        
+        results = []
+        while date_from < date_to:
+            results.append(date_from.strftime("%b %Y"))
+            date_from += relativedelta(months=1)
+        return results
+
+
+    def calculate_sales_and_expenses_per_month(self):
+        labels = self.get_month_labels()
+        labels_count = len(labels)
+        registration_sales = [0 for _ in range(labels_count)]
+        accommodation_sales = [0 for _ in range(labels_count)]
+        store_sales = [0 for _ in range(labels_count)]
+        
+        gross_sales = [0 for _ in range(labels_count)]
+        expenses = [0 for _ in range(labels_count)]
+        maintaining_sales = [85000 for _ in range(labels_count)]
+        nets = [0 for _ in range(labels_count)]
+        
+        for sale in self._get_registration_sales_per_month():
+            try:
+                index = labels.index(sale['date'])
+            except ValueError:
+                continue
+            registration_sales[index] = sale['amount']
+            
+        for sale in self._get_accommodation_sales_per_month():
+            try:
+                index = labels.index(sale['date'])
+            except ValueError:
+                continue
+            accommodation_sales[index] = sale['amount']
+            
+        for sale in self._get_store_sales_per_month():
+            try:
+                index = labels.index(sale['date'])
+            except ValueError:
+                continue
+            store_sales[index] = sale['amount']
+
+        for expense in self._get_expenses_per_month():
+            try:
+                index = labels.index(expense['date'])
+            except ValueError:
+                continue
+            expenses[index] = expense['amount']
+    
+        for i in range(labels_count):
+            gross_sales[i] = registration_sales[i] + accommodation_sales[i] + store_sales[i]
+        
+        for i in range(labels_count):
+            nets[i] = currency.format_to_str_php(gross_sales[i] - expenses[i])
+        
+        for i in range(len(expenses)):
+            expenses[i] = currency.format_to_str_php(expenses[i])
+        
+        for i in range(len(gross_sales)):
+            gross_sales[i] = currency.format_to_str_php(gross_sales[i])
+            
+        self.gross_sales = gross_sales
+        self.expenses = expenses
+        self.nets = nets
+        self.maintaining_sales = maintaining_sales
+    
+    def get_gross_sales_per_month(self):
+        return self.gross_sales
+
+    def get_expenses(self):
+        return self.expenses
+
+    def get_nets(self):
+        return self.nets
+    
+    def get_maintaining_sales(self):
+        return self.maintaining_sales
+
+    def _get_registration_sales_per_month(self):
+        if self.date_filter:
+            self.match['date'] = self.date_filter
+        
+        query = list(mongo.db.lms_registration_payments.aggregate([
+            {'$match': self.match},
+            {
+                '$project': {
+                    'branch': 1,
+                    'date': 1,
+                    'amount': 1,
+                    'month': {
+                        '$month': '$date'
+                    }, 
+                    'year': {
+                        '$year': '$date'
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': self.group,
+                    'total': {
+                        '$sum': '$amount'
+                    }
+                }
+            },
+        ]))
+        if 'date' in self.match: self.match.pop('date')
+        
+        student_payments = []
+        for document in query:
+            student_payments.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': currency.convert_decimal128_to_decimal(document['total'])
+            })
+        return student_payments
+            
+
+    def _get_accommodation_sales_per_month(self):
+        if self.date_filter:
+            self.match['created_at'] = self.date_filter
+
+        query = list(mongo.db.lms_accommodations.aggregate([
+            {'$match': self.match},
+            {
+                '$project': {
+                    'branch': 1,
+                    'created_at': 1,
+                    'total_amount': 1,
+                    'month': {
+                        '$month': '$created_at'
+                    },
+                    'year': {
+                        '$year': '$created_at'
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': self.group,
+                    'total': {
+                        '$sum': '$total_amount'
+                    }
+                }
+            },
+        ]))
+        if 'created_at' in self.match: self.match.pop('created_at')
+        
+        accommodations = []
+        for document in query:
+            accommodations.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': currency.convert_decimal128_to_decimal(document['total'])
+            })
+        return accommodations
+
+
+    def _get_store_sales_per_month(self):
+        if self.date_filter: self.match['created_at'] = self.date_filter
+
+        query = list(mongo.db.lms_store_buyed_items.aggregate([
+            {'$match': self.match},
+            {
+                '$project': {
+                    'branch': 1,
+                    'created_at': 1,
+                    'total_amount': 1,
+                    'month': {
+                        '$month': '$created_at'
+                    },
+                    'year': {
+                        '$year': '$created_at'
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': self.group,
+                    'total': {
+                        '$sum': '$total_amount'
+                    }
+                }
+            },
+        ]))
+        if 'created_at' in self.match: self.match.pop('created_at')
+        
+        store = []
+        for document in query:
+            store.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': currency.convert_decimal128_to_decimal(document['total'])
+            })
+        return store
+    
+    
+    def _get_expenses_per_month(self):
+        if self.date_filter: self.match['date'] = self.date_filter
+        self.match['type'] = 'expenses'
+        
+        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+            {
+                '$match': self.match
+            }, {
+                '$project': {
+                    'total_amount_due': 1,
+                    'branch': 1,
+                    'date': 1,
+                    'month': {
+                        '$month': '$date'
+                    }, 
+                    'year': {
+                        '$year': '$date'
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        'month': '$month',
+                        'year': '$year'
+                    }, 
+                    'total': {
+                        '$sum': '$total_amount_due'
+                    }
+                }
+            }
+        ]))
+        self.match.pop('type')
+        if 'date' in self.match: self.match.pop('date')
+        
+        if len(query) == 0:
+            return []
+        
+        results = []
+        for document in query:
+            results.append({
+                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                'amount': currency.convert_decimal128_to_decimal(document['total'])
+            })
+        return results
