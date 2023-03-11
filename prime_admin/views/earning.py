@@ -107,6 +107,7 @@ def get_dtbl_earnings_members():
         _table_data.append([
             str(payment.student.get_id()),
             str(payment.get_id()),
+            payment.get_date(),
             payment.branch.get_name(),
             payment.student.get_full_name(),
             payment.student.batch_no.get_no(),

@@ -41,6 +41,9 @@ class PaymentV2(Document):
 
     def get_status(self):
         return self.document.get('status')
+    
+    def get_date(self):
+        return format_utc_to_local(self.document['date'], date_format="%B %d, %Y %H:%M %p")
 
             
 class BranchV2(Document):
