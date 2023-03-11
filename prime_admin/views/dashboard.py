@@ -64,6 +64,40 @@ def fetch_chart_sales_today():
     return jsonify(response), 200
 
 
+@bp_lms.route('/dashboard/fetch-charts-breakdown')
+def fetch_charts_breakdown():
+    date_from = request.args['date_from']
+    date_to = request.args['date_to']
+    branch = request.args['branch']
+
+    chart = SalesAndExpensesChart(date_from=date_from, date_to=date_to, branch=branch)
+    registration_sales_per_month = chart.get_registration_sales_per_month()
+    accommodation_sales_per_month = chart.get_accommodation_sales_per_month()
+    store_sales_per_month = chart.get_store_sales_per_month()
+    
+    registration_sales = 0
+    accommodation_sales = 0
+    store_sales = 0
+
+    for sale in registration_sales_per_month:
+        registration_sales += sale['amount']
+
+    for sale in accommodation_sales_per_month:
+        accommodation_sales += sale['amount']
+
+    for sale in store_sales_per_month:
+        store_sales += sale['amount']
+        
+    response = {
+        'labels': ['Enrollee', 'Accommodation', 'Store'],
+        'gross_sales_breakdown': [
+            currency.format_to_str_php(registration_sales),
+            currency.format_to_str_php(accommodation_sales),
+            currency.format_to_str_php(store_sales)
+        ],
+    }
+    return jsonify(response), 200
+
 @bp_lms.route('/dashboard/fetch-sales-breakdown', methods=['GET'])
 def fetch_sales_breakdown():
     date_from = request.args['date_from'] if request.args['date_from'] != '' else None

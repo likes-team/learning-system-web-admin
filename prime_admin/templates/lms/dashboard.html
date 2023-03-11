@@ -3,87 +3,94 @@
 
 {% block scripts %}
 <script>
+    function updateData(chart, labels, datasets) {
+        removeData(chart);
+        chart.config.data.labels = labels;
+        chart.config.data.datasets = datasets;
+        chart.update();
+    }
+
+    function removeData(chart) {
+        chart.data.labels.pop();
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.pop();
+        });
+        chart.update();
+    }
+
     $(document).ready(function () {
         $("#li_dashboard").addClass('mm-active');
 
-        const DATA_COUNT = 7;
-        const NUMBER_CFG = { count: DATA_COUNT, min: -100, max: 100 };
-        const data = {
-            labels: [],
-            datasets: []
-        };
-        const config = {
+        // ***** SALES TODAY ***** 
+        const chart_sales_today_config = {
             type: 'bar',
-            data: data,
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: ''
-                    },
-                },
-                responsive: true,
-                scales: {
-                    x: {
-                        stacked: true,
-                    },
-                    y: {
-                        stacked: true
-                    }
-                }
-            }
+            data: {labels: [], datasets: []},
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
         };
+        const chart_sales_today_ctx = document.getElementById('chart_sales_today');
+        const chart_sales_today = new Chart(chart_sales_today_ctx, chart_sales_today_config);
 
-        const ctx = document.getElementById('chart_sales_today');
-        const myChart = new Chart(ctx, config);
+        // *****  SALES & EXPENSES (CHART) ***** 
+        const chart_sales_and_expenses_config = {type: 'line', data: {labels: [], datasets: []},
+            options: {responsive: true, plugins: {legend: {position: 'top',}, title: {display: true, text: 'Chart.js Line Chart'},},},
+        }
+        const chart_sales_and_expenses_ctx = document.getElementById('chart_sales_and_expenses');
+        chart_sales_and_expenses_ctx.height = 150;
+        const chart_sales_and_expenses = new Chart(chart_sales_and_expenses_ctx, chart_sales_and_expenses_config);
 
-        const ctx_chart_sales = document.getElementById('chart_sales');
-        ctx_chart_sales.height = 150;
+        // *****  GROSS SALES BREAKDOWN ***** 
+        const chart_gross_sales_config = {
+            type: 'bar',
+            data: {labels: [], datasets: []},
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
+        };
+        const chart_gross_sales_breakdown_ctx = document.getElementById('chart_gross_sales_breakdown');
+        const chart_gross_sales_breakdown = new Chart(chart_gross_sales_breakdown_ctx, chart_gross_sales_config);
+        
+        // *****  EXPENSES BREAKDOWN ***** 
+        const chart_expenses_breakdown_config = {
+            type: 'bar',
+            data: {labels: [], datasets: []},
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
+        };
+        const chart_expenses_breakdown_ctx = document.getElementById('chart_expenses_breakdown');
+        const chart_expenses_breakdown = new Chart(chart_expenses_breakdown_ctx, chart_expenses_breakdown_config);
+        
+        // *****  NET - LOSE ***** 
+        const chart_net_lose_config = {
+            type: 'bar',
+            data: {labels: [], datasets: []},
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
+        };
+        const chart_net_lose_ctx = document.getElementById('chart_net_lose');
+        const chart_net_lose = new Chart(chart_net_lose_ctx, chart_net_lose_config);
+        
+        // *****  NET - LOSE ***** 
+        const chart_all_branches_config = {
+            type: 'bar',
+            data: {labels: [], datasets: []},
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
+        };
+        const chart_all_branches_ctx = document.getElementById('chart_all_branches');
+        const chart_all_branches = new Chart(chart_all_branches_ctx, chart_all_branches_config);
+        
+        init();
 
-        const chart_sales = new Chart(ctx_chart_sales, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: []
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Chart.js Line Chart'
-                }
-                }
-            },
-        });
+        function init(){
+            updateSalesAndExpenses();
+            updateChartSalesToday();
+            updateGrossSalesBreakdown();
+        }
 
         function updateChartSalesToday() {
             var branch = $("#filter_branch").val();
 
             $.getJSON(
                 `/learning-management/dashboard/fetch-chart-sales-today?branch=${branch}`, function (response) {
-                    updateData(myChart, response.data.labels, response.data.datasets);
+                    updateData(chart_sales_today, response.data.labels, response.data.datasets);
                 }).fail(function () {
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
                 });
-        }
-
-        function updateData(chart, labels, datasets) {
-            removeData(chart);
-            chart.config.data.labels = labels;
-            chart.config.data.datasets = datasets;
-            chart.update();
-        }
-
-        function removeData(chart) {
-            chart.data.labels.pop();
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.pop();
-            });
-            chart.update();
         }
 
         function updateSalesBreakdown(){
@@ -103,16 +110,23 @@
                 });
         }
 
-        init();
+        function updateGrossSalesBreakdown() {
+            var dateFrom = $("#filter_date_from").val();
+            var dateTo = $("#filter_date_to").val();
+            var branch = $("#filter_branch").val();
 
-        function init(){
-            updateSalesAndExpenses();
-            updateChartSalesToday();
+            $.getJSON(
+                `/learning-management/dashboard/fetch-charts-breakdown?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
+                    updateData(chart_gross_sales_breakdown, response.labels, [{
+                        label: 'Sales Breakdown',
+                        data: response.gross_sales_breakdown,
+                        backgroundColor: 'rgba(0, 120, 246, 0.5)',
+                        fill: false,
+                    }]);
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
+                });
         }
-
-        var maintaining_sales_data;
-        var gross_sales_data;
-        var expenses_data;
 
         function updateSalesAndExpenses(){
             var branch = $("#filter_branch").val();
@@ -124,39 +138,35 @@
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function(response) {
-                    maintaining_sales_data = response.maintaining_sales;
-                    gross_sales_data = response.gross_sales;
-                    expenses_data = response.expenses;
-                    net_data = response.net;
                     var labels = response.labels;
     
                     $("#tbl_dashboard > tbody").empty();
 
-                    updateData(chart_sales, response.labels, [
+                    updateData(chart_sales_and_expenses, response.labels, [
                         {
                             label: 'Gross Sales',
-                            data: gross_sales_data,
+                            data: response.gross_sales,
                             borderColor: 'rgba(0, 120, 246, 1)',
                             backgroundColor: 'rgba(0, 120, 246, 0.5)',
                             fill: false,
                         },
                         {
                             label: 'Expenses',
-                            data: expenses_data,
+                            data: response.expenses,
                             borderColor: 'rgba(247, 255, 0, 1)',
                             backgroundColor: 'rgba(247, 255, 0, 0.5)',
                             fill: false,
                         },
                         {
                             label: 'NET',
-                            data: net_data,
+                            data: response.net,
                             borderColor: 'rgba(251, 145, 79, 1)',
                             backgroundColor: 'rgba(251, 145, 79, 0.5)',
                             fill: false,
                         },
                         {
                             label: 'Maintaining Sales',
-                            data: maintaining_sales_data,
+                            data: response.maintaining_sales,
                             borderColor: 'rgba(255, 0, 0, 1)',
                             backgroundColor: 'rgba(255, 0, 0, 0.5)',
                             fill: false,
@@ -169,17 +179,20 @@
         $("#filter_date_from").change(function(){
             updateSalesBreakdown();
             updateSalesAndExpenses();
+            updateGrossSalesBreakdown();
         });
 
         $("#filter_date_to").change(function(){
             updateSalesBreakdown();
             updateSalesAndExpenses();
+            updateGrossSalesBreakdown();
         });
 
         $("#filter_branch").change(function(){
             updateSalesBreakdown();
             updateSalesAndExpenses();
             updateChartSalesToday();
+            updateGrossSalesBreakdown();
         });
     });
 </script>
@@ -266,7 +279,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card mb-3 widget-chart widget-chart2 text-left w-100">
+                            <div class="mb-3 widget-chart widget-chart2 text-left w-100">
                                 <div class="widget-chat-wrapper-outer">
                                     <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
                                         <canvas id="chart_sales_today"></canvas>
@@ -282,7 +295,7 @@
                     <div class="mb-3 card">
                         <div class="card-header-tab card-header-tab-animation card-header">
                             <div class="card-header-title">
-                                Student's Payments Sales Breakdown
+                                Students Payment Sales Breakdown
                             </div>
                         </div>
                         <div class="card-body">
@@ -364,6 +377,88 @@
 
             {% if current_user.role.name in ['Admin', 'Partner'] %}
             <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                Gross Sales Breakdown 
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 widget-chart widget-chart2 text-left w-100">
+                                <div class="widget-chat-wrapper-outer">
+                                    <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                        <canvas id="chart_gross_sales_breakdown"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                Expenses Breakdown 
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 widget-chart widget-chart2 text-left w-100">
+                                <div class="widget-chat-wrapper-outer">
+                                    <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                        <canvas id="chart_expenses_breakdown"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if current_user.role.name in ['Admin', 'Partner'] %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                Net - Lose 
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 widget-chart widget-chart2 text-left w-100">
+                                <div class="widget-chat-wrapper-outer">
+                                    <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                        <canvas id="chart_net_lose"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                All Branches
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 widget-chart widget-chart2 text-left w-100">
+                                <div class="widget-chat-wrapper-outer">
+                                    <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                                        <canvas id="chart_all_branches"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if current_user.role.name in ['Admin', 'Partner'] %}
+            <div class="row">
                 <div class="col-md-12">
                     <div class="mb-3 card">
                         <div class="card-header">SALES & EXPENSES (CHART)
@@ -380,7 +475,7 @@
                                     <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
                                 </div>
                             </div>
-                            <canvas id="chart_sales" height="400" class="chartjs-render-monitor"
+                            <canvas id="chart_sales_and_expenses" height="400" class="chartjs-render-monitor"
                                 style="display: block; width: 378px; height: 300px;" width="378"></canvas>
                         </div>
                     </div>

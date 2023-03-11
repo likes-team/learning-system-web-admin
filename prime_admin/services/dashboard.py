@@ -201,21 +201,21 @@ class SalesAndExpensesChart:
         maintaining_sales = [85000 for _ in range(labels_count)]
         nets = [0 for _ in range(labels_count)]
         
-        for sale in self._get_registration_sales_per_month():
+        for sale in self.get_registration_sales_per_month():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
                 continue
             registration_sales[index] = sale['amount']
             
-        for sale in self._get_accommodation_sales_per_month():
+        for sale in self.get_accommodation_sales_per_month():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
                 continue
             accommodation_sales[index] = sale['amount']
             
-        for sale in self._get_store_sales_per_month():
+        for sale in self.get_store_sales_per_month():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
@@ -258,9 +258,10 @@ class SalesAndExpensesChart:
     def get_maintaining_sales(self):
         return self.maintaining_sales
 
-    def _get_registration_sales_per_month(self):
+    def get_registration_sales_per_month(self):
         if self.date_filter:
             self.match['date'] = self.date_filter
+        self.match['payment_mode'] = {'$ne': "refund"}
         
         query = list(mongo.db.lms_registration_payments.aggregate([
             {'$match': self.match},
@@ -287,6 +288,7 @@ class SalesAndExpensesChart:
             },
         ]))
         if 'date' in self.match: self.match.pop('date')
+        self.match.pop('payment_mode')
         
         student_payments = []
         for document in query:
@@ -297,7 +299,7 @@ class SalesAndExpensesChart:
         return student_payments
             
 
-    def _get_accommodation_sales_per_month(self):
+    def get_accommodation_sales_per_month(self):
         if self.date_filter:
             self.match['created_at'] = self.date_filter
 
@@ -336,7 +338,7 @@ class SalesAndExpensesChart:
         return accommodations
 
 
-    def _get_store_sales_per_month(self):
+    def get_store_sales_per_month(self):
         if self.date_filter: self.match['created_at'] = self.date_filter
 
         query = list(mongo.db.lms_store_buyed_items.aggregate([
