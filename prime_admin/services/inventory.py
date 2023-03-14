@@ -251,10 +251,10 @@ class InventoryService:
                 'supply_id': 1,
                 'quantity': 1,
                 'month': {
-                    '$month': '$date'
+                    '$month': {"date": "$date", "timezone": "Asia/Manila"}
                 },
                 'year': {
-                    '$year': '$date'
+                    '$year': {"date": "$date", "timezone": "Asia/Manila"}
                 }
             }},
             {'$match': _filter},

@@ -70,7 +70,7 @@ class BusinessExpensesService:
         query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
            {'$match': self.match},
            {'$group': {
-               '_id': {'month': {'$month': '$date'}, 'category': '$category'},
+               '_id': {'month': {'$month': {"date": "$date", "timezone": "Asia/Manila"}}, 'category': '$category'},
                'total': {'$sum': '$total_amount_due'}
            }}
         ]))

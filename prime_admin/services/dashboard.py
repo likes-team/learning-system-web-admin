@@ -271,10 +271,10 @@ class SalesAndExpensesChart:
                     'date': 1,
                     'amount': 1,
                     'month': {
-                        '$month': '$date'
-                    }, 
+                        '$month': {"date": "$date", "timezone": "Asia/Manila"}
+                    },
                     'year': {
-                        '$year': '$date'
+                        '$year': {"date": "$date", "timezone": "Asia/Manila"}
                     }
                 }
             },
@@ -311,10 +311,10 @@ class SalesAndExpensesChart:
                     'created_at': 1,
                     'total_amount': 1,
                     'month': {
-                        '$month': '$created_at'
+                        '$month': {"date": "$created_at", "timezone": "Asia/Manila"}
                     },
                     'year': {
-                        '$year': '$created_at'
+                        '$year': {"date": "$created_at", "timezone": "Asia/Manila"}
                     }
                 }
             },
@@ -349,10 +349,10 @@ class SalesAndExpensesChart:
                     'created_at': 1,
                     'total_amount': 1,
                     'month': {
-                        '$month': '$created_at'
+                        '$month': {"date": "$created_at", "timezone": "Asia/Manila"}
                     },
                     'year': {
-                        '$year': '$created_at'
+                        '$year': {"date": "$created_at", "timezone": "Asia/Manila"}
                     }
                 }
             },
@@ -389,10 +389,10 @@ class SalesAndExpensesChart:
                     'branch': 1,
                     'date': 1,
                     'month': {
-                        '$month': '$date'
+                        '$month': {"date": "$date", "timezone": "Asia/Manila"}
                     }, 
                     'year': {
-                        '$year': '$date'
+                        '$year': {"date": "$date", "timezone": "Asia/Manila"}
                     }
                 }
             }, {

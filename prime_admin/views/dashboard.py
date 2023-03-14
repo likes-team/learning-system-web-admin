@@ -88,6 +88,7 @@ def fetch_charts_breakdown():
     for sale in store_sales_per_month:
         store_sales += sale['amount']
         
+    print("registration_sales:::", registration_sales)
     response = {
         'labels': ['Enrollee', 'Accommodation', 'Store'],
         'gross_sales_breakdown': [

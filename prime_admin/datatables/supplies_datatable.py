@@ -405,10 +405,10 @@ def dt_deposit_transactions():
                 'date': 1,
                 'previous_reserve': 1,
                 'month': {
-                    '$month': '$date'
+                    '$month': {"date": "$date", "timezone": "Asia/Manila"}
                 },
                 'year': {
-                    '$year': '$date'
+                    '$year': {"date": "$date", "timezone": "Asia/Manila"}
                 }
             }
         }, {
