@@ -7,8 +7,7 @@ from prime_admin import bp_lms
 from prime_admin.models import Branch, Dashboard
 from app.admin.templating import admin_dashboard, DashboardBox
 from prime_admin.services.dashboard import DashboardService, ChartService, SalesAndExpensesChart
-from prime_admin.utils import currency
-
+from prime_admin.utils import currency, expenses
 
 
 @bp_lms.route('/')
@@ -32,12 +31,12 @@ def dashboard():
     total_full_payment = dashboard_service.get_total_full_payment()
     total_premium_payment = dashboard_service.get_total_premium_payment()
     total = dashboard_service.get_total()
-    
+
     options = {
         'branches': branches,
-        'box1': DashboardBox("Number of enrollees","Current", 0),
-        'box2': DashboardBox("Total Sales","Montly", 0),
-        'box3': DashboardBox("Gross Income","Total users", 0),
+        'box1': DashboardBox("Number of enrollees", "Current", 0),
+        'box2': DashboardBox("Total Sales", "Montly", 0),
+        'box3': DashboardBox("Gross Income", "Total users", 0),
         'scripts': [{'lms.static': 'js/utils.js'}],
         'sales_today': sales_today,
         'total_installment': total_installment,
@@ -64,8 +63,8 @@ def fetch_chart_sales_today():
     return jsonify(response), 200
 
 
-@bp_lms.route('/dashboard/fetch-charts-breakdown')
-def fetch_charts_breakdown():
+@bp_lms.route('/dashboard/fetch-gross-sales-breakdown')
+def fetch_gross_sales_breakdown():
     date_from = request.args['date_from']
     date_to = request.args['date_to']
     branch = request.args['branch']
@@ -88,7 +87,6 @@ def fetch_charts_breakdown():
     for sale in store_sales_per_month:
         store_sales += sale['amount']
         
-    print("registration_sales:::", registration_sales)
     response = {
         'labels': ['Enrollee', 'Accommodation', 'Store'],
         'gross_sales_breakdown': [
@@ -98,6 +96,38 @@ def fetch_charts_breakdown():
         ],
     }
     return jsonify(response), 200
+
+
+@bp_lms.route('/dashboard/fetch-expenses-breakdown')
+def fetch_expenses_breakdown():
+    date_from = request.args['date_from']
+    date_to = request.args['date_to']
+    branch = request.args['branch']
+    
+    chart = SalesAndExpensesChart(date_from=date_from, date_to=date_to, branch=branch)
+    expenses_per_category = chart.get_expenses_per_category()
+    labels = [
+        'UTILITIES', 'OFFICE SUPPLIES', 'SALARY', 'REBATES', 'REFUND', 'OTHER EXPENSES',
+        'BIR', 'BUSINESS PERMIT', 'EMP. BENEFITS', 'BOOK. RET. FEE',
+        'SNPL FEE'
+    ]
+    expenses_breakdown = [0 for _ in range(len(labels))]
+    
+    for expense in expenses_per_category:
+        try:
+            index = labels.index(expenses.CATEGORIES[expense['category']])
+        except KeyError:
+            print(expense['category'])
+            continue
+        expenses_breakdown[index] = currency.format_to_str_php(expense['amount'])
+
+    
+    response = {
+        'labels': labels,
+        'expenses_breakdown': expenses_breakdown
+    }
+    return jsonify(response), 200
+
 
 @bp_lms.route('/dashboard/fetch-sales-breakdown', methods=['GET'])
 def fetch_sales_breakdown():
@@ -132,8 +162,9 @@ def fetch_sales_breakdown():
 def get_chart_data(branch_id):
     date_from = request.args['date_from']
     date_to = request.args['date_to']
-    
-    chart = SalesAndExpensesChart(date_from=date_from, date_to=date_to, branch=branch_id)
+
+    chart = SalesAndExpensesChart(
+        date_from=date_from, date_to=date_to, branch=branch_id)
     chart.calculate_sales_and_expenses_per_month()
 
     no_of_students = []

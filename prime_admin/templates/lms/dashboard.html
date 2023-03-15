@@ -80,6 +80,7 @@
             updateSalesAndExpenses();
             updateChartSalesToday();
             updateGrossSalesBreakdown();
+            updateExpensesBreakdown();
         }
 
         function updateChartSalesToday() {
@@ -116,7 +117,7 @@
             var branch = $("#filter_branch").val();
 
             $.getJSON(
-                `/learning-management/dashboard/fetch-charts-breakdown?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
+                `/learning-management/dashboard/fetch-gross-sales-breakdown?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
                     updateData(chart_gross_sales_breakdown, response.labels, [{
                         label: 'Sales Breakdown',
                         data: response.gross_sales_breakdown,
@@ -127,6 +128,26 @@
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
                 });
         }
+
+
+        function updateExpensesBreakdown() {
+            var dateFrom = $("#filter_date_from").val();
+            var dateTo = $("#filter_date_to").val();
+            var branch = $("#filter_branch").val();
+
+            $.getJSON(
+                `/learning-management/dashboard/fetch-expenses-breakdown?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
+                    updateData(chart_expenses_breakdown, response.labels, [{
+                        label: 'Expenses Breakdown',
+                        data: response.expenses_breakdown,
+                        backgroundColor: 'rgba(0, 120, 246, 0.5)',
+                        fill: false,
+                    }]);
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
+                });
+        }
+
 
         function updateSalesAndExpenses(){
             var branch = $("#filter_branch").val();
@@ -180,12 +201,14 @@
             updateSalesBreakdown();
             updateSalesAndExpenses();
             updateGrossSalesBreakdown();
+            updateExpensesBreakdown();
         });
 
         $("#filter_date_to").change(function(){
             updateSalesBreakdown();
             updateSalesAndExpenses();
             updateGrossSalesBreakdown();
+            updateExpensesBreakdown();
         });
 
         $("#filter_branch").change(function(){
@@ -193,6 +216,7 @@
             updateSalesAndExpenses();
             updateChartSalesToday();
             updateGrossSalesBreakdown();
+            updateExpensesBreakdown();
         });
     });
 </script>
@@ -395,7 +419,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+            </div>
+            <div class="row">
+                <div class="col-md-12">
                     <div class="mb-3 card">
                         <div class="card-header-tab card-header-tab-animation card-header">
                             <div class="card-header-title">

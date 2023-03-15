@@ -420,3 +420,48 @@ class SalesAndExpensesChart:
                 'amount': currency.convert_decimal128_to_decimal(document['total'])
             })
         return results
+
+    def get_expenses_per_category(self):
+        if self.date_filter: self.match['date'] = self.date_filter
+        self.match['type'] = 'expenses'
+        
+        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+            {
+                '$match': self.match
+            }, {
+                '$project': {
+                    'total_amount_due': 1,
+                    'branch': 1,
+                    'date': 1,
+                    'category': 1,
+                    'month': {
+                        '$month': {"date": "$date", "timezone": "Asia/Manila"}
+                    }, 
+                    'year': {
+                        '$year': {"date": "$date", "timezone": "Asia/Manila"}
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        'category': '$category',
+                    }, 
+                    'total': {
+                        '$sum': '$total_amount_due'
+                    }
+                }
+            }
+        ]))
+        self.match.pop('type')
+        if 'date' in self.match: self.match.pop('date')
+        
+        if len(query) == 0:
+            return []
+        
+        results = []
+        for document in query:
+            results.append({
+                'category': document['_id']['category'],
+                'amount': currency.convert_decimal128_to_decimal(document['total'])
+            })
+        return results
