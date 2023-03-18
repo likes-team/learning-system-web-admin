@@ -60,7 +60,22 @@
         const chart_net_lose_config = {
             type: 'bar',
             data: {labels: [], datasets: []},
-            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},}
+            options: {plugins: {title: {display: true, text: ''},}, responsive: true, scales: {x: {stacked: true}, y: {stacked: true},},},
+            plugins: [{
+                beforeDraw: function(c) {
+                    if (c.data.datasets.length <= 0){
+                        return;
+                    }
+                    console.log(c.data.datasets[0]);
+                    var data = c.data.datasets[0].data;
+                    for (let i in data) {
+                       let bar = c.data.datasets[0]._meta['4'].data[i]._model;
+                       if (data[i] > 0) {
+                          bar.backgroundColor = '#07C';
+                       } else bar.backgroundColor = '#E82020';
+                    }
+                 }
+            }]
         };
         const chart_net_lose_ctx = document.getElementById('chart_net_lose');
         const chart_net_lose = new Chart(chart_net_lose_ctx, chart_net_lose_config);
@@ -103,6 +118,7 @@
             updateGrossSalesBreakdown();
             updateExpensesBreakdown();
             updateAllBranchesNetLose();
+            updateNetLose();
         }
 
         function updateChartSalesToday() {
@@ -177,9 +193,28 @@
             var branch = $("#filter_branch").val();
 
             $.getJSON(
-                `/learning-management/dashboard/fetch-net-lose?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
+                `/learning-management/dashboard/fetch-all-branches-net-lose?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
                     updateData(chart_all_branches, response.labels, [{
                         label: 'All Branches NET/LOSE',
+                        data: response.data,
+                        backgroundColor: 'rgba(0, 120, 246, 0.5)',
+                        fill: false,
+                    }]);
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
+                });
+        }
+
+
+        function updateNetLose() {
+            var dateFrom = $("#filter_date_from").val();
+            var dateTo = $("#filter_date_to").val();
+            var branch = $("#filter_branch").val();
+
+            $.getJSON(
+                `/learning-management/dashboard/fetch-net-lose?date_from=${dateFrom}&date_to=${dateTo}&branch=${branch}`, function (response) {
+                    updateData(chart_net_lose, response.labels, [{
+                        label: 'NET/LOSE',
                         data: response.data,
                         backgroundColor: 'rgba(0, 120, 246, 0.5)',
                         fill: false,
@@ -244,6 +279,7 @@
             updateGrossSalesBreakdown();
             updateExpensesBreakdown();
             updateAllBranchesNetLose();
+            updateNetLose();
         });
 
         $("#filter_date_to").change(function(){
@@ -252,6 +288,7 @@
             updateGrossSalesBreakdown();
             updateExpensesBreakdown();
             updateAllBranchesNetLose();
+            updateNetLose();
         });
 
         $("#filter_branch").change(function(){
@@ -261,6 +298,7 @@
             updateGrossSalesBreakdown();
             updateExpensesBreakdown();
             updateAllBranchesNetLose();
+            updateNetLose();
         });
     });
 </script>

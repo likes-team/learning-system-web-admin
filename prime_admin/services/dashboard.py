@@ -251,7 +251,7 @@ class SalesAndExpensesChart:
         }
 
 
-    def calculate_sales_and_expenses_per_month(self):
+    def calculate_sales_and_expenses_per_month(self, format_to_currency=True):
         labels = self.get_month_labels()
         labels_count = len(labels)
         registration_sales = [0 for _ in range(labels_count)]
@@ -290,25 +290,29 @@ class SalesAndExpensesChart:
             except ValueError:
                 continue
             expenses[index] = expense['amount']
-    
+            
         for i in range(labels_count):
             gross_sales[i] = registration_sales[i] + accommodation_sales[i] + store_sales[i]
         
         for i in range(labels_count):
-            nets[i] = currency.format_to_str_php(gross_sales[i] - expenses[i])
+            nets[i] = gross_sales[i] - expenses[i]
         
-        for i in range(len(expenses)):
-            expenses[i] = currency.format_to_str_php(expenses[i])
-        
-        for i in range(len(gross_sales)):
-            gross_sales[i] = currency.format_to_str_php(gross_sales[i])
+        if format_to_currency:
+            for i in range(labels_count):
+                nets[i] = currency.format_to_str_php(nets[i])
             
+            for i in range(len(expenses)):
+                expenses[i] = currency.format_to_str_php(expenses[i])
+            
+            for i in range(len(gross_sales)):
+                gross_sales[i] = currency.format_to_str_php(gross_sales[i])
+                
         self.gross_sales = gross_sales
         self.expenses = expenses
         self.nets = nets
         self.maintaining_sales = maintaining_sales
     
-    def get_gross_sales_per_month(self):
+    def get_gross_sales(self):
         return self.gross_sales
 
     def get_expenses(self):
@@ -329,9 +333,9 @@ class SalesAndExpensesChart:
             {'$match': self.match},
             {
                 '$lookup': {
-                    'from': 'lms_branches', 
-                    'localField': 'branch', 
-                    'foreignField': '_id', 
+                    'from': 'lms_branches',
+                    'localField': 'branch',
+                    'foreignField': '_id',
                     'as': 'branch'
                 }
             }, {

@@ -132,6 +132,31 @@ def fetch_expenses_breakdown():
 def fetch_net_lose():
     date_from = request.args['date_from']
     date_to = request.args['date_to']
+    branch = request.args['branch']
+
+    chart = SalesAndExpensesChart(
+        date_from=date_from, date_to=date_to, branch=branch)
+    chart.calculate_sales_and_expenses_per_month(format_to_currency=False)
+
+    total_net = 0
+    total_lose = 0
+    for sale in chart.get_gross_sales():
+        total_net += sale
+        
+    for expense in chart.get_expenses():
+        total_lose += expense
+
+    response = {
+        'labels': ['NET', 'LOSE'],
+        'data': [currency.format_to_str_php(total_net), currency.format_to_str_php(0 - total_lose)]
+    }
+    return jsonify(response), 200
+
+
+@bp_lms.route('/dashboard/fetch-all-branches-net-lose')
+def fet_all_branches_net_lose():
+    date_from = request.args['date_from']
+    date_to = request.args['date_to']
 
     chart = SalesAndExpensesChart(
         date_from=date_from,
@@ -183,7 +208,7 @@ def get_chart_data(branch_id):
     no_of_students = []
     response = {
         'labels': chart.get_month_labels(),
-        'gross_sales': chart.get_gross_sales_per_month(),
+        'gross_sales': chart.get_gross_sales(),
         'net': chart.get_nets(),
         'maintaining_sales': chart.get_maintaining_sales(),
         'expenses': chart.get_expenses(),
