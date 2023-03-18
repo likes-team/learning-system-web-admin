@@ -70,9 +70,9 @@ def fetch_gross_sales_breakdown():
     branch = request.args['branch']
 
     chart = SalesAndExpensesChart(date_from=date_from, date_to=date_to, branch=branch)
-    registration_sales_per_month = chart.get_registration_sales_per_month()
-    accommodation_sales_per_month = chart.get_accommodation_sales_per_month()
-    store_sales_per_month = chart.get_store_sales_per_month()
+    registration_sales_per_month = chart.get_registration_sales()
+    accommodation_sales_per_month = chart.get_accommodation_sales()
+    store_sales_per_month = chart.get_store_sales()
     
     registration_sales = 0
     accommodation_sales = 0
@@ -120,12 +120,25 @@ def fetch_expenses_breakdown():
             print(expense['category'])
             continue
         expenses_breakdown[index] = currency.format_to_str_php(expense['amount'])
-
     
     response = {
         'labels': labels,
         'expenses_breakdown': expenses_breakdown
     }
+    return jsonify(response), 200
+
+
+@bp_lms.route('/dashboard/fetch-net-lose')
+def fetch_net_lose():
+    date_from = request.args['date_from']
+    date_to = request.args['date_to']
+
+    chart = SalesAndExpensesChart(
+        date_from=date_from,
+        date_to=date_to,
+        per='branch'
+    )
+    response = chart.calculate_net_lose_per_branch()
     return jsonify(response), 200
 
 

@@ -143,7 +143,7 @@ class ChartService:
 
 
 class SalesAndExpensesChart:
-    def __init__(self, date_from='', date_to='', branch='all'):
+    def __init__(self, date_from='', date_to='', branch='all', per='month'):
         self.gross_sales = []
         self.expenses = []
         self.nets = []
@@ -153,12 +153,18 @@ class SalesAndExpensesChart:
         self.date_to = date_to
         self.branch = branch
         self.date_filter = None
-        self.group = {
-            'month': '$month',
-            'year': '$year'
-        }
+        self.per = per
+        if self.per == 'month':
+            self.group = {
+                'month': '$month',
+                'year': '$year'
+            }
+        elif self.per == 'branch':
+            self.group = {
+                'branch': '$branch'
+            }
+        
         match = {}
-
         if date_from != "":
             self.date_filter = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
         
@@ -189,6 +195,62 @@ class SalesAndExpensesChart:
         return results
 
 
+    def calculate_net_lose_per_branch(self):
+        query_branches = mongo.db.lms_branches.find({})
+        
+        branches = []
+        for branch in query_branches:
+            branches.append(branch['name'])
+        
+        labels_count = len(branches)
+        registration_sales = [0 for _ in range(labels_count)]
+        accommodation_sales = [0 for _ in range(labels_count)]
+        store_sales = [0 for _ in range(labels_count)]
+        
+        gross_sales = [0 for _ in range(labels_count)]
+        expenses = [0 for _ in range(labels_count)]
+        nets = [0 for _ in range(labels_count)]
+            
+        for sale in self.get_registration_sales():
+            try:
+                index = branches.index(sale['branch'])
+            except ValueError:
+                continue
+            registration_sales[index] = sale['amount']
+            
+        for sale in self.get_accommodation_sales():
+            try:
+                index = branches.index(sale['branch'])
+            except ValueError:
+                continue
+            accommodation_sales[index] = sale['amount']
+
+        for sale in self.get_store_sales():
+            try:
+                index = branches.index(sale['branch'])
+            except ValueError:
+                continue
+            store_sales[index] = sale['amount']
+            
+        for expense in self._get_expenses():
+            try:
+                index = branches.index(expense['branch'])
+            except ValueError:
+                continue
+            expenses[index] = expense['amount']
+            
+        for i in range(labels_count):
+            gross_sales[i] = registration_sales[i] + accommodation_sales[i] + store_sales[i]
+
+        for i in range(labels_count):
+            nets[i] = currency.format_to_str_php(gross_sales[i] - expenses[i])
+        
+        return {
+            'labels': branches,
+            'data': nets
+        }
+
+
     def calculate_sales_and_expenses_per_month(self):
         labels = self.get_month_labels()
         labels_count = len(labels)
@@ -201,28 +263,28 @@ class SalesAndExpensesChart:
         maintaining_sales = [85000 for _ in range(labels_count)]
         nets = [0 for _ in range(labels_count)]
         
-        for sale in self.get_registration_sales_per_month():
+        for sale in self.get_registration_sales():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
                 continue
             registration_sales[index] = sale['amount']
             
-        for sale in self.get_accommodation_sales_per_month():
+        for sale in self.get_accommodation_sales():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
                 continue
             accommodation_sales[index] = sale['amount']
             
-        for sale in self.get_store_sales_per_month():
+        for sale in self.get_store_sales():
             try:
                 index = labels.index(sale['date'])
             except ValueError:
                 continue
             store_sales[index] = sale['amount']
 
-        for expense in self._get_expenses_per_month():
+        for expense in self._get_expenses():
             try:
                 index = labels.index(expense['date'])
             except ValueError:
@@ -258,7 +320,7 @@ class SalesAndExpensesChart:
     def get_maintaining_sales(self):
         return self.maintaining_sales
 
-    def get_registration_sales_per_month(self):
+    def get_registration_sales(self):
         if self.date_filter:
             self.match['date'] = self.date_filter
         self.match['payment_mode'] = {'$ne': "refund"}
@@ -266,6 +328,17 @@ class SalesAndExpensesChart:
         query = list(mongo.db.lms_registration_payments.aggregate([
             {'$match': self.match},
             {
+                '$lookup': {
+                    'from': 'lms_branches', 
+                    'localField': 'branch', 
+                    'foreignField': '_id', 
+                    'as': 'branch'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$branch'
+                }
+            }, {
                 '$project': {
                     'branch': 1,
                     'date': 1,
@@ -292,19 +365,37 @@ class SalesAndExpensesChart:
         
         student_payments = []
         for document in query:
-            student_payments.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': currency.convert_decimal128_to_decimal(document['total'])
-            })
+            if self.per == 'branch':
+                student_payments.append({
+                    'branch': document['_id']['branch']['name'],
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
+            elif self.per == 'month':
+                student_payments.append({
+                    'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
         return student_payments
             
 
-    def get_accommodation_sales_per_month(self):
+    def get_accommodation_sales(self):
         if self.date_filter:
             self.match['created_at'] = self.date_filter
 
         query = list(mongo.db.lms_accommodations.aggregate([
             {'$match': self.match},
+            {
+                '$lookup': {
+                    'from': 'lms_branches', 
+                    'localField': 'branch', 
+                    'foreignField': '_id', 
+                    'as': 'branch'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$branch'
+                }
+            },
             {
                 '$project': {
                     'branch': 1,
@@ -331,18 +422,36 @@ class SalesAndExpensesChart:
         
         accommodations = []
         for document in query:
-            accommodations.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': currency.convert_decimal128_to_decimal(document['total'])
-            })
+            if self.per == 'branch':
+                accommodations.append({
+                    'branch': document['_id']['branch']['name'],
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
+            elif self.per == 'month':
+                accommodations.append({
+                    'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
         return accommodations
 
 
-    def get_store_sales_per_month(self):
+    def get_store_sales(self):
         if self.date_filter: self.match['created_at'] = self.date_filter
 
         query = list(mongo.db.lms_store_buyed_items.aggregate([
             {'$match': self.match},
+            {
+                '$lookup': {
+                    'from': 'lms_branches',
+                    'localField': 'branch',
+                    'foreignField': '_id',
+                    'as': 'branch'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$branch'
+                }
+            },
             {
                 '$project': {
                     'branch': 1,
@@ -369,21 +478,39 @@ class SalesAndExpensesChart:
         
         store = []
         for document in query:
-            store.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': currency.convert_decimal128_to_decimal(document['total'])
-            })
+            if self.per == 'branch':
+                store.append({
+                    'branch': document['_id']['branch']['name'],
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
+            elif self.per == 'month':
+                store.append({
+                    'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
         return store
     
     
-    def _get_expenses_per_month(self):
+    def _get_expenses(self):
         if self.date_filter: self.match['date'] = self.date_filter
         self.match['type'] = 'expenses'
         
         query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
             {
                 '$match': self.match
+            }, 
+            {
+                '$lookup': {
+                    'from': 'lms_branches', 
+                    'localField': 'branch', 
+                    'foreignField': '_id', 
+                    'as': 'branch'
+                }
             }, {
+                '$unwind': {
+                    'path': '$branch'
+                }
+            },{
                 '$project': {
                     'total_amount_due': 1,
                     'branch': 1,
@@ -397,10 +524,7 @@ class SalesAndExpensesChart:
                 }
             }, {
                 '$group': {
-                    '_id': {
-                        'month': '$month',
-                        'year': '$year'
-                    }, 
+                    '_id': self.group, 
                     'total': {
                         '$sum': '$total_amount_due'
                     }
@@ -415,10 +539,16 @@ class SalesAndExpensesChart:
         
         results = []
         for document in query:
-            results.append({
-                'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
-                'amount': currency.convert_decimal128_to_decimal(document['total'])
-            })
+            if self.per == 'branch':
+                results.append({
+                    'branch': document['_id']['branch']['name'],
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
+            elif self.per == 'month':
+                results.append({
+                    'date': "{} {}".format(DATES[document['_id']['month'] - 1], document['_id']['year']),
+                    'amount': currency.convert_decimal128_to_decimal(document['total'])
+                })
         return results
 
     def get_expenses_per_category(self):
