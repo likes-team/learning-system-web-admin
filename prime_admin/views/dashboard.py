@@ -140,15 +140,18 @@ def fetch_net_lose():
 
     total_net = 0
     total_lose = 0
-    for sale in chart.get_gross_sales():
-        total_net += sale
-        
-    for expense in chart.get_expenses():
-        total_lose += expense
-
+    total = 0
+    for net in chart.get_nets():
+        total += net
+ 
+    if total >= 0:
+        total_net = total
+    elif total < 0:
+        total_lose = total
+            
     response = {
         'labels': ['NET', 'LOSE'],
-        'data': [currency.format_to_str_php(total_net), currency.format_to_str_php(0 - total_lose)]
+        'data': [currency.format_to_str_php(total_net), currency.format_to_str_php(total_lose)]
     }
     return jsonify(response), 200
 
