@@ -56,8 +56,11 @@ def dashboard():
 def fetch_chart_sales_today():
     branch = request.args['branch'] if request.args['branch'] != 'all' else None
     data = ChartService.fetch_chart_sales_today(branch)
+    sales_today = DashboardService(branch=branch).get_sales_today()
+    print("sales_today:::", sales_today)
     response = {
         'status': 'success',
+        'sales_today': sales_today,
         'data': data
     }
     return jsonify(response), 200

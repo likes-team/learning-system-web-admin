@@ -124,6 +124,7 @@
 
             $.getJSON(
                 `/learning-management/dashboard/fetch-chart-sales-today?branch=${branch}`, function (response) {
+                    $("#span_sales_today").html(response.sales_today);
                     updateData(chart_sales_today, response.data.labels, response.data.datasets);
                 }).fail(function () {
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
@@ -257,7 +258,6 @@
                 }
             });
         }
-        console.log($("#filter_date").data('daterangepicker'));
 
         $("#filter_date").on('apply.daterangepicker', function(ev, picker){
             dateFrom = picker.startDate.format('YYYY-MM-DD');
@@ -353,7 +353,7 @@
                                                 </div>
                                                 <div class="widget-content-right">
                                                     <div class="widget-numbers line-height-1 text-success">
-                                                        <span>₱ {{options['sales_today']}}</span>
+                                                        ₱ <span id='span_sales_today'>0.00</span>
                                                     </div>
                                                 </div>
                                             </div>
