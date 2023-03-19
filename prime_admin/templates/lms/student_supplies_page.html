@@ -11,6 +11,8 @@
 
 {% block scripts %}
 <script>
+    CURRENT_USER_ROLE = "{{current_user.role.name}}";
+
     $(document).ready(function () {
         $("#li_student_supplies").addClass('mm-active');
 
@@ -47,28 +49,10 @@
             ],
         });
 
-        var dtbl_summaries = $("#tbl_summaries").DataTable({
-            "dom": 'rtip',
-            "processing": true,
-            "autoWidth": false,
-            "paging": false,
-            "ajax": {
-                "url": "/learning-management/datatables/supplies/summary",
-                "data": function (d) {
-                    d.year = $("#filter_year").val();
-                    d.month = $("#filter_month").val();
-                    d.supplies_type = "student_supplies";
-                    d.branch = $("#btn_marketer_label").val();
-                }
-            },
-            "pageLength": 500,
-            "ordering": false,
-            "order": [[0, 'asc']],
-            "columnDefs": [
-                {
-                    'targets': 0,
-                    'visible': false
-                },
+
+        var dtSummariesColDefs;
+        if(CURRENT_USER_ROLE == "Admin" || CURRENT_USER_ROLE == "Partner"){
+            dtSummariesColDefs = [{'targets': 0, 'visible': false},
                 {
                     'targets': 1,
                     "className": "text-center",
@@ -87,7 +71,42 @@
                         `
                     }
                 }
-            ],
+            ]
+        } else if(CURRENT_USER_ROLE == "Secretary"){
+            dtSummariesColDefs = [{'targets': 0, 'visible': false},
+            {
+                'targets': 1,
+                "className": "text-center",
+                'render': function(data, row, type){
+                    return `
+                    <button type="button" class="btn-inbound btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
+                    `
+                }
+            },
+            {
+                'targets': 35, visible: false
+            }
+        ]
+        }
+        
+        var dtbl_summaries = $("#tbl_summaries").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "paging": false,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/summary",
+                "data": function (d) {
+                    d.year = $("#filter_year").val();
+                    d.month = $("#filter_month").val();
+                    d.supplies_type = "student_supplies";
+                    d.branch = $("#btn_marketer_label").val();
+                }
+            },
+            "pageLength": 500,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": dtSummariesColDefs,
         });
 
         var dtbl_deposits = $("#tbl_deposits").DataTable({
