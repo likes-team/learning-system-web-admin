@@ -479,6 +479,10 @@
             var payment_status = $("#payment_status").val();
             var payment_mode = $("#payment_mode").val();
 
+            if (branch == 'all'){
+                swal("Error Occured!", "Must select branch!", "error");
+                return;
+            }
             window.open(
                 PDF_URL +
                 `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}&payment_mode=${payment_mode}`
@@ -495,6 +499,10 @@
             var payment_status = $("#payment_status").val();
             var payment_mode = $("#payment_mode").val();
 
+            if (branch == 'all'){
+                swal("Error Occured!", "Must select branch!", "error");
+                return;
+            }
             window.open(
                 STUDENTS_AUDIT_PDF_URL +
                 `?branch=${branch}&batch_no=${batch_no}&schedule=${schedule}&search_value=${search_value}&date_from=${date_from}&date_to=${date_to}&payment_status=${payment_status}&payment_mode=${payment_mode}&report=audit`

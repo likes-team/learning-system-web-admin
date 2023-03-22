@@ -7,6 +7,7 @@ from flask_login import login_required, current_user
 from app.admin.templating import admin_table
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch, Registration, Member, Student
+from prime_admin.models_v2 import StudentV2
 from flask import redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory
 from app import mongo
 from datetime import datetime
@@ -19,6 +20,8 @@ from prime_admin.utils.date import format_utc_to_local
 from prime_admin.helpers.query_filter import StudentQueryFilter
 from prime_admin.services.student import StudentService
 from prime_admin.services.inventory import InventoryService
+from prime_admin.services.branch import BranchService
+from prime_admin.services.batch import BatchService
 
 
 
@@ -671,216 +674,79 @@ def print_students_pdf():
     branch_id = request.args.get('branch', 'all')
     batch_no = request.args.get('batch_no', 'all')
     schedule = request.args.get('schedule', 'all')
-    search_value = request.args.get('search_value', 'all')
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
-    payment_status = request.args.get('payment_status')
-    payment_mode = request.args.get('payment_mode')
     report = request.args.get('report', 'default')
-    
-    installment_registrations = Registration.objects().filter(Q(payment_mode='installment') | Q(payment_mode="installment_promo")).filter(is_archived__ne=True)
-    full_payment_registrations = Registration.objects().filter(Q(payment_mode='full_payment') | Q(payment_mode="full_payment_promo")).filter(is_archived__ne=True)
-    premium_payment_registrations = Registration.objects().filter(Q(payment_mode='premium') | Q(payment_mode='premium_promo')).filter(is_archived__ne=True)
+    query_filter = StudentQueryFilter.from_request(request)
+    service = StudentService.find_students(query_filter)
+    students = service.get_data()
 
-    if branch_id != 'all':
-        registrations = Registration.objects(branch=branch_id).filter(is_archived__ne=True).filter(status='registered')
-        installment_registrations = installment_registrations.filter(branch=branch_id)
-        full_payment_registrations = full_payment_registrations.filter(branch=branch_id)
-        premium_payment_registrations = premium_payment_registrations.filter(branch=branch_id)
-
-        branch_id = Branch.objects.get_or_404(id=branch_id).name
-    else:
-        registrations = Registration.objects(status='registered').filter(is_archived__ne=True)
-
-    if batch_no != 'all':
-        registrations = registrations.filter(batch_number=batch_no)
-        installment_registrations = installment_registrations.filter(batch_number=batch_no)
-        full_payment_registrations = full_payment_registrations.filter(batch_number=batch_no)
-        premium_payment_registrations = premium_payment_registrations.filter(batch_number=batch_no)
-
-    if schedule != 'all':
-        registrations = registrations.filter(schedule=schedule)
-        installment_registrations = installment_registrations.filter(schedule=schedule)
-        full_payment_registrations = full_payment_registrations.filter(schedule=schedule)
-        premium_payment_registrations = premium_payment_registrations.filter(schedule=schedule)
-
-    if search_value != "undefined":
-        registrations = registrations.filter(lname__icontains=search_value)
-        installment_registrations = installment_registrations.filter(lname__icontains=search_value)
-        full_payment_registrations = full_payment_registrations.filter(lname__icontains=search_value)
-        premium_payment_registrations = premium_payment_registrations.filter(lname__icontains=search_value)
-
-
-    if date_from !="":
-        registrations = registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        installment_registrations = installment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        full_payment_registrations = full_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-        premium_payment_registrations = premium_payment_registrations.filter(registration_date__gte=convert_to_utc(date_from, 'date_from'))
-
-    if date_to != "":
-        registrations = registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        installment_registrations = installment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        full_payment_registrations = full_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-        premium_payment_registrations = premium_payment_registrations.filter(registration_date__lte=convert_to_utc(date_to))
-
-    if payment_status == 'PAID':
-        registrations = registrations.filter(balance__lte=0)
-        installment_registrations = installment_registrations.filter(balance__lte=0)
-        full_payment_registrations = full_payment_registrations.filter(balance__lte=0)
-        premium_payment_registrations = premium_payment_registrations.filter(balance__lte=0)
-
-    elif payment_status == "NOT PAID":
-        registrations = registrations.filter(balance__gt=0)
-        installment_registrations = installment_registrations.filter(balance__gt=0)
-        full_payment_registrations = full_payment_registrations.filter(balance__gt=0)
-        premium_payment_registrations = premium_payment_registrations.filter(balance__gt=0)
-
-    if payment_mode != 'all':
-        registrations = registrations.filter(payment_mode=payment_mode)
-        installment_registrations = installment_registrations.filter(payment_mode=payment_mode)
-        full_payment_registrations = full_payment_registrations.filter(payment_mode=payment_mode)
-        premium_payment_registrations = premium_payment_registrations.filter(payment_mode=payment_mode)
-
-    _table_data = []
-
+    table_data = []
     uniforms_count = 0
     id_lace_count = 0
     id_card_count = 0
     book1_count = 0
     book2_count = 0
-
-    for registration in registrations:
+    for student in students:
+        student: StudentV2
         books = ""
         uniforms = ""
         id_lace = False
         id_card = False
+        contact_person = "student.contact_person"
 
-        actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
-            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-
-        paid = 'NOT PAID'
-
-        if registration.balance <= 0.00:
-            actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-            paid = 'PAID'
-
-        _branch = registration.branch
-        contact_person = registration.contact_person
-
-        if registration.books:
-            books = "None"
-
-            if registration.books['volume1']:
-                books = "Vol. 1"
-                book1_count = book1_count + 1
-            if registration.books['volume2']:
-                books += " Vol. 2"
-                book2_count = book2_count + 1
-            if registration.books['book_none']:
-                books = "None"
-        else:
-            books = "None"
-
-        if registration.uniforms:
-            uniforms = "None"
-
-            if registration.uniforms['uniform_none']:
-                uniforms = "None"
-            elif registration.uniforms['uniform_xs']:
-                uniforms = "XS"
-                uniforms_count = uniforms_count + 1
-            elif registration.uniforms['uniform_s']:
-                uniforms = "S"
-                uniforms_count = uniforms_count + 1
-            elif registration.uniforms['uniform_m']:
-                uniforms = "M"
-                uniforms_count = uniforms_count + 1
-            elif registration.uniforms['uniform_l']:
-                uniforms = "L"
-                uniforms_count = uniforms_count + 1
-            elif registration.uniforms['uniform_xl']:
-                uniforms = "XL"
-                uniforms_count = uniforms_count + 1
-            elif registration.uniforms['uniform_xxl']:
-                uniforms = "XXL"
-                uniforms_count = uniforms_count + 1
-        else:
-            uniforms = "None"
-        
-        if registration.id_materials:
-            if registration.id_materials['id_card']:
-                id_card = True
-                id_card_count = id_card_count + 1
-            if registration.id_materials['id_lace']:
-                id_lace = True
-                id_lace_count = id_lace_count + 1
-
-        payment_mode = ""
-        if registration.payment_mode == 'full_payment':
-            payment_mode = "Full Payment"
-        elif registration.payment_mode == 'installment':
-            payment_mode = "Installment"
-        elif registration.payment_mode == 'premium':
-            payment_mode = "Premium Payment"
-        elif registration.payment_mode == "full_payment_promo":
-            payment_mode = "Full Payment - Promo"
-        elif registration.payment_mode == "installment_promo":
-            payment_mode = "Installment - Promo"
-        elif registration.payment_mode == "premium_promo":
-            payment_mode = "Premium - Promo"
-
-        _table_data.append([
-            str(registration.id), # 0
-            registration.created_at_local, # 1
-            registration.full_registration_number, # 2
-            registration.full_name, # 3
-            registration.batch_number.number if registration.batch_number is not None else "",
-            _branch.name if _branch is not None else '', # 5
-            registration.schedule, # 6
-            payment_mode, # 7
-            str(registration.amount), # 8
-            str(registration.balance), # 9
-            paid, # 10
-            contact_person.fname if contact_person is not None else '', # 11
-            books, # 12
-            uniforms, # 13
-            registration.created_by, # 14
-            actions, # 15
-            registration.passport, # 16
-            registration.contact_number, # 17
-            id_card, # 18
-            id_lace, # 19
-            registration.e_registration, # 20
-            registration.passport, # 21
-            registration.contact_number, #22
-            registration.lname, #23
-            registration.fname, # 24
-            registration.mname, # 25
-            registration.address, # 26
-            registration.email, # 27
-            registration.birth_date if registration.birth_date else '', #28
+        table_data.append([
+            str(student.get_id()), # 0
+            '', # 1
+            student.full_registration_number, # 2
+            student.get_full_name(), # 3
+            student.batch_no.get_no() if student.batch_no is not None else '',
+            student.branch.get_name() if student.branch is not None else '', # 5
+            student.schedule, # 6
+            student.get_payment_mode(), # 7
+            student.get_amount(currency=True), # 8
+            student.get_balance(currency=True), # 9
+            student.get_payment_status(), # 10
+            contact_person, # 11
+            student.get_books(), # 12
+            student.get_uniform(), # 13
+            student.created_by, # 14
+            student.passport, # 16
+            student.contact_number, # 17
+            student.has_id_card(), # 18
+            student.has_id_lace(), # 19
+            student.e_registration, # 20
+            student.passport, # 21
+            student.contact_number, #22
+            student.lname, #23
+            student.fname, # 24
+            student.mname, # 25
+            student.address, # 26
+            student.email, # 27
+            student.get_birth_date(), #28
         ])
 
-    total_installment = Decimal128(str(installment_registrations.sum('amount')))
-    total_full_payment = Decimal128(str(full_payment_registrations.sum('amount')))
-    total_premium_payment = Decimal128(str(premium_payment_registrations.sum('amount')))
-
-    with decimal.localcontext(D128_CTX):
-        total_payment = total_installment.to_decimal() + total_full_payment.to_decimal() + total_premium_payment.to_decimal()
-
-    total_balance = registrations.sum('balance')
+    total_installment = 0
+    total_full_payment = 0
+    total_premium_payment = 0
+    total_payment = 0
+    total_balance = 0
     
-    template = ""
-
     if report == 'audit':
         template = 'lms/students_audit_pdf.html'
     else:
         template = 'lms/student_pdf.html'
+        
+    if branch_id != 'all':
+        branch_name = BranchService.get_name_by_id(branch_id)
+    else:
+        branch_name = 'all'
+
+    if batch_no != 'all':
+        batch_no = BatchService.get_name_by_id(batch_no)
 
     html = render_template(
         template,
-        students=_table_data,
-        branch=branch_id.upper(),
+        students=table_data,
+        branch=branch_name.upper(),
         batch_no=batch_no.upper(),
         schedule=schedule.upper(),
         total_installment=total_installment,
@@ -893,8 +759,7 @@ def print_students_pdf():
         book2_count=book2_count,
         id_card_count=id_card_count,
         id_lace_count=id_lace_count
-        )
-
+    )
     return render_pdf(HTML(string=html))
 
 
@@ -1095,6 +960,5 @@ def print_certificate():
 def print_attendance_list_pdf():
     query_filter = StudentQueryFilter.from_request(request)
     service = AttendanceList.fetch(query_filter)
-    print("teacher:::", request.args.get('teacher'))
     service.set_teacher(request.args.get('teacher'))
     return service.generate_pdf()

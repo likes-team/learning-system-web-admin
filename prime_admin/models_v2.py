@@ -73,19 +73,78 @@ class StudentV2(Document):
         # self.branch = branch if branch else None
         # self.batch_no = batch_no if batch_no else None
 
+    def get_amount(self, currency=False):
+        if currency:
+            return format_to_str_php(self.document.get('amount'))
+        return convert_decimal128_to_decimal(self.document.get('amount'))
 
-    def get_registration_date(self, date_format="%B %d, %Y %I:%M %p"):
-        return format_utc_to_local(self.document.get('registration_date'), date_format=date_format)
+    def get_amount_deposit(self):
+        return convert_decimal128_to_decimal(self.document.get('amount_deposit'))
     
-    def get_session(self):
-        return self.document.get('session', '')
-    
+    def get_balance(self, currency=False):
+        if currency:
+            return format_to_str_php(self.document.get('balance'))
+        return convert_decimal128_to_decimal(self.document.get('balance'))
+
+    def get_batch_no(self):
+        # TODO: change to object class
+        if 'batch_no' not in self.document:
+            return ''
+        if len(self.document['batch_no']) == 0:
+            return ''
+        return self.document['batch_no'][0]['number']
+
+    def get_books(self):
+        books = []
+        if self.books.get('book_none', False):
+            books.append('None')
+        if self.books.get('volume1', False):
+            books.append('Vol 1.')
+        if self.books.get('volume2', False):
+            books.append('Vol 2.')
+        return ','.join(books)
+
+    def get_branch_name(self):
+        # TODO: change to object class
+        if 'branch' not in self.document:
+            return ''
+        if len(self.document['branch']) == 0:
+            return ''
+        return self.document['branch'][0]['name']
+        
+    def get_contact_person_name(self):
+        # TODO: change to object class
+        if 'contact_person' not in self.document:
+            return ''
+        if len(self.document['contact_person']) == 0:
+            return ''
+        return self.document['contact_person'][0]['fname'] + " " + self.document['contact_person'][0]['fname']
+
     def get_fle(self):
         return convert_decimal128_to_decimal(self.document.get('fle'))
 
-    def get_sle(self):
-        return convert_decimal128_to_decimal(self.document.get('sle'))
+    def get_full_name(self, reverse=False):
+        if reverse:
+            if self.mname:
+                return self.fname + " " + self.mname + " " + self.lname
+            else:
+                return self.fname + " " + self.lname
+        else:
+            if self.mname:
+                return self.lname + " " + self.mname + " " + self.fname
+            else:
+                return self.lname + " " + self.fname
 
+    def get_id_materials(self):
+        pass
+
+    def get_is_deposited(self):
+        if self.amount == self.get_amount_deposit():
+            deposit = "Yes"
+        else:
+            deposit = "No"
+        return deposit
+    
     def get_payment_mode(self):
         payment_mode = ""
         if self.payment_mode == 'full_payment':
@@ -104,43 +163,13 @@ class StudentV2(Document):
             payment_mode = "Refunded"
         return payment_mode
 
-    def get_is_deposited(self):
-        if self.amount == self.get_amount_deposit():
-            deposit = "Yes"
-        else:
-            deposit = "No"
-        return deposit
-    
-    def get_balance(self, currency=False):
-        if currency:
-            return format_to_str_php(self.document.get('balance'))
-        return convert_decimal128_to_decimal(self.document.get('balance'))
-
-    def get_amount(self, currency=False):
-        if currency:
-            return format_to_str_php(self.document.get('amount'))
-        return convert_decimal128_to_decimal(self.document.get('amount'))
-
-    def get_amount_deposit(self):
-        return convert_decimal128_to_decimal(self.document.get('amount_deposit'))
-    
     def get_payment_status(self):
         if self.get_balance() <= 0.00:
             return 'PAID'
         return 'NOT PAID'
     
-    def get_full_name(self, reverse=False):
-        if reverse:
-            if self.mname:
-                return self.fname + " " + self.mname + " " + self.lname
-            else:
-                return self.fname + " " + self.lname
-        else:
-            if self.mname:
-                return self.lname + " " + self.mname + " " + self.fname
-            else:
-                return self.lname + " " + self.fname
-            
+    def get_registration_date(self, date_format="%B %d, %Y %I:%M %p"):
+        return format_utc_to_local(self.document.get('registration_date'), date_format=date_format)
 
     def get_reviewers(self):
         reviewers: list = []
@@ -152,27 +181,41 @@ class StudentV2(Document):
             return "None"
         return ','.join(reviewers)
 
-    def get_batch_no(self):
-        # TODO: change to object class
-        if 'batch_no' not in self.document:
-            return ''
-        if len(self.document['batch_no']) == 0:
-            return ''
-        return self.document['batch_no'][0]['number']
+    def get_session(self):
+        return self.document.get('session', '')
 
-    def get_branch_name(self):
-        # TODO: change to object class
-        if 'branch' not in self.document:
-            return ''
-        if len(self.document['branch']) == 0:
-            return ''
-        return self.document['branch'][0]['name']
-        
-    def get_contact_person_name(self):
-        # TODO: change to object class
-        if 'contact_person' not in self.document:
-            return ''
-        if len(self.document['contact_person']) == 0:
-            return ''
-        return self.document['contact_person'][0]['fname'] + " " + self.document['contact_person'][0]['fname']
-              
+    def get_sle(self):
+        return convert_decimal128_to_decimal(self.document.get('sle'))
+
+    def get_uniform(self):
+        if self.uniforms is None:
+            return "None"
+
+        uniform = ""
+        if self.uniforms['uniform_none']:
+            uniform = "None"
+        elif self.uniforms['uniform_xs']:
+            uniform = "XS"
+        elif self.uniforms['uniform_s']:
+            uniform = "S"
+        elif self.uniforms['uniform_m']:
+            uniform = "M"
+        elif self.uniforms['uniform_l']:
+            uniform = "L"
+        elif self.uniforms['uniform_xl']:
+            uniform = "XL"
+        elif self.uniforms['uniform_xxl']:
+            uniform = "XXL"
+        return uniform
+
+    def has_id_card(self):
+        if self.id_materials.get('id_card', False):
+            return True
+        else:
+            return False
+
+    def has_id_lace(self):
+        if self.id_materials.get('id_lace', False):
+            return True
+        else:
+            return False
