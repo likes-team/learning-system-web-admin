@@ -24,25 +24,12 @@ def dashboard():
     elif current_user.role.name == "Admin":
         branches = Branch.objects
 
-    dashboard_service = DashboardService()
-    sales_today = dashboard_service.get_sales_today()
-    dashboard_service.reset_match()
-    total_installment = dashboard_service.get_total_installment()
-    total_full_payment = dashboard_service.get_total_full_payment()
-    total_premium_payment = dashboard_service.get_total_premium_payment()
-    total = dashboard_service.get_total()
-
     options = {
         'branches': branches,
         'box1': DashboardBox("Number of enrollees", "Current", 0),
         'box2': DashboardBox("Total Sales", "Montly", 0),
         'box3': DashboardBox("Gross Income", "Total users", 0),
         'scripts': [{'lms.static': 'js/utils.js'}],
-        'sales_today': sales_today,
-        'total_installment': total_installment,
-        'total_full_payment': total_full_payment,
-        'total_premium_payment': total_premium_payment,
-        'total': total
     }
     return admin_dashboard(
         Dashboard,
@@ -61,6 +48,33 @@ def fetch_chart_sales_today():
         'status': 'success',
         'sales_today': sales_today,
         'data': data
+    }
+    return jsonify(response), 200
+
+
+@bp_lms.route('/dashboard/fetch-sales-breakdown', methods=['GET'])
+def fetch_sales_breakdown():
+    date_from = request.args['date_from'] if request.args['date_from'] != '' else None
+    date_to = request.args['date_to'] if request.args['date_to'] != '' else None
+    branch = request.args['branch'] if request.args['branch'] != 'all' else None
+
+    dashboard_service = DashboardService(
+        date_from=date_from,
+        date_to=date_to,
+        branch=branch
+    )
+    total_installment = dashboard_service.get_total_installment()
+    total_full_payment = dashboard_service.get_total_full_payment()
+    total_premium_payment = dashboard_service.get_total_premium_payment()
+    total = dashboard_service.get_total()
+    response = {
+        'status': 'success',
+        'data': {
+            'total_installment': total_installment,
+            'total_full_payment': total_full_payment,
+            'total_premium_payment': total_premium_payment,
+            'total': total
+        }
     }
     return jsonify(response), 200
 
@@ -169,34 +183,6 @@ def fet_all_branches_net_lose():
         per='branch'
     )
     response = chart.calculate_net_lose_per_branch()
-    return jsonify(response), 200
-
-
-@bp_lms.route('/dashboard/fetch-sales-breakdown', methods=['GET'])
-def fetch_sales_breakdown():
-    date_from = request.args['date_from'] if request.args['date_from'] != '' else None
-    date_to = request.args['date_to'] if request.args['date_to'] != '' else None
-    branch = request.args['branch'] if request.args['branch'] != 'all' else None
-
-    dashboard_service = DashboardService(
-        date_from=date_from,
-        date_to=date_to,
-        branch=branch
-    )
-    total_installment = dashboard_service.get_total_installment()
-    total_full_payment = dashboard_service.get_total_full_payment()
-    total_premium_payment = dashboard_service.get_total_premium_payment()
-    total = dashboard_service.get_total()
-
-    response = {
-        'status': 'success',
-        'data': {
-            'total_installment': total_installment,
-            'total_full_payment': total_full_payment,
-            'total_premium_payment': total_premium_payment,
-            'total': total
-        }
-    }
     return jsonify(response), 200
 
 

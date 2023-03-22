@@ -110,7 +110,7 @@
         const chart_all_branches = new Chart(chart_all_branches_ctx, chart_all_branches_config);
         
         var dateFrom = $("#filter_date").data('daterangepicker').startDate.format('YYYY-MM-DD');
-        var dateTo = $("#filter_date").data('daterangepicker').startDate.format('YYYY-MM-DD');
+        var dateTo = $("#filter_date").data('daterangepicker').endDate.format('YYYY-MM-DD');
 
         init();
 
@@ -393,7 +393,7 @@
                                                 </div>
                                                 <div class="widget-content-right">
                                                     <div class="widget-numbers text-success">
-                                                        ₱ <span id="total_installment">{{options['total_installment']}}</span>
+                                                        ₱ <span id="total_installment">0.00</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -410,7 +410,7 @@
                                                 </div>
                                                 <div class="widget-content-right">
                                                     <div class="widget-numbers text-primary">
-                                                        ₱ <span id="total_full_payment">{{options['total_full_payment']}}</span>
+                                                        ₱ <span id="total_full_payment">0.00</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -427,7 +427,7 @@
                                                 </div>
                                                 <div class="widget-content-right">
                                                     <div class="widget-numbers text-danger">
-                                                        ₱ <span id="total_premium_payment">{{options['total_premium_payment']}}</span>
+                                                        ₱ <span id="total_premium_payment">0.00</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -444,7 +444,7 @@
                                                 </div>
                                                 <div class="widget-content-right">
                                                     <div class="widget-numbers text-warning">
-                                                        ₱ <span id="total">{{options['total']}}</span>
+                                                        ₱ <span id="total">0.00</span>
                                                     </div>
                                                 </div>
                                             </div>
