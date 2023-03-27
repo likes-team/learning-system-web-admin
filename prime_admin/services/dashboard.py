@@ -49,6 +49,7 @@ class DashboardService:
             _match['branch'] = current_user.branch.id
         elif current_user.role.name == 'Partner':
             _match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
+        _match['payment_mode'] = {'$ne': 'refund'}
         self.match = _match
 
 
