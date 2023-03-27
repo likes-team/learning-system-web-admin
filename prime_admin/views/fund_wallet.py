@@ -36,7 +36,7 @@ def fund_wallet():
 
     return admin_render_template(
         FundWallet,
-        "lms/fund_wallet.html",
+        "lms/fund_wallet/fund_wallet.html",
         'learning_management',
         title="Fund Wallet",
         branches=branches

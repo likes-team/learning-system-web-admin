@@ -1,0 +1,1037 @@
+{% extends "admin/admin_base.html" %}
+
+{% block modals %}
+{% include 'lms/add_funds_modal.html' %}
+{% include 'lms/add_expenses_modal.html' %}
+{% endblock %}
+
+
+{% block head %}
+<!-- sweet alert framework -->
+<link rel="stylesheet" type="text/css"
+    href="{{url_for('bp_admin.static', filename='bower_components/sweetalert/css/sweetalert.css')}}">
+{% endblock %}
+
+
+{% block scripts %}
+<!-- sweet alert js -->
+<script type="text/javascript"
+    src="{{url_for('bp_admin.static', filename='bower_components/sweetalert/js/sweetalert.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('bp_admin.static', filename='js/modal.js')}}"></script>
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+
+    function clearCreateModal() {
+        $(':input', '#mdl_add_fund')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+
+        $(':input', '#mdl_add_expenses')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+    }
+
+
+    function getContactPersons(branch, from) {
+        var selectDescriptionId = "#description";
+
+        if (from == "filter") {
+            selectDescriptionId = "#filter_description";
+        } else if (from == "filter_tab3") {
+            selectDescriptionId = "#filter_tab3_description";
+        }
+
+        $.getJSON('/learning-management/api/get-branch-contact-persons/' + branch, function (response) {
+            if (response.data.length > 0) {
+                $(selectDescriptionId).append(newOption);
+
+                for (i = 0; i < response.data.length; i++) {
+                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                    $(selectDescriptionId).append(newOption);
+                }
+            } else {
+                var newOption = $('<option value="">No Contact Persons available</option>');
+                $(selectDescriptionId).append(newOption);
+            }
+        });
+    }
+
+    function getEmployees(branch, from) {
+        var selectDescriptionId = "#description";
+
+        if (from == "filter") {
+            selectDescriptionId = "#filter_description";
+        } else if (from == "filter_tab3") {
+            selectDescriptionId = "#filter_tab3_description";
+        }
+        $(selectDescriptionId).empty();
+        $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
+            if (response.data.length > 0) {
+                $(selectDescriptionId).append(newOption);
+
+                for (i = 0; i < response.data.length; i++) {
+                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].full_name}</option>`);
+                    $(selectDescriptionId).append(newOption);
+                }
+            } else {
+                var newOption = $('<option value="">No employees available</option>');
+                $(selectDescriptionId).append(newOption);
+            }
+        });
+    }
+
+    function init() {
+    }
+
+    $(document).ready(function () {
+        $("#li_fund_wallet").addClass('mm-active');
+
+        var dtbl_fund_wallet_statements = $("#tbl_fund_wallet_statements").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/fund-wallet-statements/dt",
+                "dataSrc": function (json) {
+                    $("#total_fund_wallet").html("₱" + json.totalFundWallet);
+                    return json.data;
+                },
+                "data": function (d) {
+                    d.date_from = $("#filter_date_from").val();
+                    d.date_to = $("#filter_date_to").val();
+                    d.category = $("#filter_category").val();
+                    d.description = $("#filter_description").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_add_funds_transactions = $("#tbl_add_funds_transactions").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/add-funds-transactions/dt",
+                "dataSrc": function (json) {
+                    $("#total_fund_wallet").html("₱" + json.totalFundWallet);
+                    return json.data;
+                },
+                "data": function (d) {
+                    d.date_from = $("#filter_tab2_date_from").val();
+                    d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_business_expenses = $("#tbl_business_expenses").DataTable({
+            "dom": '',
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/branches/all/expenses-transactions/dt",
+                "data": function (d) {
+                    d.year = $("#filter_tab3_year").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        $("#div_branch_buttons").on('click', '.btn-branch', function () {
+            var branch_name = $(this).html();
+
+            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
+            $("#btn_branch_label").html(branch_name.toUpperCase());
+            $("#btn_branch_label").val($(this).val());
+            $("#card_header_label").html(branch_name);
+
+            $('#btn_branch_label').trigger('change');
+        });
+
+
+        $("#btn_branch_label").change(function () {
+            const branchId = $("#btn_branch_label").val();
+
+            dtbl_fund_wallet_statements.ajax.url(`/learning-management/branches/${branchId}/fund-wallet-statements/dt`).load();
+            dtbl_add_funds_transactions.ajax.url(`/learning-management/branches/${branchId}/add-funds-transactions/dt`).load();
+            dtbl_business_expenses.ajax.url(`/learning-management/branches/${branchId}/expenses-transactions/dt`).load();
+            dtbl_utilities.ajax.url(`/learning-management/datatables/fund-wallet/utilities`).load();
+            dtbl_office_supply.ajax.url(`/learning-management/datatables/fund-wallet/office-supplies`).load();
+            dtbl_salary.ajax.url(`/learning-management/branches/${branchId}/salary/dt`).load();
+            dtbl_refund.ajax.url(`/learning-management/branches/${branchId}/refund/dt`).load();
+            dtbl_other_expenses.ajax.url(`/learning-management/branches/${branchId}/other-expenses/dt`).load();
+        });
+
+
+        // --------------------- ADD FUND ------------------------
+
+        $('#frm_add_fund').validate({
+            'rules': {
+                'branch': {
+                    'required': true
+                },
+                'thru': {
+                    'required': true,
+                },
+                'bank_name': {
+                    'required': true,
+                },
+                'transaction_no': {
+                    'required': true
+                },
+                'sender': {
+                    'required': true,
+                },
+                'amount_received': {
+                    'required': true,
+                },
+                'receiver': {
+                    'required': true,
+                },
+                'remarks': {
+                    'required': true,
+                },
+            },
+            'submitHandler': function (form) {
+                var xform = $(form);
+
+                swal({
+                    title: `Add fund to fund wallet?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                event.stopPropagation();
+
+                                dtbl_fund_wallet_statements.ajax.reload();
+                                dtbl_add_funds_transactions.ajax.reload();
+                                dtbl_business_expenses.ajax.reload();
+                                swal("Success!", response.message, "success");
+                                $("#mdl_add_fund .close").click()
+                                clearCreateModal();
+                            },
+                            error: function (data) {
+                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+
+        // --------------------- ADD EXPENSES ------------------------
+
+
+        var frm_add_expenses_validator = $('#frm_add_expenses').validate({
+            'rules': {
+                'branch': {
+                    'required': true
+                },
+                'category': {
+                    'required': true,
+                },
+                'description': {
+                    'required': true
+                },
+                'account_no': {
+                    'required': true,
+                },
+                'billing_month_from': {
+                    'required': true,
+                },
+                'billing_month_to': {
+                    'required': true,
+                },
+                'qty': {
+                    'required': true,
+                },
+                'unit_price': {
+                    'required': true,
+                },
+                'total_amount_due': {
+                    'required': true,
+                },
+                'settled_by': {
+                    'required': true,
+                },
+                'remarks': {
+                    'required': true,
+                },
+            },
+            'submitHandler': function (form) {
+                var xform = $(form);
+
+                swal({
+                    title: `Add expenses?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                event.stopPropagation();
+
+                                dtbl_fund_wallet_statements.ajax.reload();
+                                dtbl_add_funds_transactions.ajax.reload();
+                                dtbl_business_expenses.ajax.reload();
+                                swal("Success!", response.message, "success");
+                                $("#mdl_add_expenses .close").click()
+                                clearCreateModal();
+                            },
+                            error: function (data) {
+                                if (data.responseJSON == undefined){
+                                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                                } else {
+                                    swal(data.responseJSON.message, "Add expenses failed!", "error");
+                                }
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+
+
+        $("#category").change(function () {
+            var selectedCategory = $(this).val();
+
+            frm_add_expenses_validator.resetForm();
+
+            $("#description").empty();
+            $("#description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+
+            $("#qty").prop('disabled', false);
+            $("#unit_price").prop('disabled', false);
+            $("#account_no").prop('disabled', false);
+            $("#billing_month_from").prop('disabled', false);
+            $("#billing_month_to").prop('disabled', false);
+
+            $("#qty").rules('add', { 'required': true });
+            $("#unit_price").rules('add', { 'required': true });
+            $("#account_no").rules('add', { 'required': true });
+            $("#billing_month_from").rules('add', { 'required': true });
+            $("#billing_month_to").rules('add', { 'required': true });
+
+            $("#total_amount_due").prop('readonly', false);
+
+            $("#label_description").html('Description');
+            $("#lbl_account_no").html('Account No. / Particular');
+            $("#lbl_billing_month_from").html("Billing Month From");
+            $("#lbl_billing_month_to").html("Billing Month To");
+
+            $("#billing_month_from").closest('.col-md-3').show();
+            $("#billing_month_to").closest('.col-md-3').show();
+            $("#qty").closest('.col-md-4').show();
+            $("#unit_price").closest('.col-md-4').show();
+            if (selectedCategory == "utilities") {
+                $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+
+                $("#qty").rules('remove');
+                $("#unit_price").rules('remove');
+                $("#qty").closest('.col-md-4').hide();
+                $("#unit_price").closest('.col-md-4').hide();
+            } else if (selectedCategory == "office_supply") {
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                $.getJSON(`/learning-management/api/supplies?branch=${$("#branch_expenses").val()}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+                $("#billing_month_from").prop('disabled', true);
+                $("#billing_month_to").prop('disabled', true);
+
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+
+                $("#total_amount_due").prop('readonly', true);
+                $("#lbl_account_no").html('Supplier/Store');
+            } else if (selectedCategory == "salary") {
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                getEmployees($("#branch_expenses").val(), "add_expenses");
+
+                $("#lbl_billing_month_from").html("Cut-off Month From");
+                $("#lbl_billing_month_to").html("Cut-off Month to");
+
+                $("#label_description").html('Employee');
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+                $("#qty").rules('remove');
+            } else if(selectedCategory == "rebates"){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                getContactPersons($("#branch_expenses").val(), "add_expenses");
+
+                $("#label_description").html('Contact Person');
+                $("#qty").prop('disabled', true);
+                $("#unit_price").prop('disabled', true);
+                $("#account_no").prop('disabled', true);
+                $("#qty").rules('remove');
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#account_no").rules('remove');
+
+                $("#account_no").closest('.col-md-6').hide();
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+                $("#qty").closest('.col-md-4').hide();
+                $("#unit_price").closest('.col-md-4').hide();
+            } else if (selectedCategory == "other_expenses") {
+                $.getJSON(`/learning-management/fetch-other-expenses-items`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.description).text(item.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+            } else if(
+                selectedCategory == "BIR" || 
+                selectedCategory == "Business Permit" || 
+                selectedCategory == "Employee Benefits" ||
+                selectedCategory == "Bookeeper Retainer Fee"){
+                $.getJSON(`/learning-management/fetch-bookeeper-items?category=${selectedCategory}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.description).text(item.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
+                $("#billing_month_from").rules('remove');
+                $("#billing_month_to").rules('remove');
+                $("#billing_month_from").closest('.col-md-3').hide();
+                $("#billing_month_to").closest('.col-md-3').hide();
+                if (selectedCategory == "BIR"){
+                } else if(selectedCategory == "Business Permit"){
+                } else if(selectedCategory == "Employee Benefits"){
+                } else if(selectedCategory == "Bookeeper's Retainers Fee"){
+                }
+            } else if(selectedCategory == "SNPL Fee"){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+
+                $.getJSON(`/learning-management/fetch-students?branch=${$("#branch_expenses").val()}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#description").append($('<option></option>').attr("value", item.full_name).text(item.full_name));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
+            }
+        });
+
+        $("#description").change(function(){
+            $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){
+                if(response.status == "error"){
+                    return;
+                }
+                $("#unit_price").val(response.data.price);
+                $("#unit_price").change();
+            });
+        });
+
+        $("#qty").change(function () {
+            $("#total_amount_due").val(
+                $(this).val() * $("#unit_price").val()
+            );
+        });
+
+        $("#unit_price").change(function () {
+            $("#total_amount_due").val(
+                $(this).val() * $("#qty").val()
+            );
+        });
+
+        $("#branch_expenses").change(function () {
+            if ($("#category").val() == "salary"){
+                getEmployees($("#branch_expenses").val(), "add_expenses");
+            } else if ($("#category").val() == "rebates") {
+                getContactPersons($("#branch_expenses").val(), "add_expenses");
+            }
+        });
+
+        $("#thru").change(function () {
+            var thru = $(this).val();
+
+            $("#bank").prop('disabled', true);
+            $("#remittance").prop('disabled', true);
+            $("#account_name").prop('disabled', true);
+            $("#fund_account_no").prop('disabled', true);
+            $("#transaction_no").prop('disabled', true);
+            $("#sender").prop('disabled', true);
+            $("#receiver").prop('disabled', true);
+            $("#amount_received").prop('disabled', true);
+            $("#remarks").prop('disabled', true);
+
+            $("#bank").rules('remove');
+            $("#remittance").rules('remove');
+            $("#account_name").rules('remove');
+            $("#fund_account_no").rules('remove');
+            $("#transaction_no").rules('remove');
+            $("#sender").rules('remove');
+            $("#receiver").rules('remove');
+            $("#amount_received").rules('remove');
+            $("#remarks").rules('remove');
+
+            if (thru == "BANK") {
+                $("#bank").prop('disabled', false);
+                $("#account_name").prop('disabled', false);
+                $("#fund_account_no").prop('disabled', false);
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+
+                $("#bank").rules('add', { 'required': true });
+                $("#account_name").rules('add', { 'required': true });
+                $("#fund_account_no").rules('add', { 'required': true });
+                $("#amount_received").rules('add', { 'required': true });
+                $("#remarks").rules('add', { 'required': true });
+            } else if (thru == "REMITTANCE") {
+                $("#remittance").prop('disabled', false);
+                $("#transaction_no").prop('disabled', false);
+                $("#sender").prop('disabled', false);
+                $("#receiver").prop('disabled', false);
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+
+                $("#remittance").rules('add', { 'required': true });
+                $("#transaction_no").rules('add', { 'required': true });
+                $("#sender").rules('add', { 'required': true });
+                $("#receiver").rules('add', { 'required': true });
+                $("#amount_received").rules('add', { 'required': true });
+                $("#remarks").rules('add', { 'required': true });
+            } else if (thru == "CASH ON HAND") {
+                $("#amount_received").prop('disabled', false);
+                $("#remarks").prop('disabled', false);
+                $("#amount_received").rules('add', { 'required': true });
+                $("#remarks").rules('add', { 'required': true });
+            }
+        });
+
+        // FILTERS
+
+        $('#filter_date_from').change(function () {
+            dtbl_fund_wallet_statements.ajax.reload();
+        });
+
+        $('#filter_date_to').change(function () {
+            dtbl_fund_wallet_statements.ajax.reload();
+        });
+
+        $('#filter_tab2_date_from').change(function () {
+            dtbl_add_funds_transactions.ajax.reload();
+        });
+
+        $('#filter_tab2_date_to').change(function () {
+            dtbl_add_funds_transactions.ajax.reload();
+        });
+
+        $('#filter_tab3_date_from').change(function () {
+            dtbl_business_expenses.ajax.reload();
+        });
+
+        $('#filter_tab3_date_to').change(function () {
+            dtbl_business_expenses.ajax.reload();
+        });
+
+        $('#filter_category').change(function () {
+            dtbl_fund_wallet_statements.ajax.reload();
+
+            var selectedCategory = $(this).val();
+
+            $("#filter_description").empty();
+            $("#filter_description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+
+            if (selectedCategory == "utilities") {
+                $("#filter_description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#filter_description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#filter_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#filter_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+            } else if (selectedCategory == "office_supply") {
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
+                }
+                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#filter_description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+            } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
+                getContactPersons($("#btn_branch_label").val(), "filter");
+            } else if (selectedCategory == "other_expenses") {
+                $("#filter_description").append($('<option></option>').attr("value", "Others").text("Others"));
+            }
+        });
+
+        $('#filter_tab3_category').change(function () {
+            dtbl_business_expenses.ajax.reload();
+
+            var selectedCategory = $(this).val();
+
+            $("#filter_tab3_description").empty();
+            $("#filter_tab3_description").append($('<option></option>').attr("value", "").text("Choose category first..."));
+
+            if (selectedCategory == "utilities") {
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+            } else if (selectedCategory == "office_supply") {
+                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var supply = response.data[i];
+                        $("#filter_tab3_description").append($('<option></option>').attr("value", supply.description).text(supply.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+            } else if (selectedCategory == "salary" || selectedCategory == "rebates") {
+                getContactPersons($("#btn_branch_label").val(), "filter_tab3");
+            } else if (selectedCategory == "other_expenses") {
+                $("#filter_tab3_description").append($('<option></option>').attr("value", "Others").text("Others"));
+            }
+        });
+
+        $('#filter_description').change(function () {
+            dtbl_fund_wallet_statements.ajax.reload();
+        });
+
+        $('#filter_tab3_description').change(function () {
+            dtbl_business_expenses.ajax.reload();
+        });
+
+        $('#filter_tab3_year').change(function () {
+            dtbl_business_expenses.ajax.reload();
+        });
+
+        // BUSINESS EXPENSES TABS
+        var dtbl_utilities = $("#tbl_utilities").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/datatables/fund-wallet/utilities",
+                "dataSrc": function (json) {
+                    $("#total_utilities_tab").html(json.totalUtilities);
+                    return json.data;
+                },
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                    d.description = $("#filter_utilities_description").val();
+                    d.date_from = $("#filter_utilities_date_from").val();
+                    d.date_to = $("#filter_utilities_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_office_supply = $("#tbl_office_supply").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/datatables/fund-wallet/office-supplies",
+                "dataSrc": function (json) {
+                    $("#total_office_supply_tab").html("₱" + json.totalOfficeSupply);
+                    return json.data;
+                },
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                    d.description = $("#filter_office_supply_description").val();
+                    d.date_from = $("#filter_office_supply_date_from").val();
+                    d.date_to = $("#filter_office_supply_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_salary = $("#tbl_salary").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/salary/dt",
+                "dataSrc": function (json) {
+                    $("#total_office_supply_tab").html("₱" + json.totalOfficeSupply);
+                    return json.data;
+                },
+                "data": function (d) {
+                    //d.date_from = $("#filter_tab2_date_from").val();
+                    //d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_other_expenses = $("#tbl_other_expenses").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/other-expenses/dt",
+                "dataSrc": function (json) {
+                    return json.data;
+                },
+                "data": function (d) {
+                    //d.date_from = $("#filter_tab2_date_from").val();
+                    //d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+        
+        var dtbl_refund = $("#tbl_refund").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/refund/dt",
+                "dataSrc": function (json) {
+                    //$("#total_office_supply_tab").html("₱" + json.totalOfficeSupply);
+                    return json.data;
+                },
+                "data": function (d) {
+                    //d.date_from = $("#filter_tab2_date_from").val();
+                    //d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        // $("#filter_utilities_date_from").datepicker( { 
+        //    changeYear: false, 
+        //    dateFormat: 'MM-dd',
+        //}).focus(function () {
+        //    $(".ui-datepicker-year").hide();
+        //});
+
+
+        $('#filter_utilities_description').change(function () {
+            dtbl_utilities.ajax.reload();
+        });
+
+        $('#filter_utilities_date_from').change(function () {
+            dtbl_utilities.ajax.reload();
+        });
+        
+        $('#filter_utilities_date_to').change(function () {
+            dtbl_utilities.ajax.reload();
+        });
+
+        
+        $('#filter_office_supply_description').change(function () {
+            dtbl_office_supply.ajax.reload();
+        });
+
+        $('#filter_office_supply_date_from').change(function () {
+            dtbl_office_supply.ajax.reload();
+        });
+        
+        $('#filter_office_supply_date_to').change(function () {
+            dtbl_utilities.ajax.reload();
+        });
+
+        // End of document.ready
+    });
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Fund Wallet
+                    <div class="page-title-subheading">
+                        Funds wallet and Expenses
+                    </div>
+                </div>
+            </div>
+            <div class="page-title-actions">
+                {% if current_user.role.name in ["Admin"] %}
+                <button type="button" data-toggle="modal" data-target="#mdl_add_fund" data-placement="bottom"
+                    class="btn-shadow mr-3 btn btn-primary">
+                    <i class="fa fa-plus"></i> Add funds
+                </button>
+                {% endif %}
+
+                {% if current_user.role.name in ['Secretary', 'Admin'] %}
+                <button type="button" data-toggle="modal" data-target="#mdl_add_expenses" data-placement="bottom"
+                    class="btn-shadow mr-3 btn btn-primary">
+                    <i class="fa fa-minus"></i> Expenses
+                </button>
+                {% endif %}
+
+                <div class="d-inline-block dropdown">
+                    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                        class="btn-shadow dropdown-toggle btn btn-info">
+                        <span class="btn-icon-wrapper pr-2 opacity-7">
+                            <i class="fa fa-list-alt fa-w-20"></i>
+                        </span>
+                        Actions
+                    </button>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                        <ul class="nav flex-column">
+                            {% if session['permissions'][RENDERED_MODEL.__amname__] is defined %}
+                            {% if session['permissions'][RENDERED_MODEL.__amname__]['delete'] or
+                            current_user.is_superuser %}
+                            <li id="nav_action_btns" class="nav-item">
+                                {% block dropdown_buttons %}
+                                <button disabled id="btndelete" type="button" tabindex="0"
+                                    class="dropdown-item">Delete</button>
+                                {% endblock %}
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="nav-item">
+                                <a disabled="" href="javascript:void(0);" class="nav-link disabled">
+                                    <i class="nav-link-icon lnr-file-empty"></i>
+                                    <span>
+                                        No actions
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="main-card mb-3 card">
+        <div class="card-header">
+            {% if current_user.role.name == "Secretary" %}
+            <div id="card_header_label">{{current_user.branch.name}}</div>
+            {% else %}
+            <div id="card_header_label">ALL BRANCHES</div>
+            {% endif %}
+
+            {% if current_user.role.name != "Secretary" %}
+            <div class="btn-actions-pane-right">
+                <div class="nav">
+
+                    <div class="dropleft btn-group">
+                        <button value="all" id="btn_branch_label" type="button" aria-haspopup="true"
+                            aria-expanded="false" data-toggle="dropdown"
+                            class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
+                            ALL BRANCHES
+                        </button>
+                        <div id="div_branch_buttons" tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu"
+                            x-placement="left-start"
+                            style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
+                            {% if current_user.role.name != "Secretary" %}
+                            <button value="all" type="button" tabindex="0" class="dropdown-item btn-branch">ALL
+                                BRANCHES</button>
+                            {% endif %}
+
+                            {% for branch in branches %}
+                            <button value="{{branch.id}}" type="button" tabindex="0"
+                                class="dropdown-item btn-branch">{{branch.name}}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card mb-3 widget-content">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-heading">Fund Wallet</div>
+                                <div class="widget-subheading">Running Balance</div>
+                            </div>
+                            <div class="widget-content-right">
+                                <div class="widget-numbers text-success"><span id="total_fund_wallet">₱ 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-12 card">
+                <div class="card-body">
+                    <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
+                                href="#tab-animated1-0" aria-selected="false">
+                                <span class="nav-text">FUND WALLET STATEMENTS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
+                                aria-selected="false">
+                                <span class="nav-text">ADD FUNDS TRANSACTIONS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                                aria-selected="true">
+                                <span class="nav-text">BUSINESS EXPENSES</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        {% include 'lms/fund_wallet/components/fund_wallet_statements.html' %}
+                        {% include 'lms/fund_wallet/components/add_fund_transactions.html' %}
+                        {% include 'lms/fund_wallet/components/business_expenses/business_expenses.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
