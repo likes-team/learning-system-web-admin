@@ -102,7 +102,8 @@ def fetch_gross_sales_breakdown():
 
     for sale in store_sales_per_month:
         store_sales += sale['amount']
-        
+    
+    total = registration_sales + accommodation_sales + store_sales    
     response = {
         'labels': ['Enrollee', 'Accommodation', 'Store'],
         'gross_sales_breakdown': [
@@ -110,6 +111,7 @@ def fetch_gross_sales_breakdown():
             currency.format_to_str_php(accommodation_sales),
             currency.format_to_str_php(store_sales)
         ],
+        'total': currency.format_to_str_php(total)
     }
     return jsonify(response), 200
 
@@ -129,17 +131,20 @@ def fetch_expenses_breakdown():
     ]
     expenses_breakdown = [0 for _ in range(len(labels))]
     
+    total = 0
     for expense in expenses_per_category:
         try:
             index = labels.index(expenses.CATEGORIES[expense['category']])
         except KeyError:
             print(expense['category'])
             continue
+        total += expense['amount']
         expenses_breakdown[index] = currency.format_to_str_php(expense['amount'])
     
     response = {
         'labels': labels,
-        'expenses_breakdown': expenses_breakdown
+        'expenses_breakdown': expenses_breakdown,
+        'total': currency.format_to_str_php(total)
     }
     return jsonify(response), 200
 

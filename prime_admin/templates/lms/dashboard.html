@@ -156,6 +156,7 @@
                         backgroundColor: 'rgba(0, 120, 246, 0.5)',
                         fill: false,
                     }]);
+                    $("#span_gross_sales_breakdown_total").html(response.total);
                 }).fail(function () {
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
                 });
@@ -173,6 +174,7 @@
                         backgroundColor: 'rgba(0, 120, 246, 0.5)',
                         fill: false,
                     }]);
+                    $("#span_expenses_breakdown_total").html(response.total);
                 }).fail(function () {
                     Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
                 });
@@ -468,6 +470,25 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card-border border-light no-shadow card">
+                                    <div class="widget-content">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers line-height-1 text-success">
+                                                        ₱ <span id='span_gross_sales_breakdown_total'>0.00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+        
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="mb-3 widget-chart widget-chart2 text-left w-100">
                                 <div class="widget-chat-wrapper-outer">
                                     <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
@@ -488,6 +509,25 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card-border border-light no-shadow card">
+                                    <div class="widget-content">
+                                        <div class="widget-content-outer">
+                                            <div class="widget-content-wrapper">
+                                                <div class="widget-content-left">
+                                                    <div class="widget-heading">Total</div>
+                                                </div>
+                                                <div class="widget-content-right">
+                                                    <div class="widget-numbers line-height-1 text-success">
+                                                        ₱ <span id='span_expenses_breakdown_total'>0.00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+        
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="mb-3 widget-chart widget-chart2 text-left w-100">
                                 <div class="widget-chat-wrapper-outer">
                                     <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
