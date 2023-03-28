@@ -4,7 +4,6 @@
 {% block modals %}
 {% include "lms/client_view_modal.html" %}
 {% include "lms/client_edit_modal.html" %}
-{% include "lms/client_upgrade_modal.html" %}
 {% include "lms/agreement_form_settings_modal.html" %}
 {% include "lms/print_certificate_modal.html" %}
 {% include "lms/print_attendance_list_modal.html" %}
@@ -157,88 +156,6 @@
             }
         });
 
-        // $('#tbl_members tbody').on('click', 'tr', function () {
-        //     var data = table.row( this ).data();
-
-        //     $("#viewModal").modal('toogle');
-        //     $("#viewModal").modal('show');
-        // } );
-
-        $('#tbl_members tbody').on('click', '.btn-upgrade', function () {
-            var data = table.row($(this).parents('tr')).data();
-
-            $.ajax({
-                url: '/learning-management/api/members/' + data[0],
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                success: function (response) {
-                    CLIENTID = response.data.id;
-
-                    $("#upgrade_client_id").val(response.data.id);
-                    $("#upgrade_last_name").val(response.data.lname);
-                    $("#upgrade_first_name").val(response.data.fname);
-                    $("#upgrade_middle_name").val(response.data.mname);
-                    $("#upgrade_suffix").val(response.data.suffix);
-                    $("#upgrade_mode_of_payment").val(response.data.mode_of_payment.toUpperCase());
-                    $("#upgrade_amount").val(response.data.amount);
-                    $("#upgrade_balance").val(response.data.balance);
-
-                    $("#tbl_upgrade_payment_history > tbody").empty();
-
-                    for (i = 0; i < response.data.payments.length; i++) {
-                        $('#tbl_upgrade_payment_history > tbody:first').append(
-                            `<tr>
-                            <td class="text-center">${response.data.payments[i].amount}</td>
-                            <td class="text-center">${response.data.payments[i].current_balance}</td>
-                            <td class="text-center">${response.data.payments[i].date}</td>
-                            <td class="text-center">${response.data.payments[i].remarks}</td>
-                            <td class="text-center">${response.data.payments[i].deposited}</td>
-                            </tr>`
-                        );
-                    }
-
-                    console.log(response.data);
-                    $('#upgrade_book_none').prop('checked', false);
-                    $('#upgrade_book1').prop('checked', false);
-                    $('#upgrade_book2').prop('checked', false);
-
-                    if (response.data.books.book_none) {
-                        $('#upgrade_book_none').prop('checked', true);
-                        savedValues.book_none = true;
-                    } else if (response.data.books.volume1) {
-                        $('#upgrade_book1').prop('checked', true);
-                        savedValues.book1 = true;
-                    } else if (response.data.books.volume2) {
-                        $('#upgrade_book2').prop('checked', true);
-                        savedValues.book2 = true;
-                    }
-
-                    if (response.data.uniforms.uniform_none) {
-                        $("#upgrade_uniform_none").prop("checked", true);
-                        savedValues.uniform_none = true;
-                    } else if (response.data.uniforms.uniform_xs) {
-                        $("#upgrade_uniform_xs").prop("checked", true);
-                        savedValues.uniform_xs = true;
-                    } else if (response.data.uniforms.uniform_s) {
-                        $("#upgrade_uniform_s").prop("checked", true);
-                        savedValues.uniform_s = true;
-                    } else if (response.data.uniforms.uniform_m) {
-                        $("#upgrade_uniform_m").prop("checked", true);
-                        savedValues.uniform_m = true;
-                    } else if (response.data.uniforms.uniform_l) {
-                        $("#upgrade_uniform_l").prop("checked", true);
-                        savedValues.uniform_l = true;
-                    } else if (response.data.uniforms.uniform_xl) {
-                        $("#upgrade_uniform_xl").prop("checked", true);
-                        savedValues.uniform_xl = true;
-                    } else if (response.data.uniforms.uniform_xxl) {
-                        $("#upgrade_uniform_xxl").prop("checked", true);
-                        savedValues.uniform_xxl = true;
-                    }
-                }
-            });
-        });
-
         $('#tbl_members tbody').on('click', '.btn-edit', function () {
             var data = table.row($(this).parents('tr')).data();
 
@@ -248,6 +165,13 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
                     CLIENTID = response.data.id;
+                    
+                    let payment_mode = response.data.mode_of_payment;
+                    if(payment_mode == 'full_payment' || payment_mode == 'full_payment_promo'){
+                        $("#div_upgrade_full_payment").hide();
+                    } else {
+                        $("#div_upgrade_full_payment").show();
+                    }
 
                     $("#edit_client_id").val(response.data.id);
                     $("#edit_last_name").val(response.data.lname);
@@ -272,7 +196,6 @@
                         );
                     }
 
-                    console.log(response.data);
                     $('#book_none').prop('checked', false);
                     $('#book1').prop('checked', false);
                     $('#book2').prop('checked', false);
@@ -639,7 +562,6 @@
                         $("#chkbox_upgrade_full_payment").attr('onclick', "");
                     }
                 });
-
                 return;
             }
 
@@ -671,8 +593,7 @@
 
             $('#chkbox_upgrade_full_payment').prop('checked', false); // Unchecks it
 
-            var is_checked = $(this).is(":checked");
-
+            let is_checked = $(this).is(":checked");
             if (is_checked) {
                 ISLOADING = true;
 
@@ -681,7 +602,12 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     success: function (response) {
-                        var new_amount = parseInt(response.data.balance) + 1000;
+                        var new_amount;
+                        if (response.data.mode_of_payment == "full_payment" || response.data.mode_of_payment == "full_payment_promo") {
+                            new_amount = 1500;
+                        }else{
+                            new_amount = parseInt(response.data.balance) + 1000;
+                        }
 
                         $("#new_amount").val(new_amount);
                         $("#new_amount").prop('readonly', true);
@@ -709,7 +635,6 @@
                         $("#chkbox_upgrade").attr('onclick', "");
                     }
                 });
-
                 return;
             }
 
@@ -737,163 +662,6 @@
             $("#book2").attr('onclick', "");
         });
 
-
-        $("#upgrade_chkbox_upgrade").click(function () {
-            if (ISLOADING) {
-                $("#upgrade_chkbox_upgrade").attr('onclick', "return false;");
-                return;
-            }
-
-            var is_checked = $(this).is(":checked");
-
-            if (is_checked) {
-                ISLOADING = true;
-
-                $("#btn_confirm_upgrade").prop('disabled', false);
-
-                $.ajax({
-                    url: '/learning-management/api/members/' + CLIENTID,
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    success: function (response) {
-                        if (response.data.mode_of_payment == "full_payment" || response.data.mode_of_payment == "full_payment_promo") {
-                            var new_amount = 1500;
-
-                            $("#upgrade_new_amount").val(new_amount);
-                            $('#upgrade_book_none').prop('checked', false);
-                            $('#upgrade_book1').prop('checked', true);
-                            $('#upgrade_book2').prop('checked', true);
-
-                            $('#upgrade_id_card').prop('checked', true);
-                            $('#upgrade_id_lace').prop('checked', true);
-
-                            $('#upgrade_reading').prop('checked', true);
-                            $('#upgrade_listening').prop('checked', true);
-
-                            $("#upgrade_id_lace").attr('onclick', "return false;");
-                            $("#upgrade_id_card").attr('onclick', "return false;");
-                            $("#upgrade_book_none").attr('onclick', "return false;");
-                            $("#upgrade_book1").attr('onclick', "return false;");
-                            $("#upgrade_book2").attr('onclick', "return false;");
-                            $("#upgrade_reading").attr('onclick', "return false;");
-                            $("#upgrade_listening").attr('onclick', "return false;");
-                        } else {
-                            var new_amount = parseInt(response.data.balance) + 1000;
-
-                            $("#upgrade_new_amount").val(new_amount);
-                            $('#upgrade_book_none').prop('checked', false);
-                            $('#upgrade_book1').prop('checked', true);
-                            $('#upgrade_book2').prop('checked', true);
-
-                            $("#upgrade_uniform_m").prop("checked", true);
-
-                            $('#upgrade_id_card').prop('checked', true);
-                            $('#upgrade_id_lace').prop('checked', true);
-
-                            $('#upgrade_reading').prop('checked', true);
-                            $('#upgrade_listening').prop('checked', true);
-
-                            $("#upgrade_id_lace").attr('onclick', "return false;");
-                            $("#upgrade_id_card").attr('onclick', "return false;");
-                            $("#upgrade_book_none").attr('onclick', "return false;");
-                            $("#upgrade_book1").attr('onclick', "return false;");
-                            $("#upgrade_book2").attr('onclick', "return false;");
-                            $("#upgrade_reading").attr('onclick', "return false;");
-                            $("#upgrade_listening").attr('onclick', "return false;");
-                        }
-
-                        ISLOADING = false;
-                        $("#upgrade_chkbox_upgrade").attr('onclick', "");
-                    }
-                });
-
-                return;
-            }
-
-            $("#upgrade_new_amount").val('');
-
-            $("#btn_confirm_upgrade").prop('disabled', true);
-
-            if (savedValues.book_none) {
-                $('#upgrade_book_none').prop('checked', true);
-            } else {
-                $('#upgrade_book_none').prop('checked', false);
-            }
-
-            if (savedValues.book1) {
-                $('#upgrade_book1').prop('checked', true);
-            } else {
-                $('#upgrade_book1').prop('checked', false);
-            }
-
-            if (savedValues.book2) {
-                $('#upgrade_book2').prop('checked', true);
-            } else {
-                $('#upgrade_book2').prop('checked', false);
-            }
-
-            if (savedValues.uniform_none) {
-                $("#upgrade_uniform_none").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_none").prop("checked", false);
-            }
-
-            if (savedValues.uniform_m) {
-                $("#upgrade_uniform_m").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_m").prop("checked", false);
-            }
-
-            if (savedValues.uniform_xs) {
-                $("#upgrade_uniform_xs").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_xs").prop("checked", false);
-            }
-
-            if (savedValues.uniform_s) {
-                $("#upgrade_uniform_s").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_s").prop("checked", false);
-            }
-
-            if (savedValues.uniform_m) {
-                $("#upgrade_uniform_m").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_m").prop("checked", false);
-            }
-
-            if (savedValues.uniform_l) {
-                $("#upgrade_uniform_l").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_l").prop("checked", false);
-            }
-
-            if (savedValues.uniform_xl) {
-                $("#upgrade_uniform_xl").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_xl").prop("checked", false);
-            }
-
-            if (savedValues.uniform_xxl) {
-                $("#upgrade_uniform_xxl").prop("checked", true);
-            } else {
-                $("#upgrade_uniform_xxl").prop("checked", false);
-            }
-
-            $('#upgrade_id_card').prop('checked', false);
-            $('#upgrade_id_lace').prop('checked', false);
-
-            $('#upgrade_reading').prop('checked', false);
-            $('#upgrade_listening').prop('checked', false);
-
-            $("#upgrade_id_lace").attr('onclick', "");
-            $("#upgrade_id_card").attr('onclick', "");
-            $("#upgrade_book_none").attr('onclick', "");
-            $("#upgrade_book1").attr('onclick', "");
-            $("#upgrade_book2").attr('onclick', "");
-            $("#upgrade_reading").attr('onclick', "");
-            $("#upgrade_listening").attr('onclick', "");
-        });
 
         $("#book_none").click(function () {
             var is_checked = $("#chkbox_upgrade").is(":checked");
