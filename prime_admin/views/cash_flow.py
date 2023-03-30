@@ -27,10 +27,8 @@ D128_CTX = create_decimal128_context()
 @bp_lms.route('/cash-flow')
 @login_required
 def cash_flow():
-
     if current_user.role.name == "Secretary":
         form = CashFlowSecretaryForm()
-
     else:
         form = CashFlowAdminForm()
     
@@ -40,15 +38,12 @@ def cash_flow():
         branches = Branch.objects(id=current_user.branch.id)
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
-    else:
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Admin":
         branches = Branch.objects
 
     orientators = Orientator.objects()
-
-    # scripts = [
-    #     {'lms.static': 'js/cash_flow.js'},
-    # ]
-
     modals = [
         'lms/deposit_modal.html',
         'lms/withdraw_modal.html',

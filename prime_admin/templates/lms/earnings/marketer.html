@@ -114,7 +114,7 @@
                 </a>
             </li>
 
-            {% if current_user.role.name == "Partner" or current_user.role.name == "Admin" %}
+            {% if current_user.role.name == "Partner" or current_user.role.name == "Admin" or current_user.role.name == "Manager" %}
             {% endif %}
             <li class="nav-item">
                 <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"

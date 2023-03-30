@@ -26,10 +26,6 @@ def dashboard():
 
     options = {
         'branches': branches,
-        'box1': DashboardBox("Number of enrollees", "Current", 0),
-        'box2': DashboardBox("Total Sales", "Montly", 0),
-        'box3': DashboardBox("Gross Income", "Total users", 0),
-        'scripts': [{'lms.static': 'js/utils.js'}],
     }
     return admin_dashboard(
         Dashboard,

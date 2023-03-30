@@ -9,7 +9,7 @@ from prime_admin.models import Branch, Batch
 class AdminModule(CoreModule):
     module_name = 'admin'
     module_icon = 'fa-home'
-    module_link = current_app.config['ADMIN']['HOME_URL']
+    module_link = ''
     module_short_description = 'Administration'
     module_long_description = "Administration Dashboard and pages"
     models = [AdminDashboard, AdminApp, User, Role, Branch, Batch, SystemLogs]

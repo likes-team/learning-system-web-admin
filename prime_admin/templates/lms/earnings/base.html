@@ -29,7 +29,7 @@
 
     function getMarketerTotalEarnings(){
         var marketerID;
-        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner"){
+        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner" || CURRENT_USER_ROLE == "Manager"){
             marketerID = $("#btn_marketer_label").val();
         } else if(CURRENT_USER_ROLE == "Secretary" || CURRENT_USER_ROLE == "Admin"){
             marketerID = $("#select_marketer").val();
@@ -82,7 +82,7 @@
 
     function getProfitSharingEarnings(){
         var partner_id;
-        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner"){
+        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner" || CURRENT_USER_ROLE == "Manager"){
             partner_id = $("#btn_marketer_label").val();
         } else if(CURRENT_USER_ROLE == "Secretary" || CURRENT_USER_ROLE == "Admin"){
             partner_id = $("#select_marketer").val();
@@ -159,7 +159,7 @@
         init();
     
         var dtMembersColumnDefs;
-        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner"){
+        if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner" || CURRENT_USER_ROLE == "Manager"){
             dtMembersColumnDefs = [
                 { className: "text-center", "targets": [ 10, 11 ] },
                 {visible: false, targets:[0,1,4]}
@@ -197,7 +197,7 @@
             "ajax": {
                 "url": "/learning-management/dtbl/earnings/members",
                 "data": function (d) {
-                    if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner"){
+                    if(CURRENT_USER_ROLE == "Marketer" || CURRENT_USER_ROLE == "Partner" || CURRENT_USER_ROLE == "Manager"){
                         d.contact_person = $("#btn_marketer_label").val();
                     } else if(CURRENT_USER_ROLE == "Secretary" || CURRENT_USER_ROLE == "Admin"){
                         d.contact_person = $("#select_marketer").val();
@@ -535,7 +535,7 @@
     <div class="mb-12 card">
         <div class="card-header">
             <div id="branch_card_header_label">
-                {% if current_user.role.name in ["Marketer",'Partner'] %}
+                {% if current_user.role.name in ["Marketer",'Partner', 'Manager'] %}
                     {{marketers[0].fname.upper()}}
                 {% elif current_user.role.name in ['Admin', 'Secretary'] %}
                     ALL MARKETERS
@@ -551,7 +551,7 @@
                         </span>
                         Select Marketer</button>
                 </div>
-                {% elif current_user.role.name in ["Marketer", 'Partner'] %}
+                {% elif current_user.role.name in ["Marketer", 'Partner', 'Manager'] %}
                 <div class="nav">
                     <div class="dropleft btn-group">
                         <button value="{{marketers[0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"

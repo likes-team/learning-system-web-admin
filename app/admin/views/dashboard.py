@@ -10,29 +10,6 @@ from app.admin.models import AdminDashboard
 from app.admin.templating import admin_dashboard, DashboardBox
 
 
-@bp_admin.route('/') # move to views
-@login_required
-def dashboard():
-    if current_user.is_authenticated and current_user.role.name != "Admin":
-        return redirect(url_for('lms.members'))
-
-    if current_user.role.name != "Admin":
-        return render_template('auth/authorization_error.html')
-
-    from app.auth.models import User
-
-    if AdminDashboard.__view_url__ == 'bp_admin.no_view_url':
-        return redirect(url_for('bp_admin.no_view_url'))
-    
-    options = {
-        'box1': DashboardBox("Total Modules","Installed",CoreModule.objects.count()),
-        'box2': DashboardBox("System Models","Total models",CoreModel.objects.count()),
-        'box3': DashboardBox("Users","Total users",User.objects.count()),
-        'scripts': [{'bp_admin.static': 'js/dashboard.js'}]
-    }
-
-    return admin_dashboard(AdminDashboard, **options)
-
 
 @bp_admin.route('/dashboard/get-dashboard-users', methods=['GET'])
 def get_dashboard_users():

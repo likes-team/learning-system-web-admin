@@ -32,7 +32,9 @@ def office_supplies():
         branches = Branch.objects(id__in=current_user.branches)
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
-    else:
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Admin":
         branches = Branch.objects()
 
     return admin_table(

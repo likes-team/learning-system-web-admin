@@ -52,6 +52,12 @@ def earnings():
         batch_numbers = Batch.objects()
         marketers = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False)).order_by('fname')
         template = 'lms/earnings/admin.html'
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
+        marketers = User.objects(id=current_user.id).order_by('fname')
+        template = 'lms/earnings/marketer.html'
+        
     return admin_render_template(
         Earning,
         template,

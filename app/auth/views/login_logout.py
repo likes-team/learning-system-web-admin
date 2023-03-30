@@ -18,7 +18,12 @@ def login():
 
     if request.method == "GET":
         if current_user.is_authenticated:
-            return redirect(url_for(admin_urls['admin']))
+            if current_user.role.name in ['Admin', 'Secretary', 'Partner']:
+                return redirect(url_for('lms.dashboard'))
+            elif current_user.role.name == 'Marketer':
+                return redirect(url_for("lms.members"))
+            elif current_user.role.name == "Manager":
+                return redirect(url_for("lms.members"))
         return render_template(auth_templates['login'], \
             title=current_app.config['ADMIN']['APPLICATION_NAME'], form=form)
     

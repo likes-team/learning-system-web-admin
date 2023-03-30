@@ -33,12 +33,16 @@ def fetch_office_supply_dt():
             filter = {'category': 'office_supply', 'branch': {"$in": current_user.branches}}
         elif current_user.role.name == "Secretary":
             filter = {'category': 'office_supply' ,'branch': current_user.branch.id}
+        elif current_user.role.name == "Manager":
+            filter = {'category': 'office_supply', 'branch': {"$in": current_user.branches}}
     else:
         if current_user.role.name == "Secretary":
             filter = {'category': 'office_supply', 'branch': current_user.branch.id}
         elif current_user.role.name == "Admin":
             filter = {'category': 'office_supply', 'branch': ObjectId(branch_id)}
         elif current_user.role.name == "Partner":
+            filter = {'category': 'office_supply', 'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Manager":
             filter = {'category': 'office_supply', 'branch': ObjectId(branch_id)}
 
     if description != "":

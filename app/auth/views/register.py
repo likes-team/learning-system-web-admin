@@ -34,7 +34,7 @@ def register():
 
     role = Role.objects.get(id=form.position.data)
 
-    if role.name not in ['Secretary', 'Admin', 'Marketer', 'Partner']:
+    if role.name not in ['Secretary', 'Admin', 'Marketer', 'Partner', 'Manager']:
         flash('Sorry, only Secretaries and Marketers can be registered at the moment','error')
         return redirect(url_for('bp_auth.register'))
 
@@ -61,9 +61,9 @@ def register():
         user.contact_no = form.contact_no.data
         user.address = form.address.data
 
-        if user.role.name == "Marketer" or user.role.name == "Partner":
+        if user.role.name in ['Partner', 'Marketer', 'Manager']:
             user.branches.append(form.branch.data)
-        else:    
+        else:
             user.branch = Branch.objects.get(id=form.branch.data)
 
         user.save()

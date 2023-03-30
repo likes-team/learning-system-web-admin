@@ -49,8 +49,6 @@ class Config(object):
     ADMIN = {
         'APPLICATION_NAME': 'Likes',
         'DATA_PER_PAGE': 25,
-        'HOME_URL': 'bp_admin.dashboard',
-        'DASHBOARD_URL': 'bp_admin.dashboard',
         'MODELS_SIDEBAR_HEADER': 'SYSTEM MODELS'
     }
     #                 -END-

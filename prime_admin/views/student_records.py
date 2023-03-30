@@ -50,6 +50,9 @@ def members():
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
         batch_numbers = Batch.objects()
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
+        batch_numbers = Batch.objects()
 
     settings = mongo.db.lms_configurations.find_one({'name': 'agreement_form_pdf_setting'})['settings']
     sessions = mongo.db.lms_configurations.find_one({'name': 'sessions'})['values']

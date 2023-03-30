@@ -55,7 +55,7 @@
                     </a>
                 </li>
 
-                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                     <li>
                         <a id="li_registration" href="{{url_for('lms.register')}}" class="">
                             <i class="metismenu-icon pe-7s-add-user icon-gradient bg-premium-dark" aria-hidden="true"></i>
@@ -113,7 +113,7 @@
                     </li> -->
                 {% endif %}
                 
-                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">ACCOUNTING</li>
 
                     {% if current_user.role.name in ['Admin', 'Secretary'] %}
@@ -161,7 +161,7 @@
                     </li>
                 {% endif %}
 
-                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">Inventory</li>
                     <li>
                         <a id="li_office_supplies" href="{{url_for('lms.office_supplies')}}" class="">

@@ -154,7 +154,7 @@
                 </div>
             </div>
             <div class="page-title-actions">
-                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                 <button type="button" data-toggle="modal" data-target="#mdl_outbound" data-placement="bottom"
                     class="btn-shadow mr-3 btn btn-warning">
                     <i class="fa fa-upload"></i>
@@ -188,35 +188,21 @@
             <div class="btn-actions-pane-right">
                 <div class="nav">
                     <div class="dropleft btn-group">
-                        {% if current_user.role.name == "Marketer" or current_user.role.name == "Partner" %}
-                        <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button"
-                            aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
-                            class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
-                            {{TABLE_OPTIONS['marketers'][0].fname.upper()}}
-                        </button>
-                        {% else %}
                         <button value="all" id="btn_marketer_label" type="button" aria-haspopup="true"
                             aria-expanded="false" data-toggle="dropdown"
                             class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
                             ALL BRANCHES
                         </button>
-                        {% endif %}
-
-                        {% if current_user.role.name != "Marketer" %}
                         <div id="div_marketer_buttons" tabindex="-1" role="menu" aria-hidden="true"
                             class="dropdown-menu" x-placement="left-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
-
                             <button value="all" type="button" tabindex="0" class="dropdown-item btn-marketer">All
                                 Branches</button>
-
                             {% for branch in TABLE_OPTIONS['branches'] %}
-                            <button value="{{branch.id}}" type="button" tabindex="0"
-                                class="dropdown-item btn-marketer">{{branch.name}}</button>
+                                <button value="{{branch.id}}" type="button" tabindex="0"
+                                    class="dropdown-item btn-marketer">{{branch.name}}</button>
                             {% endfor %}
                         </div>
-                        {% endif %}
-
                     </div>
                 </div>
             </div>
