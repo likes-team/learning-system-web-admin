@@ -177,6 +177,11 @@ class SalesAndExpensesChart:
 
         if branch != 'all':
             match['branch'] = ObjectId(branch)
+        else:
+            if current_user.role.name == "Secretary":
+                match['branch'] = current_user.branch.id
+            elif current_user.role.name == "Partner":
+                match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
         self.match = match
 
         
