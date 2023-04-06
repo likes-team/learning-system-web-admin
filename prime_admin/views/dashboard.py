@@ -14,16 +14,20 @@ from prime_admin.utils import currency, expenses
 @bp_lms.route('/dashboard')
 @login_required
 def dashboard():
-    if current_user.role.name not in ["Admin", 'Secretary', 'Partner']:
+    if current_user.role.name not in ["Admin", 'Secretary', 'Partner', "Manager"]:
         return render_template('auth/authorization_error.html')
 
     if current_user.role.name == "Secretary":
         branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Marketer":
+        branches = Branch.objects(id__in=current_user.branches)
     elif current_user.role.name == "Partner":
         branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
     elif current_user.role.name == "Admin":
-        branches = Branch.objects
-
+        branches = Branch.objects()
+        
     options = {
         'branches': branches,
     }
