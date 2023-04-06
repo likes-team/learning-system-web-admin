@@ -8,6 +8,8 @@ from prime_admin.utils.currency import format_to_str_php, convert_decimal128_to_
 
 class BusinessExpensesService:
     def __init__(self, branch='all', year='all'):
+        self.grand_total = None
+        self.table = None
         match = {}
         
         if branch == 'all':
@@ -86,10 +88,22 @@ class BusinessExpensesService:
 
             self._add_to_total_expenditure(month, total)
             self._add_to_total(category, total)
+            
+        self._compute_grand_total_expenditure()
         self._format_table()
         return self.table
 
 
+    def _compute_grand_total_expenditure(self):
+        total = 0
+        for _, months in self.data.items():
+            category_total = months[-1]
+            if not isinstance(category_total, str):
+                total += category_total
+        self.grand_total = total
+        self.data['total'][12] = total
+        
+        
     def _add_to_total_expenditure(self, month, total):
         total_expenditure = self.data['total'][month]
         if isinstance(total_expenditure, str):
