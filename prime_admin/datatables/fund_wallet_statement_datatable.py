@@ -103,6 +103,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         
         table_data.append([
             local_datetime,
+            category.upper(),
             description,
             supplier,
             str(amount_received) if statement_type == "add_fund" else '',
