@@ -117,6 +117,7 @@
             fundColumnDefs = [
                 { "visible": false, "targets": 0 },
                 { "visible": false, "targets": 13 },
+                { "visible": false, "targets": 12 },
             ];
         }
 
@@ -160,9 +161,9 @@
         });
 
 
-        var dtbl_fund_statement = $('#tbl_fund_statement').DataTable({
+        var dtbl_fund_1_statement = $('#tbl_fund_1_statement').DataTable({
             "dom": 'rtip',
-            "pageLength": 100,
+            "pageLength": 50,
             "order": [[1, 'asc']],
             "processing": true,
             "serverSide": true,
@@ -170,26 +171,36 @@
             "ordering": false,
             "columnDefs": fundColumnDefs,
             "ajax": {
-                "url": "/learning-management/dtbl/get-cash-flow",
+                "url": "/learning-management/datatables/cash-flow/fund-statement",
                 "data": function (d) {
                     d.branch = $("#btn_branch_label").val();
-                    d.from_what = "fund"
-                },
-                "dataSrc": function (json) {
-                    var remaining = parseFloat(json.remaining).toFixed(2);
-                    var net = parseFloat(json.net).toFixed(2);
-                    var fund1 = parseFloat(json.fund1).toFixed(2);
-                    var fund2 = parseFloat(json.fund2).toFixed(2);
-
-                    $("#total_gross_sales").html("₱" + json.totalGrossSales);
-                    $("#remaining").html("₱" + remaining);
-                    $("#net").html("₱" + net);
-                    $("#fund1").html("₱" + fund1);
-                    $("#fund2").html("₱" + fund2);
-                    $("#final_fund1").html("₱" + json.finalFund1);
-                    $("#final_fund2").html("₱" + json.finalFund2);
-                    return json.data;
+                    d.date_from = $("#filter_date_from").val();
+                    d.date_to = $("#filter_date_to").val();
+                    d.transaction_type = $("#filter_transaction_type").val();
+                    d.from_what = "Fund 1";
                 }
+            }
+        });
+
+
+        var dtbl_fund_2_statement = $('#tbl_fund_2_statement').DataTable({
+            "dom": 'rtip',
+            "pageLength": 50,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": fundColumnDefs,
+            "ajax": {
+                "url": "/learning-management/datatables/cash-flow/fund-statement",
+                "data": function (d) {
+                    d.branch = $("#btn_branch_label").val();
+                    d.date_from = $("#filter_date_from").val();
+                    d.date_to = $("#filter_date_to").val();
+                    d.transaction_type = $("#filter_transaction_type").val();
+                    d.from_what = "Fund 2";
+                },
             }
         });
 
@@ -224,7 +235,8 @@
 
         $("#btn_branch_label").change(function () {
             dtbl_statement.ajax.reload();
-            dtbl_fund_statement.ajax.reload();
+            dtbl_fund_1_statement.ajax.reload();
+            dtbl_fund_2_statement.ajax.reload();
             dtbl_profits_history.ajax.reload();
         });
 
@@ -702,6 +714,40 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">Filter</h5>
+                    <div class="form-row">
+                        <div class="col-md-2 col-xs-2">
+                            <div class="position-relative form-group">
+                                <label for="filter_date_from" class="">Date From</label>
+                                <input id="filter_date_from" type="date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-xs-2">
+                            <div class="position-relative form-group">
+                                <label for="filter_date_to" class="">Date To</label>
+                                <input id="filter_date_to" type="date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-xs-2">
+                            <div class="position-relative form-group">
+                                <label for="filter_transaction_type" class="">Transaction Type</label>
+                                <select id="filter_transaction_type" class="form-control">
+                                    <option value="">All</option>
+                                    <option value="deposit">Deposit</option>
+                                    <option value="withdraw">Withdrawal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="main-card mb-3 card">
         <div class="card-header">
             {% if current_user.role.name == "Secretary" %}
@@ -915,30 +961,6 @@
                 </div>
             </div>
             {% endif %}
-            <div class="form-row">
-                <div class="col-md-2 col-xs-2">
-                    <div class="position-relative form-group">
-                        <label for="filter_date_from" class="">Date From</label>
-                        <input id="filter_date_from" type="date" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-2 col-xs-2">
-                    <div class="position-relative form-group">
-                        <label for="filter_date_to" class="">Date To</label>
-                        <input id="filter_date_to" type="date" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-2 col-xs-2">
-                    <div class="position-relative form-group">
-                        <label for="filter_transaction_type" class="">Transaction Type</label>
-                        <select id="filter_transaction_type" class="form-control">
-                            <option value="">All</option>
-                            <option value="deposit">Deposit</option>
-                            <option value="withdraw">Withdrawal</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
             <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
                 <li class="nav-item">
                     <a role="tab" class="nav-link show active" id="tab-c1-0" data-toggle="tab"
@@ -949,11 +971,17 @@
                 <li class="nav-item">
                     <a role="tab" class="nav-link show" id="tab-c1-1" data-toggle="tab" href="#tab-animated1-1"
                         aria-selected="false">
-                        <span class="nav-text">FUND 1 & 2 STATEMENT</span>
+                        <span class="nav-text">FUND 1 STATEMENT</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a role="tab" class="nav-link show" id="tab-c1-2" data-toggle="tab" href="#tab-animated1-2"
+                        aria-selected="false">
+                        <span class="nav-text">FUND 2 STATEMENT</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a role="tab" class="nav-link show" id="tab-c1-3" data-toggle="tab" href="#tab-animated1-3"
                         aria-selected="true">
                         <span class="nav-text">PROFITS HISTORY</span>
                     </a>
@@ -977,7 +1005,22 @@
                 </div>
                 <div class="tab-pane show" id="tab-animated1-1" role="tabpanel">
                     <div class="table-responsive">
-                        <table id="tbl_fund_statement" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <table id="tbl_fund_1_statement" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    {% for column in TABLE_OPTIONS['table_columns'] %}
+                                    <th class="text-center">{{ column.upper() }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+                    <div class="table-responsive">
+                        <table id="tbl_fund_2_statement" class="align-middle mb-0 table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
                                     {% for column in TABLE_OPTIONS['table_columns'] %}
