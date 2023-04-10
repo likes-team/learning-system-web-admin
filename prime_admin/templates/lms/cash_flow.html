@@ -74,6 +74,33 @@
             "hideMethod": "fadeOut"
         }
 
+        function loadTotals(){
+            let branch = $("#filter_branch").val();
+            let date_from = $("#filter_date_from").val();
+            let date_to = $("#filter_date_to").val();
+
+            $.getJSON(`/learning-management/cash-flow/totals?branch=${branch}&date_from=${date_from}&date_to=${date_to}`, function(response, status, xhr){
+                var remaining = parseFloat(response.remaining).toFixed(2);
+                var net = parseFloat(response.net).toFixed(2);
+                var fund1 = parseFloat(response.fund1).toFixed(2);
+                var fund2 = parseFloat(response.fund2).toFixed(2);
+
+                $("#total_gross_sales").html(response.totalGrossSales);
+                $("#remaining").html(remaining);
+                $("#net").html(net);
+                $("#fund1").html(fund1);
+                $("#fund2").html(fund2);
+                $("#final_fund1").html(response.finalFund1);
+                $("#final_fund2").html(response.finalFund2);
+                $("#total_deposit").html(response.totalDeposit);
+                $("#total_withdrawal").html(response.totalWithdrawal);
+                $("#total_current_balance").html(response.totalCurrentBalance);
+            }).fail(function(err){
+                swal("Error Occured!", "Please refresh the page then try again!", "error");
+            });
+        }
+
+
         var columnDefs;
         var fundColumnDefs;
         if(CURRENT_USER_ROLE == "Secretary"){
@@ -121,9 +148,9 @@
             ];
         }
 
-        var dtbl_statement = $('#tbl_statement').DataTable({
+        var dtblSalesStatement = $('#tbl_statement').DataTable({
             "dom": 'rtip',
-            "pageLength": 100,
+            "pageLength": 50,
             "order": [[1, 'asc']],
             "processing": true,
             "serverSide": true,
@@ -133,35 +160,17 @@
             "ajax": {
                 "url": "/learning-management/dtbl/get-cash-flow",
                 "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
-                    d.from_what = "sales"
+                    d.branch = $("#filter_branch").val();
                     d.date_from = $("#filter_date_from").val();
                     d.date_to = $("#filter_date_to").val();
                     d.transaction_type = $("#filter_transaction_type").val();
+                    d.from_what = "Sales";
                 },
-                "dataSrc": function (json) {
-                    var remaining = parseFloat(json.remaining).toFixed(2);
-                    var net = parseFloat(json.net).toFixed(2);
-                    var fund1 = parseFloat(json.fund1).toFixed(2);
-                    var fund2 = parseFloat(json.fund2).toFixed(2);
-
-                    $("#total_gross_sales").html("₱" + json.totalGrossSales);
-                    $("#remaining").html("₱" + remaining);
-                    $("#net").html("₱" + net);
-                    $("#fund1").html("₱" + fund1);
-                    $("#fund2").html("₱" + fund2);
-                    $("#final_fund1").html("₱" + json.finalFund1);
-                    $("#final_fund2").html("₱" + json.finalFund2);
-                    $("#total_deposit").html("₱" + json.totalDeposit);
-                    $("#total_withdrawal").html("₱" + json.totalWithdrawal);
-                    $("#total_current_balance").html("₱" + json.totalCurrentBalance);
-                    return json.data;
-                }
             }
         });
 
 
-        var dtbl_fund_1_statement = $('#tbl_fund_1_statement').DataTable({
+        var dtblfund1statement = $('#tbl_fund_1_statement').DataTable({
             "dom": 'rtip',
             "pageLength": 50,
             "order": [[1, 'asc']],
@@ -171,9 +180,9 @@
             "ordering": false,
             "columnDefs": fundColumnDefs,
             "ajax": {
-                "url": "/learning-management/datatables/cash-flow/fund-statement",
+                "url": "/learning-management/datatables/cash-flow/statement",
                 "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
+                    d.branch = $("#filter_branch").val();
                     d.date_from = $("#filter_date_from").val();
                     d.date_to = $("#filter_date_to").val();
                     d.transaction_type = $("#filter_transaction_type").val();
@@ -183,7 +192,7 @@
         });
 
 
-        var dtbl_fund_2_statement = $('#tbl_fund_2_statement').DataTable({
+        var dtblfund2statement = $('#tbl_fund_2_statement').DataTable({
             "dom": 'rtip',
             "pageLength": 50,
             "order": [[1, 'asc']],
@@ -193,9 +202,9 @@
             "ordering": false,
             "columnDefs": fundColumnDefs,
             "ajax": {
-                "url": "/learning-management/datatables/cash-flow/fund-statement",
+                "url": "/learning-management/datatables/cash-flow/statement",
                 "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
+                    d.branch = $("#filter_branch").val();
                     d.date_from = $("#filter_date_from").val();
                     d.date_to = $("#filter_date_to").val();
                     d.transaction_type = $("#filter_transaction_type").val();
@@ -204,7 +213,7 @@
             }
         });
 
-        var dtbl_profits_history = $('#tbl_profits_history').DataTable({
+        var dtblprofitshistory = $('#tbl_profits_history').DataTable({
             "dom": 'rtip',
             "pageLength": 100,
             "processing": true,
@@ -214,30 +223,19 @@
             "ajax": {
                 "url": "/learning-management/dtbl/get-profits-history",
                 "data": function (d) {
-                    d.branch = $("#btn_branch_label").val();
+                    d.branch = $("#filter_branch").val();
                 },
             }
         });
 
-        $("#div_branch_buttons").on('click', '.btn-branch', function () {
-            var branch_name = $(this).html();
+        
 
-            // if(!(localStorage.getItem('sessSubArea') == _sub_area_name)){
-            $("#btn_branch_label").html(branch_name.toUpperCase());
-            $("#btn_branch_label").val($(this).val());
-            $("#card_header_label").html(branch_name);
-
-            $('#btn_branch_label').trigger('change');
-            // dtbl_subscribers.ajax.url(`/bds/api/sub-areas/${$(this).val()}/subscribers`).load();
-            // }
-
-        });
-
-        $("#btn_branch_label").change(function () {
-            dtbl_statement.ajax.reload();
-            dtbl_fund_1_statement.ajax.reload();
-            dtbl_fund_2_statement.ajax.reload();
-            dtbl_profits_history.ajax.reload();
+        $("#filter_branch").change(function () {
+            loadTotals();
+            dtblSalesStatement.ajax.reload();
+            dtblfund1statement.ajax.reload();
+            dtblfund2statement.ajax.reload();
+            dtblprofitshistory.ajax.reload();
         });
 
         var groupColumn = 1;
@@ -574,7 +572,7 @@
 
 
         $('#tbl_statement tbody').on('click', '.btn-view', function () {
-            var data = dtbl_statement.row($(this).parents('tr')).data();
+            var data = dtblSalesStatement.row($(this).parents('tr')).data();
 
             $.ajax({
                 url: '/learning-management/api/cash-flow/' + data[0],
@@ -610,15 +608,15 @@
         // FILTERS
 
         $('#filter_date_from').change(function () {
-            dtbl_statement.ajax.reload();
+            dtblSalesStatement.ajax.reload();
         });
 
         $('#filter_date_to').change(function () {
-            dtbl_statement.ajax.reload();
+            dtblSalesStatement.ajax.reload();
         });
 
         $('#filter_transaction_type').change(function () {
-            dtbl_statement.ajax.reload();
+            dtblSalesStatement.ajax.reload();
         });
 
     });
@@ -722,6 +720,24 @@
                     <div class="form-row">
                         <div class="col-md-2 col-xs-2">
                             <div class="position-relative form-group">
+                                <label for="filter_branch" class="">Branch</label>
+                                <select id="filter_branch" class="form-control">
+                                    {% if current_user.role.name == "Secretary" %}
+                                        <!-- Pass -->
+                                    {% else %}
+                                        <option value="all">All</option>
+                                    {% endif %}
+        
+                                    {% for branch in TABLE_OPTIONS['branches'] %}
+                                        <option value="{{ branch.id }}">
+                                            {{ branch.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-xs-2">
+                            <div class="position-relative form-group">
                                 <label for="filter_date_from" class="">Date From</label>
                                 <input id="filter_date_from" type="date" class="form-control">
                             </div>
@@ -749,42 +765,6 @@
     </div>
 
     <div class="main-card mb-3 card">
-        <div class="card-header">
-            {% if current_user.role.name == "Secretary" %}
-            <div id="card_header_label">{{current_user.branch.name}} BRANCH</div>
-            {% else %}
-            <div id="card_header_label">BRANCH'S NAME</div>
-            {% endif %}
-
-            {% if current_user.role.name != "Secretary" %}
-            <div class="btn-actions-pane-right">
-                <div class="nav">
-
-                    <div class="dropleft btn-group">
-                        <button value="all" id="btn_branch_label" type="button" aria-haspopup="true"
-                            aria-expanded="false" data-toggle="dropdown"
-                            class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
-                            Select Branch
-                        </button>
-                        <div id="div_branch_buttons" tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu"
-                            x-placement="left-start"
-                            style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-4px, 0px, 0px);">
-                            {% if current_user.role.name != "Secretary" %}
-                            <button disabled value="all" type="button" tabindex="0" class="dropdown-item btn-branch">All
-                                Branch</button>
-                            {% endif %}
-
-                            {% for branch in TABLE_OPTIONS['branches'] %}
-                            <button value="{{branch.id}}" type="button" tabindex="0"
-                                class="dropdown-item btn-branch">{{branch.name}}</button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-        </div>
         <div class="card-body">
             {% if current_user.role.name == "Admin" or current_user.role.name == "Partner" or current_user.role.name == "Manager" %}
             <div class="row">
@@ -796,7 +776,7 @@
                                 <div class="widget-subheading">Student Loan</div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-success"><span id="final_fund1">₱ 0.00</span></div>
+                                <div class="widget-numbers text-success">₱ <span id="final_fund1">0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -809,7 +789,7 @@
                                 <div class="widget-subheading">Emergency Loan</div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="final_fund2">₱ 0.00</span></div>
+                                <div class="widget-numbers text-primary">₱ <span id="final_fund2">0.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -818,16 +798,12 @@
             <h5>Gross Sale</h5>
             <div class="row">
                 <div class="col-lg-4 col-xl-4">
-
                 </div>
-
                 <div class="col-lg-4 col-xl-4">
                 </div>
             </div>
             <div class="no-gutters row">
-                <div class="col-md-4 col-xl-4" style="
-            margin-top: 30px;
-        ">
+                <div class="col-md-4 col-xl-4">
                     <div class="card mb-3 widget-content">
                         <div class="widget-content-wrapper">
                             <div class="widget-content-left">
@@ -835,7 +811,7 @@
                                 <div class="widget-subheading"></div>
                             </div>
                             <div class="widget-content-right">
-                                <div class="widget-numbers text-primary"><span id="total_gross_sales">₱ 0.00</span>
+                                <div class="widget-numbers text-primary">₱ <span id="total_gross_sales">0.00</span>
                                 </div>
                             </div>
                         </div>
@@ -853,7 +829,7 @@
                                                 <div class="widget-subheading"></div>
                                             </div>
                                             <div class="widget-content-right">
-                                                <div class="widget-numbers text-success" id="remaining">₱ 0.00</div>
+                                                <div class="widget-numbers text-success">₱ <span id="remaining">0.00</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -868,7 +844,7 @@
                                                 <div class="widget-subheading"></div>
                                             </div>
                                             <div class="widget-content-right">
-                                                <div class="widget-numbers text-primary" id="fund1">₱ 0.00</div>
+                                                <div class="widget-numbers text-primary">₱ <span id="fund1">0.00</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -889,7 +865,7 @@
                                                 <div class="widget-subheading"></div>
                                             </div>
                                             <div class="widget-content-right">
-                                                <div class="widget-numbers text-danger" id="net">₱ 0.00</div>
+                                                <div class="widget-numbers text-danger">₱ <span id="net">0.00</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -904,7 +880,7 @@
                                                 <div class="widget-subheading"></div>
                                             </div>
                                             <div class="widget-content-right">
-                                                <div class="widget-numbers text-warning" id="fund2">₱ 0.00</div>
+                                                <div class="widget-numbers text-warning">₱ <span id="fund2">0.00</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -1033,7 +1009,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="tab-pane show" id="tab-animated1-2" role="tabpanel">
+                <div class="tab-pane show" id="tab-animated1-3" role="tabpanel">
                     <div class="table-responsive">
                         <table id="tbl_profits_history"
                             class="align-middle mb-0 table table-bordered table-striped table-hover">

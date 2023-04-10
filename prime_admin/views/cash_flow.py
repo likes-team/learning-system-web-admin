@@ -1,24 +1,23 @@
+import decimal
+import pytz
+import pymongo
+from datetime import datetime
 from bson.decimal128 import create_decimal128_context
 from bson.objectid import ObjectId
-from flask_mongoengine import json
-import pytz
+from bson import Decimal128
 from config import TIMEZONE
-import decimal
-from prime_admin.globals import PARTNERREFERENCE, SECRETARYREFERENCE, convert_to_utc, get_date_now
-from app.auth.models import Earning, User
-from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, OrientationAttendanceForm, WithdrawForm
+from flask import jsonify, request, redirect
 from flask.helpers import flash, url_for
 from flask_login import login_required, current_user
-from werkzeug.utils import redirect
-from app.admin.templating import admin_render_template, admin_table, admin_edit
-from prime_admin import bp_lms
-from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, OrientationAttendance, Registration, Batch, Orientator, StoreRecords
-from flask import jsonify, request
-from datetime import date, datetime
-from mongoengine.queryset.visitor import Q
-from bson import Decimal128
 from app import mongo
-import pymongo
+from app.auth.models import User
+from app.admin.templating import admin_table
+from prime_admin import bp_lms
+from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, Registration, Orientator, StoreRecords
+from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, WithdrawForm
+from prime_admin.globals import PARTNERREFERENCE, convert_to_utc, get_date_now
+from prime_admin.utils import currency
+
 
 
 D128_CTX = create_decimal128_context()
@@ -61,7 +60,6 @@ def cash_flow():
         subheading="Bank Transfer",
         title="Cash Flow",
         table_template="lms/cash_flow.html",
-        # scripts=scripts,
         modals=modals,
         branches=branches,
         orientators=orientators
@@ -360,12 +358,74 @@ def withdraw():
     return redirect(url_for('lms.cash_flow'))
 
 
+
+@bp_lms.route('/cash-flow/totals')
+def get_totals():
+    branch_id = request.args.get('branch')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
+    if branch_id == "all":
+        return jsonify({})
+    
+    if current_user.role.name == "Secretary":
+        branch = current_user.branch.id
+    else:
+        branch = branch_id
+
+    accounting = mongo.db.lms_accounting.find_one({'branch': ObjectId(branch)})
+    total_gross_sales = currency.convert_decimal128_to_decimal(accounting.get('total_gross_sale', 0.00))
+    remaining = total_gross_sales * decimal.Decimal(.05)
+    net = total_gross_sales * decimal.Decimal(.55)
+    fund1 = total_gross_sales * decimal.Decimal(.20)
+    fund2 = total_gross_sales * decimal.Decimal(.20)
+    final_fund1 = currency.convert_decimal128_to_decimal(accounting.get('final_fund1', 0.00))
+    final_fund2 = currency.convert_decimal128_to_decimal(accounting.get('final_fund2', 0.00))
+    total_deposit = 0
+    total_withdrawal = 0
+    total_current_balance = 0
+    
+    query = list(mongo.db.lms_bank_statements.aggregate([
+        {'$match': {
+            'branch': ObjectId(branch),
+            'from_what': "Sales",
+            'group': accounting['active_group']
+        }},
+        {'$group': {
+            '_id': {'type': '$type'},
+            'total': {
+                '$sum': '$amount'
+            }
+        }}
+    ]))
+
+    if len(query) > 0:
+        for item in query:
+            if item['_id']['type'] == "deposit":
+                total_deposit = currency.convert_decimal128_to_decimal(item['total'])
+            elif item['_id']['type'] == 'withdraw':
+                total_withdrawal = currency.convert_decimal128_to_decimal(item['total'])
+                
+    total_current_balance = total_deposit - total_withdrawal
+    response = {
+        'totalGrossSales': currency.format_to_str_php(total_gross_sales),
+        'remaining': currency.format_to_str_php(remaining),
+        'net': currency.format_to_str_php(net),
+        'fund1': currency.format_to_str_php(fund1),
+        'fund2': currency.format_to_str_php(fund2),
+        'finalFund1': currency.format_to_str_php(final_fund1),
+        'finalFund2': currency.format_to_str_php(final_fund2),
+        'totalDeposit': currency.format_to_str_php(total_deposit),
+        'totalWithdrawal': currency.format_to_str_php(total_withdrawal),
+        'totalCurrentBalance': currency.format_to_str_php(total_current_balance)
+    }
+    return jsonify(response)
+
+
 @bp_lms.route('/dtbl/get-cash-flow')
 def get_cash_flow():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-    # search_value = "%" + request.args.get("search[value]") + "%"
-    # column_order = request.args.get('column_order')
     branch_id = request.args.get('branch')
     from_what = request.args.get('from_what')
     date_from = request.args.get('date_from', '')
@@ -378,20 +438,9 @@ def get_cash_flow():
             'recordsTotal': 0,
             'recordsFiltered': 0,
             'data': [],
-            'totalGrossSales': 0.00,
-            'remaining': 0.00,
-            'net': 0.00,
-            'fund1': 0.00,
-            'fund2': 0.00,
-            'finalFund1': 0.00,
-            'finalFund2': 0.00,
-            'totalDeposit': 0.00,
-            'totalWithdrawal': 0.00,
-            'totalCurrentBalance': 0.00
         }
 
         return jsonify(response)
-        # bank_statements = CashFlow.objects.skip(start).limit(length)
     
     if current_user.role.name == "Secretary":
         accounting = Accounting.objects(branch=current_user.branch.id).first()
@@ -400,29 +449,17 @@ def get_cash_flow():
 
     if accounting:
         filter: dict = {}
-                
-        total_gross_sales = accounting.total_gross_sale
-        remaining = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.05)
-        net = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.55)
-        fund1 = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.20)
-        fund2 = decimal.Decimal(accounting.total_gross_sale if accounting.total_gross_sale is not None else 0) * decimal.Decimal(.20)
-        final_fund1 = accounting.final_fund1 if accounting.final_fund1 is not None else 0.00
-        final_fund2 = accounting.final_fund2 if accounting.final_fund2 is not None else 0.00
 
         if current_user.role.name == "Secretary":
             if from_what == "sales":
                 filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': 'Sales'}
-                # bank_statements = CashFlow.objects(branch=).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
                 filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': {'$ne': 'Sales'}}
-                # bank_statements = CashFlow.objects(branch=current_user.branch.id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         else:
             if from_what == "sales":
                 filter = {'branch': ObjectId(branch_id), 'group': accounting.active_group, 'from_what': 'Sales'}
-                # bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what="Sales").order_by('-date_deposit').skip(start).limit(length)
             else: # fund
                 filter = {'branch': ObjectId(branch_id), 'group': accounting.active_group, 'from_what': {'$ne': 'Sales'}}
-                # bank_statements = CashFlow.objects(branch=branch_id).filter(group=accounting.active_group).filter(from_what__ne="Sales").order_by('-date_deposit').skip(start).limit(length)
         
         if date_from != "":
             filter['date_deposit'] = {"$gt": convert_to_utc(date_from, 'date_from')}
@@ -440,22 +477,11 @@ def get_cash_flow():
         recordsTotal = bank_statements.count(),
         recordsFiltered = bank_statements.count(),
     else:
-        total_gross_sales = 0.00
-        remaining = 0.00
-        net = 0.00
-        fund1 = 0.00
-        fund2 = 0.00
-        final_fund1 = 0.00
-        final_fund2 = 0.00
         recordsTotal = 0,
         recordsFiltered = 0,
         bank_statements = []
 
     _table_data = []
-    total_deposit = decimal.Decimal(0)
-    total_withdrawal = decimal.Decimal(0)
-    total_current_balance = decimal.Decimal(0)
-
     if current_user.role.name == "Secretary":
         with decimal.localcontext(D128_CTX):
             for statement in bank_statements:
@@ -474,11 +500,6 @@ def get_cash_flow():
                 remarks = statement.get('remarks', '')
                 group = statement.get('group')
                 _type = statement.get('type')
-                
-                if _type == 'deposit':
-                    total_deposit = total_deposit + amount
-                elif _type == 'withdraw':
-                    total_withdrawal = total_withdrawal + amount
                 
                 _table_data.append((
                     str(_id),
@@ -512,12 +533,7 @@ def get_cash_flow():
                 group = statement.get('group')
                 balance = statement.get('balance', 0.00)
                 _type = statement.get('type')
-                
-                if _type == 'deposit':
-                    total_deposit = total_deposit + amount
-                elif _type == 'withdraw':
-                    total_withdrawal = total_withdrawal + amount
-                
+        
                 _table_data.append((
                     str(_id),
                     date_deposit,
@@ -534,25 +550,12 @@ def get_cash_flow():
                     group,
                     ''
                 ))
-            
-    total_current_balance = total_deposit - total_withdrawal
     response = {
         'draw': draw,
         'recordsTotal': recordsTotal,
         'recordsFiltered': recordsFiltered,
         'data': _table_data,
-        'totalGrossSales': str(total_gross_sales),
-        'remaining': str(remaining),
-        'net': str(net),
-        'fund1': str(fund1),
-        'fund2': str(fund2),
-        'finalFund1': str(final_fund1),
-        'finalFund2': str(final_fund2),
-        'totalDeposit': str(total_deposit),
-        'totalWithdrawal': str(total_withdrawal),
-        'totalCurrentBalance': str(total_current_balance)
     }
-
     return jsonify(response)
 
 

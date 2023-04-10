@@ -6,5 +6,5 @@ from .fund_wallet import (
     dt_office_supplies
 )
 from .cash_flow import (
-    dt_fund_statement
+    dt_statements
 )

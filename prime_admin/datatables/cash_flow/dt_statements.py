@@ -10,7 +10,7 @@ from prime_admin.globals import convert_to_utc
 
 
 
-@bp_lms.route('/datatables/cash-flow/fund-statement')
+@bp_lms.route('/datatables/cash-flow/statement')
 def fetch_fund_statement_dt():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
@@ -105,7 +105,6 @@ def fetch_fund_statement_dt():
                 group,
                 ''
             ))
-
     response = {
         'draw': draw,
         'recordsTotal': records_total,
