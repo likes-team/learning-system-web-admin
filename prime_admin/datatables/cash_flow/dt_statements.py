@@ -34,6 +34,11 @@ def fetch_fund_statement_dt():
     else:
         accounting = mongo.db.lms_accounting.find_one({'branch': ObjectId(branch_id)})
 
+    if from_what == "Fund 1":
+        from_what = {'$in': ['Fund 1', 'Student Loan Payment']}
+    elif from_what == "Fund 2":
+        from_what = {'$in': ['Fund 2', 'Emergency Fund']}
+    
     match = {'group': accounting['active_group'], 'from_what': from_what}
 
     if current_user.role.name == "Secretary":
