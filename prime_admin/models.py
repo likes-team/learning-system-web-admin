@@ -119,7 +119,7 @@ class Student(object):
         pass
     
     def get_is_deposited(self):
-        if self.amount == self.get_amount_deposit():
+        if convert_decimal128_to_decimal(self.amount) == self.get_amount_deposit():
             deposit = "Yes"
         else:
             deposit = "No"
