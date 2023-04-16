@@ -1,3 +1,4 @@
+from bson import ObjectId
 from prime_admin.utils.date import format_utc_to_local, convert_utc_to_local
 from prime_admin.utils.currency import convert_decimal128_to_decimal, format_to_str_php
 
@@ -58,6 +59,10 @@ class BatchV2(Document):
     def __init__(self, document):
         super().__init__(document)
         
+        self.branch: BranchV2 = None
+        if 'branch' in document and not isinstance(document['branch'], ObjectId):
+            self.branch = BranchV2(document['branch'])
+
     def get_no(self):
         return self.document.get('number')
     

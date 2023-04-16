@@ -8,3 +8,6 @@ from .fund_wallet import (
 from .cash_flow import (
     dt_statements
 )
+from .batches import (
+    dt_batches
+)

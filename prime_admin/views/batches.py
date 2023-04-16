@@ -16,10 +16,18 @@ from prime_admin.utils.date import format_date
 def batches():
     form = BatchForm()
 
-    _table_data = []
+    if current_user.role.name == "Secretary":
+        branches = Branch.objects(id=current_user.branch.id)
+    elif current_user.role.name == "Partner":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Manager":
+        branches = Branch.objects(id__in=current_user.branches)
+    elif current_user.role.name == "Admin":
+        branches = Branch.objects
 
+    table_data = []
     for batch in Batch.objects:
-        _table_data.append((
+        table_data.append((
             batch.id,
             batch.active,
             batch.number,
@@ -34,12 +42,13 @@ def batches():
         Batch,
         fields=[],
         form=form,
-        table_data=_table_data,
+        table_data=table_data,
         create_url='lms.create_batch',
         edit_url='lms.edit_batch',
-        table_template='lms/branch_table.html',
-        view_modal_template="lms/batch_view_modal.html"
-        )
+        table_template='lms/batches/batch_table.html',
+        view_modal_template="lms/batch_view_modal.html",
+        branches=branches
+    )
 
 
 @bp_lms.route('/batches/<string:oid>')
