@@ -1,15 +1,13 @@
-from config import TIMEZONE
-from prime_admin.views.branches import branches
-from flask.json import jsonify
-from app.auth.models import Role, User
-from prime_admin.forms import BatchEditForm, BatchForm, PartnerForm, SecretaryEditForm, SecretaryForm, StudentForm, TeacherForm, TrainingCenterEditForm, TrainingCenterForm
+from bson import ObjectId
 from flask_login import login_required, current_user
-from app.admin.templating import admin_render_template, admin_table, admin_edit
+from flask import redirect, url_for, request, flash, jsonify
+from app import mongo
+from app.admin.templating import admin_table, admin_edit
 from prime_admin import bp_lms
 from prime_admin.models import Batch, Branch
-from flask import redirect, url_for, request, current_app, flash
-from app import db
-from datetime import datetime
+from prime_admin.forms import BatchEditForm, BatchForm
+from prime_admin.models_v2 import BatchV2, BranchV2
+from prime_admin.utils.date import format_date
 
 
 
@@ -32,10 +30,6 @@ def batches():
             batch.updated_by,
             batch.updated_at_local
         ))
-
-
-    _scripts = []
-
     return admin_table(
         Batch,
         fields=[],
@@ -44,10 +38,29 @@ def batches():
         create_url='lms.create_batch',
         edit_url='lms.edit_batch',
         table_template='lms/branch_table.html',
-        view_modal_url='/learning-management/get-view-batch-data',
-        view_modal_template="lms/batch_view_modal.html",
-        scripts=_scripts
+        view_modal_template="lms/batch_view_modal.html"
         )
+
+
+@bp_lms.route('/batches/<string:oid>')
+def get_batch(oid):
+    query = mongo.db.lms_batches.find_one({'_id': ObjectId(oid)})
+    if query is None:
+        pass
+    
+    batch = BatchV2(query)
+    branch_id = batch.document.get('branch')
+    if branch_id:
+        query = mongo.db.lms_branches.find_one({'_id': ObjectId(branch_id)})
+        branch = BranchV2(query)
+    
+    response = {
+        'id': str(batch.get_id()),
+        'no': batch.get_no(),
+        'branch': str(branch.get_id()),
+        'start_date': format_date(batch.get_start_date())
+    }
+    return jsonify(response)
 
 
 @bp_lms.route('/get-view-batch-data', methods=['GET'])

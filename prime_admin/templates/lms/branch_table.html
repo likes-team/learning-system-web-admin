@@ -57,47 +57,23 @@
     
     
         $("#index_table tbody").on('click','.row_object',function(){
-    
-            if (VIEW_MODAL != 'True'){
-                return;
-            }
-    
-            var id = '#param_' + $(this).attr('id');
+            let id = '#param_' + $(this).attr('id');
             
             if($("#view_edit_button").length){
                 const view_url = $(id).attr('value');
                 document.getElementById("view_edit_button").setAttribute("href", view_url);
             }
-    
-            var ctr;
-            var field;
-            var field_id = $(this).attr('id');
-            
-            for (ctr=0; ctr < js_fields_array.length; ctr++){
-                $.ajax({
-                    url: `/admin/_get_view_modal_data?table=${TABLE_NAME}&column=${js_fields_array[ctr]}&id=${field_id}`,
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    success: function(data) {
-                        if (data.result){
-                            field = "#view_" + data.column;
-                            var input_type = $(field).attr('type');
-                            if (input_type == 'checkbox'){
-                                if (data.result == '1'){
-                                    $(field).attr('checked',true);
-                                }else{
-                                    $(field).attr('checked', false);
-                                }
-                            }else{
-                                $(field).val(data.result);
-                            }
-                        }
-                    }
+
+            $.getJSON(
+                `/learning-management/batches/${$(this).attr('id')}`, function (response) {
+                    $("#view_number").val(response.no);
+                    $("#view_branch").val(response.branch);
+                    $("#view_start_date").val(response.start_date);
+                }).fail(function () {
+                    Swal.fire({ title: "Error Occured!", text: "Please refresh the page then try again!", icon: "error" });
                 });
-            }
-            
         });
-    
+
     
         $("#btndelete").click(function(){
             if($('#btndelete').text()=='Delete'){
@@ -144,15 +120,10 @@
         var ROWSTATUS;
     
         $("#index_table tbody").on('click','.row_object',function(){
-    
-            var $row = $(this).closest('tr');
-    
-            // Get row data
-            var data = dtbl_table.row($row).data();
-    
+            let $row = $(this).closest('tr');
+            let data = dtbl_table.row($row).data();
             BATCHID = data.DT_RowId;
-    
-            var row_status = data[1];
+            let row_status = data[1];
     
             if(row_status == `<div class="mb-2 mr-2 badge badge-pill badge-success">ACTIVE</div>`){
                 ROWSTATUS = 0;
@@ -163,7 +134,6 @@
                 $("#btn_active_toggle").html('Set Active');
                 $("#btn_active_toggle").removeClass("btn-secondary").addClass("btn-success");
             }
-        
         });
     
     
@@ -214,15 +184,11 @@
                     </div>
                 </div>
             </div>
-            
             {% block actions %}
-
                 {% if TABLE_OPTIONS['actions'] %}
                     {% include TABLE_OPTIONS['action_template'] %}
                 {% endif %}
-
             {% endblock %}
-            
         </div>
     </div>
     <div class="row">
@@ -239,22 +205,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                            
                             {% for row_data in TABLE_OPTIONS['table_data'] %}
-
-                                {% if TABLE_OPTIONS['view_modal'] %}
-                                    <tr class="item row_object" id="{{row_data[0]}}"  data-toggle="modal" data-target="#viewModal">
-                                    <param id="param_{{row_data[0]}}" name="param_{{row_data[0]}}" {% if TABLE_OPTIONS['edit_url'] %} value="{{url_for(TABLE_OPTIONS['edit_url'],oid=row_data[0] | string)}}" {% endif %}>
-                                {% else %}
-                                    <tr class="item row_object" id="{{row_data[0]}}">
-                                {% endif %}
-
+                                <tr class="item row_object" id="{{row_data[0]}}"  data-toggle="modal" data-target="#viewModal">
+                                <param id="param_{{row_data[0]}}" name="param_{{row_data[0]}}" {% if TABLE_OPTIONS['edit_url'] %} value="{{url_for(TABLE_OPTIONS['edit_url'],oid=row_data[0] | string)}}" {% endif %}>
                                     <!-- TEMPORARY conversion ng boolean word 'true' to 'YES' and 'false' to 'NO' -->
                                     <td class="text-center"></td>
-
                                     {% for value in row_data %}
                                         {% if loop.index > 1 %}
-
                                         <td class="text-center">
                                             {% if value == none %}
                                             {% elif value is true %}
@@ -266,12 +223,10 @@
                                                 {{value}}
                                             {% endif %}
                                         </td>
-
                                         {% endif %}
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
-
                         </tbody>
                     </table>
                 </div>
