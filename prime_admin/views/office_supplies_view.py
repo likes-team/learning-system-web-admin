@@ -121,12 +121,17 @@ def print_office_supplies_summary():
                         
             unit_price = Decimal128(str(supply.get('price', 0)))
             total_price = Decimal128(str(total_used)).to_decimal() * unit_price.to_decimal()
-            
+            replacement = InventoryService.supply_total_used(
+                supply_id=supply['_id'],
+                from_what='office_supplies',
+                year=filter_year,
+                month=filter_month
+            )
             row = [
                 str(supply['_id']),
                 supply['description'],
                 supply.get('remaining', ''),
-                supply.get('replacement', ''),
+                replacement,
                 str(unit_price),
                 str(total_price)
             ]
