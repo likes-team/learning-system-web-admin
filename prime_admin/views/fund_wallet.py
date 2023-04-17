@@ -15,8 +15,8 @@ from prime_admin.globals import D128_CTX, convert_to_utc, get_date_now
 from prime_admin import bp_lms
 from prime_admin.models import Branch, FundWallet, Registration
 from prime_admin.services.fund_wallet import BusinessExpensesService
-from prime_admin.utils.date import format_utc_to_local
 from prime_admin.helpers.employee import get_employees
+from prime_admin.helpers import access
 from prime_admin.services.student import StudentService
 from prime_admin.services.inventory import InventoryService
 from prime_admin.helpers.query_filter import StudentQueryFilter
@@ -27,13 +27,7 @@ from prime_admin.models_v2 import StudentV2
 @bp_lms.route('/fund-wallet')
 @login_required
 def fund_wallet():
-    if current_user.role.name == "Secretary":
-        branches = Branch.objects(id=current_user.branch.id)
-    elif current_user.role.name == "Partner":
-        branches = Branch.objects(id__in=current_user.branches)
-    else:
-        branches = Branch.objects
-
+    branches = access.get_current_user_branches()
     return admin_render_template(
         FundWallet,
         "lms/fund_wallet/fund_wallet.html",
@@ -49,43 +43,47 @@ def fetch_add_funds_transactions_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
-    
     total_records: int
     filtered_records: int
-    filter: dict
+    match = {'type': 'add_fund'}
 
     if branch_id == 'all':
         total_fund_wallet = 0.00
         
         if current_user.role.name == "Admin":
-            filter = {'type': 'add_fund'}
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Partner":
-            filter = {'type': 'add_fund', 'branch': {"$in": current_user.branches}}
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Secretary":
-            filter = {'type': 'add_fund' ,'branch': current_user.branch.id}
+            match['branch'] = current_user.branch.id
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'type': 'add_fund', 'branch': current_user.branch.id}
-            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-        elif current_user.role.name == "Admin":
-            filter = {'type': 'add_fund', 'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
         elif current_user.role.name == "Partner":
-            filter = {'type': 'add_fund', 'branch': ObjectId(branch_id)}
+            match['branch'] = ObjectId(branch_id)
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
         total_fund_wallet = accounting['total_fund_wallet'] if 'total_fund_wallet' in accounting else '0.00'
 
     if date_from != "":
-        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+        match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
     if date_to != "":
-        if 'date' in filter:
-            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        if 'date' in match:
+            match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
         else:
-            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+            match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
-    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = query.count()
     
     table_data = []
@@ -322,37 +320,40 @@ def fetch_salary_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
-    
     total_records: int
     filtered_records: int
-    filter: dict
+    match = {'category': {'$in': ['salary', 'salary_and_rebates']}}
 
     if branch_id == 'all':
         if current_user.role.name == "Admin":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']}}
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Partner":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']}, 'branch': {"$in": current_user.branches}}
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Secretary":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']},'branch': current_user.branch.id}
+            match['branch'] = current_user.branch.id
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']}, 'branch': current_user.branch.id}
-        elif current_user.role.name == "Admin":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']}, 'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
         elif current_user.role.name == "Partner":
-            filter = {'category': {'$in': ['salary', 'salary_and_rebates']}, 'branch': ObjectId(branch_id)}
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
 
     # if date_from != "":
-    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    #     match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
     # if date_to != "":
-    #     if 'date' in filter:
-    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     if 'date' in match:
+    #         match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
     #     else:
-    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+    #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
-    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = query.count()
     
     table_data = []
@@ -498,37 +499,40 @@ def fetch_other_expenses_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
-    
     total_records: int
     filtered_records: int
-    filter: dict
+    match = {'category': 'other_expenses'}
 
     if branch_id == 'all':
         if current_user.role.name == "Admin":
-            filter = {'category': 'other_expenses'}
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Partner":
-            filter = {'category': 'other_expenses', 'branch': {"$in": current_user.branches}}
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Secretary":
-            filter = {'category': 'other_expenses','branch': current_user.branch.id}
+            match['branch'] = current_user.branch.id
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'category': 'other_expenses', 'branch': current_user.branch.id}
-        elif current_user.role.name == "Admin":
-            filter = {'category': 'other_expenses', 'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
         elif current_user.role.name == "Partner":
-            filter = {'category': 'other_expenses', 'branch': ObjectId(branch_id)}
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
 
     # if date_from != "":
-    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    #     match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
     # if date_to != "":
-    #     if 'date' in filter:
-    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     if 'date' in match:
+    #         match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
     #     else:
-    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+    #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
-    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = query.count()
     
     table_data = []
@@ -577,25 +581,28 @@ def fetch_refund_dt(branch_id):
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
-    
     total_records: int
     filtered_records: int
-    filter: dict
+    match = {'category': 'refund'}
 
     if branch_id == 'all':
         if current_user.role.name == "Admin":
-            filter = {'category': 'refund'}
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Partner":
-            filter = {'category': 'refund', 'branch': {"$in": current_user.branches}}
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Secretary":
-            filter = {'category': 'refund','branch': current_user.branch.id}
+            match['branch'] = current_user.branch.id
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'category': 'refund', 'branch': current_user.branch.id}
-        elif current_user.role.name == "Admin":
-            filter = {'category': 'refund', 'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
         elif current_user.role.name == "Partner":
-            filter = {'category': 'refund', 'branch': ObjectId(branch_id)}
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
 
     # if date_from != "":
     #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
@@ -606,12 +613,10 @@ def fetch_refund_dt(branch_id):
     #     else:
     #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
-    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = query.count()
-    
     table_data = []
-    
     total_ofice_supply = decimal.Decimal(0)
     
     with decimal.localcontext(D128_CTX):
@@ -694,7 +699,6 @@ def fetch_refund_dt(branch_id):
         'recordsFiltered': total_records,
         'data': table_data,
     }
-
     return jsonify(response)
 
 

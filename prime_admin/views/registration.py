@@ -256,15 +256,14 @@ def get_pre_registered_clients_registration():
 
 @bp_lms.route('/api/dtbl/registered-students', methods=['GET'])
 def get_pre_registered_students():
-
-    if current_user.role.name == "Secretary":
-        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
-    elif current_user.role.name == "Admin":
+    if current_user.role.name == "Admin":
         clients = Registration.objects(status="registered")
+    elif current_user.role.name == "Manager":
+        clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
     elif current_user.role.name == "Partner":
         clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
-    else:
-        return abort(404)
+    elif current_user.role.name == "Secretary":
+        clients = Registration.objects(status="registered").filter(branch=current_user.branch)
 
     _data = []
 

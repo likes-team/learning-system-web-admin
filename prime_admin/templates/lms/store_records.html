@@ -147,7 +147,7 @@
             <div class="btn-actions-pane-right">
                 <div class="nav">
                     <div class="dropleft btn-group">
-                        {% if current_user.role.name == "Marketer" or current_user.role.name == "Partner" %}
+                        {% if current_user.role.name == "Marketer" %}
                         <button value="{{TABLE_OPTIONS['marketers'][0].id}}" id="btn_marketer_label" type="button" aria-haspopup="true" aria-expanded="false"
                             data-toggle="dropdown" class="btn-wide mb-2 mr-2 dropdown-toggle btn btn-primary">
                             {{TABLE_OPTIONS['marketers'][0].fname.upper()}}

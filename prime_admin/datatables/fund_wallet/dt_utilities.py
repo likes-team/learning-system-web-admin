@@ -19,36 +19,41 @@ def fetch_utilities_dt():
     description = request.args.get('description', '')
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
+    match = {'category': 'utilities'}
     
     if branch_id == 'all':
         if current_user.role.name == "Admin":
-            filter = {'category': 'utilities'}
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Partner":
-            filter = {'category': 'utilities', 'branch': {"$in": current_user.branches}}
+            match['branch'] = {"$in": current_user.branches}
         elif current_user.role.name == "Secretary":
-            filter = {'category': 'utilities' ,'branch': current_user.branch.id}
+            match['branch'] = current_user.branch.id
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'category': 'utilities', 'branch': current_user.branch.id}
-        elif current_user.role.name == "Admin":
-            filter = {'category': 'utilities', 'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
         elif current_user.role.name == "Partner":
-            filter = {'category': 'utilities', 'branch': ObjectId(branch_id)}
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
 
     if description != "":
-        filter['description'] = description
+        match['description'] = description
 
     if date_from != "":
-        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+        match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
     if date_to != "":
-        if 'date' in filter:
-            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        if 'date' in match:
+            match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
         else:
-            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+            match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
      
-    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = query.count()
     
     table_data = []

@@ -10,23 +10,27 @@ class BusinessExpensesService:
     def __init__(self, branch='all', year='all'):
         self.grand_total = None
         self.table = None
-        match = {}
-        
+        match = {'type': 'expenses'}
+
         if branch == 'all':
             if current_user.role.name == "Admin":
-                match = {'type': 'expenses'}
+                pass
+            elif current_user.role.name == "Manager":
+                match['branch'] = {"$in": current_user.branches}
             elif current_user.role.name == "Partner":
-                match = {'type': 'expenses', 'branch': {"$in": current_user.branches}}
+                match['branch'] = {"$in": current_user.branches}
             elif current_user.role.name == "Secretary":
-                match = {'type': 'expenses', 'branch': current_user.branch.id}
+                match['branch'] = current_user.branch.id
         else:
-            if current_user.role.name == "Secretary":
-                match = {'type': 'expenses', 'branch': current_user.branch.id}
-            elif current_user.role.name == "Admin":
-                match = {'type': 'expenses', 'branch': ObjectId(branch)}
+            if current_user.role.name == "Admin":
+                match['branch'] = ObjectId(branch)
+            elif current_user.role.name == "Manager":
+                match['branch'] = ObjectId(branch)
             elif current_user.role.name == "Partner":
-                match = {'type': 'expenses', 'branch': ObjectId(branch)}
-            
+                match['branch'] = ObjectId(branch)
+            elif current_user.role.name == "Secretary":
+                match['branch'] = current_user.branch.id
+
         if year != "all":
             match['date'] = {
                 "$gte": convert_date_input_to_utc(f'{year}-01-01', 'date_from'),

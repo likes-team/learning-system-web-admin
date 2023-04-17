@@ -21,54 +21,57 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     date_to = request.args.get('date_to', '')
     category = request.args.get('category', '')
     description = request.args.get('description', '')
-    
     total_records: int
     filtered_records: int
-    filter: dict
+    match = {}
     
     if branch_id == 'all':
         total_fund_wallet = 0.00
 
         if current_user.role.name == "Admin":
-            filter = {}
+            pass
+        elif current_user.role.name == "Manager":
+            match = {'branch': {"$in": current_user.branches}}
         elif current_user.role.name == "Partner":
-            filter = {
-                'branch': {"$in": current_user.branches}
-            }
+            match = {'branch': {"$in": current_user.branches}}
         elif current_user.role.name == "Secretary":
-            filter = {'branch': current_user.branch.id}
+            match = {'branch': current_user.branch.id}
             accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
             total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
     else:
-        if current_user.role.name == "Secretary":
-            filter = {'branch': current_user.branch.id}
-            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
-        elif current_user.role.name == "Admin":
-            filter = {'branch': ObjectId(branch_id)}
+        if current_user.role.name == "Admin":
+            match = {'branch': ObjectId(branch_id)}
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})
-        elif current_user.role.name == "Partner":
-            filter = {'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Manager":
+            match = {'branch': ObjectId(branch_id)}
             accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})            
+        elif current_user.role.name == "Partner":
+            match = {'branch': ObjectId(branch_id)}
+            accounting = mongo.db.lms_accounting.find_one({"branch": ObjectId(branch_id)})            
+        elif current_user.role.name == "Secretary":
+            match = {'branch': current_user.branch.id}
+            accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id})
+
         total_fund_wallet = decimal.Decimal(str(accounting.get('total_fund_wallet', "0.00")))
 
     if date_from != "":
-        filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+        match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
     if date_to != "":
-        if 'date' in filter:
-            filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+        if 'date' in match:
+            match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
         else:
-            filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+            match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
     
     if category != "":
-        filter['category'] = category
+        match['category'] = category
         
     if description != "":
-        filter['description'] = description    
+        match['description'] = description    
     
-    statements_query =  mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    statements_query =  mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
 
-    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     filtered_records = statements_query.count()
 
     table_data = []

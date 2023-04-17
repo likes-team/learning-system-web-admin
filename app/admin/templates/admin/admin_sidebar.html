@@ -116,7 +116,7 @@
                 {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">ACCOUNTING</li>
 
-                    {% if current_user.role.name in ['Admin', 'Secretary'] %}
+                    {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                         <li>
                             <a id="li_cash_on_hand" href="{{url_for('lms.cash_on_hand')}}" class="">
                                 <i class="metismenu-icon pe-7s-cash icon-gradient bg-premium-dark" aria-hidden="true"></i>
@@ -139,7 +139,7 @@
                     </li>
                 {% endif %}
 
-                {% if current_user.role.name in ['Admin', 'Secretary'] %}
+                {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}
                     <li id="header_dashboard" class="app-sidebar__heading">STORE</li>
                     <li>
                         <a id="li_buy_items" href="{{url_for('lms.store')}}" class="">

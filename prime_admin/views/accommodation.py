@@ -1,6 +1,7 @@
+import decimal
+import pymongo
 from bson.objectid import ObjectId
 from flask_mongoengine import json
-import pymongo
 from prime_admin.globals import SECRETARYREFERENCE, convert_to_local, get_date_now
 from app.auth.models import User
 from prime_admin.functions import generate_number
@@ -13,9 +14,7 @@ from flask import redirect, url_for, request, current_app, flash, jsonify
 from app import mongo
 from datetime import datetime, timedelta
 from bson.decimal128 import Decimal128, create_decimal128_context
-import decimal
-from mongoengine.queryset.visitor import Q
-
+from prime_admin.helpers import access
 
 
 D128_CTX = create_decimal128_context()
@@ -27,24 +26,11 @@ def accommodation():
     _table_columns = [
         'id', 'date', 'Registration No.', 'Full Name', 'branch','batch no.', 'schedule', 'date_from', 'date_to', 'days', 'total amount', 'remarks'
     ]
-
     _modals = [
         'lms/search_client_last_name_modal.html',
     ]
-
-    if current_user.role.name == "Secretary":
-        branches = Branch.objects(id=current_user.branch.id)
-        batch_numbers = Batch.objects(branch=current_user.branch.id)
-    elif current_user.role.name == "Marketer":
-        branches = Branch.objects(id__in=current_user.branches)
-        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-    elif current_user.role.name == "Partner":
-        branches = Branch.objects(id__in=current_user.branches)
-        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-    else:
-        branches = Branch.objects()
-        batch_numbers = Batch.objects()
-
+    branches = access.get_current_user_branches()
+    batch_numbers = access.get_current_user_batches()
     return admin_table(
         Accommodation,
         fields=[],
@@ -104,34 +90,40 @@ def get_dtbl_accommodations():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
-
+    match = {}
+    
     if branch_id == 'all':
-        query = mongo.db.lms_accommodations.find().skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
+        if current_user.role.name == "Admin":
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Partner":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+        query = mongo.db.lms_accommodations.find(match).skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
     else:
         query = mongo.db.lms_accommodations.find({"branch": ObjectId(branch_id)}).skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
 
     table_data = []
 
     for doc in query:
-        try:
-            student = Registration.objects(id=doc['client_id']).get()
+        student = Registration.objects(id=doc['client_id']).get()
 
-            table_data.append([
-                str(doc['_id']),
-                convert_to_local(doc['created_at']),
-                student.full_registration_number,
-                student.full_name,
-                student.branch.name,
-                student.batch_number.number,
-                student.schedule,
-                doc['date_from'],
-                doc['date_to'],
-                doc['days'],
-                str(doc['total_amount']),
-                doc['remarks']
-            ])
-        except Exception:
-            continue
+        table_data.append([
+            str(doc['_id']),
+            convert_to_local(doc['created_at']),
+            student.full_registration_number,
+            student.full_name,
+            student.branch.name,
+            student.batch_number.number,
+            student.schedule,
+            doc['date_from'],
+            doc['date_to'],
+            doc['days'],
+            str(doc['total_amount']),
+            doc['remarks']
+        ])
 
     response = {
         'draw': draw,
@@ -139,5 +131,4 @@ def get_dtbl_accommodations():
         'recordsFiltered': query.count(),
         'data': table_data,
     }
-
     return jsonify(response)

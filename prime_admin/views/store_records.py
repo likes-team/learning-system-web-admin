@@ -8,6 +8,7 @@ from prime_admin.models import Branch, Registration, Batch, StoreRecords
 from flask import request, jsonify
 from app import mongo
 from bson.decimal128 import create_decimal128_context
+from prime_admin.helpers import access
 
 
 
@@ -22,20 +23,8 @@ def store_records():
         'schedule', 'uniform', 'id lace', 'id card', 'book 1', 'book 2',
         'listening', 'reading' 
     ]
-
-    if current_user.role.name == "Secretary":
-        branches = Branch.objects(id=current_user.branch.id)
-        batch_numbers = Batch.objects(branch=current_user.branch.id)
-    elif current_user.role.name == "Marketer":
-        branches = Branch.objects(id__in=current_user.branches)
-        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-    elif current_user.role.name == "Partner":
-        branches = Branch.objects(id__in=current_user.branches)
-        batch_numbers = Batch.objects(active=True).filter(branch__in=current_user.branches).all()
-    else:
-        branches = Branch.objects()
-        batch_numbers = Batch.objects()
-
+    branches = access.get_current_user_branches()
+    batch_numbers = access.get_current_user_batches()
     return admin_table(
         StoreRecords,
         fields=[],
@@ -56,9 +45,18 @@ def get_dtbl_store_records():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch')
+    match = {}
 
     if branch_id == 'all':
-        _store_records = mongo.db.lms_store_buyed_items.find().skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
+        if current_user.role.name == "Admin":
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
+        elif current_user.role.name == "Partner":
+            match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+        _store_records = mongo.db.lms_store_buyed_items.find(match).skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
     else:
         _store_records = mongo.db.lms_store_buyed_items.find({"branch": ObjectId(branch_id)}).skip(start).limit(length).sort('created_at', pymongo.DESCENDING)
 
