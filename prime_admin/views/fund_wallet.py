@@ -243,6 +243,8 @@ def fund_wallet_add_expenses():
     category = form.get('category', '')
     description = form.get('description', '')
     account_no = form.get('account_no', None)
+    bank_name = form.get('expenses_bank')
+    account_name = form.get('expenses_account_name')
     billing_month_from = form.get('billing_month_from', None)
     billing_month_to = form.get('billing_month_to', None)
     qty = form.get('qty', None)
@@ -250,7 +252,7 @@ def fund_wallet_add_expenses():
     settled_by = form.get('settled_by', '')
     total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
     branch_id = form.get('branch', None)
-    
+
     with mongo.cx.start_session() as session:
         with session.start_transaction():
             accounting = mongo.db.lms_accounting.find_one({
@@ -289,6 +291,8 @@ def fund_wallet_add_expenses():
                 'date': get_date_now(),
                 'category': category,
                 'description': description,
+                'bank_name': bank_name,
+                'account_name': account_name,
                 'account_no': account_no,
                 'billing_month_from': billing_month_from,
                 'billing_month_to': billing_month_to,

@@ -386,11 +386,17 @@
             $("#billing_month_to").closest('.col-md-3').show();
             $("#qty").closest('.col-md-4').show();
             $("#unit_price").closest('.col-md-4').show();
+
+            $("#expenses_bank").closest('.col-md-6').hide();
+            $("#expenses_account_name").closest('.col-md-6').hide();
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
                 $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
                 $("#description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
+
+                $("#expenses_bank").closest('.col-md-6').show();
+                $("#expenses_account_name").closest('.col-md-6').show();
 
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
@@ -865,9 +871,7 @@
         $('#filter_office_supply_date_to').change(function () {
             dtbl_utilities.ajax.reload();
         });
-
-        // End of document.ready
-    });
+    }); // document.ready
 </script>
 {% endblock %}
 

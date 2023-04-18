@@ -65,6 +65,8 @@ def fetch_utilities_dt():
             transaction_date: datetime = transaction.get('date', None)
             account_no = transaction.get('account_no', '')
             description = transaction.get('description', '')
+            bank_name = transaction.get('bank_name', '')
+            account_name = transaction.get('account_name', '')
             billing_month_from = transaction.get('billing_month_from', '')
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
@@ -76,6 +78,8 @@ def fetch_utilities_dt():
             table_data.append([
                 format_utc_to_local(transaction_date),
                 description,
+                bank_name,
+                account_name,
                 account_no,
                 billing_month,
                 str(total_amount_due),
