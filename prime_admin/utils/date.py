@@ -117,4 +117,6 @@ def convert_utc_to_local(date):
     
 
 def format_date(date: datetime, date_format="%B %d, %Y"):
+    if date is None:
+        return ''
     return date.strftime(date_format)
