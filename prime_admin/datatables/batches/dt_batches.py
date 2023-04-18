@@ -43,11 +43,11 @@ def fetch_batches_dt():
         {'$unwind': {
             'path': '$branch'
         }},
+        {'$sort': {
+            'start_date': pymongo.DESCENDING
+        }},
         {"$skip": start},
         {"$limit": length},
-        {'$sort': {
-            'date': pymongo.DESCENDING
-        }}
     ]))
     total_records = mongo.db.lms_batches.find(match).count()
     filtered_records = len(query)
