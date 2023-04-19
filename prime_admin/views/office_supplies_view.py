@@ -131,7 +131,7 @@ def print_office_supplies_summary():
                 str(supply['_id']),
                 supply['description'],
                 supply.get('remaining', ''),
-                replacement,
+                supply.get('replacement', ''),
                 str(unit_price),
                 str(total_price)
             ]
