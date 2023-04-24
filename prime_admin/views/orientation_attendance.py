@@ -256,9 +256,9 @@ def get_referrals():
 def get_branch_contact_persons(branch_id):
     print(branch_id)
     if branch_id == "all":
-        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE))
+        contact_persons = User.objects(Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE)).order_by('fname')
     else:
-        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE))
+        contact_persons = User.objects(Q(branches__in=[branch_id]) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False) & Q(id__ne=current_user.id) | Q(role=PARTNERREFERENCE)).order_by('fname')
 
     if contact_persons is None:
         response = {
@@ -268,17 +268,14 @@ def get_branch_contact_persons(branch_id):
         return jsonify(response)
 
     data = []
-
-    print(contact_persons)
-
     for contact_person in contact_persons:
         data.append({
             'id': str(contact_person.id),
-            'fname': contact_person.fname
+            'fname': contact_person.fname,
+            'full_name': contact_person.full_name
         })
-
+        
     response = {
         'data': data
         }
-
     return jsonify(response)

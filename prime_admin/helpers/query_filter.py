@@ -106,7 +106,9 @@ class PaymentQueryFilter(BaseQueryFilter):
     def __init__(
         self, contact_person=None,
         branch=None, batch_no=None,
-        status=None, start=None, length=None, sort=None
+        status=None, start=None,
+        is_expenses=None,
+        length=None, sort=None
     ):
         super(PaymentQueryFilter, self).__init__(start, length, sort)
         self.branch = branch
@@ -127,6 +129,9 @@ class PaymentQueryFilter(BaseQueryFilter):
                 match['status'] = {"$exists": False}
             else:
                 match['status'] = status
+
+        if is_expenses is not None:
+            match['is_expenses'] = is_expenses
 
         self.match = match
 

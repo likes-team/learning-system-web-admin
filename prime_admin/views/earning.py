@@ -23,6 +23,7 @@ from prime_admin.services.earning import EarningService
 from prime_admin.services.saving import SavingService
 from prime_admin.helpers.query_filter import PaymentQueryFilter
 from prime_admin.models_v2 import PaymentV2, StudentV2
+from prime_admin.utils import currency
 
 
 
@@ -218,6 +219,35 @@ def get_marketer_total_earnings(marketer_id):
         'totalSavingsClaimed': total_savings_claimed,
         'totalNYC': total_nyc,
         'branchesTotalEarnings': branches_total_earnings
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('/earnings/recently-approved-marketer-total_earnings')
+def get_recently_approved_marketer_total_earnings():
+    contact_person_id = request.args['contact_person']
+    branch_id = request.args['branch']
+
+    query = list(mongo.db.lms_registration_payments.aggregate([
+        {"$match": {
+            'contact_person': ObjectId(contact_person_id),
+            'branch': ObjectId(branch_id),
+            'is_expenses': False
+        }},
+        {"$group": {
+            '_id': None,
+            'total_amount': {
+                '$sum': '$earnings'
+            }
+        }}
+    ]))
+    if len(query) == 0:
+        total_amount = 0
+    else:
+        total_amount = query[0]['total_amount']
+
+    response = {
+        'total_amount': currency.format_to_str_php(total_amount)
     }
     return jsonify(response)
 

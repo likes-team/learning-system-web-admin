@@ -1,8 +1,9 @@
 {% extends "admin/admin_base.html" %}
 
 {% block modals %}
-{% include 'lms/add_funds_modal.html' %}
-{% include 'lms/add_expenses_modal.html' %}
+    {% include 'lms/add_funds_modal.html' %}
+    {% include 'lms/add_expenses_modal.html' %}
+    {% include 'lms/fund_wallet/modals/list_of_earnings_modal.html' %}
 {% endblock %}
 
 
@@ -66,18 +67,17 @@
         } else if (from == "filter_tab3") {
             selectDescriptionId = "#filter_tab3_description";
         }
+        $(selectDescriptionId).empty();
 
         $.getJSON('/learning-management/api/get-branch-contact-persons/' + branch, function (response) {
             if (response.data.length > 0) {
-                $(selectDescriptionId).append(newOption);
+                $(selectDescriptionId).append($('<option value="">Select...</option>'));
 
                 for (i = 0; i < response.data.length; i++) {
-                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
-                    $(selectDescriptionId).append(newOption);
+                    $(selectDescriptionId).append($(`<option value="${response.data[i].id}">${response.data[i].full_name}</option>`));
                 }
             } else {
-                var newOption = $('<option value="">No Contact Persons available</option>');
-                $(selectDescriptionId).append(newOption);
+                $(selectDescriptionId).append($('<option value="">No Contact Persons available</option>'));
             }
         });
     }
@@ -389,6 +389,7 @@
 
             $("#expenses_bank").closest('.col-md-6').hide();
             $("#expenses_account_name").closest('.col-md-6').hide();
+            $("#btn_show_earnings").closest('.col-md-3').hide();
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
                 $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
@@ -451,7 +452,8 @@
                     return;
                 }
                 getContactPersons($("#branch_expenses").val(), "add_expenses");
-
+                $("#total_amount_due").prop('readonly', true);
+                $("#btn_show_earnings").closest('.col-md-3').show();
                 $("#label_description").html('Contact Person');
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
@@ -460,7 +462,6 @@
                 $("#billing_month_from").rules('remove');
                 $("#billing_month_to").rules('remove');
                 $("#account_no").rules('remove');
-
                 $("#account_no").closest('.col-md-6').hide();
                 $("#billing_month_from").closest('.col-md-3').hide();
                 $("#billing_month_to").closest('.col-md-3').hide();
@@ -523,13 +524,26 @@
         });
 
         $("#description").change(function(){
-            $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){
-                if(response.status == "error"){
-                    return;
-                }
-                $("#unit_price").val(response.data.price);
-                $("#unit_price").change();
-            });
+            let selectedCategory = $("#category").val();
+
+            if(selectedCategory == "rebates"){
+                let contactPerson = $(this).val();
+                let branch = $("#branch_expenses").val();
+
+                $.getJSON(
+                    `/learning-management/earnings/recently-approved-marketer-total_earnings?contact_person=${contactPerson}&branch=${branch}`
+                        , function(response){
+                    $("#total_amount_due").val(response.total_amount);
+                });
+            } else {
+                $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){
+                    if(response.status == "error"){
+                        return;
+                    }
+                    $("#unit_price").val(response.data.price);
+                    $("#unit_price").change();
+                });
+            }
         });
 
         $("#qty").change(function () {
@@ -545,9 +559,10 @@
         });
 
         $("#branch_expenses").change(function () {
-            if ($("#category").val() == "salary"){
+            let selectedCategory = $("#category").val();
+            if (selectedCategory == "salary"){
                 getEmployees($("#branch_expenses").val(), "add_expenses");
-            } else if ($("#category").val() == "rebates") {
+            } else if (selectedCategory == "rebates") {
                 getContactPersons($("#branch_expenses").val(), "add_expenses");
             }
         });
@@ -870,6 +885,51 @@
         
         $('#filter_office_supply_date_to').change(function () {
             dtbl_utilities.ajax.reload();
+        });
+
+        var dtListOfEarnings = $('#tbl_mdl_list_of_earnings').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "processing": true,
+            "autoWidth": false,
+            "columnDefs": [
+                {visible: false, targets:[0,1,2]}
+            ],
+            ordering: false,
+            "order": [[ 2, 'asc' ]],
+            "drawCallback": function ( settings ) {
+                var api = this.api();
+                var rows = api.rows( {page:'current'} ).nodes();
+                var last=null;
+                var lastID = '';
+
+                api.column(2, {page:'current'} ).data().each( function ( group, i ) {
+                    var row_data = api.rows({page:'current'} ).row(i).data();
+                    var groupID = row_data[0];
+
+                    if ( last !== group ) {
+                        lastID = row_data[0];
+
+                        $(rows).eq( i ).before(
+                            `<tr style="background-color: lightcyan !important"><td id="td_${groupID}" colspan="8"><strong>${group} Earnings: </strong></td></tr>`
+                        );
+                        last = group;
+                    }
+                } );
+            },
+        });
+
+        $("#btn_show_earnings").click(function(){
+            let contactPerson = $("#description").val();
+            let branch = $("#branch_expenses").val();
+            if (contactPerson == ''){
+                dtListOfEarnings.clear().draw();
+                return;
+            }
+
+            dtListOfEarnings.ajax.url(
+                `/learning-management/fund-wallet/list-of-earnings?contact_person=${contactPerson}&branch=${branch}`
+            ).load();
         });
     }); // document.ready
 </script>

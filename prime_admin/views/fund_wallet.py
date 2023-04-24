@@ -21,6 +21,9 @@ from prime_admin.services.student import StudentService
 from prime_admin.services.inventory import InventoryService
 from prime_admin.helpers.query_filter import StudentQueryFilter
 from prime_admin.models_v2 import StudentV2
+from prime_admin.services.payment import PaymentService
+from prime_admin.helpers.query_filter import PaymentQueryFilter
+from prime_admin.models_v2 import PaymentV2
 
 
 
@@ -283,6 +286,14 @@ def fund_wallet_add_expenses():
 
             if category == "office_supply":
                 InventoryService.inbound_office_supply(description, branch_id, qty, unit_price, session=session)
+            elif category == "rebates":
+                mongo.db.lms_registration_payments.update_many({
+                    'contact_person': ObjectId(description),
+                    'branch': ObjectId(branch_id),
+                    'is_expenses': False
+                }, {'$set': {
+                    'is_expenses': True
+                }})
    
             mongo.db.lms_fund_wallet_transactions.insert_one({
                 'type': 'expenses',
@@ -316,6 +327,42 @@ def fund_wallet_add_expenses():
         'message': "Expenses added successfully!"
     }
     return jsonify(response), 201
+
+
+@bp_lms.route('/fund-wallet/list-of-earnings')
+def get_list_of_earnings():
+    contact_person_id = request.args['contact_person']
+    branch_id = request.args['branch']
+    marketer: User = User.objects.get(id=contact_person_id)
+    service = PaymentService.find_payments(
+        PaymentQueryFilter(
+            contact_person=contact_person_id,
+            branch=branch_id,
+            status='approved',
+            is_expenses=False
+        )
+    )
+    payments = service.get_data()
+    table_data = []
+    html_status = """<div class="text-center mb-2 mr-2 badge badge-pill badge-success">APPROVED</div>"""
+
+    for payment in payments:
+        payment: PaymentV2
+        table_data.append([
+            str(payment.student.get_id()),
+            str(payment.get_id()),
+            marketer.full_name,
+            payment.student.get_full_name(),
+            payment.student.batch_no.get_no() if payment.student.batch_no is not None else '',
+            payment.get_earnings(currency=True),
+            payment.student.schedule,
+            payment.student.get_payment_mode(),
+            html_status,
+        ])
+    response = {
+        'data': table_data,
+    }
+    return jsonify(response)
 
 
 @bp_lms.route('/branches/<string:branch_id>/salary/dt', methods=['GET'])

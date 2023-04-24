@@ -46,7 +46,8 @@ class Earning:
                     mongo.db.lms_registration_payments.update_one(
                         {"_id": ObjectId(payment.get_id())},
                         {"$set": {
-                            "status": "approved"
+                            "status": "approved",
+                            'is_expenses': False
                         }}, session=session)
                     
                     mongo.db.lms_system_transactions.insert_one({
