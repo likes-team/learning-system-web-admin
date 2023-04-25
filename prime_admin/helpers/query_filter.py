@@ -108,6 +108,7 @@ class PaymentQueryFilter(BaseQueryFilter):
         branch=None, batch_no=None,
         status=None, start=None,
         is_expenses=None,
+        date_from=None,date_to=None,
         length=None, sort=None
     ):
         super(PaymentQueryFilter, self).__init__(start, length, sort)
@@ -132,6 +133,15 @@ class PaymentQueryFilter(BaseQueryFilter):
 
         if is_expenses is not None:
             match['is_expenses'] = is_expenses
+            
+        if date_from and date_from != "":
+            match['date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
+        
+        if date_to and date_to != '':
+            match['date'] = {'$lte': convert_date_input_to_utc(date_to, 'date_to')}
+
+        if date_from and date_from != '' and date_to and date_to != '':
+            match['date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from'), '$lte': convert_date_input_to_utc(date_to, 'date_to')}
 
         self.match = match
 
@@ -143,6 +153,8 @@ class PaymentQueryFilter(BaseQueryFilter):
             branch=request.args.get('branch'),
             batch_no=request.args.get('batch_no'),
             status=request.args.get('status'),
+            date_from = request.args.get('date_from'),
+            date_to = request.args.get('date_to'),
             start=request.args.get('start'),
             length=request.args.get('length')
         )

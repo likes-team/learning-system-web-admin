@@ -156,6 +156,9 @@
             "hideMethod": "fadeOut"
             }
 
+        var dateFrom = $("#filter_date").data('daterangepicker').startDate.format('YYYY-MM-DD');
+        var dateTo = $("#filter_date").data('daterangepicker').endDate.format('YYYY-MM-DD');
+    
         init();
     
         var dtMembersColumnDefs;
@@ -205,6 +208,8 @@
                     d.branch = $("#branch").val();
                     d.batch_no = $("#batch_no").val();
                     d.status = $("#status").val();
+                    d.date_from = dateFrom;
+                    d.date_to = dateTo;
                 }
             }
         });
@@ -458,6 +463,13 @@
 
         $("#btn_print_available_earnings").click(function(){
             window.open('/learning-management/available-earnings.pdf');
+        });
+
+
+        $("#filter_date").on('apply.daterangepicker', function(ev, picker){
+            dateFrom = picker.startDate.format('YYYY-MM-DD');
+            dateTo = picker.endDate.format('YYYY-MM-DD');
+            dt_members.ajax.reload();
         });
     });
 </script>
