@@ -5,6 +5,7 @@ from flask_login import current_user
 from app import mongo
 from prime_admin.utils.date import get_utc_date_now
 from prime_admin.utils.currency import convert_decimal128_to_decimal
+from prime_admin.errors import NotEnoughStocksError
 
 
 
@@ -141,6 +142,10 @@ class InventoryService:
         supply = mongo.db.lms_office_supplies.find_one({
             '_id': ObjectId(supply_id),
         })
+        
+        remaining = supply.get('remaining', 0)
+        if quantity > remaining:
+            raise NotEnoughStocksError("Not Enough Stocks")
 
         old_replacement = supply.get('replacement', 0)
         if old_replacement == 0:

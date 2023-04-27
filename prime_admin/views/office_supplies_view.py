@@ -17,6 +17,7 @@ from flask_weasyprint import HTML, render_pdf
 from app import mongo
 from prime_admin.globals import convert_to_utc, D128_CTX
 from prime_admin.services.inventory import InventoryService
+from prime_admin.errors import NotEnoughStocksError
 
 
 
@@ -59,9 +60,13 @@ def outbound_office_supply():
     supply_id = request.form['outbound_supply_id']
     quantity = int(request.form['quantity'])
 
-    InventoryService.outbound_office_supply(supply_id, quantity)
-    flash('Process Successfully!','success')
-    return redirect(url_for('lms.office_supplies'))
+    try:
+        InventoryService.outbound_office_supply(supply_id, quantity)
+        flash('Process Successfully!','success')
+        return redirect(url_for('lms.office_supplies'))
+    except NotEnoughStocksError as err:
+        flash(str(err),'error')
+        return redirect(url_for('lms.office_supplies'))
 
 
 @bp_lms.route('/office-supplies/create',methods=['GET','POST'])
