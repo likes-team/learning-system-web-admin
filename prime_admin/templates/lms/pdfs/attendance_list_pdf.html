@@ -131,10 +131,9 @@
     <thead>
       <tr>
         <th>NO.</th>
-        <th style="width: 40%;">NAME OF STUDENT</th>
-        <th style="width: 1%;">SESSION</th>
-        <th style="width: 12%;">TIME IN</th>
-        <th style="width: 12%;">TIME OUT</th>
+        <th style="width: 35%;">NAME OF STUDENT</th>
+        <th style="width: 15%;">BATCH NO.</th>
+        <th style="width: 30%;">CONTACT NO.</th>
         <th>STUDENT'S SIGNATURE</th>
       </tr>
     </thead>
@@ -142,7 +141,7 @@
       {% for _ in range(10) %}
         <tr>
           <td>{{loop.index}}</td>
-          {% for _ in range(5) %}
+          {% for _ in range(4) %}
           <td></td>
           {% endfor %}
         </tr>
