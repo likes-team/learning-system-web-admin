@@ -15,6 +15,9 @@
     $(document).ready(function () {
         $("#li_office_supplies").addClass('mm-active');
 
+        //var dateFrom = $("#filter_date").data('daterangepicker').startDate.format('YYYY-MM-DD');
+        //var dateTo = $("#filter_date").data('daterangepicker').endDate.format('YYYY-MM-DD');
+
         var dtbl_supplies = $("#tbl_supplies").DataTable({
             "dom": 'rtip',
             "processing": true,
@@ -29,6 +32,8 @@
                     d.month = $("#filter_month").val();
                     d.supplies_type = "office_supplies";
                     d.branch = $("#btn_marketer_label").val();
+                    //d.date_from = dateFrom;
+                    //d.date_to = dateTo;
                 },
             },
             "ordering": false,
@@ -53,6 +58,8 @@
                     d.month = $("#filter_month").val();
                     d.supplies_type = "office_supplies";
                     d.branch = $("#btn_marketer_label").val();
+                    //d.date_from = dateFrom;
+                    //d.date_to = dateTo;
                 },
                 "dataSrc": function(json){
                     $("#fund_request_total").html(json.fundRequestTotal);
@@ -68,8 +75,39 @@
                     'targets': 0,
                     'visible': false
                 },
+                {
+                    'targets': 6,
+                    "className": "text-center",
+                    'render': function(data, row, type){
+                        return `
+                        <button type="button" class="btn-transactions btn btn-info btn-sm" data-toggle="modal" data-target="#mdl_supply_transactions"><i class="pe-7s-look btn-icon-wrapper"> </i></button>
+                        `
+                    }
+                }
             ],
         });
+
+
+        var dtSupplyTransactions = $("#tbl_supply_transactions").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/all/transactions"
+            },
+            "info": false,
+            "pageLength": 10,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            columnDefs: [
+                {
+                    'targets': 2,
+                    'width': '10%'
+                },
+            ],
+        });
+
 
         $('#tbl_summaries tbody').on('click', '.btn-inbound', function () {
             var data = dtbl_summaries.row($(this).parents('tr')).data();
@@ -118,6 +156,7 @@
             });
         });
 
+
         $("#btn_print").click(function(){
             var branch = $("#btn_marketer_label").val();
             if (branch == 'all'){
@@ -133,6 +172,19 @@
                 `?branch=${branch}&year=${year}&month=${month}`
             );
         });
+
+
+        $('#tbl_summaries tbody').on('click', '.btn-transactions',function(){
+            let data = dtbl_summaries.row( $(this).parents('tr') ).data();
+            let supplyId = data[0];
+            dtSupplyTransactions.ajax.url(`/learning-management/datatables/supplies/${supplyId}/transactions`).load();
+        });
+
+        //$("#filter_date").on('apply.daterangepicker', function(ev, picker){
+        //    dateFrom = picker.startDate.format('YYYY-MM-DD');
+        //    dateTo = picker.endDate.format('YYYY-MM-DD');
+        //    dt_members.ajax.reload();
+        //});
     }); // Document.ready
 </script>
 {% endblock %}
@@ -210,6 +262,15 @@
         <div class="mb-12 card">
             <div class="card-body">
                 <div class="form-row">
+                    <!-- <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="filter_date" class="">Date</label>
+                            <div id="filter_date" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                                <span></span> <b class="caret"></b>
+                            </div>
+                        </div>
+                    </div> -->
                     <div class="col-md-1 col-xs-1">
                         <div class="position-relative form-group">
                             <label for="filter_year" class="">Year</label>
@@ -339,6 +400,7 @@
                                         <th class="text-center">REPLACEMENT</th>
                                         <th class="text-center">UNIT PRICE</th>
                                         <th class="text-center">TOTAL</th>
+                                        <th class="text-center">ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>

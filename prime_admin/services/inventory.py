@@ -109,6 +109,7 @@ class InventoryService:
             'description': description,
             'branch': ObjectId(branch),
         })
+        
         old_replacement = supply.get('replacement', 0)
         if old_replacement == 0:
             new_replacement = 0

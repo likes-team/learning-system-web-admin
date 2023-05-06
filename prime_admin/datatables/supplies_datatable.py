@@ -20,7 +20,9 @@ def dt_monthly_transactions():
     filter_month = request.args.get('month', 'all')
     supplies_type = request.args.get('supplies_type')
     branch_id = request.args.get('branch')
-    
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+
     if branch_id == 'all':
         response = {
             'draw': draw,
@@ -343,7 +345,7 @@ def dt_summary():
                     supply.get('reserve', ''),
                     '',
                     supply.get('remaining', ''),
-                    replacement,
+                    supply.get('replacement', ''),
                 ]
                 
             # Replace zeros to empty string
@@ -433,6 +435,42 @@ def dt_deposit_transactions():
         ])
     
     filtered_records = len(query)
+    response = {
+        'draw': draw,
+        'recordsTotal': total_records,
+        'recordsFiltered': filtered_records,
+        'data': table_data,
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('datatables/supplies/<string:supply_id>/transactions', methods=['GET'])
+def dt_supply_transactions(supply_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args['start']), int(request.args['length'])
+    print("supply_id:::", supply_id)
+
+    if supply_id == 'all':
+        response = {
+            'draw': draw,
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
+        }
+        return jsonify(response)
+    
+    query = mongo.db.lms_office_supplies_transactions.find({'supply_id': ObjectId(supply_id)}).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    table_data = []
+    
+    for document in query:
+        table_data.append((
+            format_utc_to_local(document.get('date')),
+            document['type'].upper(),
+            document['quantity']
+        ))
+        
+    total_records = len(table_data)
+    filtered_records = len(table_data)
     response = {
         'draw': draw,
         'recordsTotal': total_records,
