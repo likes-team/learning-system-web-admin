@@ -95,7 +95,7 @@ class Student(object):
             return ''
         if len(self.data['contact_person']) == 0:
             return ''
-        return self.data['contact_person'][0]['fname'] + " " + self.data['contact_person'][0]['fname']
+        return self.data['contact_person'][0]['fname'] + " " + self.data['contact_person'][0]['lname']
 
     def get_fle(self):
         return convert_decimal128_to_decimal(self.document.get('fle'))

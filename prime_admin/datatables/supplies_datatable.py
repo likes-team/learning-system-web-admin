@@ -448,7 +448,6 @@ def dt_deposit_transactions():
 def dt_supply_transactions(supply_id):
     draw = request.args.get('draw')
     start, length = int(request.args['start']), int(request.args['length'])
-    print("supply_id:::", supply_id)
 
     if supply_id == 'all':
         response = {
