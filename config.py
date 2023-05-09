@@ -64,22 +64,17 @@ class DevelopmentConfig(Config):
     """
     Development configurations
     """
-
-    MONGODB_HOST = "mongodb+srv://dbUser:dbUserPassword@cluster0.hfnwc.mongodb.net/primeTestDB?retryWrites=true&w=majority"
-
-    MONGO_URI = "mongodb+srv://dbUser:dbUserPassword@cluster0.hfnwc.mongodb.net/primeTestDB?retryWrites=true&w=majority"
-
+    MONGO_URI = os.environ.get('MONGO_URI_DEV')
+    MONGODB_HOST = os.environ.get('MONGO_URI_DEV')
     DEBUG = True
+
 
 class ProductionConfig(Config):
     """
     Production configurations
     """
-
-    MONGODB_HOST = "mongodb+srv://dbUser:dbUserPassword@cluster0.hfnwc.mongodb.net/primeDB?retryWrites=true&w=majority"
-
-    MONGO_URI = "mongodb+srv://dbUser:dbUserPassword@cluster0.hfnwc.mongodb.net/primeDB?retryWrites=true&w=majority"
-
+    MONGO_URI = os.environ.get('MONGO_URI_PROD')
+    MONGODB_HOST = os.environ.get('MONGO_URI_PROD')
     DEBUG = False
 
 
