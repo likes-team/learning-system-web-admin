@@ -59,6 +59,7 @@
                     'render': function(data, row, type){
                         return `
                         <button type="button" class="btn-inbound btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
+                        <button type="button" class="btn-transactions btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_supply_transactions"><i class="pe-7s-look btn-icon-wrapper"> </i></button>
                         `
                     }
                 },
@@ -80,6 +81,7 @@
                 'render': function(data, row, type){
                     return `
                     <button type="button" class="btn-inbound btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_inbound"><i class="pe-7s-download btn-icon-wrapper"> </i></button>
+                    <button type="button" class="btn-transactions btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_supply_transactions"><i class="pe-7s-look btn-icon-wrapper"> </i></button>
                     `
                 }
             },
@@ -127,6 +129,28 @@
             "ordering": false,
             "order": [[0, 'asc']],
         });
+
+
+        var dtSupplyTransactions = $("#tbl_supply_transactions").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/datatables/supplies/all/transactions?supplies_type=student_supplies"
+            },
+            "info": false,
+            "pageLength": 10,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            columnDefs: [
+                {
+                    'targets': 2,
+                    'width': '10%'
+                },
+            ],
+        });
+
 
         $('#tbl_summaries tbody').on('click', '.btn-inbound', function () {
             var data = dtbl_summaries.row( $(this).parents('tr') ).data();
@@ -196,6 +220,13 @@
                     });
                 }, 500);
             });
+        });
+
+
+        $('#tbl_summaries tbody').on('click', '.btn-transactions',function(){
+            let data = dtbl_summaries.row( $(this).parents('tr') ).data();
+            let supplyId = data[0];
+            dtSupplyTransactions.ajax.url(`/learning-management/datatables/supplies/${supplyId}/transactions?supplies_type=student_supplies`).load();
         });
     }); // Document.ready
 </script>

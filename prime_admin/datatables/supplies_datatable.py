@@ -448,6 +448,7 @@ def dt_deposit_transactions():
 def dt_supply_transactions(supply_id):
     draw = request.args.get('draw')
     start, length = int(request.args['start']), int(request.args['length'])
+    supplies_type = request.args.get('supplies_type')
 
     if supply_id == 'all':
         response = {
@@ -458,7 +459,12 @@ def dt_supply_transactions(supply_id):
         }
         return jsonify(response)
     
-    query = mongo.db.lms_office_supplies_transactions.find({'supply_id': ObjectId(supply_id)}).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    if supplies_type == 'office_supplies':
+        table = mongo.db.lms_office_supplies_transactions
+    elif supplies_type == 'student_supplies':
+        table = mongo.db.lms_student_supplies_transactions
+    
+    query = table.find({'supply_id': ObjectId(supply_id)}).sort('date', pymongo.DESCENDING).skip(start).limit(length)
     table_data = []
     
     for document in query:

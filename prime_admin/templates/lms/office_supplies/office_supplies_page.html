@@ -94,7 +94,7 @@
             "serverSide": true,
             "autoWidth": false,
             "ajax": {
-                "url": "/learning-management/datatables/supplies/all/transactions"
+                "url": "/learning-management/datatables/supplies/all/transactions?supplies_type=office_supplies"
             },
             "info": false,
             "pageLength": 10,
@@ -177,7 +177,7 @@
         $('#tbl_summaries tbody').on('click', '.btn-transactions',function(){
             let data = dtbl_summaries.row( $(this).parents('tr') ).data();
             let supplyId = data[0];
-            dtSupplyTransactions.ajax.url(`/learning-management/datatables/supplies/${supplyId}/transactions`).load();
+            dtSupplyTransactions.ajax.url(`/learning-management/datatables/supplies/${supplyId}/transactions?supplies_type=office_supplies`).load();
         });
 
         //$("#filter_date").on('apply.daterangepicker', function(ev, picker){
