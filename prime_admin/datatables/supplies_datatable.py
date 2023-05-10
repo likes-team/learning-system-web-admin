@@ -473,9 +473,8 @@ def dt_supply_transactions(supply_id):
             document['type'].upper(),
             document['quantity']
         ))
-        
-    total_records = len(table_data)
-    filtered_records = len(table_data)
+    total_records = table.find({'supply_id': ObjectId(supply_id)}).count()
+    filtered_records = query.count()
     response = {
         'draw': draw,
         'recordsTotal': total_records,
