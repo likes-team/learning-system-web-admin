@@ -74,23 +74,14 @@ class InventoryService:
             }
             
         supply = mongo.db.lms_student_supplies.find_one(_filter)
-        old_replacement = supply.get('replacement', 0)
-        if old_replacement == 0:
-            new_replacement = 0
-        else:
-            new_replacement = int(old_replacement - int(quantity))
-
-        if new_replacement < 0:
-            new_replacement = 0
-
+    
         mongo.db.lms_student_supplies.update_one(_filter,
-        {'$set': {
-            'replacement': new_replacement
-        },
-        '$inc': {
-            'remaining': 0 - quantity,
-            'released': quantity
-        }}, session=session)
+            {'$inc': {
+                'replacement': quantity,
+                'remaining': 0 - quantity,
+                'released': quantity
+            }},
+        session=session)
         
         mongo.db.lms_student_supplies_transactions.insert_one({
             'type': 'outbound',
@@ -138,6 +129,7 @@ class InventoryService:
             'confirm_by': current_user.id
         }, session=session)
 
+
     @staticmethod
     def outbound_office_supply(supply_id,  quantity, session=None):
         supply = mongo.db.lms_office_supplies.find_one({
@@ -148,22 +140,11 @@ class InventoryService:
         if quantity > remaining:
             raise NotEnoughStocksError("Not Enough Stocks")
 
-        old_replacement = supply.get('replacement', 0)
-        if old_replacement == 0:
-            new_replacement = 0
-        else:
-            new_replacement = int(old_replacement - int(quantity))
-
-        if new_replacement < 0:
-            new_replacement = 0
-
         mongo.db.lms_office_supplies.update_one({
             '_id': ObjectId(supply['_id']),
         },
-        {'$set': {
-            'replacement': new_replacement
-        },
-        '$inc': {
+        {'$inc': {
+            'replacement': quantity,
             'remaining': 0 - quantity,
             'released': quantity
         }}, session=session)
@@ -313,9 +294,9 @@ class InventoryService:
                         'price': Decimal128(str(price)),
                         'amount': Decimal128(str(price))
                     })
-
+                    
             if not student.uniforms['uniform_none']:
-                if existing_item['uniforms'].get('uniform_none'):
+                if existing_item['uniforms'].get('uniform_none', True):
                     InventoryService.minus_stocks(branch=student.branch.id, description='uniform', quantity=1, session=session)
                     item = mongo.db.lms_student_supplies.find_one({'description': student_supply_descriptions['uniform']})
                     price = convert_decimal128_to_decimal(item.get('price', 0))
