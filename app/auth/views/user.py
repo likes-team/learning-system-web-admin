@@ -94,7 +94,7 @@ def edit_user(oid,**kwargs):
     form = UserEditForm(obj=user)
 
     if request.method == "GET":
-        if user.role.name == "Marketer":
+        if user.role.name in ["Marketer", 'Partner', 'Manager']:
             return redirect(url_for('lms.edit_marketer', oid=oid))
         
         _scripts = [
