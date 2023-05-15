@@ -139,42 +139,44 @@ def dt_monthly_transactions():
             elif local_date.day == 31:
                 thone += quantity
             total_used += quantity
-            
+        
+        row = None
         if supplies_type == "office_supplies":
-            row = [
-                str(supply['_id']),
-                supply['description'],
-                supply.get('maintaining', ''),
-                supply.get('remaining', ''),
-                supply.get('uom', ''),
-                one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
-                eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
-                total_used
-            ]
+            if total_used > 0:
+                row = [
+                    str(supply['_id']),
+                    supply['description'],
+                    supply.get('maintaining', ''),
+                    supply.get('remaining', ''),
+                    supply.get('uom', ''),
+                    one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+                    eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
+                    total_used
+                ]
         elif supplies_type == "student_supplies":
-            row = [
-                str(supply['_id']),
-                supply['description'],
-                supply.get('completing', ''),
-                supply.get('maintaining', ''),
-                supply.get('uom', ''),
-                one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
-                eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
-                total_used
-            ]
+            if total_used > 0:
+                row = [
+                    str(supply['_id']),
+                    supply['description'],
+                    supply.get('completing', ''),
+                    supply.get('maintaining', ''),
+                    supply.get('uom', ''),
+                    one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,
+                    eighteen,nineteen,twenty,tone,ttwo,tthree,tfour,tfive,tsix,tseven,teight,tnine,thirty,thone,
+                    total_used
+                ]
         
-        # Replace zeros to empty string
-        i = 0
-        for x in row:
-            if x == 0:
-                row[i] = ''
-            i += 1
-
-        table_data.append(row)
-        
+        if row:
+            # Replace zeros to empty string
+            i = 0
+            for x in row:
+                if x == 0:
+                    row[i] = ''
+                i += 1
+            table_data.append(row)
+            
     total_records = mongo_table.find(_filter).count()
     filtered_records = query.count()
-
     response = {
         'draw': draw,
         'recordsTotal': filtered_records,
@@ -203,12 +205,9 @@ def dt_summary():
         }
         return jsonify(response)
         
-    total_records: int
-    filtered_records: int
-
     _filter = {'branch': ObjectId(branch_id)}
-    
     mongo_table = None
+    
     if supplies_type == "office_supplies":
         mongo_table =  mongo.db.lms_office_supplies
     elif supplies_type == "student_supplies":
@@ -310,15 +309,13 @@ def dt_summary():
                 elif local_date.day == 31:
                     thone += quantity
                 total_used += quantity
-                        
+                
+            row = None
             if supplies_type == "office_supplies":
+                replacement = supply.get('replacement', 0)
+                
+                # if replacement > 0:
                 unit_price = Decimal128(str(supply.get('price', 0)))
-                replacement = InventoryService.supply_total_used(
-                    supply_id=supply['_id'],
-                    from_what=supplies_type,
-                    year=filter_year,
-                    month=filter_month
-                )
                 total_price = replacement * unit_price.to_decimal()
                 fund_request_total += total_price
                 row = [
@@ -330,12 +327,8 @@ def dt_summary():
                     str(total_price)
                 ]
             elif supplies_type == "student_supplies":
-                replacement = InventoryService.supply_total_used(
-                    supply_id=supply['_id'],
-                    from_what=supplies_type,
-                    year=filter_year,
-                    month=filter_month
-                )
+                replacement = supply.get('replacement', 0)
+                # if replacement > 0:
                 row = [
                     str(supply['_id']),
                     '',
@@ -345,16 +338,18 @@ def dt_summary():
                     supply.get('reserve', ''),
                     '',
                     supply.get('remaining', ''),
-                    supply.get('replacement', ''),
+                    replacement,
                 ]
                 
-            # Replace zeros to empty string
-            i = 0
-            for x in row:
-                if x == 0 or x == "0":
-                    row[i] = ''
-                i += 1
-            table_data.append(row)
+            if row:
+                # Replace zeros to empty string
+                i = 0
+                for x in row:
+                    if x == 0 or x == "0":
+                        row[i] = ''
+                    i += 1
+                table_data.append(row)
+                
     response = {
         'draw': draw,
         'data': table_data,
