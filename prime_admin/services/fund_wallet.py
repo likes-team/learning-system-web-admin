@@ -88,6 +88,9 @@ class BusinessExpensesService:
             if category == "salary_and_rebates":
                 # TODO: manual update
                 continue
+            if category == "Transportation":
+                continue
+
             self.data[category][month] = total
 
             self._add_to_total_expenditure(month, total)

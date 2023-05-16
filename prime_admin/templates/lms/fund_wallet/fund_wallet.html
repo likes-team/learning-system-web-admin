@@ -519,7 +519,8 @@
                 }).fail(function(err){
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
                 });
-
+            } else if(selectedCategory == "Transportation"){
+                $("#description").append($('<option></option>').attr("value", "Travel Expenses").text("Travel Expenses"));
             }
         });
 
