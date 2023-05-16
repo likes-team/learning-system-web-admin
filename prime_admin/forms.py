@@ -277,6 +277,8 @@ class ContactPersonEditForm(AdminEditForm):
 
     __heading__ = "Edit Contact Person"
 
+    username = AdminField(label='Username', validators=[DataRequired()])
+    email = AdminField(label='Email', type='email',required=False)
     fname = AdminField(label="First Name", validators=[DataRequired()])
     lname = AdminField(label="Last Name", validators=[DataRequired()])
     is_employee = AdminField(label="Is Employee?", type='checkbox')
@@ -290,7 +292,7 @@ class ContactPersonEditForm(AdminEditForm):
 
     @property
     def fields(self):
-        return [[self.fname, self.lname], [self.is_employee], [self.is_teacher]]
+        return [[self.fname, self.lname], [self.username,self.email], [self.is_employee], [self.is_teacher]]
 
 
 class PartnerForm(AdminTableForm):

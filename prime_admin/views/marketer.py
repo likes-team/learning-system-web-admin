@@ -203,10 +203,11 @@ def edit_marketer(oid):
         for key, value in form.errors.items():
             flash(str(key) + str(value), 'error')
         return redirect(url_for('lms.marketers'))
-        
-    # try:
+    
+    contact_person.username = form.username.data
     contact_person.fname = form.fname.data
     contact_person.lname = form.lname.data
+    contact_person.email = form.email.data if not form.email.data == '' else None
     contact_person.is_employee = True if form.is_employee.data == 'on' else False
     contact_person.is_teacher = True if form.is_teacher.data == 'on' else False
     
@@ -218,27 +219,21 @@ def edit_marketer(oid):
             branches.append(b_id)
 
     contact_person.branches = branches
-
     contact_person.set_updated_at()
     contact_person.updated_by = "{} {}".format(current_user.fname,current_user.lname)
-    
-    # contact_person.save()
     
     mongo.db.auth_users.update_one(
         {"_id": contact_person.id},
         {"$set": {
             "fname": contact_person.fname,
             "lname": contact_person.lname,
+            "username": contact_person.username,
+            "email": contact_person.email,
             "branches": contact_person.branches,
             "updated_at": contact_person.updated_at,
             "updated_by": contact_person.updated_by,
             "is_employee": contact_person.is_employee,
             "is_teacher": contact_person.is_teacher
         }})
-    
     flash('Contact Person Updated Successfully!','success')
-
-    # except Exception as e:
-    #     flash(str(e),'error')
-
     return redirect(url_for('bp_auth.users'))
