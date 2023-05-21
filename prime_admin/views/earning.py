@@ -153,7 +153,7 @@ def fetch_marketer_payment_records_dt(marketer_id):
     query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
         {"$match": {
             'type': 'expenses',
-            'category': 'salary_and_rebates',
+            'category': 'rebates',
             'description': marketer_id,
         }},
         {"$skip": start},
@@ -168,7 +168,7 @@ def fetch_marketer_payment_records_dt(marketer_id):
     total_records = len(list(mongo.db.lms_fund_wallet_transactions.aggregate([
         {"$match": {
             'type': 'expenses',
-            'category': 'salary_and_rebates',
+            'category': 'rebates',
             'description': marketer_id,
         }},
         {"$sort": {
