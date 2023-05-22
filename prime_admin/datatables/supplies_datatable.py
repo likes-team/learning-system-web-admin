@@ -464,7 +464,7 @@ def dt_supply_transactions(supply_id):
     
     for document in query:
         table_data.append((
-            format_utc_to_local(document.get('date')),
+            format_utc_to_local(document.get('date'), with_time=True),
             document['type'].upper(),
             document['quantity']
         ))
