@@ -1,5 +1,6 @@
 import decimal
 from bson import ObjectId
+from pymongo import ReturnDocument
 from bson.decimal128 import Decimal128
 from flask_login import current_user
 from app import mongo
@@ -111,13 +112,13 @@ class InventoryService:
             new_replacement = 0
             
         # increment remaining materials value
-        mongo.db.lms_office_supplies.update_one({
+        supply_updated = mongo.db.lms_office_supplies.find_one_and_update({
             'description': description,
             'branch': ObjectId(branch),
         }, {
             '$inc': {'remaining': int(qty)},
             '$set': {'price': Decimal128(unit_price), 'replacement': new_replacement}
-        },session=session)
+        }, return_document=ReturnDocument.AFTER, session=session)
         
         mongo.db.lms_office_supplies_transactions.insert_one({
             'type': 'inbound',
@@ -126,7 +127,10 @@ class InventoryService:
             'quantity': int(qty),
             'remarks': 'from expenses',
             'withdraw_by': current_user.id,
-            'confirm_by': current_user.id
+            'confirm_by': current_user.id,
+            'new_replacement': supply_updated.get('replacement', 0),
+            'new_remaining': supply_updated.get('remaining', 0),
+            'new_released': supply_updated.get('released', 0)
         }, session=session)
 
 
@@ -134,20 +138,20 @@ class InventoryService:
     def outbound_office_supply(supply_id,  quantity, session=None):
         supply = mongo.db.lms_office_supplies.find_one({
             '_id': ObjectId(supply_id),
-        })
+        }, session=session)
         
         remaining = supply.get('remaining', 0)
         if quantity > remaining:
             raise NotEnoughStocksError("Not Enough Stocks")
 
-        mongo.db.lms_office_supplies.update_one({
+        supply_updated = mongo.db.lms_office_supplies.find_one_and_update({
             '_id': ObjectId(supply['_id']),
         },
         {'$inc': {
             'replacement': quantity,
             'remaining': 0 - quantity,
             'released': quantity
-        }}, session=session)
+        }}, return_document=ReturnDocument.AFTER, session=session)
         
         mongo.db.lms_office_supplies_transactions.insert_one({
             'type': 'outbound',
@@ -156,7 +160,10 @@ class InventoryService:
             'quantity': quantity,
             'remarks': '',
             'withdraw_by': current_user.id,
-            'confirm_by': current_user.id
+            'confirm_by': current_user.id,
+            'new_replacement': supply_updated.get('replacement', 0),
+            'new_remaining': supply_updated.get('remaining', 0),
+            'new_released': supply_updated.get('released', 0)
         }, session=session)
 
 
