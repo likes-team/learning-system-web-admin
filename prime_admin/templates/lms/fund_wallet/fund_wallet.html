@@ -390,6 +390,10 @@
             $("#expenses_bank").closest('.col-md-6').hide();
             $("#expenses_account_name").closest('.col-md-6').hide();
             $("#btn_show_earnings").closest('.col-md-3').hide();
+            $("#expenses_remittance").closest('.col-md-6').hide();
+            $("#expenses_sender").closest('.col-md-6').hide();
+            $("#expenses_address").closest('.col-md-6').hide();
+
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
                 $("#description").append($('<option></option>').attr("value", "Electricity Bill").text("Electricity Bill"));
@@ -452,9 +456,13 @@
                     return;
                 }
                 getContactPersons($("#branch_expenses").val(), "add_expenses");
-                $("#total_amount_due").prop('readonly', true);
                 $("#btn_show_earnings").closest('.col-md-3').show();
+                $("#expenses_remittance").closest('.col-md-6').show();
+                $("#expenses_sender").closest('.col-md-6').show();
+                $("#expenses_address").closest('.col-md-6').show();
+    
                 $("#label_description").html('Contact Person');
+                $("#total_amount_due").prop('readonly', true);
                 $("#qty").prop('disabled', true);
                 $("#unit_price").prop('disabled', true);
                 $("#account_no").prop('disabled', true);

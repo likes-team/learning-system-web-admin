@@ -257,6 +257,9 @@ def fund_wallet_add_expenses():
     settled_by = form.get('settled_by', '')
     total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
     branch_id = form.get('branch', None)
+    remittance = form.get('expenses_remittance')
+    sender = form.get('expenses_sender')
+    address = form.get('expenses_address')
 
     with mongo.cx.start_session() as session:
         with session.start_transaction():
@@ -286,17 +289,21 @@ def fund_wallet_add_expenses():
             else:
                 raise Exception("Likes Error: Accounting data not found")
 
+            status = "PROCESSED"
+            
             if category == "office_supply":
                 InventoryService.inbound_office_supply(description, branch_id, qty, unit_price, session=session)
             elif category == "rebates":
+                status = "PROCESSING"
+                
                 mongo.db.lms_registration_payments.update_many({
                     'contact_person': ObjectId(description),
                     'branch': ObjectId(branch_id),
                     'is_expenses': False
                 }, {'$set': {
                     'is_expenses': True
-                }})
-   
+                }}, session=session)
+                
             mongo.db.lms_fund_wallet_transactions.insert_one({
                 'type': 'expenses',
                 'running_balance': balance,
@@ -313,6 +320,10 @@ def fund_wallet_add_expenses():
                 'unit_price': unit_price,
                 'total_amount_due': Decimal128(total_amount_due),
                 'settled_by': settled_by,
+                'remittance': remittance,
+                'sender': sender,
+                'address': address,
+                'status': status,
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)

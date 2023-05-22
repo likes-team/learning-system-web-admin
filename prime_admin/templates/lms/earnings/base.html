@@ -221,7 +221,29 @@
             "serverSide": true,
             "autoWidth": false,
             "columnDefs": [
-                {visible: false, targets:[0]}
+                {visible: false, targets:[0]},
+                {
+                    "targets": 6,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if (data == "PROCESSED") {
+                            return `<div class="badge badge-success">PROCESSED</div>`
+                        } else if(data == "PROCESSING") {
+                            return `<div class="badge badge-warning">PROCESSING</div>`
+                        }
+                    }
+                },
+                {
+                    "targets": 7,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if (row[6] == "PROCESSED") {
+                            return ``;
+                        } else if(row[6] == "PROCESSING") {
+                            return `<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-input-reference-no"><i class="pe-7s-check btn-icon-wrapper"> </i>Input Reference No.</button>`;
+                        }
+                    }
+                },
             ],
             ordering: false,
             "ajax": {
@@ -470,6 +492,55 @@
             dateFrom = picker.startDate.format('YYYY-MM-DD');
             dateTo = picker.endDate.format('YYYY-MM-DD');
             dt_members.ajax.reload();
+        });
+
+        $("#tbl_payments tbody").on('click', '.btn-input-reference-no', function(){
+            var data = dt_payments.row( $(this).parents('tr')).data();
+            
+            swal({
+                title: 'Input Reference No.',
+                text: "Reference no. and status will be updated",
+    			inputPlaceholder: "Reference no.",
+                type: 'input',
+                inputType: 'text',
+                showCancelButton: true,
+                cancelButtonColor: "#DD6B55",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Confirm!",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+              }, function (inputValue) {
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Please input the reference no!");
+                    return false;
+                }
+
+                setTimeout(function () {
+                    $.ajax({ 
+                        url: "/learning-management/earnings/input-reference-no",
+                        type: "POST",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            "reference_no": inputValue,
+                            "transaction_id": data[0]
+                        }),
+                        async: false,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (response) {
+                            swal(
+                                'Success!',
+                                'Reference and status updated!',
+                                'success'
+                                );
+                            dt_payments.ajax.reload();
+                        },
+                        error: function (response) {
+                            swal("Error Occured!", "Update Failed", "error");
+                        },
+                    });
+                }, 500);
+              });
         });
     });
 </script>

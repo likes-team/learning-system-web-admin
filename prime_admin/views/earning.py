@@ -182,11 +182,11 @@ def fetch_marketer_payment_records_dt(marketer_id):
         data.append([
             str(record['_id']),
             convert_to_local(record['date']),
-            record['account_no'],
-            '',
-            '',
+            record.get('remittance', ''),
+            record.get('reference_no'),
+            record.get('sender'),
             str(record['total_amount_due']),
-            'PAID',
+            record.get('status', '').upper(),
             '',
         ])
     response = {
@@ -194,6 +194,25 @@ def fetch_marketer_payment_records_dt(marketer_id):
         'recordsTotal': filtered_records,
         'recordsFiltered': total_records,
         'data': data
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('/earnings/input-reference-no', methods=['POST'])
+@login_required
+def input_reference_no():
+    transaction_id = request.json['transaction_id']
+    reference_no = request.json['reference_no']
+
+    mongo.db.lms_fund_wallet_transactions.update_one({
+        '_id': ObjectId(transaction_id)
+    }, {'$set': {
+        'reference_no': reference_no,
+        'status': "PROCESSED"
+    }})
+
+    response = {
+        'result': True
     }
     return jsonify(response)
 
