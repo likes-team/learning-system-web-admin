@@ -63,13 +63,9 @@
                                         <label for="expenses_bank" class="">BANK</label>
                                         <select name="expenses_bank" id="expenses_bank" class="form-control">
                                             <option value="">Choose...</option>
-                                            <option value="METROBANK">METROBANK</option>
-                                            <option value="BDO">BDO</option>
-                                            <option value="LANDBANK">LANDBANK</option>
-                                            <option value="BPI">BPI</option>
-                                            <option value="RCBC">RCBC</option>
-                                            <option value="CHINABANK">CHINABANK</option>
-                                            <option value="GCASH">GCASH</option>
+                                            {% for option in payment_options %}
+                                                <option value="{{option}}">{{option}}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>

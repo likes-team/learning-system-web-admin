@@ -31,12 +31,14 @@ from prime_admin.models_v2 import PaymentV2
 @login_required
 def fund_wallet():
     branches = access.get_current_user_branches()
+    payment_options = mongo.db.lms_configurations.find_one({'name': 'payment_options'})['values']
     return admin_render_template(
         FundWallet,
         "lms/fund_wallet/fund_wallet.html",
         'learning_management',
         title="Fund Wallet",
-        branches=branches
+        branches=branches,
+        payment_options=payment_options
     )
 
 
