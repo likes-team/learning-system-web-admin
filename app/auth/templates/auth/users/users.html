@@ -104,17 +104,6 @@
                     "className": "text-center",
                 },
                 {
-                    "targets": 4,
-                    "className": "text-center",
-                    "render": function(data, type, row){
-                        if (data) {
-                            return `<div class="badge badge-success">Yes</div>`
-                        } else {
-                            return `<div class="badge badge-danger">No</div>`
-                        }
-                    }
-                },
-                {
                     "targets": 5,
                     "className": "text-center",
                     "render": function(data, type, row){
@@ -128,6 +117,17 @@
                 {
                     "targets": 6,
                     "className": "text-center",
+                    "render": function(data, type, row){
+                        if (data) {
+                            return `<div class="badge badge-success">Yes</div>`
+                        } else {
+                            return `<div class="badge badge-danger">No</div>`
+                        }
+                    }
+                },
+                {
+                    "targets": 7,
+                    "className": "text-center",
                     "render": function (data, type, row) {
                         if (data) {
                             return `<div class="badge badge-success">Approved</div>`
@@ -137,7 +137,7 @@
                     }
                 },
                 {
-                    "targets": 7,
+                    "targets": 8,
                     "className": "text-center",
                     "render": function (data, type, row) {
                         if (!data) {
@@ -341,6 +341,7 @@
                                     <th class="text-center">EMPLOYEE ID</th>
                                     <th>NAME</th>
                                     <th class="text-center">POSITION</th>
+                                    <th class="text-center">BRANCH/S</th>
                                     <th class="text-center">IS EMPLOYEE?</th>
                                     <th class="text-center">IS TEACHER?</th>
                                     <th class="text-center">STATUS</th>

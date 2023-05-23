@@ -52,7 +52,19 @@ def get_dashboard_users():
         active = data.get('active', False)
         is_employee = data.get('is_employee', False)
         is_teacher = data.get('is_teacher', False)
-        
+        branch_id = data.get('branch')
+        branch_ids = data.get('branches')
+        branches = []
+        if branch_ids and len(branch_ids) > 0:
+            for id in branch_ids:
+                name = mongo.db.lms_branches.find_one({'_id': ObjectId(id)})['name']
+                branches.append(name)
+        else:
+            branch = mongo.db.lms_branches.find_one({'_id': ObjectId(branch_id)})
+            if branch:
+                branches.append(branch['name'])
+        branches = ', '.join(branches)
+    
         table_data.append([
             str(id),
             full_employee_id,
@@ -61,6 +73,7 @@ def get_dashboard_users():
                 'username': username
             },
             role[0]['name'],
+            branches,
             is_employee,
             is_teacher,
             active,
