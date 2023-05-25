@@ -289,13 +289,18 @@ def fund_wallet_add_expenses():
             else:
                 raise Exception("Likes Error: Accounting data not found")
 
-            status = "PROCESSED"
+            status = None
+            reference_no = None
             
             if category == "office_supply":
                 InventoryService.inbound_office_supply(description, branch_id, qty, unit_price, session=session)
             elif category == "rebates":
-                status = "PROCESSING"
-                
+                if remittance == "OVER THE COUNTER":
+                    status = "PROCESSED"
+                    reference_no = "OVER THE COUNTER"
+                else:
+                    status = "PROCESSING"
+
                 mongo.db.lms_registration_payments.update_many({
                     'contact_person': ObjectId(description),
                     'branch': ObjectId(branch_id),
@@ -303,7 +308,7 @@ def fund_wallet_add_expenses():
                 }, {'$set': {
                     'is_expenses': True
                 }}, session=session)
-                
+
             mongo.db.lms_fund_wallet_transactions.insert_one({
                 'type': 'expenses',
                 'running_balance': balance,
@@ -324,6 +329,7 @@ def fund_wallet_add_expenses():
                 'sender': sender,
                 'address': address,
                 'status': status,
+                'reference_no': reference_no,
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)

@@ -77,6 +77,15 @@
                     </a>
                 </li>
 
+                {% if current_user.role.name in ['Marketer', 'Partner', 'Manager'] %}
+                <li>
+                    <a id="li_transactions" href="{{url_for('lms.transactions')}}" class="">
+                        <i class="metismenu-icon pe-7s-cash icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                        Transactions
+                    </a>
+                </li>
+                {% endif %}
+
                 {% if current_user.role.name in ['Admin'] %}
                     <li>
                         <a id="li_batches" href="{{url_for('lms.batches')}}" class="">
