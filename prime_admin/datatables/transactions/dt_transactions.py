@@ -57,6 +57,7 @@ def fetch_transactions_dt():
             record.get('remittance', ''),
             record.get('reference_no'),
             record.get('sender'),
+            record.get('contact_no'),
             record.get('address'),
             str(record['total_amount_due']),
             record.get('status', '').upper(),

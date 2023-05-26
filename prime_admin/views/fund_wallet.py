@@ -259,6 +259,7 @@ def fund_wallet_add_expenses():
     branch_id = form.get('branch', None)
     remittance = form.get('expenses_remittance')
     sender = form.get('expenses_sender')
+    contact_no = form.get('expenses_contact_no')
     address = form.get('expenses_address')
 
     with mongo.cx.start_session() as session:
@@ -327,6 +328,7 @@ def fund_wallet_add_expenses():
                 'settled_by': settled_by,
                 'remittance': remittance,
                 'sender': sender,
+                'contact_no': contact_no,
                 'address': address,
                 'status': status,
                 'reference_no': reference_no,
