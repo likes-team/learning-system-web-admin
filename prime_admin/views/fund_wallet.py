@@ -32,13 +32,15 @@ from prime_admin.models_v2 import PaymentV2
 def fund_wallet():
     branches = access.get_current_user_branches()
     payment_options = mongo.db.lms_configurations.find_one({'name': 'payment_options'})['values']
+    expenses_categories = mongo.db.lms_configurations.find_one({'name': "expenses_categories"})['values']
     return admin_render_template(
         FundWallet,
         "lms/fund_wallet/fund_wallet.html",
         'learning_management',
         title="Fund Wallet",
         branches=branches,
-        payment_options=payment_options
+        payment_options=payment_options,
+        expenses_categories=expenses_categories
     )
 
 
@@ -777,17 +779,26 @@ def fetch_refund_dt(branch_id):
 @bp_lms.route('api/supplies', methods=['GET'])
 def get_supplies():
     branch_id = request.args.get('branch')
-
-    query = mongo.db.lms_office_supplies.find({'branch': ObjectId(branch_id)})
-    
+    if branch_id == 'all':
+        match = {}
+    else:
+        match = {'branch': ObjectId(branch_id)}
+        
+    query = mongo.db.lms_office_supplies.find(match)
     list_supplies = []
+    list_supplies_ids = []
     
     for row in query:
+        if row['description'] in list_supplies_ids:
+            # Prevent duplicates
+            continue
+        
+        list_supplies_ids.append(row['description'])
         list_supplies.append({
             'id': str(row['_id']),
             'description': row['description'],
         })
-    
+
     return jsonify({
         'status': 'success',
         'data': list_supplies,

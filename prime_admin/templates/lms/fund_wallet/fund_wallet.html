@@ -675,12 +675,7 @@
                 $("#filter_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#filter_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
             } else if (selectedCategory == "office_supply") {
-                if ($("#branch_expenses").val() == '') {
-                    swal("Error Occured!", "Please select branch first!", "info");
-                    $(this).val('');
-                    return;
-                }
-                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                $.getJSON(`/learning-management/api/supplies?branch=${$("#btn_branch_label").val()}`, function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
                         var supply = response.data[i];
                         $("#filter_description").append($('<option></option>').attr("value", supply.description).text(supply.description));
@@ -709,7 +704,7 @@
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Water Bill").text("Water Bill"));
                 $("#filter_tab3_description").append($('<option></option>').attr("value", "Internet And Communication Bill").text("Internet And Communication Bill"));
             } else if (selectedCategory == "office_supply") {
-                $.getJSON('/learning-management/api/supplies?inventory_type=supplies', function(response, status, xhr){
+                $.getJSON(`/learning-management/api/supplies?branch=${$("#btn_branch_label").val()}`, function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
                         var supply = response.data[i];
                         $("#filter_tab3_description").append($('<option></option>').attr("value", supply.description).text(supply.description));

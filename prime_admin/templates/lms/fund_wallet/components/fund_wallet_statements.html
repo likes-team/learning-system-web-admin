@@ -17,11 +17,9 @@
                 <label for="filter_category" class="">Category</label>
                 <select id="filter_category" class="form-control" required>
                     <option value="">Choose...</option>
-                    <option value="utilities">Utilities</option>
-                    <option value="office_supply">Office Supply</option>
-                    <option value="salary">Salary</option>
-                    <option value="rebates">Rebates</option>
-                    <option value="other_expenses">Other Expenses</option>
+                    {% for category in expenses_categories %}
+                        <option value="{{category['key']}}">{{category['label']}}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
