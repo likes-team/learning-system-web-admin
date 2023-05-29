@@ -134,7 +134,11 @@ def fetch_expenses_breakdown():
     total = 0
     for expense in expenses_per_category:
         try:
-            index = labels.index(expenses.CATEGORIES[expense['category']])
+            category = expenses.CATEGORIES[expense['category']]
+            # Rename category to a short version
+            if category == "EMPLOYEE BENEFITS": category = "EMP. BENEFITS"
+
+            index = labels.index(category)
         except KeyError:
             print(expense['category'])
             continue
