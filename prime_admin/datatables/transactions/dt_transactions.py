@@ -33,8 +33,6 @@ def fetch_transactions_dt():
             'created_at': pymongo.DESCENDING
         }}
     ]))
-    
-    print("query:", query)
 
     filtered_records = len(query)
     total_records = len(list(mongo.db.lms_fund_wallet_transactions.aggregate([

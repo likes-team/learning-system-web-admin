@@ -23,7 +23,7 @@
             "columnDefs": [
                 {visible: false, targets:[0]},
                 {
-                    "targets": 9,
+                    "targets": [9],
                     "className": "text-center",
                     "render": function(data, type, row){
                         if (data == "PROCESSED") {
@@ -31,6 +31,7 @@
                         } else if(data == "PROCESSING") {
                             return `<div class="badge badge-warning">PROCESSING</div>`
                         }
+                        return '';
                     }
                 },
             ],
