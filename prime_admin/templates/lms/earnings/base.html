@@ -230,6 +230,8 @@
                             return `<div class="badge badge-success">PROCESSED</div>`
                         } else if(data == "PROCESSING") {
                             return `<div class="badge badge-warning">PROCESSING</div>`
+                        } else {
+                            return '';
                         }
                     }
                 },
@@ -241,6 +243,8 @@
                             return ``;
                         } else if(row[6] == "PROCESSING") {
                             return `<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-input-reference-no"><i class="pe-7s-check btn-icon-wrapper"> </i>Input Reference No.</button>`;
+                        } else {
+                            return '';
                         }
                     }
                 },
