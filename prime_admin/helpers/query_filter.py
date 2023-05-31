@@ -52,6 +52,9 @@ class StudentQueryFilter(BaseQueryFilter):
             if current_user.role.name in ["Marketer", 'Partner', 'Manager']:
                 match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
         
+        if current_user.role.name in ['Marketer']:
+            match['contact_person'] = ObjectId(current_user.id)
+        
         if session and session != 'all':
             match['session'] = session
         
