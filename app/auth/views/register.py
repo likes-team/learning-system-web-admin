@@ -1,16 +1,13 @@
-from datetime import datetime
-from werkzeug.urls import url_parse
 from flask import render_template, flash, redirect, url_for, request, current_app
-from flask_login import current_user, login_user, logout_user, login_required
-from app import CONTEXT
+from flask_login import current_user
+from app import mongo
 from app.auth import bp_auth
 from app.auth.models import Role, User
-from app.auth.forms import LoginForm, RegisterForm
+from app.auth.forms import RegisterForm
 from app.admin import admin_urls
-from app.auth import auth_urls
 from app.auth import auth_templates
-from app.auth.permissions import load_permissions
 from prime_admin.models import Branch
+
 
 
 @bp_auth.route('/register', methods=['GET', 'POST'])
@@ -43,6 +40,13 @@ def register():
             flash(str(key) + str(value), 'error')
         return redirect(url_for('bp_auth.register'))
 
+    check_fname = mongo.db.auth_users.find({'fname': form.fname.data}).count()
+    check_lname = mongo.db.auth_users.find({'lname': form.lname.data}).count()
+    if check_fname > 0 and check_lname > 0:
+        flash('User already exists','error')
+        return redirect(url_for('bp_auth.register'))
+
+
     try:
         user = User()
         # user.custom_id = 
@@ -67,11 +71,8 @@ def register():
             user.branch = Branch.objects.get(id=form.branch.data)
 
         user.save()
-
         flash('Account created successfully, please wait for the admin to approve your account','success')
-
         return redirect(url_for('bp_auth.login'))
-
     except Exception as e:
         flash(str(e),'error')
         return redirect(url_for('bp_auth.register'))
