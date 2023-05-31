@@ -71,18 +71,16 @@ def get_last_n_days(days=7):
     return results
 
 
-def convert_date_input_to_utc(date_str, date_type):
+def convert_date_input_to_utc(date_str, date_type=None, date_format="%Y-%m-%d"):
     if date_str == '':
         return None
-    naive = datetime.strptime(date_str, "%Y-%m-%d")
+    naive = datetime.strptime(date_str, date_format)
     local_dt = TIMEZONE.localize(naive, is_dst=None)
 
     if date_type == "date_from":
         local_dt = local_dt.replace(hour=0, minute=0, second=0)
     elif date_type == "date_to":
         local_dt = local_dt.replace(hour=23, minute=59, second=59)
-    else:
-        raise ValueError("InceptionError: invalid date_type value")
 
     utc_dt = local_dt.astimezone(pytz.utc)
     return utc_dt

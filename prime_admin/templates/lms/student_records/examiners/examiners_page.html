@@ -1,0 +1,339 @@
+{% extends "admin/admin_base.html" %}
+
+{% block modals %}
+    {% include 'lms/search_client_last_name_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $("#li_student_records").addClass('mm-active');
+        $("#li_examiners").addClass('mm-active');
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+
+        $.validator.setDefaults({
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+
+        var dtSearchStudents = $("#tbl_mdl_clients").DataTable({
+            pageLength: 10,
+            columnDefs: [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            ajax: {
+                url: "/learning-management/datatables/student-records/examiners/mdl-students",
+            }
+        });
+
+        $('#tbl_mdl_clients tbody').on('click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtSearchStudents.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+
+        $('#btn_confirm').click( function () {
+            let selectedStudent = dtSearchStudents.row('.selected').data();
+            
+            $.ajax({
+                url: '/learning-management/api/clients/' + selectedStudent[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    $("#student_id").val(response.data.id);
+                    $("#lname").val(response.data.lname);
+                    $("#fname").val(response.data.fname);
+                    $("#mname").val(response.data.mname);
+                }
+            });
+        });
+
+        
+        var dtExaminers = $('#tbl_examiners').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0},
+            ],
+            "ajax": {
+                "url": "/learning-management/datatables/student-records/examiners",
+            }
+        });
+
+        
+        $('#frm_examiner').validate({
+            'rules': {
+                'industry': {
+                    'required': true
+                },
+                'application_no': {
+                    'required': true,
+                },
+                'room': {
+                    'required': true,
+                },
+                'test_date': {
+                    'required': true
+                },
+                'exam_venue': {
+                    'required': true,
+                },
+                'no_of_klt': {
+                    'required': true,
+                }
+            },
+            'submitHandler': function(form){
+                var xform = $(form);
+
+                swal({
+                    title: `Add this student?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function(){
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                event.stopPropagation();
+                                dtSearchStudents.ajax.reload();
+                                dtExaminers.ajax.reload();
+                                clearForm();
+                                swal("Success!", response.message, "success");
+                            },
+                            error: function (data) {
+                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+    }); // document end
+
+    
+    function clearForm(){
+        $(':input','#frm_examiner')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+    }
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-users icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Examiners
+                    <div class="page-title-subheading">
+                        Enrollment > Student Records > Examiners
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <h5 class="card-title">Registered Students Examiner</h5>
+            <form id="frm_examiner" action="{{url_for('lms.add_to_examiners')}}" method="POST" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input id="student_id" name="student_id" type="hidden" class="form-control">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="lname" class="">Last Name</label>
+                            <div class="input-group"><input id="lname" name="lname" type="text"
+                                    class="form-control" required readonly>
+                                <div class="input-group-append">
+                                    <button
+                                        type="button" 
+                                        data-toggle="modal"
+                                        data-target="#mdl_search_client_last_name"
+                                        data-placement="bottom"
+                                        class="btn btn-primary pe-7s-search">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="fname" class="">First Name</label>
+                            <input readonly name="fname" id="fname" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="mname" class="">Middle Name</label>
+                            <input readonly name="mname" id="mname" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="position-relative form-group">
+                            <label for="suffix" class="">Suffix</label>
+                            <input readonly name="suffix" id="suffix" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="industry" class="">Industry</label>
+                            <select name="industry" id="industry" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for industry in industries %}
+                                <option value="{{industry}}">
+                                    {{industry}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="application_no" class="">Application No.</label>
+                            <input required name="application_no" id="application_no" type="text" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="room" class="">Room</label>
+                            <input required name="room" id="room" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="test_date" class="">Test Date</label>
+                            <input required name="test_date" id="test_date" type="datetime-local" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="position-relative form-group">
+                            <label for="session" class="">Session</label>
+                            <select name="session" id="session" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for session in sessions %}
+                                <option value="{{session['description']}}">
+                                    {{session['description']}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="exam_venue" class="">Exam Venue</label>
+                            <select name="exam_venue" id="exam_venue" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for exam_venue in exam_venues %}
+                                <option value="{{exam_venue}}">
+                                    {{exam_venue}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="no_of_klt" class="">No. of KLT</label>
+                            <input name="no_of_klt" id="no_of_klt" type="number" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="batch_no" class="">Batch No.</label>
+                            <select name="batch_no" id="batch_no" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for batch_no in batch_numbers %}
+                                <option value="{{batch_no['description']}}">
+                                    {{batch_no['description']}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="d-block text-right card-footer">
+            <input form="frm_examiner" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="ADD">
+        </div>
+    </div>
+
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="table-responsive">
+                    <table id="tbl_examiners" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">ID</th>
+                                <th class="text-center">NO.</th>
+                                <th class="text-center">APPLICATION NO.</th>
+                                <th class="text-center">NAME</th>
+                                <th class="text-center">GENDER</th>
+                                <th class="text-center">INDUSTRY</th>
+                                <th class="text-center">ROOM</th>
+                                <th class="text-center">TEST DATE</th>
+                                <th class="text-center">SESSION</th>
+                                <th class="text-center">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- load with json -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

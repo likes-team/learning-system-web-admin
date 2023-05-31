@@ -56,6 +56,7 @@
 <script>
     $(document).ready(function () {
         $("#li_student_records").addClass('mm-active');
+        $("#li_registered_students").addClass('mm-active');
 
         var CLIENTID;
         var ISLOADING = false;
@@ -129,7 +130,7 @@
             "columnDefs": columnDefs,
             "ordering": false,
             "ajax": {
-                "url": "/learning-management/dtbl/members",
+                "url": "/learning-management/datatables/student-records/registered-students",
                 "data": function (d) {
                     d.branch = $("#branch").val();
                     d.batch_no = $("#batch_no").val();
@@ -817,12 +818,12 @@
         <div class="page-title-wrapper">
             <div class="page-title-heading">
                 <div class="page-title-icon">
-                    <i class="{{ RENDERED_MODEL.__amicon__ }} icon-gradient bg-happy-itmeo"></i>
+                    <i class="pe-7s-users icon-gradient bg-happy-itmeo"></i>
                 </div>
                 <div>
-                    {{ TABLE_OPTIONS['heading'] }}
+                    Registered Students
                     <div class="page-title-subheading">
-                        {{ TABLE_OPTIONS['subheading'] }}
+                        Enrollment > Student Records > Registered Students
                     </div>
                 </div>
             </div>

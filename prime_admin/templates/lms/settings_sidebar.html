@@ -55,6 +55,39 @@
                         Other Expenses
                     </a>
                 </li>
+                <li>
+                    <a id="li_examination" href="#">
+                        <i class="metismenu-icon pe-7s-pen icon"></i>
+                        Examination
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a id="li_batch_numbers" href="{{url_for('lms.batch_numbers_settings')}}">
+                                <i class="metismenu-icon"></i>
+                                Batch Numbers
+                            </a>
+                        </li>
+                        <li>
+                            <a id="li_sessions" href="{{url_for('lms.sessions_settings')}}">
+                                <i class="metismenu-icon"></i>
+                                Sessions
+                            </a>
+                        </li>
+                        <li id="li_examiners">
+                            <a href="{{url_for('bp_admin.under_construction')}}?message=Venues">
+                                <i class="metismenu-icon"></i>
+                                Venues
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{url_for('bp_admin.under_construction')}}?message=Industries">
+                                <i class="metismenu-icon"></i>
+                                Industries
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

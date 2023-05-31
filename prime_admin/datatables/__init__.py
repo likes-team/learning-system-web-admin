@@ -1,3 +1,7 @@
+from .student_records import (
+    dt_registered_students,
+    dt_examiners
+)
 from . import supplies_datatable
 from . import fund_wallet_statement_datatable
 from . import other_expenses_datatable
@@ -19,4 +23,7 @@ from .cash_on_hand import (
 from .transactions import (
     dt_transactions
 )
-
+from .settings.examination import (
+    dt_batch_numbers_settings,
+    dt_sessions_settings
+)

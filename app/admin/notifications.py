@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request
 from flask_login import login_required
 from app.admin import bp_admin
 
@@ -13,4 +13,5 @@ def no_view_url():
 @bp_admin.route('notifications/under-construction')
 @login_required
 def under_construction():
-    return render_template('admin/notifications/under_construction.html'), 400
+    message = request.args.get('message', 'Prime KLC')
+    return render_template('admin/notifications/under_construction.html', message=message)

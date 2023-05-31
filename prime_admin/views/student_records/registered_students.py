@@ -67,7 +67,7 @@ def members():
         heading='Student Records',
         subheading="",
         title='Student Records',
-        table_template="lms/student_records.html",
+        table_template="lms/student_records/student_records.html",
         branches=branches,
         batch_numbers=batch_numbers,
         schedules=['WDC', 'SDC'],
@@ -76,54 +76,6 @@ def members():
         refunds_and_withdrawals=refunds_and_withdrawals,
         sessions=sessions
     )
-
-
-@bp_lms.route('/dtbl/members')
-def get_dtbl_members():
-    draw = request.args.get('draw')
-    query_filter = StudentQueryFilter.from_request(request)
-    service = StudentService.find_students(query_filter)
-    students = service.get_data()
-    _table_data = []
-
-    student: Student
-    for student in students:
-        # TODO Move this to JS
-        actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#editModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-success btn-edit"><i class="pe-7s-wallet btn-icon-wrapper"> </i></button>
-            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        
-        if current_user.role.name in ['Secretary', 'Admin', 'Partner']:
-            if student.payment_mode == "premium" or student.payment_mode == "premium_promo":
-                actions = """<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#viewModal" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>"""
-        else: # Marketers
-            actions = ""
-            
-        _table_data.append([
-            str(student.get_id()),
-            student.get_registration_date(),
-            student.full_registration_number,
-            student.get_full_name(),
-            student.get_batch_no(),
-            student.get_branch_name(),
-            student.schedule,
-            student.get_payment_mode(),
-            student.get_amount(currency=True),
-            student.get_balance(currency=True),
-            student.get_payment_status(),
-            student.get_is_deposited(),
-            student.get_contact_person_name(),
-            student.get_session(),
-            student.contact_number,
-            student.created_by,
-            actions
-        ])
-    response = {
-        'draw': draw,
-        'recordsTotal': service.total_filtered(),
-        'recordsFiltered': service.total_filtered(),
-        'data': _table_data,
-    }
-    return jsonify(response)
 
 
 @bp_lms.route('/api/members/<string:client_id>/edit', methods=['POST'])
@@ -815,3 +767,5 @@ def print_attendance_list_pdf():
     service = AttendanceList.fetch(query_filter)
     service.set_teacher(request.args.get('teacher'))
     return service.generate_pdf()
+
+

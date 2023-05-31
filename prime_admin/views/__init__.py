@@ -1,6 +1,10 @@
 from .dashboard import dashboard
 from .registration import register
-from .student_records import members
+from .student_records import (
+    examiners,
+    printing,
+    registered_students
+)
 from .earning import earnings
 from .expenses import expenses
 from .secretary import secretaries

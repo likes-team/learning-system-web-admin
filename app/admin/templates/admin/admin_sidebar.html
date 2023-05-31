@@ -65,10 +65,45 @@
                 {% endif %}
 
                 <li>
-                    <a id="li_student_records" href="{{url_for('lms.members')}}" class="">
-                        <i class="metismenu-icon pe-7s-users icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                    <a id="li_student_records" href="#">
+                        <i class="metismenu-icon pe-7s-users icon"></i>
                         Student Records
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
+                    <ul>
+                        <li>
+                            <a id="li_registered_students" href="{{url_for('lms.members')}}">
+                                <i class="metismenu-icon"></i>
+                                Registered Students
+                            </a>
+                        </li>
+                        {% if current_user.role.name in ['Admin'] %}
+                        <li>
+                            <a href="{{url_for('bp_admin.under_construction')}}?message=Student Records > Sales">
+                                <i class="metismenu-icon"></i>
+                                Sales
+                            </a>
+                        </li>
+                        <li>
+                            <a id="li_examiners" href="{{url_for('lms.examiners')}}">
+                                <i class="metismenu-icon"></i>
+                                Examiners
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{url_for('bp_admin.under_construction')}}?message=Student Records > Passers">
+                                <i class="metismenu-icon"></i>
+                                Passers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{url_for('bp_admin.under_construction')}}?message=Student Records > Deployed">
+                                <i class="metismenu-icon"></i>
+                                Deployed
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
                 </li>
                 <li>
                     <a id="li_earnings" href="{{url_for('lms.earnings')}}" class="">
