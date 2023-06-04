@@ -266,6 +266,6 @@ def approve_user():
     user.active = True
 
     
-    # user.save()
+    user.save()
 
     return jsonify(True)
