@@ -43,7 +43,6 @@ def get_dashboard_users():
     table_data = []
 
     for data in query:
-        id = data.get('_id', '')
         full_employee_id = data.get('full_employee_id', '')
         lname = data.get('lname', '')
         fname = data.get('fname', '')
@@ -66,7 +65,7 @@ def get_dashboard_users():
         branches = ', '.join(branches)
     
         table_data.append([
-            str(id),
+            str(data.get('_id', '')),
             full_employee_id,
             {
                 'name': fname + " " + lname,
@@ -88,36 +87,6 @@ def get_dashboard_users():
     }
 
     return jsonify(response)
-
-
-@bp_admin.route('/dashboard/approve-user', methods=['POST'])
-def approve_user():
-    from app.auth.models import User
-    from prime_admin.functions import generate_employee_id
-    from prime_admin.globals import get_date_now
-
-    user_id = request.json['user_id']
-
-    user = User.objects.get_or_404(id=user_id)
-
-    generated_employee_id = ""
-    
-    last_registration_number = User.objects(active=True).order_by('-employee_id_no').first()
-
-    date_now = get_date_now()
-
-    if last_registration_number:
-        generated_employee_id = generate_employee_id(last_registration_number.employee_id_no)
-    else:
-        generated_employee_id = str(date_now.year) + '%02d' % date_now.month + "0001"
-
-    user.full_employee_id = generated_employee_id
-    user.employee_id_no = last_registration_number.employee_id_no + 1 if last_registration_number is not None else 1
-    user.active = True
-
-    user.save()
-
-    return jsonify(True)
 
 
 @bp_admin.route('/dashboard/reject-user', methods=['POST'])

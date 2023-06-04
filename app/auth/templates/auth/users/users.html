@@ -177,23 +177,26 @@
                         btnClass: 'btn-blue',
                         keys: ['enter', 'shift'],
                         action: function () {
-                            $.ajax({
-                                url: "/admin/dashboard/approve-user",
-                                type: "POST",
-                                dataType: "json",
-                                data: JSON.stringify({
-                                    "user_id": data[0]
-                                }),
-                                contentType: "application/json; charset=utf-8",
-                                success: function (response) {
-                                    if (response) {
-                                        dtbl_user_status.ajax.reload();
-                                        toastr.success("User Approved Successfully!");
-                                    } else {
-                                        toastr.error("Error Occured!, Approving Failed");
+                            console.log(data[0]);
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: "{{url_for('bp_auth.approve_user')}}",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: JSON.stringify({
+                                        "user_id": data[0]
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    success: function (response) {
+                                        if (response) {
+                                            dtbl_user_status.ajax.reload();
+                                            toastr.success("User Approved Successfully!");
+                                        } else {
+                                            toastr.error("Error Occured!, Approving Failed");
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }, 500);
                         }
                     },
                     cancel: function () {

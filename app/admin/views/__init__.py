@@ -1,3 +1,1 @@
-from . import (
-    dashboard, app, system_logs
-)
+from . import (dashboard, app, system_logs)
