@@ -1,9 +1,10 @@
 from .dashboard import dashboard
 from .registration import register
 from .student_records import (
+    registered_students,
     examiners,
+    passers,
     printing,
-    registered_students
 )
 from .earning import earnings
 from .expenses import expenses

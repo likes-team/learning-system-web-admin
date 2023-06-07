@@ -1,6 +1,7 @@
 from .student_records import (
     dt_registered_students,
-    dt_examiners
+    dt_examiners,
+    dt_passers
 )
 from . import supplies_datatable
 from . import fund_wallet_statement_datatable
