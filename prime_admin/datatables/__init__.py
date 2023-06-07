@@ -26,5 +26,6 @@ from .transactions import (
 )
 from .settings.examination import (
     dt_batch_numbers_settings,
-    dt_sessions_settings
+    dt_sessions_settings,
+    dt_industries_settings
 )

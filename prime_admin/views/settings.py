@@ -34,6 +34,13 @@ def sessions_settings():
     )
 
 
+@bp_lms.route('/settings/examination/industries')
+def industries_settings():
+    return admin_render_template(
+        Settings, 'lms/settings/examination/industries_settings_page.html', 'learning_management'
+    )
+
+
 @bp_lms.route('/settings/other-expenses/create', methods=['POST'])
 def create_other_expenses():
     description = request.form['description']
@@ -75,3 +82,19 @@ def create_session():
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.sessions_settings'))
     
+    
+
+@bp_lms.route('/settings/examination/industries/create', methods=['POST'])
+def create_industry():
+    description = request.form['description']
+    
+    if description == "":
+        return redirect(url_for('lms.industries_settings'))
+
+    mongo.db.lms_configurations.update_one({
+        'name': "industries"
+    }, {"$push": {
+        'values': description
+    }})
+    flash("Added successfully!", 'success')
+    return redirect(url_for('lms.industries_settings'))
