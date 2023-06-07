@@ -23,7 +23,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css">
     <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/carousel.css') }}">
     <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/org_chart.css') }}">
-
+    <style>
+        .branch {
+            cursor: pointer
+        }
+    </style>
     <!-- Block Head -->
     {% block head %} {% endblock %}
 </head>
@@ -111,7 +115,23 @@
                     scrollTop: $("#div_departure").offset().top
                 }, 2000);
             })
-        });
+
+            $("#div_cebu_branch").click(function(){
+                window.open("http://maps.google.com/?q=Doña Luisa Building, 6000 Fuente Osmeña Cir, Cebu City, 6000 Cebu");
+            });
+
+            $("#div_bohol_branch").click(function(){
+                window.open("http://maps.google.com/?q=27-19 Celestino Gallares St, Tagbilaran City, Bohol");
+            });
+
+            $("#div_tacloban_branch").click(function(){
+                window.open("http://maps.google.com/?q=6XVX+HWM, Burgos St, Downtown, Tacloban City, Leyte");
+            });
+
+            $("#div_palawan_branch").click(function(){
+                window.open("http://maps.google.com/?q=Yusay incorporated building,Lacao st. puerto princesa city, palawan");
+            });
+        }); // document.ready
     </script>
     <!-- Block Extra Script -->
     {% block extra_script %}{% endblock %}
