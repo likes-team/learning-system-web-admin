@@ -37,6 +37,7 @@ def add_to_passers():
            'remark': remark,
            'score': score,
            'primary_key': primary_key,
+           'is_examinee': False,
            'is_passer': True,
            'added_to_passers_date': get_utc_date_now()
        }

@@ -35,7 +35,6 @@ def fetch_examiners_dt():
             student.document.get('room', ''),
             format_utc_to_local(student.document.get('test_date'), with_time=True),
             student.document.get('session', ''),
-            '',
         ])
     response = {
         'draw': draw,
