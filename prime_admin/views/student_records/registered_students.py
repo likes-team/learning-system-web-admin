@@ -10,6 +10,7 @@ from prime_admin.models import Batch, Branch, Registration, Member, Student
 from prime_admin.models_v2 import StudentV2
 from flask import redirect, url_for, request, current_app, flash, jsonify, render_template, send_from_directory
 from app import mongo
+from app.auth.models import User
 from datetime import datetime
 from bson.decimal128 import Decimal128, create_decimal128_context
 from flask_weasyprint import HTML, render_pdf
@@ -89,6 +90,8 @@ def edit_member(client_id):
         mname = request.json['mname']
         suffix = request.json['suffix']
         contact_no = request.json['contact_no']
+        branch_id = request.json['branch']
+        contact_person_id = request.json['contact_person']
 
         client = Registration.objects.get_or_404(id=client_id)
         client.lname = lname
@@ -96,7 +99,8 @@ def edit_member(client_id):
         client.mname = mname
         client.suffix = suffix
         client.contact_number = contact_no
-
+        client.branch = Branch.objects.get_or_404(id=branch_id)
+        client.contact_person = User.objects.get_or_404(id=contact_person_id)
         client.save()
 
         with mongo.cx.start_session() as session:
@@ -279,7 +283,9 @@ def get_member(client_id):
         'gender': client.gender,
         'registration_no': client.full_registration_number,
         'is_paid': is_paid,
-        'reviewers': client.get_reviewers()
+        'reviewers': client.get_reviewers(),
+        'branch_id': str(client.branch.id),
+        'contact_person_id': str(client.contact_person.id),
     }
     response = {
         'data': data

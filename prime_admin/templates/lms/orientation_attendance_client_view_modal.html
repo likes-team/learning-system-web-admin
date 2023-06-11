@@ -49,14 +49,30 @@
                         
                         <div class="form-row">
                             <div class="col-md-6 mb-3">
-                                <label for="view_branch">Branch</label>
-                                <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_branch" name="view_branch"
-                                    value="">
+                                <label for="view_branch" class="">Branch</label>
+                                <select disabled name="view_branch" id="view_branch" class="form-control" required>
+                                    {% if current_user.role.name == "Secretary" %}
+                                    <!-- Pass -->
+                                    {% else %}
+                                        <option value="">Choose...</option>
+                                    {% endif %}
+                                    
+                                    {% for branch in branches %}
+                                    <option value="{{ branch.id }}">
+                                        {{branch.name}}
+                                    </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="view_contact_person">Contact Person</label>
-                                <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_contact_person" name="view_contact_person"
-                                    value="">
+                                <label for="view_contact_person" class="">Contact Person</label>
+                                <select disabled name="view_contact_person" id="view_contact_person" class="form-control" required>
+                                    {% for contact_person in contact_persons %}
+                                    <option value="{{ contact_person.id }}">
+                                        {{contact_person.full_name}}
+                                    </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>

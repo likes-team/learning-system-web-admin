@@ -323,8 +323,6 @@
                 }
             });
         });
-    
-    
         $('#tbl_members tbody').on('click', '.btn-view', function () {
             var data = dtbl_members.row($(this).parents('tr')).data();
     
@@ -334,15 +332,16 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
                     CLIENTID = response.data.id;
-    
+                    getContactPersons(response.data.branch_id);
+
                     $("#view_client_id").val(response.data.id);
                     $("#view_last_name").val(response.data.lname);
                     $("#view_first_name").val(response.data.fname);
                     $("#view_middle_name").val(response.data.mname);
                     $("#view_suffix").val(response.data.suffix);
                     $("#view_contact_no").val(response.data.contact_no);
-                    $("#view_branch").val(response.data.branch);
-                    $("#view_contact_person").val(response.data.contact_person);
+                    $("#view_branch").val(response.data.branch_id);
+                    $("#view_contact_person").val(response.data.contact_person_id);
                 }
             });
     
@@ -356,6 +355,8 @@
                 $("#view_middle_name").prop('disabled', false);
                 $("#view_suffix").prop('disabled', false);
                 $("#view_contact_no").prop('disabled', false);
+                $("#view_branch").prop('disabled', false);
+                $("#view_contact_person").prop('disabled', false);
             }else if ($(this).html() == "Save"){
                 $(this).html("Edit");
                 $("#view_last_name").prop('disabled', true);
@@ -363,12 +364,16 @@
                 $("#view_middle_name").prop('disabled', true);
                 $("#view_suffix").prop('disabled', true);
                 $("#view_contact_no").prop('disabled', true);
+                $("#view_branch").prop('disabled', true);
+                $("#view_contact_person").prop('disabled', true);
     
-                var lname = $("#view_last_name").val();
-                var fname = $("#view_first_name").val();
-                var mname = $("#view_middle_name").val();
-                var suffix = $("#view_suffix").val();
-                var contact_no = $("#view_contact_no").val();
+                let lname = $("#view_last_name").val();
+                let fname = $("#view_first_name").val();
+                let mname = $("#view_middle_name").val();
+                let suffix = $("#view_suffix").val();
+                let contact_no = $("#view_contact_no").val();
+                let branch = $("#view_branch").val();
+                let contact_person = $("#view_contact_person").val();
     
                 $.ajax({
                     url: "/learning-management/api/members/" + $("#view_client_id").val() + "/edit",
@@ -380,6 +385,8 @@
                         "mname": mname,
                         "suffix": suffix,
                         "contact_no": contact_no,
+                        "branch": branch,
+                        'contact_person': contact_person,
                         'from': 'orientation_attendance'
                     }),
                     contentType: "application/json; charset=utf-8",
@@ -403,6 +410,46 @@
             $("#search_input").val("")
             dtbl_members.search("").draw();
         });
+
+        
+        $("#view_branch").change(function(){
+            getContactPersons($(this).val());
+        });
+
+
+        function getContactPersons(branch) {
+            if(branch==""){
+                $('#view_contact_person').find('option').remove();
+                let newOption = $('<option value="">No Contact Persons available</option>');
+                $('#view_contact_person').append(newOption);
+                return;
+            }
+
+            $.ajax({
+                url: `/learning-management/api/get-branch-contact-persons/${branch}`,
+                type: "GET",
+                async: false,
+                success: function (response) {
+                    $('#view_contact_person').find('option').remove();
+    
+                    if (response.data.length > 0) {
+                        var newOption = $('<option value="">Choose...</option>');
+                        $('#view_contact_person').append(newOption);
+    
+                        for (i = 0; i < response.data.length; i++) {
+                            var newOption = $(`<option value="${response.data[i].id}">${response.data[i].fname}</option>`);
+                            $('#view_contact_person').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="">No Contact Persons available</option>');
+                        $('#view_contact_person').append(newOption);
+                    }
+                },
+                error: function (response) {
+                    swal("Error Occured!", "Error", "error");
+                },
+            });
+        }
     });
 </script>
 {% endblock %}
