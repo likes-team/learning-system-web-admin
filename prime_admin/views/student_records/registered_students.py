@@ -34,7 +34,7 @@ D128_CTX = create_decimal128_context()
 def members():
     _table_columns = [
         'id', 'date', 'registration','name of student', 'batch no.', 'branch', 'schedule', 'remark',
-        'amount','balance', 'paid/not paid', 'Deposit','contact person', 'session', 'contact no.', 'cashier', 'actions'
+        'amount','balance', 'paid/not paid', 'Deposit','contact person', 'Orientator', 'session', 'contact no.', 'cashier', 'actions'
         ]
 
     fields = []

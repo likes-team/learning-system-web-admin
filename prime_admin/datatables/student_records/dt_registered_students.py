@@ -41,6 +41,7 @@ def fetch_registered_students_dt():
             student.get_payment_status(),
             student.get_is_deposited(),
             student.get_contact_person_name(),
+            student.data.get('orientator', {}).get('fname', ''),
             student.get_session(),
             student.contact_number,
             student.created_by,

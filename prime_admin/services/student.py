@@ -37,6 +37,13 @@ class StudentService:
                 'foreignField': '_id',
                 'as': 'contact_person'
             }},
+            {"$lookup": {
+                'from': 'lms_orientators',
+                'localField': 'orientator',
+                'foreignField': '_id',
+                'as': 'orientator'
+            }},
+            {"$unwind": {'path': '$orientator'}},
             {'$sort': query_filter.get_sort()}
         ]
 
