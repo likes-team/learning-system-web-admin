@@ -296,7 +296,14 @@
                     <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="no_of_klt" class="">No. of KLT</label>
-                            <input name="no_of_klt" id="no_of_klt" type="number" class="form-control">
+                            <select name="no_of_klt" id="no_of_klt" class="form-control" required>
+                                <option value="">Choose...</option>
+                                {% for klt in klts %}
+                                <option value="{{klt['description']}}">
+                                    {{klt['description']}}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-2">

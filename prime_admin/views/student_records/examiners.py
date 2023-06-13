@@ -12,12 +12,14 @@ def examiners():
     industries = mongo.db.lms_configurations.find_one({'name': "industries"})['values']
     batch_numbers = mongo.db.lms_examination_batch_numbers.find()
     sessions = mongo.db.lms_examination_sessions.find()
+    klts = mongo.db.lms_klts.find()
     return render_template(
         'lms/student_records/examiners/examiners_page.html',
         exam_venues=exam_venues,
         industries=industries,
         batch_numbers=batch_numbers,
-        sessions=sessions
+        sessions=sessions,
+        klts=klts
     )
 
 

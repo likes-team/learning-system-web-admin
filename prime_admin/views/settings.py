@@ -49,6 +49,13 @@ def orientators_settings():
     )
 
 
+@bp_lms.route('/settings/examination/klts')
+def klts_settings():
+    return admin_render_template(
+        Settings, 'lms/settings/examination/no_of_klt_settings_page.html', 'learning_management'
+    )
+
+
 @bp_lms.route('/settings/other-expenses/create', methods=['POST'])
 def create_other_expenses():
     description = request.form['description']
@@ -121,6 +128,20 @@ def create_orientator():
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.orientators_settings'))
 
+
+@bp_lms.route('/settings/examination/klts/create', methods=['POST'])
+def create_klt():
+    description = request.form['description']
+    
+    if description == "":
+        return redirect(url_for('lms.klts_settings'))
+
+    mongo.db.lms_klts.insert_one({
+        'description': description
+    })
+    flash("Added successfully!", 'success')
+    return redirect(url_for('lms.klts_settings'))
+    
 
 @bp_lms.route('/settings/orientators/toggle-status', methods=['POST'])
 def toggle_orientators_status():
