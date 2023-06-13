@@ -27,6 +27,7 @@ def add_to_examiners():
     
     student_id = ObjectId(form.get('student_id'))
     industry = form.get('industry')
+    sub_category = form.get('sub_category')
     application_no = form.get('application_no')
     room = form.get('room')
     exam_venue = form.get('exam_venue')
@@ -39,6 +40,7 @@ def add_to_examiners():
     },{'$set':
        {
            'industry': industry,
+           'sub_category': sub_category,
            'application_no': application_no,
            'room': room,
            'exam_venue': exam_venue,

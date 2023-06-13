@@ -94,6 +94,9 @@
                 'industry': {
                     'required': true
                 },
+                'sub_category': {
+                    'required': true,
+                },
                 'application_no': {
                     'required': true,
                 },
@@ -235,6 +238,15 @@
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">
+                            <label for="sub_category" class="">Sub-Category</label>
+                            <select name="sub_category" id="sub_category" class="form-control" required>
+                                <option value="">Choose...</option>
+                                <option value="ASSEMBLY">ASSEMBLY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
                             <label for="application_no" class="">Application No.</label>
                             <input required name="application_no" id="application_no" type="text" class="form-control" required>
                         </div>
@@ -243,12 +255,6 @@
                         <div class="position-relative form-group">
                             <label for="room" class="">Room</label>
                             <input required name="room" id="room" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="position-relative form-group">
-                            <label for="test_date" class="">Test Date</label>
-                            <input required name="test_date" id="test_date" type="datetime-local" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-1">
@@ -281,13 +287,19 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <div class="position-relative form-group">
+                            <label for="test_date" class="">Test Date</label>
+                            <input required name="test_date" id="test_date" type="datetime-local" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="no_of_klt" class="">No. of KLT</label>
                             <input name="no_of_klt" id="no_of_klt" type="number" class="form-control">
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="position-relative form-group">
                             <label for="batch_no" class="">Batch No.</label>
                             <select name="batch_no" id="batch_no" class="form-control" required>
