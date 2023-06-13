@@ -1,0 +1,189 @@
+{% extends "admin/admin_base.html" %}
+
+
+{% block modals %}
+{% endblock %}
+
+
+{% block head %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+    $(document).ready(function(){
+        $("#li_orientators").addClass("mm-active");
+        
+        var dtOrientators = $('#tbl_orientators').DataTable({
+            'searching': false,
+            "pageLength": 25,
+            "processing": true,
+            "serverSide": false,
+            "ordering": false,
+            "responsive": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/datatables/settings/orientators",
+            },
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+                {
+                    "targets": 2,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if(data){
+                            return `<div class="badge badge-success">ACTIVE</div>`
+                        }
+                        return `<div class="badge badge-secondary">INACTIVE</div>`
+                    }
+                },
+                {
+                    "targets": 3,
+                    "className": "text-center",
+                    "render": function (data, type, row) {
+                        return `
+                        <button type="button" class="btn btn-info btn-sm btn-toggle"><i class="fa fa-toggle-on"></i></button>
+                        `;
+                    }
+                },
+            ],
+        });
+
+
+        $("#tbl_orientators tbody").on('click', '.btn-toggle', function(){
+            let data = dtOrientators.row( $(this).parents('tr')).data();
+            let status 
+
+            $.confirm({
+                title: 'Toggle status',
+                content: "Switch orientator's status?",
+                buttons: {
+                    confirm: {
+                        text: 'Switch',
+                        btnClass: 'btn-blue',
+                        keys: ['enter', 'shift'],
+                        action: function(){
+                            $.ajax({
+                                url: "/learning-management/settings/orientators/toggle-status",
+                                type: "POST",
+                                dataType: "json",
+                                data: JSON.stringify({
+                                    "orientator": data[0]
+                                }),
+                                contentType: "application/json; charset=utf-8",
+                                success: function(response){
+                                    if(response){
+                                        dtOrientators.ajax.reload();
+                                        toastr.success("Toggled Successfully!");
+                                    }else{
+                                        toastr.error("Error Occured!, Switching Failed");
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: function () {
+                        $.alert('Canceled!');
+                    },
+                }
+            });
+        });
+    }); // document.ready
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+{% include 'lms/settings_sidebar.html' %}
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-settings icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Orientators Settings
+                    <div class="page-title-subheading">
+                        Create, read, update and archive items
+                    </div>
+                </div>
+            </div>
+            {% block actions %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">New Record</h5>
+                    <form id="frm_create_orientator" action="{{url_for('lms.create_orientator')}}" method="POST" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input id="client_id" name="client_id" type="hidden" class="form-control">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label for="name" class="">Name</label>
+                                    <div class="input-group"><input id="name" name="name" type="text"
+                                            class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <input form="frm_create_orientator" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SAVE">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                    <table id="tbl_orientators" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">NAME</th>
+                            <th class="text-center">STATUS</th>
+                            <th class="text-center">ACTION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

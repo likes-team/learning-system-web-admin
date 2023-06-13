@@ -435,6 +435,7 @@ class Orientator(Base, Admin):
 
     fname = db.StringField()
     lname = db.StringField()
+    is_active = db.BooleanField()
 
     @property
     def name(self):

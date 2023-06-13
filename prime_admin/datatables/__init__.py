@@ -29,3 +29,6 @@ from .settings.examination import (
     dt_sessions_settings,
     dt_industries_settings
 )
+from .settings import (
+    dt_orientators_settings
+)

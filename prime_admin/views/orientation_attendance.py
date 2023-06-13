@@ -31,7 +31,7 @@ def orientation_attendance():
         branches = Branch.objects(id__in=current_user.branches)
         contact_persons = User.objects(Q(branches__in=current_user.branches) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
         
-    orientators = Orientator.objects()
+    orientators = Orientator.objects(is_active=True)
 
     return admin_render_template(
         OrientationAttendance,

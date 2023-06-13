@@ -1,4 +1,5 @@
-from flask import request, redirect, url_for, flash
+from bson import ObjectId
+from flask import request, redirect, url_for, flash, jsonify
 from app.admin.templating import admin_render_template
 from app import mongo
 from prime_admin import bp_lms
@@ -16,7 +17,7 @@ def settings():
 @bp_lms.route('/settings/other-expenses')
 def other_expenses_settings():
     return admin_render_template(
-        Settings, 'lms//settings/other_expenses_settings_page.html', 'learning_management'
+        Settings, 'lms/settings/other_expenses_settings_page.html', 'learning_management'
     )
     
 
@@ -38,6 +39,13 @@ def sessions_settings():
 def industries_settings():
     return admin_render_template(
         Settings, 'lms/settings/examination/industries_settings_page.html', 'learning_management'
+    )
+
+
+@bp_lms.route('/settings/orientators')
+def orientators_settings():
+    return admin_render_template(
+        Settings, 'lms/settings/orientators_settings_page.html', 'learning_management'
     )
 
 
@@ -98,3 +106,30 @@ def create_industry():
     }})
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.industries_settings'))
+
+
+@bp_lms.route('/settings/orientators/create', methods=['POST'])
+def create_orientator():
+    name = request.form['name']
+    
+    if name == "":
+        return redirect(url_for('lms.orientators_settings'))
+
+    mongo.db.lms_orientators.insert_one({
+        'fname': name
+    })
+    flash("Added successfully!", 'success')
+    return redirect(url_for('lms.orientators_settings'))
+
+
+@bp_lms.route('/settings/orientators/toggle-status', methods=['POST'])
+def toggle_orientators_status():
+    orientator_id = request.json['orientator']
+
+    mongo.db.lms_orientators.update_one({
+        '_id': ObjectId(orientator_id)
+    }, [{'$set': {
+        "is_active": {
+            "$eq": [False,"$is_active"]
+        }}}])
+    return jsonify({'result': True})
