@@ -1,0 +1,128 @@
+<div id="mdl_hired_edit" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit and Save for monitoring the status of the application</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit_hired" method="POST">
+                    <div class="main-card mb-3 card">
+                        <div class="card-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" class="form-control" id="edit_student_id" name="edit_student_id" value="">
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <h5 class="card-title">Procedure</h5>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <h5 class="card-title">Current Progress</h5>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <h5 class="card-title">Date</h5>
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_eps_topik" class="col-md-4 col-form-label">EPS-TOPIK</label>
+                                <div class="col-md-4">
+                                    <select name="edit_eps_topik" id="edit_eps_topik" class="form-control">
+                                        <option value="">Choose...</option>
+                                        <option value="PASS">PASS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_eps_topik_date" id="edit_eps_topik_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_jsr_forwarding" class="col-md-4 col-form-label">Job Seekers Roster Forwarding Date</label>
+                                <div class="col-md-4">
+                                    <select name="edit_jsr_forwarding" id="edit_jsr_forwarding" class="form-control">
+                                        <option value="">Choose...</option>
+                                        <option value="SENT">SENT</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_jsr_forwarding_date" id="edit_jsr_forwarding_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_jsr_approval" class="col-md-4 col-form-label">Job Seekers Roster Approval Date</label>
+                                <div class="col-md-4">
+                                    <select name="edit_jsr_approval" id="edit_jsr_approval" class="form-control">
+                                        <option value="">Choose...</option>
+                                        <option value="APPROVAL">APPROVAL</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_jsr_approval_date" id="edit_jsr_approval_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_job_search_progress" class="col-md-4 col-form-label">Job Search Progress</label>
+                                <div class="col-md-4">
+                                    <input name="edit_job_search_progress" id="edit_job_search_progress" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_job_search_progress_date" id="edit_job_search_progress_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_employment_permit_assuance" class="col-md-4 col-form-label">Employment Permit Assuance</label>
+                                <div class="col-md-4">
+                                    <input name="edit_employment_permit_assuance" id="edit_employment_permit_assuance" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_employment_permit_assuance_date" id="edit_employment_permit_assuance_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_slc_forwarding" class="col-md-4 col-form-label">Standard Labor Contract Forwarding</label>
+                                <div class="col-md-4">
+                                    <input name="edit_slc_forwarding" id="edit_slc_forwarding" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_slc_forwarding_date" id="edit_slc_forwarding_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_slc_signing" class="col-md-4 col-form-label">Standard Labor Contract Signing</label>
+                                <div class="col-md-4">
+                                    <input name="edit_slc_signing" id="edit_slc_signing" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_slc_signing_date" id="edit_slc_signing_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_ccvi_issuance" class="col-md-4 col-form-label">CCVI Issuance</label>
+                                <div class="col-md-4">
+                                    <input name="edit_ccvi_issuance" id="edit_ccvi_issuance" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_ccvi_issuance_date" id="edit_ccvi_issuance_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="position-relative row form-group">
+                                <label for="edit_tentative_entry" class="col-md-4 col-form-label">Tentative Entry Date</label>
+                                <div class="col-md-4">
+                                    <input name="edit_tentative_entry" id="edit_tentative_entry" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="edit_tentative_entry_date" id="edit_tentative_entry_date" type="date" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

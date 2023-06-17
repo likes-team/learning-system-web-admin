@@ -4,6 +4,7 @@ from .student_records import (
     registered_students,
     examiners,
     passers,
+    hired,
     printing,
 )
 from .earning import earnings

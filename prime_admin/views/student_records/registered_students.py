@@ -250,7 +250,14 @@ def get_member(client_id):
         is_paid = True
     else:
         is_paid = False
-
+        
+    raw_data = mongo.db.lms_registrations.find_one({'_id': ObjectId(client_id)})
+    hired_information = raw_data.get('hired_information', None)
+    
+    if hired_information:
+        for key, val in hired_information.items():
+            hired_information[key]['date'] = format_utc_to_local(val['date'], date_format="%Y-%m-%d")
+        
     data = {
         'id': str(client.id),
         'fname': client.fname,
@@ -286,6 +293,7 @@ def get_member(client_id):
         'reviewers': client.get_reviewers(),
         'branch_id': str(client.branch.id),
         'contact_person_id': str(client.contact_person.id),
+        'hired_information': hired_information
     }
     response = {
         'data': data

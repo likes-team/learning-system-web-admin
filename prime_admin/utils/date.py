@@ -90,6 +90,9 @@ def format_utc_to_local(date, date_format="%B %d, %Y", with_time=False):
     if date is None:
         return ''
     
+    if date == '':
+        return ''
+    
     if with_time:
         date_format = "%B %d, %Y %I:%M %p"
     

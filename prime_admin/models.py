@@ -256,6 +256,7 @@ class Registration(Base, Admin):
     gender = db.StringField()
     session = db.StringField()
     is_examinee = db.BooleanField()
+    is_passer = db.BooleanField()
     
     def get_birth_date(self):
         return format_utc_to_local(self.birth_date)
