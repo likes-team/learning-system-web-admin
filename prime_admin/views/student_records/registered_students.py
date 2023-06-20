@@ -252,10 +252,14 @@ def get_member(client_id):
         is_paid = False
         
     raw_data = mongo.db.lms_registrations.find_one({'_id': ObjectId(client_id)})
+    employer_information = raw_data.get('employer_information', None)
     hired_information = raw_data.get('hired_information', None)
     
     if hired_information:
         for key, val in hired_information.items():
+            if key == 'current_status':
+                continue
+            
             hired_information[key]['date'] = format_utc_to_local(val['date'], date_format="%Y-%m-%d")
         
     data = {
@@ -293,7 +297,8 @@ def get_member(client_id):
         'reviewers': client.get_reviewers(),
         'branch_id': str(client.branch.id),
         'contact_person_id': str(client.contact_person.id),
-        'hired_information': hired_information
+        'hired_information': hired_information,
+        'employer_information': employer_information
     }
     response = {
         'data': data

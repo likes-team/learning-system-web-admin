@@ -81,12 +81,33 @@ def edit_hired(student_id):
     ccvi_issuance_date = convert_date_input_to_utc(form.get('edit_ccvi_issuance_date'))
     tentative_entry = form.get('edit_tentative_entry')
     tentative_entry_date = convert_date_input_to_utc(form.get('edit_tentative_entry_date'))
+
+    current_status = None
+    if eps_topik != '':
+        current_status = "eps_topik"
+    if jsr_forwarding != "":
+        current_status = "jsr_forwarding"
+    if jsr_approval != "":
+        current_status = "jsr_approval"
+    if job_search_progress != "":
+        current_status = "job_search_progress"
+    if employment_permit_assuance != "":
+        current_status = "employment_permit_assuance"
+    if slc_forwarding != "":
+        current_status = "slc_forwarding"
+    if slc_signing != "":
+        current_status = "slc_signing"
+    if ccvi_issuance != "":
+        current_status = "ccvi_issuance"
+    if tentative_entry != "":
+        current_status = "tentative_entry"
     
     mongo.db.lms_registrations.update_one({
         '_id': student_id
     },{'$set':
        {
             'hired_information': {
+               'current_status': current_status,
                'eps_topik': {'current_progress': eps_topik, 'date': eps_topik_date},
                'jsr_forwarding': {'current_progress': jsr_forwarding, 'date': jsr_forwarding_date},
                'jsr_approval': {'current_progress': jsr_approval, 'date': jsr_approval_date},

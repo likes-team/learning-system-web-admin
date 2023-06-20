@@ -25,6 +25,12 @@ def datatables_student_records_hired():
         student = StudentV2(doc)
         ctr = ctr + 1
         employer_information = student.document.get('employer_information', {})
+        hired_information = student.document.get('hired_information', {})
+        current_status = hired_information.get('current_status', None)
+        if current_status:
+            current_progress = hired_information[current_status].get('current_progress', '')
+        else:
+            current_progress = ""
         
         table_data.append([
             str(student.get_id()),
@@ -36,6 +42,7 @@ def datatables_student_records_hired():
             employer_information.get('employer_contact_no', ''),
             employer_information.get('address_in_korea', ''),
             employer_information.get('title_of_work', ''),
+            current_progress,
             '',
         ])
     response = {

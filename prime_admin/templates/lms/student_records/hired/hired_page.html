@@ -84,7 +84,7 @@
             "columnDefs": [
                 { "visible": false, "targets": 0},
                 {
-                    "targets": 9,
+                    "targets": 10,
                     "width": "1%",
                     "render": function (data, type, row) {
                         var id = row[0];
@@ -173,39 +173,52 @@
                 `/learning-management/api/members/${data[0]}`, function(response){
                     clearForm('frm_edit_hired');
 
-                    if (response.data.hired_information == null){
-                        return '';
+                    if (response.data.hired_information){
+                        let eps_topik = response.data.hired_information.eps_topik;
+                        let jsr_forwarding = response.data.hired_information.jsr_forwarding;
+                        let jsr_approval = response.data.hired_information.jsr_approval;
+                        let job_search_progress = response.data.hired_information.job_search_progress;
+                        let employment_permit_assuance = response.data.hired_information.employment_permit_assuance;
+                        let slc_forwarding = response.data.hired_information.slc_forwarding;
+                        let slc_signing = response.data.hired_information.slc_signing;
+                        let ccvi_issuance = response.data.hired_information.ccvi_issuance;
+                        let tentative_entry = response.data.hired_information.tentative_entry;
+    
+                        $("#edit_student_id").val(response.data.id);
+                        $("#edit_eps_topik").val(eps_topik.current_progress);
+                        $("#edit_eps_topik_date").val(eps_topik.date);
+                        $("#edit_jsr_forwarding").val(jsr_forwarding.current_progress);
+                        $("#edit_jsr_forwarding_date").val(jsr_forwarding.date);
+                        $("#edit_jsr_approval").val(jsr_approval.current_progress);
+                        $("#edit_jsr_approval_date").val(jsr_approval.date);
+                        $("#edit_job_search_progress").val(job_search_progress.current_progress);
+                        $("#edit_job_search_progress_date").val(job_search_progress.date);
+                        $("#edit_employment_permit_assuance").val(employment_permit_assuance.current_progress);
+                        $("#edit_employment_permit_assuance_date").val(employment_permit_assuance.date);
+                        $("#edit_slc_forwarding").val(slc_forwarding.current_progress);
+                        $("#edit_slc_forwarding_date").val(slc_forwarding.date);
+                        $("#edit_slc_signing").val(slc_signing.current_progress);
+                        $("#edit_slc_signing_date").val(slc_signing.date);
+                        $("#edit_ccvi_issuance").val(ccvi_issuance.current_progress);
+                        $("#edit_ccvi_issuance_date").val(ccvi_issuance.date);
+                        $("#edit_tentative_entry").val(tentative_entry.current_progress);
+                        $("#edit_tentative_entry_date").val(tentative_entry.date);
                     }
 
-                    let eps_topik = response.data.hired_information.eps_topik;
-                    let jsr_forwarding = response.data.hired_information.jsr_forwarding;
-                    let jsr_approval = response.data.hired_information.jsr_approval;
-                    let job_search_progress = response.data.hired_information.job_search_progress;
-                    let employment_permit_assuance = response.data.hired_information.employment_permit_assuance;
-                    let slc_forwarding = response.data.hired_information.slc_forwarding;
-                    let slc_signing = response.data.hired_information.slc_signing;
-                    let ccvi_issuance = response.data.hired_information.ccvi_issuance;
-                    let tentative_entry = response.data.hired_information.tentative_entry;
+                    if (response.data.employer_information){
+                        let employerInformation = response.data.employer_information;
+                        let employerName = employer_information.employer_name;
+                        let companyName = employer_information.company_name;
+                        let employerContactNo = employer_information.contact_no;
+                        let addressInKorea = employer_information.address_in_korea;
+                        let titleOfWork = employer_information.title_of_work;
 
-                    $("#edit_student_id").val(response.data.id);
-                    $("#edit_eps_topik").val(eps_topik.current_progress);
-                    $("#edit_eps_topik_date").val(eps_topik.date);
-                    $("#edit_jsr_forwarding").val(jsr_forwarding.current_progress);
-                    $("#edit_jsr_forwarding_date").val(jsr_forwarding.date);
-                    $("#edit_jsr_approval").val(jsr_approval.current_progress);
-                    $("#edit_jsr_approval_date").val(jsr_approval.date);
-                    $("#edit_job_search_progress").val(job_search_progress.current_progress);
-                    $("#edit_job_search_progress_date").val(job_search_progress.date);
-                    $("#edit_employment_permit_assuance").val(employment_permit_assuance.current_progress);
-                    $("#edit_employment_permit_assuance_date").val(employment_permit_assuance.date);
-                    $("#edit_slc_forwarding").val(slc_forwarding.current_progress);
-                    $("#edit_slc_forwarding_date").val(slc_forwarding.date);
-                    $("#edit_slc_signing").val(slc_signing.current_progress);
-                    $("#edit_slc_signing_date").val(slc_signing.date);
-                    $("#edit_ccvi_issuance").val(ccvi_issuance.current_progress);
-                    $("#edit_ccvi_issuance_date").val(ccvi_issuance.date);
-                    $("#edit_tentative_entry").val(tentative_entry.current_progress);
-                    $("#edit_tentative_entry_date").val(tentative_entry.date);
+                        $("#edit_employer_name").val(employerName);
+                        $("#edit_company_name").val(companyName);
+                        $("#edit_contact_number").val(employerContactNo);
+                        $("#edit_address_in_korea").val(addressInKorea);
+                        $("#edit_title_of_work").val(titleOfWork);
+                    }
             }).fail(function() {
                 swal("Error Occured!", "Please refresh the page then try again!", "error");
             });
@@ -400,6 +413,7 @@
                                 <th class="text-center">CONTACT NO.</th>
                                 <th class="text-center">ADDRESSS IN KOREA</th>
                                 <th class="text-center">TITLE OF WORK</th>
+                                <th class="text-center">CURRENT PROGRESS</th>
                                 <th class="text-center">ACTION</th>
                             </tr>
                         </thead>
