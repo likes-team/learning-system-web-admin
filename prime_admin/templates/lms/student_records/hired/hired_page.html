@@ -172,6 +172,7 @@
             $.getJSON(
                 `/learning-management/api/members/${data[0]}`, function(response){
                     clearForm('frm_edit_hired');
+                    $("#edit_student_id").val(response.data.id);
 
                     if (response.data.hired_information){
                         let eps_topik = response.data.hired_information.eps_topik;
@@ -184,7 +185,6 @@
                         let ccvi_issuance = response.data.hired_information.ccvi_issuance;
                         let tentative_entry = response.data.hired_information.tentative_entry;
     
-                        $("#edit_student_id").val(response.data.id);
                         $("#edit_eps_topik").val(eps_topik.current_progress);
                         $("#edit_eps_topik_date").val(eps_topik.date);
                         $("#edit_jsr_forwarding").val(jsr_forwarding.current_progress);
