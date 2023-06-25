@@ -1,4 +1,5 @@
 from bson import ObjectId
+from flask_login import current_user
 from app import mongo
 from prime_admin.utils.currency import convert_decimal128_to_decimal, format_to_str_php
 from prime_admin.models_v2 import PaymentV2, UserV2
@@ -62,7 +63,12 @@ class EarningService:
         match = {}
         if contact_person != 'all':
             match['contact_person'] = ObjectId(contact_person)
-            
+        
+        if current_user.role.name in ['Secretary']:
+            match['branch'] = current_user.branch.id
+        elif current_user.role.name in ['Partner', 'Manager']:
+            match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
+        
         aggregate_query = list(mongo.db.lms_registration_payments.aggregate([
             {'$match': match},
             {'$group': {
@@ -101,6 +107,11 @@ class EarningService:
         if contact_person != 'all':
             match['contact_person'] = ObjectId(contact_person)
 
+        if current_user.role.name in ['Secretary']:
+            match['branch'] = current_user.branch.id
+        elif current_user.role.name in ['Partner', 'Manager']:
+            match['branch'] = {'$in': [ObjectId(branch) for branch in current_user.branches]}
+        
         aggregate_query = list(mongo.db.lms_registration_payments.aggregate([
             {'$match': match},
             {'$lookup': {
