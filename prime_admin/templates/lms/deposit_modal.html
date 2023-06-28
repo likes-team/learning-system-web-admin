@@ -1,5 +1,5 @@
 <div id="mdl_deposit" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
-     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -9,20 +9,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form name="frm_deposit" action="{{url_for('lms.deposit')}}" method="POST" class="needs-validation" novalidate>
+                <form id="frm_deposit" action="{{url_for('lms.deposit')}}" method="POST" novalidate>
                     <div class="main-card mb-3 card">
                         <div class="card-body">
-                        <!-- <h5 class="card-title">Student Information</h5> -->
-
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id"
-                            value="">
-                            
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" class="form-control" id="edit_client_id" name="client_id" value="">
                             <div class="form-row">
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
                                         <label for="from_what" class="">From</label>
-                                        <select id="from_what" name="from_what" id="from_what" class="form-control" required="">
+                                        <select id="from_what" name="from_what" id="from_what" class="form-control"
+                                            required="">
                                             <option value="">Choose...</option>
                                             <option value="Sales">
                                                 Sales
@@ -34,93 +31,51 @@
                                                 Emergency Fund
                                             </option>
                                         </select>
-                                        <div class="valid-feedback">
-                                            Looks good!
-                                        </div>
-                                        <div class="invalid-feedback">
-                                            Please provide value
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="bank_name"
-                                            class="">Bank Name</label><input name="bank_name" id="bank_name"
-                                            type="text" class="form-control" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid bank name
-                                            </div>
-                                        </div>
+                                    <div class="position-relative form-group"><label for="bank_name" class="">Bank
+                                            Name</label><input name="bank_name" id="bank_name" type="text"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="account_no"
-                                            class="">Account No.</label><input name="account_no" id="account_no"
-                                            type="text" class="form-control" required></div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide an account no.
-                                            </div>
+                                    <div class="position-relative form-group"><label for="account_no" class="">Account
+                                            No.</label><input name="account_no" id="account_no" type="text"
+                                            class="form-control" required></div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="account_name"
-                                            class="">Account Name</label><input name="account_name" id="account_name"
-                                            type="text" class="form-control" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid account name
-                                            </div></div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="amount"
-                                            class="">Deposit Amount</label>
-                                            <input required id="amount" placeholder="Amount" step="1" type="number" name="amount" class="form-control">
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a valid amount
-                                            </div>
+                                    <div class="position-relative form-group"><label for="account_name" class="">Account
+                                            Name</label><input name="account_name" id="account_name" type="text"
+                                            class="form-control" required>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="position-relative form-group"><label for="by_who"
-                                            class="">By Who</label><input name="by_who" id="by_who"
-                                            type="text" class="form-control" required>
-                                            </div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide value
-                                            </div>
                                 </div>
                             </div>
 
                             <div class="form-row">
-                          
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="amount" class="">Deposit
+                                            Amount</label>
+                                        <input required id="amount" placeholder="Amount" step="1" type="number"
+                                            name="amount" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group"><label for="by_who" class="">By
+                                            Who</label><input name="by_who" id="by_who" type="text" class="form-control"
+                                            required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="col-md-12">
                                     <div class="position-relative form-group"><label for="remarks"
-                                            class="">Remarks</label><input name="remarks" id="remarks"
-                                            type="text" class="form-control" required>
-                                            </div>
-                                            <div class="valid-feedback">
-                                                Looks good!
-                                            </div>
-                                            <div class="invalid-feedback">
-                                                Please provide a remark
-                                            </div>
+                                            class="">Remarks</label><input name="remarks" id="remarks" type="text"
+                                            class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -128,54 +83,34 @@
 
                     <div style="display: none;" id="tbl_deposit" class="main-card mb-3 card">
                         <div class="card-body">
-                <div class="table-responsive">
-                            <table id="tbl_mdl_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
-                            <thead>
-                                <tr>
-                                    <th>REGISTRATION NO.</th>
-                                    <th>SALES FROM</th>
-                                    <th>LAST NAME</th>
-                                    <th>FIRST NAME</th>
-                                    <th>MIDDLE NAME</th>
-                                    <th>SUFFIX</th>
-                                    <th>AMOUNT</th>
-                                    <th>DATE OF PAYMENT</th>
-                                    <!-- <th>BALANCE</th> -->
-                                    <!-- <th>DEPOSIT</th> -->
-                                </tr>
-                                </thead>
-                                <tbody>
-                                     <!-- load with ajax -->
-                                </tbody>
-                            </table>
-                        </div>
+                            <div class="table-responsive">
+                                <table id="tbl_mdl_deposit" style="width:100%; cursor:pointer;" class="mb-0 table">
+                                    <thead>
+                                        <tr>
+                                            <th>REGISTRATION NO.</th>
+                                            <th>SALES FROM</th>
+                                            <th>LAST NAME</th>
+                                            <th>FIRST NAME</th>
+                                            <th>MIDDLE NAME</th>
+                                            <th>SUFFIX</th>
+                                            <th>AMOUNT</th>
+                                            <th>DATE OF PAYMENT</th>
+                                            <!-- <th>BALANCE</th> -->
+                                            <!-- <th>DEPOSIT</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- load with ajax -->
+                                    </tbody>
+                                </table>
+                            </div>
 
                         </div>
                     </div>
-                    <script>
-                        // Example starter JavaScript for disabling form submissions if there are invalid fields
-                        (function() {
-                            'use strict';
-                            window.addEventListener('load', function() {
-                                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                                var forms = document.getElementsByClassName('needs-validation');
-                                // Loop over them and prevent submission
-                                var validation = Array.prototype.filter.call(forms, function(form) {
-                                    form.addEventListener('submit', function(event) {
-                                        if (form.checkValidity() === false) {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }
-                                        form.classList.add('was-validated');
-                                    }, false);
-                                });
-                            }, false);
-                        })();
-                    </script>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="btn_deposit" type="submit" class="btn btn-success">Deposit</button>
+                        <input id="btn_deposit" type="submit" class="btn btn-success" value="Deposit"
+                            disabled="disabled"></button>
                     </div>
                 </form>
             </div>

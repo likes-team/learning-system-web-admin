@@ -56,6 +56,7 @@
 
     $(document).ready(function () {
         $("#li_orientation_attendance").addClass('mm-active');
+        $("#btn_save").prop("disabled", false);
 
         var dtbl_members = $('#tbl_members').DataTable({
             "dom": 'rtip',
@@ -570,7 +571,7 @@
         </div>
 
         <div class="d-block text-right card-footer">
-            <input form="frm_orient" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SAVE">
+            <input id="btn_save" form="frm_orient" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SAVE" disabled="disabled">
         </div>
     </div>
     {% endif %}

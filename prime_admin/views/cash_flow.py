@@ -69,23 +69,20 @@ def cash_flow():
 @bp_lms.route('/deposit', methods=['POST'])
 @login_required
 def deposit():
-    form = DepositForm()
-    
+    form = request.form
     new_deposit = CashFlow()
-    # new_deposit.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_to")
-    new_deposit.bank_name = form.bank_name.data
-    new_deposit.account_no = form.account_no.data
-    new_deposit.account_name = form.account_name.data
-    new_deposit.amount = form.amount.data
-    new_deposit.from_what = form.from_what.data
-    new_deposit.by_who = form.by_who.data
+    new_deposit.bank_name = form.get('bank_name')
+    new_deposit.account_no = form.get('account_no')
+    new_deposit.account_name = form.get('account_name')
+    new_deposit.amount = form.get('amount')
+    new_deposit.from_what = form.get('from_what')
+    new_deposit.by_who = form.get('by_who')
     new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
     new_deposit.branch = current_user.branch
     new_deposit.type = "deposit"
-    new_deposit.remarks = form.remarks.data
+    new_deposit.remarks = form.get('remarks')
     new_deposit.set_created_at()
     new_deposit.date_deposit = new_deposit.created_at
-
     payments = []
 
     with mongo.cx.start_session() as session:
@@ -96,7 +93,7 @@ def deposit():
                 if accounting:
                     new_deposit.group = accounting['active_group']
 
-                    if form.from_what.data == "Sales":
+                    if new_deposit.from_what == "Sales":
                         new_deposit.balance = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         accounting["total_gross_sale"] = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
 
@@ -251,9 +248,11 @@ def deposit():
                     "group": new_deposit.group,
                     "created_at": new_deposit.created_at,
                 }, session=session)
-
-    flash('Deposit Successfully!','success')
-    return redirect(url_for('lms.cash_flow'))
+    response = {
+        'status': 'success',
+        'message': "Processed successfully!"
+    }
+    return jsonify(response), 201
 
 
 @bp_lms.route('/withdraw', methods=['POST'])
