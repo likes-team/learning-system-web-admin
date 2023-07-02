@@ -90,9 +90,13 @@
                                     value="">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label for="view_passport">E-Reg. Password</label>
-                                <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_password" name="view_password"
-                                    value="">
+                                <label for="view_password">E-Reg. Password</label>
+                                <div class="input-group">
+                                    <input style="font-weight: bold;" disabled type="password" class="form-control" id="view_password" name="view_password" class="form-control">
+                                    <div class="input-group-append">
+                                        <button id="btn_toggle_password" class="btn btn-info" value="show"><i class="fa fa-eye"></i></button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="view_civil_status">Civil Status</label>

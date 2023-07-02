@@ -806,6 +806,73 @@
             $("#print_registration_no").val(registration_no);
             $("#print_address").val(address);
         });
+
+        $("#btn_toggle_password").click(function(){
+            let state = $(this).val();
+
+            if (state == "show"){
+                fixBootstrapModal();
+                swal({
+                    title: 'Password?',
+                    text: "Enter your password",
+                    inputPlaceholder: "Your Password",
+                    type: 'input',
+                    inputType: 'password',
+                    showCancelButton: true,
+                    cancelButtonColor: "#DD6B55",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Confirm",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function (inputValue) {
+                    if (inputValue === false) return false;
+                    if (inputValue === "") {
+                        swal.showInputError("Please input your password!");
+                        return false;
+                    }
+    
+                    const url = `/learning-management/check-password?password=${inputValue}`;
+    
+                    setTimeout(function () {
+                        $.ajax({
+                            url: url,
+                            type: "GET",
+                            async: false,
+                            success: function (response) {
+                                swal("Success!", "Correct password!", "success");
+                                $("#view_password").attr('type', 'text');
+                                $("#btn_toggle_password").val('hide');
+                            },
+                            error: function (response) {
+                                swal("Error Occured!", "Invalid password!", "error");
+                            },
+                        });
+                    }, 500);
+                });
+            } else {
+                $("#view_password").attr('type', 'password');
+                $(this).val('show');
+            }
+        });
+
+        // call this before showing SweetAlert:
+        function fixBootstrapModal() {
+            var modalNode = document.querySelector('.modal[tabindex="-1"]');
+            if (!modalNode) return;
+        
+            modalNode.removeAttribute('tabindex');
+            modalNode.classList.add('js-swal-fixed');
+        }
+        
+        // call this before hiding SweetAlert (inside done callback):
+        function restoreBootstrapModal() {
+            var modalNode = document.querySelector('.modal.js-swal-fixed');
+            if (!modalNode) return;
+        
+            modalNode.setAttribute('tabindex', '-1');
+            modalNode.classList.remove('js-swal-fixed');
+        }
+        
     }); // document end
 </script>
 {% endblock %}

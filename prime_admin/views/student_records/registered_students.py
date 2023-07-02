@@ -636,6 +636,23 @@ def print_student_agreement_form():
     return render_pdf(HTML(string=html))
 
 
+@bp_lms.route('/check-password', methods=['GET'])
+def check_password():
+    password = request.args.get('password', '')
+
+    if not current_user.check_password(password):
+        return jsonify({
+            'status': 'error',
+            'message': "Invalid password!"
+        }), 400
+
+    response = {
+        'status': 'success',
+        'message': "Valid password!"
+    }
+    return jsonify(response)
+    
+
 @bp_lms.route('/refund', methods=['POST'])
 def refund():
     student_id = request.json.get('student_id', None)
