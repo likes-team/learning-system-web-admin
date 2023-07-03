@@ -1,5 +1,6 @@
 from bson import ObjectId
 from flask import request, render_template, jsonify
+from flask_login import login_required
 from app import mongo
 from prime_admin import bp_lms
 from prime_admin.utils.date import get_utc_date_now, convert_date_input_to_utc
@@ -7,6 +8,7 @@ from prime_admin.utils.date import get_utc_date_now, convert_date_input_to_utc
 
 
 @bp_lms.route('/hired')
+@login_required
 def hired():
     exam_venues = mongo.db.lms_configurations.find_one({'name': "exam_venues"})['values']
     industries = mongo.db.lms_configurations.find_one({'name': "industries"})['values']

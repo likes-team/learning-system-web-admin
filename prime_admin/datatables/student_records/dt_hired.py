@@ -1,4 +1,5 @@
 import pymongo
+from bson import ObjectId
 from mongoengine.queryset.visitor import Q
 from flask import abort, jsonify, request
 from flask_login import current_user
@@ -15,6 +16,16 @@ def datatables_student_records_hired():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     match = {'is_hired': True}
+    
+    if current_user.role.name == "Admin":
+        pass
+    elif current_user.role.name == "Manager":
+        match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
+    elif current_user.role.name == "Partner":
+        match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
+    elif current_user.role.name == "Secretary":
+        match['branch'] = current_user.branch.id
+
     query = mongo.db.lms_registrations.find(match).sort('added_to_hired_date', pymongo.DESCENDING).skip(start).limit(length)
     total_records = mongo.db.lms_registrations.find(match).count()
     filtered_records = query.count()
@@ -61,6 +72,8 @@ def datatables_student_records_hired_mdl_students():
     elif current_user.role.name == "Admin":
         clients = Registration.objects(Q(status="registered") & Q(is_passer=True))
     elif current_user.role.name == "Partner":
+        clients = Registration.objects(Q(status="registered") & Q(is_passer=True)).filter(branch__in=current_user.branches)
+    elif current_user.role.name == "Manager":
         clients = Registration.objects(Q(status="registered") & Q(is_passer=True)).filter(branch__in=current_user.branches)
     else:
         return abort(404)
