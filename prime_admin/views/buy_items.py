@@ -82,7 +82,7 @@ def buy_items():
                 'deposited': "Pre Deposit"
             }, session=session)
 
-            flash("Process successfully!", 'success')
+            flash("Processed successfully!", 'success')
     return redirect(url_for('lms.store_records'))
 
 

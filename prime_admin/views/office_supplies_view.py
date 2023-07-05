@@ -62,7 +62,7 @@ def outbound_office_supply():
 
     try:
         InventoryService.outbound_office_supply(supply_id, quantity)
-        flash('Process Successfully!','success')
+        flash('Processed successfully!','success')
         return redirect(url_for('lms.office_supplies'))
     except NotEnoughStocksError as err:
         flash(str(err),'error')

@@ -59,7 +59,7 @@ def inbound_student_supply():
     quantity = int(request.form['quantity'])
 
     InventoryService.inbound_student_supply(supply_id, quantity, brand, price)
-    flash('Process Successfully!','success')
+    flash('Processed successfully!','success')
     return redirect(url_for('lms.student_supplies'))
 
 

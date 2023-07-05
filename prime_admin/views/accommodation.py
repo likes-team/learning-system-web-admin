@@ -79,7 +79,7 @@ def accomodate():
                 'deposited': "Pre Deposit"
             })
 
-    flash("Process successfully!", 'success')
+    flash("Processed successfully!", 'success')
     # except Exception as err:
     #     flash("Error occured:" + str(err), 'error')
 
