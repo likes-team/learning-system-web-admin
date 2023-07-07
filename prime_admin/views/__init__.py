@@ -25,3 +25,4 @@ from . import office_supplies_view
 from . import student_supplies_view
 from .settings import settings, create_other_expenses
 from .transactions import *
+from .payroll import *
