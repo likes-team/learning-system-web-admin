@@ -105,17 +105,76 @@
                 },
                 {
                     "targets": 5,
-                    "className": "text-center",
-                    "render": function(data, type, row){
-                        if (data) {
-                            return `<div class="badge badge-success">Yes</div>`
-                        } else {
-                            return `<div class="badge badge-danger">No</div>`
-                        }
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-salary-rate">
+                            </div>
+                        </td>`;
                     }
                 },
                 {
                     "targets": 6,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-sss">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 7,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-phil">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 8,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-pag-ibig">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 9,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-sss">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 10,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-phil">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 11,
+                    "render": function (data, type, row) {
+                        return `<td>
+                            <div class="position-relative form-group">
+                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-pag-ibig">
+                            </div>
+                        </td>`;
+                    }
+                },
+                {
+                    "targets": 12,
                     "className": "text-center",
                     "render": function(data, type, row){
                         if (data) {
@@ -126,7 +185,18 @@
                     }
                 },
                 {
-                    "targets": 7,
+                    "targets": 13,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if (data) {
+                            return `<div class="badge badge-success">Yes</div>`
+                        } else {
+                            return `<div class="badge badge-danger">No</div>`
+                        }
+                    }
+                },
+                {
+                    "targets": 14,
                     "className": "text-center",
                     "render": function (data, type, row) {
                         if (data) {
@@ -137,7 +207,7 @@
                     }
                 },
                 {
-                    "targets": 8,
+                    "targets": 15,
                     "className": "text-center",
                     "render": function (data, type, row) {
                         if (!data) {
@@ -150,6 +220,7 @@
                         var id = row[0];
                         return `
                         <a href="/auth/users/${id}/edit" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-primary btn-sm btn-edit" value="edit"><i class="fa fa-wrench"></i></button>
                         <button type="button" class="btn btn-info btn-sm btn-view" data-toggle="modal" data-target="#mdl_view"><i class="fa fa-eye"></i></button>
                         `
                     }
@@ -278,6 +349,50 @@
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
                 });
         });
+
+
+        $("#tbl_user_status tbody").on('click', '.btn-edit', function(){
+            let buttonVal = $(this).val(); 
+            let row = $(this).parents('tr');
+            const userId = dtbl_user_status.row(row).data()[0];
+
+            if(buttonVal == "edit"){
+                $(this).val('save');
+                $(this).removeClass('btn-primary');
+                $(this).addClass('btn-success');
+                $('input', row).each(function() {
+                    $(this).prop('disabled', false);
+                });
+            } else if(buttonVal == "save"){
+                $(this).val('edit');
+                $(this).removeClass('btn-success');
+                $(this).addClass('btn-primary');
+
+                let values = [];
+
+                $('input', row).each(function() {
+                    $(this).prop('disabled', true);
+                    
+                    values.push($(this).val());
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: `/learning-management/payroll/employees/${userId}/edit`,
+                    dataType: "json",
+                    data: JSON.stringify({
+                        'values': values
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (response) {
+                        swal("Success!", 'Saved Successfully!', "success");
+                    },
+                    error: function (data) {
+                        swal("Error occured!", "Please refresh the page then try again!", "error");
+                    },
+                });
+            }
+        });
     });
 </script>
 
@@ -340,11 +455,24 @@
                             class="align-middle mb-0 table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
+                                    <th colspan="6" scope="colgroup"></th>
+                                    <th colspan="3" scope="colgroup">EE</th>
+                                    <th colspan="3" scope="colgroup">ER</th>
+                                    <th colspan="4" scope="colgroup"></th>
+                                </tr>
+                                <tr>
                                     <th class="text-center">SYSTEM ID</th>
                                     <th class="text-center">EMPLOYEE ID</th>
                                     <th>NAME</th>
                                     <th class="text-center">POSITION</th>
                                     <th class="text-center">BRANCH/S</th>
+                                    <th class="text-center">SALARY RATE</th>
+                                    <th class="text-center">SSS</th>
+                                    <th class="text-center">PHIL</th>
+                                    <th class="text-center">PAG-IBIG</th>
+                                    <th class="text-center">SSS</th>
+                                    <th class="text-center">PHIL</th>
+                                    <th class="text-center">PAG-IBIG</th>
                                     <th class="text-center">IS EMPLOYEE?</th>
                                     <th class="text-center">IS TEACHER?</th>
                                     <th class="text-center">STATUS</th>

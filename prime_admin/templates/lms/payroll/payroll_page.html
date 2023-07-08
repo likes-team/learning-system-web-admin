@@ -314,36 +314,6 @@
         <div class="col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-body">
-                    <div class="form-row">
-                        <div class="col-md-2">
-                            <div class="position-relative form-group">
-                                <label for="lname" class="">Search</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <input id="search_input" placeholder="Last Name" type="text"
-                                            class="form-control">
-                                        <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
-                                            </i></button>
-                                        <button id="btn_clear_entry"
-                                            class="border-0 btn-transition btn btn-outline-danger"><i
-                                                class="pe-7s-close">
-                                            </i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="position-relative form-group">
-                                <label for="filter_roles" class="">Position</label>
-                                <select id="filter_roles" class="form-control">
-                                    <option value="all">All</option>
-                                    {% for role in roles %}
-                                    <option value="{{role['_id']}}">{{role['name']}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
                     <div class="table-responsive">
                         <table id="tbl_employees"
                             class="align-middle mb-0 table table-bordered table-striped table-hover">

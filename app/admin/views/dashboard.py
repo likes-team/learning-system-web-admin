@@ -63,6 +63,9 @@ def get_dashboard_users():
             if branch:
                 branches.append(branch['name'])
         branches = ', '.join(branches)
+        employee_information = data.get('employee_information', {})
+        ee = employee_information.get('ee', {})
+        er = employee_information.get('er', {})
     
         table_data.append([
             str(data.get('_id', '')),
@@ -73,6 +76,13 @@ def get_dashboard_users():
             },
             role[0]['name'],
             branches,
+            str(employee_information.get('salary_rate', '')),
+            str(ee.get('sss', '')),
+            str(ee.get('phil', '')),
+            str(ee.get('pag_ibig', '')),
+            str(er.get('sss', '')),
+            str(er.get('phil', '')),
+            str(er.get('pag_ibig', '')),
             is_employee,
             is_teacher,
             active,
