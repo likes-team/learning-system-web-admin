@@ -91,6 +91,7 @@
             selectDescriptionId = "#filter_tab3_description";
         }
         $(selectDescriptionId).empty();
+        $(selectDescriptionId).append($('<option value="">Select...</option>'));
         $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
             if (response.data.length > 0) {
                 $(selectDescriptionId).append(newOption);
@@ -274,6 +275,28 @@
             }
         });
 
+
+        var dtEmployeeBenefits = $("#tbl_employee_benefits").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/employee-benefits/dt",
+                "dataSrc": function (json) {
+                    return json.data;
+                },
+                "data": function (d) {
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
         // --------------------- ADD EXPENSES ------------------------
 
 
@@ -337,6 +360,7 @@
                                 dtbl_fund_wallet_statements.ajax.reload();
                                 dtbl_add_funds_transactions.ajax.reload();
                                 dtbl_business_expenses.ajax.reload();
+                                dtEmployeeBenefits.ajax.reload();
                                 swal("Success!", response.message, "success");
                                 $("#mdl_add_expenses .close").click()
                                 clearCreateModal();
@@ -394,6 +418,7 @@
             $("#expenses_sender").closest('.col-md-4').hide();
             $("#expenses_contact_no").closest('.col-md-4').hide();
             $("#expenses_address").closest('.col-md-6').hide();
+            $("#government_benefits").closest('.col-md-12').hide();
 
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
@@ -493,9 +518,7 @@
                 $("#billing_month_to").closest('.col-md-3').hide();
             } else if(
                 selectedCategory == "BIR" || 
-                selectedCategory == "Business Permit" || 
-                selectedCategory == "Employee Benefits" ||
-                selectedCategory == "Bookeeper Retainer Fee"){
+                selectedCategory == "Business Permit"){
                 $.getJSON(`/learning-management/fetch-bookeeper-items?category=${selectedCategory}`, function(response, status, xhr){
                     for(i=0; i < response.data.length; i++){
                         var item = response.data[i];
@@ -509,11 +532,32 @@
                 $("#billing_month_to").rules('remove');
                 $("#billing_month_from").closest('.col-md-3').hide();
                 $("#billing_month_to").closest('.col-md-3').hide();
-                if (selectedCategory == "BIR"){
-                } else if(selectedCategory == "Business Permit"){
-                } else if(selectedCategory == "Employee Benefits"){
-                } else if(selectedCategory == "Bookeeper's Retainers Fee"){
+            } else if (selectedCategory == "Bookeeper"){
+                if ($("#branch_expenses").val() == '') {
+                    swal("Error Occured!", "Please select branch first!", "info");
+                    $(this).val('');
+                    return;
                 }
+                $("#label_description").html('Employee');
+                getEmployees($("#branch_expenses").val(), "add_expenses");
+
+                $("#government_benefits").empty();
+                $("#government_benefits").closest('.col-md-12').show();
+                $.getJSON(`/learning-management/fetch-bookeeper-items?category=${selectedCategory}`, function(response, status, xhr){
+                    for(i=0; i < response.data.length; i++){
+                        var item = response.data[i];
+                        $("#government_benefits").append($('<option></option>').attr("value", item.description).text(item.description));
+                    }
+                }).fail(function(err){
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
+
+                $("#account_no").rules('remove');
+                $("#qty").rules('remove');
+                $("#unit_price").rules('remove');
+                $("#account_no").closest('.col-md-6').hide();
+                $("#qty").closest('.col-md-4').hide();
+                $("#unit_price").closest('.col-md-4').hide();
             } else if(selectedCategory == "SNPL Fee"){
                 if ($("#branch_expenses").val() == '') {
                     swal("Error Occured!", "Please select branch first!", "info");
@@ -545,6 +589,16 @@
                     `/learning-management/earnings/recently-approved-marketer-total_earnings?contact_person=${contactPerson}&branch=${branch}`
                         , function(response){
                     $("#total_amount_due").val(response.total_amount);
+                });
+            } else if(selectedCategory == "Bookeeper"){
+                $.getJSON(`/learning-management/employees/${$(this).val()}/get-government-benefits`, function(response){
+                    if(response.status == "error"){
+                        $("#total_amount_due").val('');
+                        swal("Error Occured!", response.message, "error");
+                        return;
+                    }
+
+                    $("#total_amount_due").val(response.data.total);
                 });
             } else {
                 $.getJSON('/learning-management/api/supplies/' + $(this).val(), function(response){

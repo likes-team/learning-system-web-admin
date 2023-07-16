@@ -50,8 +50,9 @@ class BusinessExpensesService:
             'other_expenses': initial.copy(),
             'BIR': initial.copy(),
             'Business Permit': initial.copy(),
-            'Employee Benefits': initial.copy(),
-            'Bookeeper Retainer Fee': initial.copy(),
+            'Employee Benefits': initial.copy(), # Deprecated
+            'Bookeeper Retainer Fee': initial.copy(), # Deprecated
+            'Bookeeper': initial.copy(),
             'SNPL Fee': initial.copy(),
             'total': initial.copy()
         }
@@ -65,8 +66,9 @@ class BusinessExpensesService:
             'other_expenses': 'OTHER EXPENSES',
             'BIR': 'BIR',
             'Business Permit': 'BUSINESS PERMIT',
-            'Employee Benefits': 'EMPLOYEE BENEFITS',
-            'Bookeeper Retainer Fee': 'BOOKEEPERs RETAINERS FEE',
+            'Employee Benefits': 'EMPLOYEE BENEFITS', # Deprecated
+            'Bookeeper Retainer Fee': 'BOOKEEPERs RETAINERS FEE', # Deprecated
+            'Bookeeper': 'BOOKEEPER',
             'SNPL Fee': "SNPL FEE",
             'total': 'TOTAL OF EXPENDITURE'
         }

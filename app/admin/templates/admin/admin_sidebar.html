@@ -188,14 +188,12 @@
                         </a>
                     </li>
 
-                    {% if current_user.role.name in ['Admin'] %}
-                        <li>
-                            <a id="li_payroll" href="{{url_for('lms.payroll')}}" class="">
-                                <i class="metismenu-icon pe-7s-date icon-gradient bg-premium-dark" aria-hidden="true"></i>
-                                Payroll
-                            </a>
-                        </li>
-                    {% endif %}
+                    <!-- <li>
+                        <a id="li_payroll" href="{{url_for('lms.payroll')}}" class="">
+                            <i class="metismenu-icon pe-7s-date icon-gradient bg-premium-dark" aria-hidden="true"></i>
+                            Payroll
+                        </a>
+                    </li> -->
                 {% endif %}
 
                 {% if current_user.role.name in ['Admin', 'Secretary', 'Partner', 'Manager'] %}

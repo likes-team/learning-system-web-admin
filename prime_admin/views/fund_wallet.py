@@ -24,6 +24,7 @@ from prime_admin.models_v2 import StudentV2
 from prime_admin.services.payment import PaymentService
 from prime_admin.helpers.query_filter import PaymentQueryFilter
 from prime_admin.models_v2 import PaymentV2
+from prime_admin.utils.currency import convert_decimal128_to_decimal
 
 
 
@@ -255,7 +256,10 @@ def fund_wallet_add_expenses():
     billing_month_from = form.get('billing_month_from', None)
     billing_month_to = form.get('billing_month_to', None)
     qty = form.get('qty', None)
-    unit_price = format(float(form.get('unit_price', '0.00')), '.2f')
+    unit_price = form.get('unit_price', '0.00')
+    if unit_price == '':
+        unit_price = '0.00'
+    unit_price = format(float(unit_price), '.2f')
     settled_by = form.get('settled_by', '')
     total_amount_due = format(float(form.get('total_amount_due', '0.00')), '.2f')
     branch_id = form.get('branch', None)
@@ -294,6 +298,7 @@ def fund_wallet_add_expenses():
 
             status = None
             reference_no = None
+            employee_information = None
             
             if category == "office_supply":
                 InventoryService.inbound_office_supply(description, branch_id, qty, unit_price, session=session)
@@ -311,6 +316,9 @@ def fund_wallet_add_expenses():
                 }, {'$set': {
                     'is_expenses': True
                 }}, session=session)
+            elif category == 'Bookeeper':
+                query = mongo.db.auth_users.find_one({'_id': ObjectId(description)})
+                employee_information = query.get('employee_information')
 
             mongo.db.lms_fund_wallet_transactions.insert_one({
                 'type': 'expenses',
@@ -334,6 +342,7 @@ def fund_wallet_add_expenses():
                 'address': address,
                 'status': status,
                 'reference_no': reference_no,
+                'employee_information': employee_information,
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)
@@ -776,6 +785,94 @@ def fetch_refund_dt(branch_id):
     return jsonify(response)
 
 
+@bp_lms.route('/branches/<string:branch_id>/employee-benefits/dt', methods=['GET'])
+def fetch_employee_benefits_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    total_records: int
+    filtered_records: int
+    match = {'category': 'Bookeeper'}
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Partner":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+    else:
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Partner":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+
+    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
+    filtered_records = query.count()
+    table_data = []
+    total_ofice_supply = decimal.Decimal(0)
+    
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_date: datetime = transaction.get('date', None)
+            description = transaction.get('description')
+            billing_month_from = transaction.get('billing_month_from', '')
+            billing_month_to = transaction.get('billing_month_to', '')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', 0.00)
+            employee_information = transaction.get('employee_information')
+            ee = employee_information.get('ee')
+            er = employee_information.get('er')
+            ee_sss = convert_decimal128_to_decimal(ee.get('sss', 0))
+            ee_phil = convert_decimal128_to_decimal(ee.get('phil', 0))
+            ee_pag_ibig = convert_decimal128_to_decimal(ee.get('pag_ibig', 0))
+            er_sss = convert_decimal128_to_decimal(er.get('sss', 0))
+            er_phil = convert_decimal128_to_decimal(er.get('phil', 0))
+            er_pag_ibig = convert_decimal128_to_decimal(er.get('pag_ibig', 0))
+            total_ee = ee_sss + ee_phil + ee_pag_ibig
+            total_er = er_sss + er_phil + er_pag_ibig
+            employee = mongo.db.auth_users.find_one({'_id': ObjectId(description)})
+        
+            if type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+            
+            table_data.append([
+                local_datetime,
+                employee['fname'] + " " + employee['lname'],
+                billing_month_from + " - " + billing_month_to,
+                str(ee.get('sss')),
+                str(ee.get('pag_ibig')),
+                str(ee.get('phil')),
+                str(total_ee),
+                str(er.get('sss')),
+                str(er.get('pag_ibig')),
+                str(er.get('phil')),
+                str(total_er),
+                str(total_amount_due),
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+    return jsonify(response)
+
+
 @bp_lms.route('api/supplies', methods=['GET'])
 def get_supplies():
     branch_id = request.args.get('branch')
@@ -824,6 +921,29 @@ def get_supply(description):
         'data': product,
         'message': ""
     }), 200
+    
+
+@bp_lms.route('employees/<string:employee_id>/get-government-benefits', methods=['GET'])
+def get_goverment_benefits(employee_id):
+    query = mongo.db.auth_users.find_one({'_id': ObjectId(employee_id)})
+    employee_information = query.get('employee_information')
+    
+    if employee_information is None:
+        return jsonify({'status': 'error', 'message': "Government benefits is not set"}), 200
+    
+    ee = employee_information.get('ee')
+    er = employee_information.get('er')
+    ee_sss = convert_decimal128_to_decimal(ee.get('sss', 0))
+    ee_phil = convert_decimal128_to_decimal(ee.get('phil', 0))
+    ee_pag_ibig = convert_decimal128_to_decimal(ee.get('pag_ibig', 0))
+    er_sss = convert_decimal128_to_decimal(er.get('sss', 0))
+    er_phil = convert_decimal128_to_decimal(er.get('phil', 0))
+    er_pag_ibig = convert_decimal128_to_decimal(er.get('pag_ibig', 0))
+    
+    total_ee = ee_sss + ee_phil + ee_pag_ibig
+    total_er = er_sss + er_phil + er_pag_ibig
+    total = str(total_ee + total_er)
+    return jsonify({'status': 'success', 'data': {'total': total}})    
     
 
 @bp_lms.route('/fetch-other-expenses-items', methods=['GET'])
