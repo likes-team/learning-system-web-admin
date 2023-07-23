@@ -1,0 +1,394 @@
+{% extends "admin/admin_base.html" %}
+
+
+{% block head %}
+<!-- sweet alert framework -->
+<link rel="stylesheet" type="text/css"
+    href="{{url_for('bp_admin.static', filename='bower_components/sweetalert/css/sweetalert.css')}}">
+{% endblock %}
+
+
+{% block scripts %}
+<!-- sweet alert js -->
+<script type="text/javascript"
+    src="{{url_for('bp_admin.static', filename='bower_components/sweetalert/js/sweetalert.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('bp_admin.static', filename='js/modal.js')}}"></script>
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+
+    function getEmployees(branch, from) {
+        $("#employee").empty();
+        $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
+            if (response.data.length > 0) {
+                $("#employee").append('<option value="">Choose...</option>');
+
+                for (i = 0; i < response.data.length; i++) {
+                    var newOption = $(`<option value="${response.data[i].id}">${response.data[i].full_name}</option>`);
+                    $("#employee").append(newOption);
+                }
+            } else {
+                var newOption = $('<option value="">No employees available</option>');
+                $("#employee").append(newOption);
+            }
+        });
+    }
+
+    function calculateTotalDays(dateFrom, dateTo){
+        // Get the input values
+        const startDateString = dateFrom;
+        const endDateString = dateTo;
+
+        // Convert input strings to Date objects
+        const startDate = new Date(startDateString);
+        const endDate = new Date(endDateString);
+
+        // Calculate the difference in milliseconds between the dates
+        const timeDifference = endDate - startDate;
+
+        // Convert milliseconds to days
+        return timeDifference / (1000 * 60 * 60 * 24) + 1;
+    }
+
+    function updateTotalWorkingDays(){
+        const noOfDays = $("#no_of_days").val();
+        const dayOff = $("#day_off").val();
+        const absent = $("#day_absent").val();
+        const totalWorkingDays = noOfDays - (parseInt(dayOff) + parseInt(absent));
+        $("#total_working_days").val(totalWorkingDays);
+    }
+
+    function updateTotalSalaryAmount(){
+        const totalWorkingDays = $("#total_working_days").val();
+        const salaryRate = $("#salary_rate").val();
+        const totalSalaryAmount = parseInt(totalWorkingDays) * salaryRate;
+        console.log(totalWorkingDays);
+        console.log(salary_rate);
+        console.log(totalSalaryAmount);
+        $("#total_salary_amount").val(totalSalaryAmount);
+    }
+
+    function updateGrossSalary(){
+        const totalSalaryAmount = $("#total_salary_amount").val();
+        const foodAllowance = $("#food_allowance").val();
+        const accommodation = $("#accommodation").val();
+        const grossSalary = parseInt(totalSalaryAmount) + parseInt(foodAllowance) + parseInt(accommodation);
+        $("#gross_salary").val(grossSalary);
+    }
+
+    function updateTotalAmountDue(){
+        const grossSalary = $("#gross_salary").val();
+        const cashAdvance = $("#cash_advance").val();
+        const governmentBenefits = $("#government_benefits").val();
+        const accommodationDeduction = $("#accommodation_deduction").val();
+        const totalAmountDue = parseFloat(grossSalary) - (parseFloat(cashAdvance) + parseFloat(governmentBenefits) + parseFloat(accommodationDeduction));
+        $("#total_amount_due").val(totalAmountDue);
+    }
+
+    $(document).ready(function () {
+        $("#li_payroll").addClass('mm-active');
+
+        $("#branch").change(function(){
+            getEmployees($(this).val());
+        });
+
+        $("#employee").change(function(){
+            $.getJSON(`/learning-management/employees/${$(this).val()}/get-salary-rate`, function (response) {
+                if (response.status == "success") {
+                    $("#salary_rate").val(response.data.salary_rate);
+                    updateTotalSalaryAmount();
+                } else {
+                    swal(response.message, "No deductions!", "info");
+                }
+            });
+        });
+
+        $("#billing_month_from").change(function(){
+            const days = calculateTotalDays($(this).val(), $("#billing_month_to").val());
+            $("#no_of_days").val(days);
+            updateTotalWorkingDays();
+            updateTotalSalaryAmount();
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#billing_month_to").change(function(){
+            const days = calculateTotalDays($("#billing_month_from").val(), $(this).val());
+            $("#no_of_days").val(days);
+            updateTotalWorkingDays();
+            updateTotalSalaryAmount();
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#day_off").change(function(){
+            const noOfDays = $("#no_of_days").val();
+            $("#day_off_net").val(noOfDays - $(this).val);
+            updateTotalWorkingDays();
+            updateTotalSalaryAmount();
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#day_absent").change(function(){
+            const noOfDays = $("#no_of_days").val();
+            $("#day_absent_net").val(noOfDays - $(this).val);
+            updateTotalWorkingDays();
+            updateTotalSalaryAmount();
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#food_allowance").change(function(){
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#accommodation").change(function(){
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#cash_advance").change(function(){
+            updateTotalAmountDue();
+        });
+
+        $("#government_benefits").change(function(){
+            updateTotalAmountDue();
+        });
+
+        $("#accommodation_deduction").change(function(){
+            updateTotalAmountDue();
+        });
+
+        var frmValidator = $('#frm_create_payslip').validate({
+            'rules': {
+                'branch': {
+                    'required': true
+                },
+                'employee': {
+                    'required': true,
+                },
+                'position': {
+                    'required': true
+                },
+                'billing_month_from': {
+                    'required': true,
+                },
+                'billing_month_to': {
+                    'required': true,
+                },
+                'settled_by': {
+                    'required': true,
+                }
+            },
+            'submitHandler': function (form) {
+                var xform = $(form);
+
+                swal({
+                    title: `Create Payslip?`,
+                    text: "Double check your inputted data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Confirm!",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function () {
+                    setTimeout(function () {
+                        $.ajax({
+                            type: xform.attr('method'),
+                            url: xform.attr('action'),
+                            data: xform.serialize(),
+                            success: function (response) {
+                                event.stopPropagation();
+                                swal("Success!", response.message, "success");
+
+                                setTimeout(function(){
+                                    location.href = "/learning-management/payroll";
+                                }, 3000);
+                            },
+                            error: function (data) {
+                                if (data.responseJSON == undefined){
+                                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                                } else {
+                                    swal(data.responseJSON.message, "Add payslip failed!", "error");
+                                }
+                            },
+                        });
+                    }, 500);
+                });
+            }
+        });
+    }); // document.ready
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-date icon-gsradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Create Payslip
+                    <div class="page-title-subheading">
+                        Payroll
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="frm_create_payslip" action="{{url_for('lms.create_payslip')}}" method="POST" novalidate>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label for="branch" class="">Branch</label>
+                                <select name="branch" id="branch" class="form-control" required>
+                                    {% if current_user.role.name != "Secretary" %}
+                                    <option value="">Choose...</option>
+                                    {% endif %}
+
+                                    {% for branch in branches %}
+                                    <option value="{{branch.id}}">{{branch.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label for="employee" class="">Employee</label>
+                                <select name="employee" id="employee" class="form-control" required>
+                                    <option value="">Choose branch first...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label id="label_description" for="description" class="">Position</label>
+                                <select name="description" id="description" class="form-control" required>
+                                    <option value="">Choose...</option>
+                                    <option value="STAFF">Staff</option>
+                                    <option value="TEACHER">Teacher</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="position-relative form-group"><label id="lbl_billing_month_from" for="billing_month_from"
+                                    class="">Billing Month From</label>
+                                <input name="billing_month_from" id="billing_month_from" type="date"
+                                    class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="position-relative form-group"><label id="lbl_billing_month_to" for="billing_month_to"
+                                    class="">Billing Month To</label>
+                                <input name="billing_month_to" id="billing_month_to" type="date"
+                                    class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="position-relative row form-group"><label for="no_of_days" class="col-sm-4 col-form-label">No. of Days</label>
+                                <div class="col-sm-5"><input readonly id="no_of_days" name="no_of_days" type="number" class="form-control"></div>
+                            </div>
+                        
+                            <div class="position-relative row form-group"><label for="day_off" class="col-sm-4 col-form-label">Day Off</label>
+                                <div class="col-sm-5"><input id="day_off" name="day_off" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="day_off_net" class="col-sm-4 col-form-label"></label>
+                                <div class="col-sm-5"><input id="day_off_net" readonly name="day_off_net" type="number" class="form-control"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="day_absent" class="col-sm-4 col-form-label">Absent</label>
+                                <div class="col-sm-5"><input id="day_absent" name="day_absent" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="day_absent_net" class="col-sm-4 col-form-label"></label>
+                                <div class="col-sm-5"><input readonly id="day_absent_net" name="day_absent_net" type="number" class="form-control"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="total_working_days" class="col-sm-4 col-form-label">Total Working Days</label>
+                                <div class="col-sm-5"><input readonly id="total_working_days" name="total_working_days" type="number" class="form-control"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label">No. of Session</label>
+                                <div class="col-sm-5"><input name="email" type="number" class="form-control"></div>
+                            </div>
+                        
+                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label">Salary Rate</label>
+                                <div class="col-sm-5"><input readonly id="salary_rate" name="salary_rate" type="number" class="form-control"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="total_salary_amount" class="col-sm-4 col-form-label">Total</label>
+                                <div class="col-sm-5"><input readonly id="total_salary_amount" name="number" type="number" class="form-control"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="food_allowance" class="col-sm-4 col-form-label">Food Allowance</label>
+                                <div class="col-sm-5"><input id="food_allowance" name="food_allowance" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="accommodation" class="col-sm-4 col-form-label">Accommodation</label>
+                                <div class="col-sm-5"><input id="accommodation" name="accommodation" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="gross_salary" class="col-sm-4 col-form-label">Gross Salary</label>
+                                <div class="col-sm-5"><input readonly id="gross_salary" name="gross_salary" type="number" class="form-control"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h5><strong>Deduction</strong></h5>
+                            <div class="position-relative row form-group"><label for="cash_advance" class="col-sm-4 col-form-label">CA</label>
+                                <div class="col-sm-5"><input id="cash_advance" name="cash_advance" type="number" class="form-control" value="0"></div>
+                            </div>
+                        
+                            <div class="position-relative row form-group"><label for="government_benefits" class="col-sm-4 col-form-label">Govt. Benefits</label>
+                                <div class="col-sm-5"><input id="government_benefits" name="government_benefits" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="accommodation_deduction" class="col-sm-4 col-form-label">Accommodation</label>
+                                <div class="col-sm-5"><input id="accommodation_deduction" name="accommodation_deduction" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label"></label>
+                            </div>
+                            <div class="position-relative row form-group"><label for="total_amount_due" class="col-sm-4 col-form-label">Total Amount Due</label>
+                                <div class="col-sm-5"><input readonly id="total_amount_due" name="total_amount_due" type="number" class="form-control"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="settled_by" class="col-sm-4 col-form-label">Settled By</label>
+                                <div class="col-sm-5"><input id="settled_by" name="settled_by" type="text" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <input id="btn_save" form="frm_create_payslip" class="btn-wide btn btn-success" type="submit" value="CONFIRM">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
