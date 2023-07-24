@@ -84,7 +84,7 @@ def get_employee_salary_rate(employee_id):
         query = mongo.db.auth_users.find_one({"_id": ObjectId(employee_id)})
         employee_information = query.get('employee_information', {})
         salary_rate = str(employee_information.get('salary_rate', 0))
-        return jsonify({'status': 'error', 'message': "Bookeeper not found", salary_rate: salary_rate}), 200
+        return jsonify({'status': 'error', 'message': "Bookeeper not found", 'data': {'salary_rate': salary_rate}}), 200
     
     employee_information = query.get('employee_information')
     salary_rate = str(employee_information.get('salary_rate'))

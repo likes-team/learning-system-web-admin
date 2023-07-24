@@ -115,12 +115,11 @@
 
         $("#employee").change(function(){
             $.getJSON(`/learning-management/employees/${$(this).val()}/get-salary-rate`, function (response) {
-                if (response.status == "success") {
-                    $("#salary_rate").val(response.data.salary_rate);
-                    updateTotalSalaryAmount();
-                } else {
+                if (response.status == "error") {
                     swal(response.message, "No deductions!", "info");
                 }
+                $("#salary_rate").val(response.data.salary_rate);
+                updateTotalSalaryAmount();
             });
         });
 
