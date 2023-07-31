@@ -119,6 +119,7 @@
                     swal(response.message, "No deductions!", "info");
                 }
                 $("#salary_rate").val(response.data.salary_rate);
+                $("#government_benefits").val(response.data.government_benefits);
                 updateTotalSalaryAmount();
             });
         });
@@ -340,11 +341,11 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label">No. of Session</label>
-                                <div class="col-sm-5"><input name="email" type="number" class="form-control"></div>
+                            <div class="position-relative row form-group"><label for="no_of_session" class="col-sm-4 col-form-label">No. of Session</label>
+                                <div class="col-sm-5"><input id="no_of_session" name="no_of_session" type="number" class="form-control"></div>
                             </div>
                         
-                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label">Salary Rate</label>
+                            <div class="position-relative row form-group"><label for="salary_rate" class="col-sm-4 col-form-label">Salary Rate</label>
                                 <div class="col-sm-5"><input readonly id="salary_rate" name="salary_rate" type="number" class="form-control"></div>
                             </div>
                             <div class="position-relative row form-group"><label for="total_salary_amount" class="col-sm-4 col-form-label">Total</label>
@@ -367,12 +368,12 @@
                             </div>
                         
                             <div class="position-relative row form-group"><label for="government_benefits" class="col-sm-4 col-form-label">Govt. Benefits</label>
-                                <div class="col-sm-5"><input id="government_benefits" name="government_benefits" type="number" class="form-control" value="0"></div>
+                                <div class="col-sm-5"><input readonly id="government_benefits" name="government_benefits" type="number" class="form-control" value="0"></div>
                             </div>
                             <div class="position-relative row form-group"><label for="accommodation_deduction" class="col-sm-4 col-form-label">Accommodation</label>
                                 <div class="col-sm-5"><input id="accommodation_deduction" name="accommodation_deduction" type="number" class="form-control" value="0"></div>
                             </div>
-                            <div class="position-relative row form-group"><label for="exampleEmail" class="col-sm-4 col-form-label"></label>
+                            <div class="position-relative row form-group"><label class="col-sm-4 col-form-label"></label>
                             </div>
                             <div class="position-relative row form-group"><label for="total_amount_due" class="col-sm-4 col-form-label">Total Amount Due</label>
                                 <div class="col-sm-5"><input readonly id="total_amount_due" name="total_amount_due" type="number" class="form-control"></div>
