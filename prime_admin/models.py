@@ -385,7 +385,7 @@ class Branch(Base, Admin):
     __tablename__ = 'lms_branches'
     __amname__ = 'branch'
     __amdescription__ = 'Branches'
-    __amicon__ = 'pe-7s-network'
+    __amicon__ = 'pe-7s-culture'
     __view_url__ = 'lms.branches'
 
     name = db.StringField()

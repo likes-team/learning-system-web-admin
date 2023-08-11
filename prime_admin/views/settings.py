@@ -3,8 +3,8 @@ from flask import request, redirect, url_for, flash, jsonify
 from app.admin.templating import admin_render_template
 from app import mongo
 from prime_admin import bp_lms
-from prime_admin.models import Settings
-
+from prime_admin.models import Settings, Branch
+from prime_admin.forms import BranchForm
 
 
 @bp_lms.route('/settings')
@@ -54,6 +54,36 @@ def klts_settings():
     return admin_render_template(
         Settings, 'lms/settings/examination/no_of_klt_settings_page.html', 'learning_management'
     )
+
+
+# @bp_lms.route('/settings/branches')
+# def branch_settings():
+#     form = BranchForm()
+
+#     _table_data = []
+
+#     for branch in Branch.objects:
+#         _table_data.append((
+#             branch.id,
+#             branch.name,
+#             branch.created_by,
+#             branch.created_at_local,
+#             branch.updated_by,
+#             branch.updated_at_local,
+#         ))
+        
+#     TABLE_OPTIONS = {
+        
+#     }
+#     return admin_render_template(
+#         Settings, 'lms/settings/branch_settings_page.html', 'learning_management',
+#         form=form,
+#         table_data=_table_data,
+#         create_url='lms.create_branch',
+#         edit_url='lms.edit_branch',
+#         view_modal_url='/learning-management/get-view-branch-data',
+#         TABLE_OPTIONS=TABLE_OPTIONS
+#     )
 
 
 @bp_lms.route('/settings/other-expenses/create', methods=['POST'])
