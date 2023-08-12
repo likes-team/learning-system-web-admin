@@ -112,6 +112,7 @@ class WithdrawForm(FlaskForm):
     account_name = StringField()
     amount = DecimalField()
     from_what = StringField()
+    to_what = StringField()
     by_who = StringField()    
     branch = StringField()    
     remarks = StringField()

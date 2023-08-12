@@ -1012,13 +1012,6 @@
                 </div>
             </div>
             <div class="page-title-actions">
-                {% if current_user.role.name in ["Admin"] %}
-                <button type="button" data-toggle="modal" data-target="#mdl_add_fund" data-placement="bottom"
-                    class="btn-shadow mr-3 btn btn-primary">
-                    <i class="fa fa-plus"></i> Add funds
-                </button>
-                {% endif %}
-
                 {% if current_user.role.name in ['Secretary', 'Admin'] %}
                 <button type="button" data-toggle="modal" data-target="#mdl_add_expenses" data-placement="bottom"
                     class="btn-shadow mr-3 btn btn-primary">

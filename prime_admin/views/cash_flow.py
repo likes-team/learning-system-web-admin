@@ -17,7 +17,7 @@ from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, Regi
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, WithdrawForm
 from prime_admin.globals import PARTNERREFERENCE, convert_to_utc, get_date_now
 from prime_admin.utils import currency
-
+from prime_admin.services.fund_wallet_services import add_fund
 
 
 D128_CTX = create_decimal128_context()
@@ -260,22 +260,23 @@ def deposit():
 def withdraw():
     form = WithdrawForm()
     
-    try:
-        new_withdraw = CashFlow()
-        # new_withdraw.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
-        new_withdraw.bank_name = form.bank_name.data
-        new_withdraw.account_no = form.account_no.data
-        new_withdraw.account_name = form.account_name.data
-        new_withdraw.amount = form.amount.data
-        new_withdraw.from_what = form.from_what.data
-        new_withdraw.by_who = form.by_who.data
-        new_withdraw.created_by = "{} {}".format(current_user.fname,current_user.lname)
-        new_withdraw.branch = Branch.objects.get(id=form.branch.data)
-        new_withdraw.type = "withdraw"
-        new_withdraw.remarks = form.remarks.data
-        new_withdraw.set_created_at()
-        new_withdraw.date_deposit = new_withdraw.created_at
+    new_withdraw = CashFlow()
+    # new_withdraw.date_deposit = convert_to_utc(str(form.date_deposit.data), "date_from")
+    new_withdraw.bank_name = form.bank_name.data
+    new_withdraw.account_no = form.account_no.data
+    new_withdraw.account_name = form.account_name.data
+    new_withdraw.amount = form.amount.data
+    new_withdraw.from_what = form.from_what.data
+    new_withdraw.by_who = form.by_who.data
+    new_withdraw.created_by = "{} {}".format(current_user.fname,current_user.lname)
+    new_withdraw.branch = Branch.objects.get(id=form.branch.data)
+    new_withdraw.type = "withdraw"
+    new_withdraw.remarks = form.remarks.data
+    new_withdraw.set_created_at()
+    new_withdraw.date_deposit = new_withdraw.created_at
+    to_what = form.to_what.data
 
+    try:
         with mongo.cx.start_session() as session:
             with session.start_transaction():
                 accounting = Accounting.objects(branch=form.branch.data).first()
@@ -341,7 +342,22 @@ def withdraw():
                     "group": new_withdraw.group,
                     "created_at": new_withdraw.created_at,
                 }, session=session)
-                
+                print(to_what)
+                if to_what == 'FUND WALLET':
+                    add_fund(
+                        branch_id=new_withdraw.branch.id,
+                        thru="CASH FLOW",
+                        bank_name=new_withdraw.bank_name,
+                        remittance='',
+                        account_name=new_withdraw.account_name,
+                        account_no=new_withdraw.account_no,
+                        transaction_no='',
+                        amount_received=new_withdraw.amount,
+                        sender='',
+                        receiver='',
+                        session=session
+                    )
+
                 mongo.db.lms_system_transactions.insert_one({
                     "_id": ObjectId(),
                     "date": get_date_now(),
