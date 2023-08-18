@@ -80,6 +80,7 @@ class CashFlowAdminForm(AdminTableForm):
         'from',
         'withdraw',
         'balance',
+        'to',
         'withdraw from',
         'bank name',
         'account no.',

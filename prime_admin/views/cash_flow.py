@@ -333,6 +333,7 @@ def withdraw():
                     "account_name": new_withdraw.account_name,
                     "amount": Decimal128(str(new_withdraw.amount)),
                     "from_what": new_withdraw.from_what,
+                    "to_what": to_what,
                     "by_who": new_withdraw.by_who,
                     "created_by": new_withdraw.created_by,
                     "branch": new_withdraw.branch.id,
@@ -543,6 +544,7 @@ def get_cash_flow():
                 else:
                     amount = decimal.Decimal(amount)
                 from_what = statement.get('fron_what', '')
+                to_what = statement.get('to_what', '')
                 by_who = statement.get('by_who', '')
                 remarks = statement.get('remarks', '')
                 group = statement.get('group')
@@ -556,6 +558,7 @@ def get_cash_flow():
                     '' if _type == 'withdraw' else from_what,
                     '' if _type == "deposit" else str(amount),
                     str(balance) if balance is not None else '',
+                    to_what,
                     '' if _type == "deposit" else from_what,
                     bank_name,
                     account_no,
