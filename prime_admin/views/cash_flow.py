@@ -342,7 +342,7 @@ def withdraw():
                     "group": new_withdraw.group,
                     "created_at": new_withdraw.created_at,
                 }, session=session)
-                print(to_what)
+
                 if to_what == 'FUND WALLET':
                     add_fund(
                         branch_id=new_withdraw.branch.id,
