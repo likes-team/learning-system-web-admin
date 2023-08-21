@@ -38,9 +38,14 @@
     });
 
 
-    function getEmployees(branch, from) {
+    function getEmployees(branch, position) {
+        if (branch == "" || position == ""){
+            return;
+        }
+
         $("#employee").empty();
-        $.getJSON('/learning-management/fetch-employees?branch=' + branch, function (response) {
+
+        $.getJSON(`/learning-management/fetch-employees?branch=${branch}&position=${position}`, function (response) {
             if (response.data.length > 0) {
                 $("#employee").append('<option value="">Choose...</option>');
 
@@ -110,7 +115,11 @@
         $("#li_payroll").addClass('mm-active');
 
         $("#branch").change(function(){
-            getEmployees($(this).val());
+            getEmployees($(this).val(), $("#position").val());
+        });
+
+        $("#position").change(function(){
+            getEmployees($("#branch").val() , $(this).val());
         });
 
         $("#employee").change(function(){
@@ -285,19 +294,22 @@
                         </div>
                         <div class="col-md-4">
                             <div class="position-relative form-group">
-                                <label for="employee" class="">Employee</label>
-                                <select name="employee" id="employee" class="form-control" required>
-                                    <option value="">Choose branch first...</option>
+                                <label for="position" class="">Position</label>
+                                <select name="position" id="position" class="form-control" required>
+                                    <option value="">Choose...</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="Secretary">Secretary</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Marketer">Marketer</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="position-relative form-group">
-                                <label id="label_description" for="description" class="">Position</label>
-                                <select name="description" id="description" class="form-control" required>
-                                    <option value="">Choose...</option>
-                                    <option value="STAFF">Staff</option>
-                                    <option value="TEACHER">Teacher</option>
+                                <label for="employee" class="">Employee</label>
+                                <select name="employee" id="employee" class="form-control" required>
+                                    <option value="">Choose branch and position first...</option>
                                 </select>
                             </div>
                         </div>

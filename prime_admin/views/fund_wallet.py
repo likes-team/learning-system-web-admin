@@ -984,8 +984,10 @@ def fetch_bookeeper_items():
 @bp_lms.route('/fetch-employees')
 def fetch_employees():
     branch = request.args.get('branch')
-    employees = get_employees(branch)
+    position = request.args.get('position')
+    employees = get_employees(position, branch_id=branch)
     data = []
+
     for employee in employees:
         data.append({
             'id': str(employee.id),

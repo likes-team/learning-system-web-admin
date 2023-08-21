@@ -8,6 +8,8 @@ from bson.decimal128 import create_decimal128_context
 SECRETARYREFERENCE = Role.objects(name="Secretary").get().id
 PARTNERREFERENCE = Role.objects(name="Partner").get().id
 MARKETERREFERENCE = Role.objects(name="Marketer").get().id
+MANAGEREFERENCE = Role.objects(name="Manager").get().id
+
 D128_CTX = create_decimal128_context()
 
 
