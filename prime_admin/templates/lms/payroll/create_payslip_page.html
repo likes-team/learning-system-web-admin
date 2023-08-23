@@ -85,12 +85,16 @@
     }
 
     function updateTotalSalaryAmount(){
-        const totalWorkingDays = $("#total_working_days").val();
         const salaryRate = $("#salary_rate").val();
-        const totalSalaryAmount = parseInt(totalWorkingDays) * salaryRate;
-        console.log(totalWorkingDays);
-        console.log(salary_rate);
-        console.log(totalSalaryAmount);
+        let totalSalaryAmount;
+
+        if ($("#position").val() == "Teacher"){
+            const noOfSession = $("#no_of_session").val();
+            totalSalaryAmount = parseInt(noOfSession) * salaryRate;
+        } else{
+            const totalWorkingDays = $("#total_working_days").val();
+            totalSalaryAmount = parseInt(totalWorkingDays) * salaryRate;
+        }
         $("#total_salary_amount").val(totalSalaryAmount);
     }
 
@@ -120,6 +124,12 @@
 
         $("#position").change(function(){
             getEmployees($("#branch").val() , $(this).val());
+            
+            if($(this).val() == "Teacher"){
+                $("#div_days_inputs").hide();
+            }else {
+                $("#div_days_inputs").show();
+            }
         });
 
         $("#employee").change(function(){
@@ -164,6 +174,12 @@
             const noOfDays = $("#no_of_days").val();
             $("#day_absent_net").val(noOfDays - $(this).val);
             updateTotalWorkingDays();
+            updateTotalSalaryAmount();
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#no_of_session").change(function(){
             updateTotalSalaryAmount();
             updateGrossSalary();
             updateTotalAmountDue();
@@ -331,11 +347,10 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="div_days_inputs">
                             <div class="position-relative row form-group"><label for="no_of_days" class="col-sm-4 col-form-label">No. of Days</label>
                                 <div class="col-sm-5"><input readonly id="no_of_days" name="no_of_days" type="number" class="form-control"></div>
                             </div>
-                        
                             <div class="position-relative row form-group"><label for="day_off" class="col-sm-4 col-form-label">Day Off</label>
                                 <div class="col-sm-5"><input id="day_off" name="day_off" type="number" class="form-control" value="0"></div>
                             </div>
