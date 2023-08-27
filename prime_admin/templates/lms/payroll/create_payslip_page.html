@@ -106,6 +106,14 @@
         $("#gross_salary").val(grossSalary);
     }
 
+    function updateTotalDeduction(){
+        const cashAdvance = $("#cash_advance").val();
+        const governmentBenefits = $("#government_benefits").val();
+        const accommodationDeduction = $("#accommodation_deduction").val();
+        const totalDeduction = parseFloat(cashAdvance) + parseFloat(governmentBenefits) + parseFloat(accommodationDeduction);
+        $("#total_deduction").val(totalDeduction);
+    }
+
     function updateTotalAmountDue(){
         const grossSalary = $("#gross_salary").val();
         const cashAdvance = $("#cash_advance").val();
@@ -400,9 +408,10 @@
                             <div class="position-relative row form-group"><label for="accommodation_deduction" class="col-sm-4 col-form-label">Accommodation</label>
                                 <div class="col-sm-5"><input id="accommodation_deduction" name="accommodation_deduction" type="number" class="form-control" value="0"></div>
                             </div>
-                            <div class="position-relative row form-group"><label class="col-sm-4 col-form-label"></label>
+                            <div class="position-relative row form-group"><label for="total_deduction" class="col-sm-4 col-form-label">Total Deductions</label>
+                                <div class="col-sm-5"><input readonly id="total_deduction" name="total_deduction" type="number" class="form-control"></div>
                             </div>
-                            <div class="position-relative row form-group"><label for="total_amount_due" class="col-sm-4 col-form-label">Total Amount Due</label>
+                            <div class="position-relative row form-group"><label for="total_amount_due" class="col-sm-4 col-form-label">NET</label>
                                 <div class="col-sm-5"><input readonly id="total_amount_due" name="total_amount_due" type="number" class="form-control"></div>
                             </div>
                             <div class="position-relative row form-group"><label for="settled_by" class="col-sm-4 col-form-label">Settled By</label>
