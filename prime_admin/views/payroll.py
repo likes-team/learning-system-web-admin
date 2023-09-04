@@ -99,13 +99,18 @@ def get_employee_salary_rate(employee_id):
         response['status'] = 'error'
         return jsonify(response)
     
+    # From bookeeper data
     employee_information = query.get('employee_information')
-    salary_rate = str(employee_information.get('salary_rate'))
     ee = employee_information.get('ee')
     ee_sss = convert_decimal128_to_decimal(ee.get('sss', 0))
     ee_phil = convert_decimal128_to_decimal(ee.get('phil', 0))
     ee_pag_ibig = convert_decimal128_to_decimal(ee.get('pag_ibig', 0))
     goverment_benefits = str(ee_sss + ee_phil + ee_pag_ibig)
+
+    # From users data
+    query = mongo.db.auth_users.find_one({"_id": ObjectId(employee_id)})
+    employee_information = query.get('employee_information', {})
+    salary_rate = str(employee_information.get('salary_rate', 0))
 
     response['data']['salary_rate'] = salary_rate
     response['data']['government_benefits'] = goverment_benefits
