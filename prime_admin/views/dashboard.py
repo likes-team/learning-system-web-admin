@@ -1,4 +1,5 @@
-from datetime import datetime
+import datetime
+import calendar
 from flask import request
 from flask.json import jsonify
 from flask.templating import render_template
@@ -7,7 +8,11 @@ from prime_admin import bp_lms
 from prime_admin.models import Branch, Dashboard
 from app.admin.templating import admin_dashboard, DashboardBox
 from prime_admin.services.dashboard import DashboardService, ChartService, SalesAndExpensesChart
+from prime_admin.services.student import StudentService
 from prime_admin.utils import currency, expenses
+from prime_admin.helpers.query_filter import StudentQueryFilter
+from prime_admin.globals import get_date_now
+from prime_admin.utils.date import format_date
 
 
 @bp_lms.route('/')
@@ -27,9 +32,20 @@ def dashboard():
         branches = Branch.objects(id__in=current_user.branches)
     elif current_user.role.name == "Admin":
         branches = Branch.objects()
+
+    now = get_date_now()
+    _, month_end_day = calendar.monthrange(now.year, now.month)
+    date_from = format_date(datetime.datetime(now.year, now.month, 1), date_format="%Y-%m-%d")
+    date_to = format_date(datetime.datetime(now.year, now.month, month_end_day), date_format="%Y-%m-%d")
+    students_this_month = StudentService.find_students(
+        query_filter=StudentQueryFilter(
+            date_from=date_from,
+            date_to=date_to
+    )).get_data()
         
     options = {
         'branches': branches,
+        'students_this_month': students_this_month
     }
     return admin_dashboard(
         Dashboard,

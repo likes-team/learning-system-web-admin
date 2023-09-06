@@ -499,6 +499,65 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="mb-3 card">
+                        <div class="card-header-tab card-header-tab-animation card-header">
+                            <div class="card-header-title">
+                                Registration
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6 col-md-6">
+                                    <div class="card-border border-light no-shadow card">
+                                        <div class="widget-content">
+                                            <div class="widget-content-outer">
+                                                <div class="widget-content-wrapper">
+                                                    <div class="widget-content-left">
+                                                        <div class="widget-heading">Total Students</div>
+                                                        <div class="widget-subheading">This Month</div>
+                                                    </div>
+                                                    <div class="widget-content-right">
+                                                        <div class="widget-numbers line-height-1 text-success">
+                                                            <span id='span_gross_sales_breakdown_total'>{{options['students_this_month'] |length}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="text-muted text-uppercase font-size-md opacity-5 font-weight-normal">Latest Students</h6>
+                            <div class="scroll-area-sm">
+                                <div class="scrollbar-container">
+                                    <ul class="rm-list-borders rm-list-borders-scroll list-group list-group-flush">
+                                        {% for student in options['students_this_month'] %}
+                                            <li class="list-group-item">
+                                                <div class="widget-content p-0">
+                                                    <div class="widget-content-wrapper">
+                                                        <div class="widget-content-left">
+                                                            <div class="widget-heading">{{student.get_full_name()}}
+                                                            </div>
+                                                            <div class="widget-subheading">{{student.get_registration_no()}}
+                                                            </div>
+                                                        </div>
+                                                        <div class="widget-content-right">
+                                                            <div class="font-size-xlg text-muted">
+                                                                <small class="opacity-5 pr-1">₱ </small>
+                                                                <span>{{student.get_amount(currency=True)}}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endfor%}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
