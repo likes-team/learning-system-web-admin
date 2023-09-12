@@ -42,7 +42,7 @@ def dashboard():
             date_from=date_from,
             date_to=date_to
     )).get_data()
-        
+
     options = {
         'branches': branches,
         'students_this_month': students_this_month
@@ -53,6 +53,36 @@ def dashboard():
         dashboard_template="lms/dashboard.html",
         module="learning_management"
     )
+
+
+@bp_lms.route('/dashboard/fetch-students-this-month', methods=['GET'])
+def fetch_students_this_month():
+    branch = request.args['branch'] if request.args['branch'] != 'all' else None
+    now = get_date_now()
+    _, month_end_day = calendar.monthrange(now.year, now.month)
+    date_from = format_date(datetime.datetime(now.year, now.month, 1), date_format="%Y-%m-%d")
+    date_to = format_date(datetime.datetime(now.year, now.month, month_end_day), date_format="%Y-%m-%d")
+    students_this_month = StudentService.find_students(
+        query_filter=StudentQueryFilter(
+            branch=branch,
+            date_from=date_from,
+            date_to=date_to
+    )).get_data()
+    
+    data = []
+    for student in students_this_month:
+        data.append({
+            'full_name': student.get_full_name(),
+            'registration_no': student.get_registration_no(),
+            'amount': student.get_amount(currency=True)
+        })
+
+    response = {
+        'status': 'success',
+        'count': len(data),
+        'data': data
+    }
+    return jsonify(response), 200
 
 
 @bp_lms.route('/dashboard/fetch-chart-sales-today', methods=['GET'])

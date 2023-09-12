@@ -117,6 +117,44 @@
         function init(){
             updateCharts();
             updateChartSalesToday();
+            updateStudentsThisMonth();
+        }
+
+        function updateStudentsThisMonth() {
+            var branch = $("#filter_branch").val();
+
+            $.getJSON(
+                `/learning-management/dashboard/fetch-students-this-month?branch=${branch}`, function (response) {
+                    $("#span_students_this_month_count").html(response.count);
+                    $("#ul_students_this_month").empty();
+                    
+                    let i = 0;
+                    for(i; i < response.data.length; i++){
+                        let student = response.data[i];
+                        let liStudent = $(`
+                        <li class="list-group-item">
+                            <div class="widget-content p-0">
+                                <div class="widget-content-wrapper">
+                                    <div class="widget-content-left">
+                                        <div class="widget-heading">${student.full_name}
+                                        </div>
+                                        <div class="widget-subheading">${student.registration_no}
+                                        </div>
+                                    </div>
+                                    <div class="widget-content-right">
+                                        <div class="font-size-xlg text-muted">
+                                            <small class="opacity-5 pr-1">₱ </small>
+                                            <span>${student.amount}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>`);
+                        $("#ul_students_this_month").append(liStudent);
+                    }
+                }).fail(function () {
+                    swal("Error Occured!", "Please refresh the page then try again!", "error");
+                });
         }
 
         function updateChartSalesToday() {
@@ -271,6 +309,7 @@
         $("#filter_branch").change(function(){
             updateCharts();
             updateChartSalesToday();
+            updateStudentsThisMonth();
         });
 
         function updateCharts(){
@@ -519,7 +558,7 @@
                                                     </div>
                                                     <div class="widget-content-right">
                                                         <div class="widget-numbers line-height-1 text-success">
-                                                            <span id='span_gross_sales_breakdown_total'>{{options['students_this_month'] |length}}</span>
+                                                            <span id='span_students_this_month_count'>{{options['students_this_month'] |length}}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -531,26 +570,10 @@
                             <h6 class="text-muted text-uppercase font-size-md opacity-5 font-weight-normal">Latest Students</h6>
                             <div class="scroll-area-sm">
                                 <div class="scrollbar-container">
-                                    <ul class="rm-list-borders rm-list-borders-scroll list-group list-group-flush">
+                                    <ul id="ul_students_this_month" class="rm-list-borders rm-list-borders-scroll list-group list-group-flush">
+
                                         {% for student in options['students_this_month'] %}
-                                            <li class="list-group-item">
-                                                <div class="widget-content p-0">
-                                                    <div class="widget-content-wrapper">
-                                                        <div class="widget-content-left">
-                                                            <div class="widget-heading">{{student.get_full_name()}}
-                                                            </div>
-                                                            <div class="widget-subheading">{{student.get_registration_no()}}
-                                                            </div>
-                                                        </div>
-                                                        <div class="widget-content-right">
-                                                            <div class="font-size-xlg text-muted">
-                                                                <small class="opacity-5 pr-1">₱ </small>
-                                                                <span>{{student.get_amount(currency=True)}}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
+                       
                                         {% endfor%}
                                     </ul>
                                 </div>
