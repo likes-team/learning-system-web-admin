@@ -124,7 +124,7 @@
             var branch = $("#filter_branch").val();
 
             $.getJSON(
-                `/learning-management/dashboard/fetch-students-this-month?branch=${branch}`, function (response) {
+                `/learning-management/dashboard/fetch-students-this-month?branch=${branch}&date_from=${dateFrom}&date_to=${dateTo}`, function (response) {
                     $("#span_students_this_month_count").html(response.count);
                     $("#ul_students_this_month").empty();
                     
@@ -303,6 +303,7 @@
             dateFrom = picker.startDate.format('YYYY-MM-DD');
             dateTo = picker.endDate.format('YYYY-MM-DD');
             updateCharts();
+            updateStudentsThisMonth();
         });
 
 

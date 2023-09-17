@@ -57,11 +57,9 @@ def dashboard():
 
 @bp_lms.route('/dashboard/fetch-students-this-month', methods=['GET'])
 def fetch_students_this_month():
+    date_from = request.args['date_from'] if request.args['date_from'] != '' else None
+    date_to = request.args['date_to'] if request.args['date_to'] != '' else None
     branch = request.args['branch'] if request.args['branch'] != 'all' else None
-    now = get_date_now()
-    _, month_end_day = calendar.monthrange(now.year, now.month)
-    date_from = format_date(datetime.datetime(now.year, now.month, 1), date_format="%Y-%m-%d")
-    date_to = format_date(datetime.datetime(now.year, now.month, month_end_day), date_format="%Y-%m-%d")
     students_this_month = StudentService.find_students(
         query_filter=StudentQueryFilter(
             branch=branch,
