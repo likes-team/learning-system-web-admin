@@ -3,9 +3,12 @@ from bson import Decimal128
 from bson.objectid import ObjectId
 from datetime import datetime
 import pymongo
+import pytz
 from config import TIMEZONE
 from flask import jsonify, request, render_template
 from flask_login import login_required, current_user
+from flask_weasyprint import HTML, render_pdf
+import inflect
 from app import mongo
 from app.auth.models import User
 from prime_admin.globals import D128_CTX, convert_to_utc, get_date_now
@@ -21,15 +24,18 @@ from prime_admin.models_v2 import StudentV2
 from prime_admin.services.payment import PaymentService
 from prime_admin.helpers.query_filter import PaymentQueryFilter
 from prime_admin.models_v2 import PaymentV2
-from prime_admin.utils.currency import convert_decimal128_to_decimal
-
+from prime_admin.utils.currency import convert_decimal128_to_decimal, format_to_str_php
+from prime_admin.utils.date import format_utc_to_local
 
 
 @bp_lms.route('/payroll')
 @login_required
 def payroll():
     branches = access.get_current_user_branches()
-    return render_template('lms/payroll/payroll_page.html', branches=branches)
+    return render_template(
+        'lms/payroll/payroll_page.html', branches=branches,
+        title="Payroll"
+    )
 
 
 @bp_lms.route('/payroll/create-payslip')
@@ -114,6 +120,9 @@ def get_employee_salary_rate(employee_id):
 
     response['data']['salary_rate'] = salary_rate
     response['data']['government_benefits'] = goverment_benefits
+    response['data']['sss'] = str(ee_sss)
+    response['data']['phil_health'] = str(ee_phil)
+    response['data']['pag_ibig'] = str(ee_pag_ibig)
     response['message'] = "Retrieved Successfully!"
     response['status'] = 'success'
     return jsonify(response)
@@ -128,22 +137,26 @@ def create_payslip():
     position = form.get('position')
     billing_month_from = form.get('billing_month_from', None)
     billing_month_to = form.get('billing_month_to', None)
-    no_of_days = form.get('no_of_days')
-    day_off = form.get('day_off')
-    absent_days = form.get('absent_days')
-    total_working_days = form.get('total_working_days')
-    no_of_session = form.get('no_of_session')
-    salary_rate = form.get('salary_rate')
-    total_salary_amount = form.get("total_salary_amount")
-    food_allowance = form.get("food_allowance")
-    accommodation = form.get("accommodation")
-    gross_salary = form.get('gross_salary')
-    cash_advance = form.get('cash_advance')
-    government_benefits = form.get('goverment_benefits')
-    accommodation_deduction = form.get("accommodation_deduction")
-    total_amount_due = form.get('total_amount_due')
+    no_of_days = form.get('no_of_days', '0')
+    day_off = form.get('day_off', '0')
+    absent_days = form.get('absent_days', '0')
+    total_working_days = form.get('total_working_days', '0')
+    no_of_session = form.get('no_of_session', '0')
+    salary_rate = form.get('salary_rate', '0')
+    total_salary_amount = form.get("total_salary_amount", '0')
+    food_allowance = form.get("food_allowance", '0')
+    accommodation = form.get("accommodation", '0')
+    gross_salary = form.get('gross_salary', '0')
+    cash_advance = form.get('cash_advance', '0')
+    government_benefits = form.get('government_benefits', '0')
+    accommodation_deduction = form.get("accommodation_deduction", '0')
+    total_amount_due = form.get('total_amount_due', '0')
     settled_by = form.get('settled_by')
-    
+    sss = form.get('sss', '0')
+    phil_health = form.get('phil_health', '0')
+    pag_ibig = form.get('pag_ibig', '0')
+    settled_by = form.get('settled_by')
+
     with mongo.cx.start_session() as session:
         with session.start_transaction():
             accounting = mongo.db.lms_accounting.find_one({
@@ -178,21 +191,25 @@ def create_payslip():
                 'position': position,
                 'billing_month_from': billing_month_from,
                 'billing_month_to': billing_month_to,
-                'no_of_days': no_of_days,
-                'day_off': day_off,
-                'absent_days': absent_days,
-                'total_working_days': total_working_days,
-                'no_of_session': no_of_session,
-                'salary_rate': salary_rate,
-                'total_salary_amount': total_salary_amount,
-                'food_allowance': food_allowance,
-                'accommodation': accommodation,
-                'gross_salary': gross_salary,
-                'cash_advance': cash_advance,
-                'government_benefits': government_benefits,
-                'accommodation_deduction': accommodation_deduction,
-                'total_amount_due': total_amount_due,
-                'settled_by': settled_by
+                'no_of_days': int(no_of_days),
+                'day_off': int(day_off),
+                'absent_days': int(absent_days),
+                'total_working_days': int(total_working_days),
+                'no_of_session': int(no_of_session),
+                'salary_rate': Decimal128(salary_rate),
+                'total_salary_amount': Decimal128(total_salary_amount),
+                'food_allowance': Decimal128(food_allowance),
+                'accommodation': Decimal128(accommodation),
+                'gross_salary': Decimal128(gross_salary),
+                'cash_advance': Decimal128(cash_advance),
+                'government_benefits': Decimal128(government_benefits),
+                'accommodation_deduction': Decimal128(accommodation_deduction),
+                'total_amount_due': Decimal128(total_amount_due),
+                'settled_by': settled_by,
+                'sss': Decimal128(sss),
+                'phil_health': Decimal128(phil_health),
+                'pag_ibig': Decimal128(pag_ibig),
+                'date': get_date_now(),
             })
             
             mongo.db.lms_fund_wallet_transactions.insert_one({
@@ -228,3 +245,173 @@ def create_payslip():
         'message': "Payslip added successfully!"
     }
     return jsonify(response), 201
+
+
+@bp_lms.route('/datatables/payroll/payslips', methods=['GET'])
+def fetch_payslips_dt():
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    branch_id = request.args.get('branch', '')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    total_records: int
+    filtered_records: int
+    match = {}
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            pass
+        elif current_user.role.name == "Manager":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Partner":
+            match['branch'] = {"$in": current_user.branches}
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+    else:
+        if current_user.role.name == "Admin":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Manager":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Partner":
+            match['branch'] = ObjectId(branch_id)
+        elif current_user.role.name == "Secretary":
+            match['branch'] = current_user.branch.id
+
+    # if date_from != "":
+    #     match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    # if date_to != "":
+    #     if 'date' in match:
+    #         match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     else:
+    #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+
+    query = mongo.db.lms_payroll_payslips.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_payroll_payslips.find(match).count()
+    filtered_records = query.count()
+    table_data = []
+    total_ofice_supply = decimal.Decimal(0)
+
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_id = str(transaction['_id'])
+            transaction_date: datetime = transaction.get('date', None)
+            employee_id = transaction.get('employee', '')
+            billing_month_from = transaction.get('billing_month_from', '')
+            billing_month_to = transaction.get('billing_month_to', '')
+            gross_salary = transaction.get('gross_salary', '0')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', '0')
+            food_allowance = transaction.get('food_allowance', '0')
+            accommodation = transaction.get('accommodation', '0')
+            cash_advance = transaction.get('cash_advance', '0')
+            government_benefits = transaction.get('government_benefits', '0')
+            accommodation_deduction = transaction.get('accommodation_deduction', '0')
+
+            if accommodation_deduction is None:
+                accommodation_deduction = 0
+            if government_benefits is None:
+                government_benefits = 0
+            if cash_advance is None:
+                cash_advance = 0
+            
+            total_deduction = convert_decimal128_to_decimal(cash_advance) + convert_decimal128_to_decimal(government_benefits) \
+                + convert_decimal128_to_decimal(accommodation_deduction)
+
+            if transaction_date is None:
+                local_datetime = ''
+            elif type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+            
+            contact_person : User = User.objects.get(id=employee_id)
+            description = contact_person.full_name
+            
+            cut_off_date = str(billing_month_from) + " - " + str(billing_month_to)
+            # total_ofice_supply = total_ofice_supply + total_amount_due.to_decimal()
+            action = """
+                <a href="/learning-management/employee/payslip.pdf?payslip_id={}" 
+                    style="margin-bottom: 8px;" 
+                    type="button" 
+                    class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-print">
+                    <i class="pe-7s-print btn-icon-wrapper"> 
+                    </i>
+                </a>
+            """.format(transaction_id)
+
+            table_data.append([
+                local_datetime,
+                description,
+                cut_off_date,
+                str(gross_salary),
+                str(total_deduction),
+                str(total_amount_due),
+                settled_by,
+                action
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+        'totalOfficeSupply': str(total_ofice_supply)
+    }
+
+    return jsonify(response)
+
+
+@bp_lms.route('/employee/payslip.pdf')
+def print_employee_payslip():
+    payslip_id = request.args.get('payslip_id')
+    payslip = mongo.db.lms_payroll_payslips.find_one({'_id': ObjectId(payslip_id)})
+    employee: User = User.objects.get(id=payslip['employee'])
+    gross_salary = payslip.get('gross_salary', '0')
+    total_amount_due = payslip.get('total_amount_due', '0')
+    food_allowance = payslip.get('food_allowance', '0')
+    accommodation = payslip.get('accommodation', '0')
+    cash_advance = payslip.get('cash_advance', '0')
+    government_benefits = payslip.get('government_benefits', '0')
+    accommodation_deduction = payslip.get('accommodation_deduction', '0')
+    sss = payslip.get('sss', '0')
+    phil_health = payslip.get('phil_health', '0')
+    pag_ibig = payslip.get('pag_ibig', '0')
+    billing_month_from = payslip.get('billing_month_from', '')
+    billing_month_to = payslip.get('billing_month_to', '')
+    pay_period = billing_month_from + " - " + billing_month_to
+    work_days = payslip.get('total_working_days', '0')
+    pay_date = format_utc_to_local(payslip.get('date'))
+
+    total_earnings = convert_decimal128_to_decimal(gross_salary) + convert_decimal128_to_decimal(food_allowance) \
+        + convert_decimal128_to_decimal(accommodation) + convert_decimal128_to_decimal(0)
+    total_deduction = convert_decimal128_to_decimal(cash_advance) + convert_decimal128_to_decimal(government_benefits) \
+        + convert_decimal128_to_decimal(accommodation_deduction)
+
+    table_data = [
+        ("SALARY", format_to_str_php(gross_salary), "SSS", format_to_str_php(sss)),
+        ("FOOD ALLOWANCE", format_to_str_php(food_allowance), "PHILHEALTH", format_to_str_php(phil_health)),
+        ("ACCOMMODATION", format_to_str_php(accommodation), "PAG-IBIG", format_to_str_php(pag_ibig)),
+        ("REBATE", format_to_str_php(0), "C.A", format_to_str_php(cash_advance)),
+    ]
+    position = payslip.get('position')
+    net_amount_in_words = inflect.engine().number_to_words(total_amount_due)
+
+    html = render_template(
+        'lms/fund_wallet/pdf_payslip.html',
+        branches_earnings=table_data,
+        employee=employee,
+        position=position,
+        table_data=table_data,
+        pay_period=pay_period,
+        work_days=work_days,
+        pay_date=pay_date,
+        total_earnings=format_to_str_php(total_earnings),
+        total_deduction=format_to_str_php(total_deduction),
+        net_amount=format_to_str_php(total_amount_due),
+        net_amount_in_words=net_amount_in_words
+    )
+    return render_pdf(HTML(string=html))

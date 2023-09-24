@@ -147,6 +147,9 @@
                 }
                 $("#salary_rate").val(response.data.salary_rate);
                 $("#government_benefits").val(response.data.government_benefits);
+                $("#sss").val(response.data.sss);
+                $("#phil_health").val(response.data.phil_health);
+                $("#pag_ibig").val(response.data.pag_ibig);
                 updateTotalSalaryAmount();
             });
         });
@@ -404,7 +407,6 @@
                             <div class="position-relative row form-group"><label for="cash_advance" class="col-sm-4 col-form-label">CA</label>
                                 <div class="col-sm-5"><input id="cash_advance" name="cash_advance" type="number" class="form-control" value="0"></div>
                             </div>
-                        
                             <div class="position-relative row form-group"><label for="government_benefits" class="col-sm-4 col-form-label">Govt. Benefits</label>
                                 <div class="col-sm-5"><input readonly id="government_benefits" name="government_benefits" type="number" class="form-control" value="0"></div>
                             </div>
@@ -420,6 +422,9 @@
                             <div class="position-relative row form-group"><label for="settled_by" class="col-sm-4 col-form-label">Settled By</label>
                                 <div class="col-sm-5"><input id="settled_by" name="settled_by" type="text" class="form-control"></div>
                             </div>
+                            <input id="sss" name="sss" type="hidden" class="form-control">
+                            <input id="phil" name="phil" type="hidden" class="form-control">
+                            <input id="pag_ibig" name="pag_ibig" type="hidden" class="form-control">
                         </div>
                     </div>
                 </div>

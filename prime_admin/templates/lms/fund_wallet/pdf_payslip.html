@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Payslip</title>
+
+		<style>
+			.invoice-box {
+				max-width: 800px;
+				margin: auto;
+				padding-top: 30px;
+				padding-left: 30px;
+				padding-right: 30px;
+				border: 1px solid black;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+				font-size: 12px;
+				line-height: 24px;
+				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+				color: #555;
+			}
+
+			.invoice-box table {
+				width: 100%;
+				line-height: inherit;
+				text-align: left;
+			}
+
+			.invoice-box table td {
+				vertical-align: top;
+			}
+
+			.invoice-box table tr td:nth-child(2) {
+				text-align: right;
+			}
+
+			.invoice-box table tr.top table td {
+				padding-bottom: 20px;
+			}
+
+			.invoice-box table tr.top table td.title {
+				font-size: 45px;
+				line-height: 45px;
+				color: #333;
+			}
+
+			.invoice-box table tr.information table td {
+				padding-bottom: 40px;
+			}
+
+			.invoice-box table tr.heading td {
+				background: #eee;
+				border-bottom: 1px solid #ddd;
+				font-weight: bold;
+			}
+
+			.invoice-box table tr.details td {
+				padding-bottom: 20px;
+			}
+
+			.invoice-box table tr.total td:nth-child(2) {
+				border-top: 2px solid #eee;
+				font-weight: bold;
+			}
+
+			@media only screen and (max-width: 600px) {
+				.invoice-box table tr.top table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+
+				.invoice-box table tr.information table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+			}
+
+			/** RTL **/
+			.invoice-box.rtl {
+				direction: rtl;
+				font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+			}
+
+			.invoice-box.rtl table {
+				text-align: right;
+			}
+
+			.invoice-box.rtl table tr td:nth-child(2) {
+				text-align: left;
+			}
+
+			#div_logo{
+				height: auto;
+				left: 0px;
+				right: 0px;
+			}
+
+			#img_logo{
+				width: 10%;
+				height: auto;
+				top: 30px;
+				left: 40px;
+				right: 0px;
+				position:absolute
+			}
+
+			#title {
+				margin-top: 30px;
+				width:300px;
+				height:35px;
+				text-align: center;
+				margin-left: auto;
+				margin-right: auto;
+				padding-top: 10px;
+				font-size: x-large;
+			}
+
+			.row {
+				display: flex;
+				justify-content: center;
+			}
+
+			.information {
+				width:300px;
+				height:20px;
+				padding: 5px;
+				font-size: x-small;
+			}
+
+			#date {
+				width:170px;
+				height:20px;
+				padding: 5px;
+				font-size: x-small;
+				margin-top: 30px;
+				text-align: center;
+			}
+
+			#record {
+				margin-top: 50px;
+				width:300px;
+				height:25px;
+				border:1px solid #000;
+				text-align: center;
+				margin-left: auto;
+				margin-right: auto;
+				font-size: large;
+			}
+
+			.branch {
+				width:200px;
+				height:20px;
+				border:1px solid #000;
+				padding: 5px;
+				font-size: x-small;
+				margin-right: 280px;
+				margin-bottom: 5px;
+			}
+
+			.total {
+				width: 100px;
+				height:20px;
+				border:1px solid #000;
+				padding: 5px;
+				font-size: x-small;
+				margin-top: 30px;
+				text-align: center;
+				margin-bottom: 5px;
+			}
+
+			#footer {
+				text-align: center;
+				margin-left: auto;
+				margin-right: auto;
+				padding: 0%;
+				margin-top: 30px;
+				margin-bottom: 0px;
+			}
+			
+			#footer p {
+				margin: 0;
+				padding: 0;
+			}
+
+			.prime {
+				margin: 0;
+				padding: 0;
+			}
+
+			table, th, td {
+				border: 1px solid black;
+				border-collapse: collapse;
+			}
+
+			th {
+				text-align: center;
+			}
+			
+			td {
+				padding: 10px;
+				text-align: left;
+			}
+
+			.Column {
+				display: table-cell;
+				font-size: 11px;
+				/*Optional*/
+			}
+
+			.Row {
+				display: table;
+				width: 100%;
+				/*Optional*/
+				table-layout: fixed;
+				/*Optional*/
+				border-spacing: 5px;
+				/*Optional*/
+			  }
+
+			.line{
+				width: 230px;
+				height: 30px;
+				border-bottom: 1px solid black;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="invoice-box">
+			<div id="div_logo">
+				<img id="img_logo" src="{{url_for('lms.static', filename='img/logo.png')}}" alt="logo" width="10%" height="10%" style="float:left">
+			</div>
+
+			<div class="prime" style="text-align: center; font-size: larger;">
+				<strong>PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</strong>
+			</div>
+
+			<div class="prime" style="text-align: center;">
+				<p class="prime" style="font-size:smaller;">ROOM 305, 3RD FLOOR, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY</p>
+				<p class="prime" style="font-size:smaller;">TEL. NO. (032) 425 2165</p>
+			</div>
+			<hr/>
+
+			<div id="title">PAYSLIP</div>
+
+			<div class="Row" style="margin-top: 15px;">
+				<div class="Column"><strong>EMPLOYEE NO.</strong>: {{employee.full_employee_id}}</div>
+				<div class="Column"><strong>PAY PERIOD</strong>: {{pay_period}}</div>
+			</div>
+
+			<div class="Row">
+				<div class="Column"><strong>FULL NAME</strong>: {{employee.full_name.upper()}}</div>
+				<div class="Column"><strong>WORK DAYS</strong>: {{work_days}}</div>
+			</div>
+
+			<div class="Row">
+				<div class="Column"><strong>POSITION</strong>: {{position.upper()}}</div>
+				<div class="Column"><strong>PAY DATE</strong>: {{pay_date}}</div>
+			</div>
+
+			<table style="border: 1px solid black; margin-top: 30px;">
+				<thead>
+					<tr>
+					<th>EARNINGS</th>
+					<th>AMOUNT</th>
+					<th>DEDUCTION</th>
+					<th>AMOUNT</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for row in table_data %}
+						<tr>
+							<td>{{row[0]}}</td>
+							<td>₱ {{row[1]}}</td>
+							<td>{{row[2]}}</td>
+							<td>₱ {{row[3]}}</td>
+						</tr>
+					{% endfor %}
+					<tr style="padding-top: 1em;">
+						<td><strong>TOTAL EARNINGS</strong></td>
+						<td>₱ {{total_earnings}}</td>
+						<td><strong>TOTAL DEDUCTION</strong></td>
+						<td>₱ {{total_deduction}}</td>
+					</tr>
+					<tr style="padding-top: 1em;">
+						<td><strong>NET AMOUNT</strong></td>
+						<td colspan="3"><strong>{{net_amount}}</strong></br>
+							{{net_amount_in_words|upper}}
+						</td>
+					</tr>
+				</tbody>
+				<!-- <tfoot>
+					<tr>
+						<td>TOTAL EARNINGS</td>
+						<td colspan="2">TOTAL DEDUCTION</td>
+					</tr>
+				</tfoot>
+				-->
+			</table>
+			<div class="Row">
+				<div class="Column">
+				  <div style="text-align: left; font-size: 12px; margin-top: 30px; margin-bottom: 0px;">
+					<div class="line"></div>
+					<div style="text-align: left; margin-left: 20px;">
+						EMPLOYEE NAME/SIGNATURE
+					</div>
+				  </div>
+				</div>
+			
+				<div class="Column">
+				  <div style="text-align: left; margin-left: 50px; font-size: 12px; margin-top:0px; margin-bottom: 0px;">
+					<div class="line"></div>
+					<div style="text-align: center;">
+					  ADMINISTRATOR
+					</div>
+				  </div>
+				</div>
+			</div>	
+		</div>
+	</body>
+</html>

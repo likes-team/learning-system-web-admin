@@ -104,189 +104,20 @@
     $(document).ready(function () {
         $("#li_payroll").addClass('mm-active');
 
-        var dtEmployees = $('#tbl_employees').DataTable({
-            "dom": "rtip",
-            "pageLength": 25,
+        var dtbl_salary = $("#tbl_payslips").DataTable({
+            "dom": 'rtip',
             "processing": true,
-            "serverSide": true,
-            "ordering": false,
-            "responsive": true,
             "autoWidth": false,
+            "serverSide": true,
             "ajax": {
-                "url": "/learning-management/datatables/payroll/employees",
-                "data": function(d){
-                    d.role = $("#filter_roles").val();
-                }
+                "url": "/learning-management/datatables/payroll/payslips?branch=all",
             },
-            "language": {
-                "searchPlaceholder": "By last name",
-            },
-            initComplete: function () {
-                var input = $('.dataTables_filter input').unbind(),
-                    self = this.api(),
-                    $searchButton = $('<button>')
-                        .text('search')
-                        .click(function () {
-                            self.search(input.val()).draw();
-                        }),
-                    $clearButton = $('<button>')
-                        .text('clear')
-                        .click(function () {
-                            input.val('');
-                            $searchButton.click();
-                        })
-                $('.dataTables_filter').append($searchButton, $clearButton);
-            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
             "columnDefs": [
-                {
-                    "targets": 0,
-                    "visible": false
-                },
-                {
-                    "targets": 1,
-                    "className": "text-center",
-                },
-                {
-                    "targets": 2,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="widget-content p-0">
-                                <div class="widget-content-wrapper">
-                                    <div class="widget-content-left mr-3">
-                                        <div class="widget-content-left">
-                                            <img width="40" class="rounded-circle" src="/auth/auth/static/img/user_default_image.png" alt=""></div>
-                                    </div>
-                                    <div class="widget-content-left flex2">
-                                        <div class="widget-heading">${data['name']}</div>
-                                        <div class="widget-subheading opacity-7">${data['username']}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 5,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-salary-rate">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 6,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-sss">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 7,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-phil">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 8,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-ee-pag-ibig">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 9,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-sss">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 10,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-phil">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 11,
-                    "render": function (data, type, row) {
-                        return `<td>
-                            <div class="position-relative form-group">
-                                <input value="${data}" disabled step="any" min=0 type="number" class="form-control inp-er-pag-ibig">
-                            </div>
-                        </td>`;
-                    }
-                },
-                {
-                    "targets": 12,
-                    "render": function (data, type, row) {
-                        return `
-                        <button type="button" class="btn btn-primary btn-sm btn-edit" value="edit"><i class="fa fa-edit"></i></button>
-                        `;
-                    }
-                },
             ],
-        });
-
-        $("#tbl_employees tbody").on('click', '.btn-edit', function(){
-            let buttonVal = $(this).val(); 
-            let row = $(this).parents('tr');
-            const userId = dtEmployees.row(row).data()[0];
-
-            if(buttonVal == "edit"){
-                $(this).val('save');
-                $(this).removeClass('btn-primary');
-                $(this).addClass('btn-success');
-                $('input', row).each(function() {
-                    $(this).prop('disabled', false);
-                });
-            } else if(buttonVal == "save"){
-                $(this).val('edit');
-                $(this).removeClass('btn-success');
-                $(this).addClass('btn-primary');
-
-                let values = [];
-
-                $('input', row).each(function() {
-                    $(this).prop('disabled', true);
-                    
-                    values.push($(this).val());
-                });
-
-                $.ajax({
-                    type: "POST",
-                    url: `/learning-management/payroll/employees/${userId}/edit`,
-                    dataType: "json",
-                    data: JSON.stringify({
-                        'values': values
-                    }),
-                    contentType: "application/json; charset=utf-8",
-                    success: function (response) {
-                        swal("Success!", 'Saved Successfully!', "success");
-                    },
-                    error: function (data) {
-                        swal("Error occured!", "Please refresh the page then try again!", "error");
-                    },
-                });
-            }
+            "order": [[1, 'asc']],
         });
     }); // document.ready
 </script>
@@ -320,7 +151,7 @@
             <div class="main-card mb-3 card">
                 <div class="card-body">
                     <div style="margin-top: 10px;" class="table-responsive">
-                        <table id="tbl_salary"
+                        <table id="tbl_payslips"
                             class="align-middle mb-0 table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
@@ -331,6 +162,7 @@
                                     <th class="text-center">DEDUCTION</th>
                                     <th class="text-center">NET</th>
                                     <th class="text-center">SETTLED BY</th>
+                                    <th class="text-center">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
