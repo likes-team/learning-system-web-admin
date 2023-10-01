@@ -141,7 +141,10 @@ def create_payslip():
     day_off = form.get('day_off', '0')
     absent_days = form.get('absent_days', '0')
     total_working_days = form.get('total_working_days', '0')
+
     no_of_session = form.get('no_of_session', '0')
+    if no_of_session == '': no_of_session = '0'
+
     salary_rate = form.get('salary_rate', '0')
     total_salary_amount = form.get("total_salary_amount", '0')
     food_allowance = form.get("food_allowance", '0')
@@ -154,7 +157,10 @@ def create_payslip():
     settled_by = form.get('settled_by')
     sss = form.get('sss', '0')
     phil_health = form.get('phil_health', '0')
+
     pag_ibig = form.get('pag_ibig', '0')
+    if pag_ibig == '': pag_ibig = '0'
+
     settled_by = form.get('settled_by')
 
     with mongo.cx.start_session() as session:
