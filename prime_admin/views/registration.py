@@ -287,64 +287,46 @@ def get_pre_registered_students():
 
 @bp_lms.route('/api/clients/<string:client_id>', methods=['GET'])
 def get_client(client_id):
-    
+    is_check_existing_client = request.args.get('check_existing_client', False)
     client = Registration.objects.get(id=client_id)
 
-    if client.status == "pre_registered" and client.is_oriented is False:
-        _data = {
-            'id': str(client.id),
-            'fname': client.fname,
-            'lname': client.lname,
-            'mname': client.mname,
-            'suffix': client.suffix,
-            'birth_date': client.birth_date,
-            'contact_number': client.contact_number,
-            'email': client.email,
-            'address': client.address,
-            'branch': client.branch,
-            'status': client.status,
-            'is_oriented': client.is_oriented
-        }
-    elif client.status == "pre_registered" and client.is_oriented is True:
-        _data = {
-            'id': str(client.id),
-            'fname': client.fname,
-            'lname': client.lname,
-            'mname': client.mname,
-            'suffix': client.suffix,
-            'birth_date': client.birth_date,
-            'contact_number': client.contact_number,
-            'email': client.email,
-            'address': client.address,
-            'branch': client.branch,
-            'status': client.status,
-            'contact_person': str(client.contact_person.id),
-            'is_oriented': client.is_oriented
-        }
-    else:
-        payment_status = "PAID"
-        if client.balance is not None and client.balance > 0:
+    payment_status = "PAID"
+    if client.balance is not None:
+        if client.balance > 0:
             payment_status = "NOT PAID"
 
-        _data = {
-            'id': str(client.id),
-            'fname': client.fname,
-            'lname': client.lname,
-            'mname': client.mname if client.mname is not None else '',
-            'contact_number': client.contact_number,
-            'status': client.status,
-            'contact_person': str(client.contact_person.id),
-            'is_oriented': client.is_oriented,
-            'branch': str(client.branch.id) if client.branch is not None else '',
-            'branch_name': str(client.branch.name) if client.branch is not None else '',
-            'registration_no': client.full_registration_number,
-            'batch_number': client.batch_number.number if client.batch_number is not None else '',
-            'schedule': client.schedule,
-            'payment_status': payment_status
-        }
+    if is_check_existing_client:
+        check_existing_client = list(mongo.db.lms_registrations.find({
+            '_id': {"$ne": ObjectId(client.id)},
+            'fname': {'$regex': client.fname},
+            'lname': {'$regex': client.lname},
+            'status': 'registered'
+        }))
+        
+        if len(check_existing_client) > 0:
+            return jsonify({
+                'status': 'error',
+                'message': "Student is already registered"
+            })
+
+    _data = {
+        'id': str(client.id),
+        'fname': client.fname,
+        'lname': client.lname,
+        'mname': client.mname if client.mname is not None else '',
+        'contact_number': client.contact_number,
+        'status': client.status,
+        'contact_person': str(client.contact_person.id),
+        'is_oriented': client.is_oriented,
+        'branch': str(client.branch.id) if client.branch is not None else '',
+        'branch_name': str(client.branch.name) if client.branch is not None else '',
+        'registration_no': client.full_registration_number,
+        'batch_number': client.batch_number.number if client.batch_number is not None else '',
+        'schedule': client.schedule,
+        'payment_status': payment_status
+    }
 
     batch_numbers = Batch.objects(branch=client.branch.id).filter(active=True)
-
     batch_no_data = []
 
     for batch_number in batch_numbers:
