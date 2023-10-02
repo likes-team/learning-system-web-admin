@@ -155,8 +155,12 @@ def create_payslip():
     accommodation_deduction = form.get("accommodation_deduction", '0')
     total_amount_due = form.get('total_amount_due', '0')
     settled_by = form.get('settled_by')
+
     sss = form.get('sss', '0')
+    if sss == '': sss = '0'
+
     phil_health = form.get('phil_health', '0')
+    if phil_health == '': phil_health = '0'
 
     pag_ibig = form.get('pag_ibig', '0')
     if pag_ibig == '': pag_ibig = '0'
