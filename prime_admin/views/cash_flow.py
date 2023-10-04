@@ -78,7 +78,11 @@ def deposit():
     new_deposit.from_what = form.get('from_what')
     new_deposit.by_who = form.get('by_who')
     new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
-    new_deposit.branch = current_user.branch
+    
+    if form.get('deposit_branch'):
+        new_deposit.branch = Branch.objects.get(id=form.get('deposit_branch'))
+    else:    
+        new_deposit.branch = current_user.branch
     new_deposit.type = "deposit"
     new_deposit.remarks = form.get('remarks')
     new_deposit.set_created_at()
@@ -88,7 +92,7 @@ def deposit():
     with mongo.cx.start_session() as session:
         with session.start_transaction():
             with decimal.localcontext(D128_CTX):
-                accounting = mongo.db.lms_accounting.find_one({"branch": current_user.branch.id}, session=session)
+                accounting = mongo.db.lms_accounting.find_one({"branch": new_deposit.branch.id}, session=session)
 
                 if accounting:
                     new_deposit.group = accounting['active_group']
@@ -99,7 +103,7 @@ def deposit():
 
                         clients = mongo.db.lms_registrations.find({
                             "status": "registered",
-                            "branch": current_user.branch.id
+                            "branch": new_deposit.branch.id
                             }, session=session)
 
                         for client in clients:
@@ -129,11 +133,11 @@ def deposit():
                                     }}, session=session)
 
                         mongo.db.lms_store_buyed_items.update_many(
-                            {"deposited": "Pre Deposit","branch": current_user.branch.id}, 
+                            {"deposited": "Pre Deposit","branch": new_deposit.branch.id}, 
                             {'$set': {'deposited': "Yes"}},session=session)
 
                         mongo.db.lms_accommodations.update_many(
-                            {"deposited": "Pre Deposit","branch": current_user.branch.id},
+                            {"deposited": "Pre Deposit","branch": new_deposit.branch.id},
                             {'$set': {'deposited': "Yes"}},session=session)
 
                         mongo.db.lms_accounting.update_one({
@@ -176,7 +180,7 @@ def deposit():
                     if new_deposit.from_what == "Sales":
                         accounting.total_gross_sale = new_deposit.amount
 
-                        clients = mongo.db.lms_registrations.find({"status": "registered", "branch": current_user.branch.id}, session=session)
+                        clients = mongo.db.lms_registrations.find({"status": "registered", "branch": new_deposit.branch.id}, session=session)
 
                         for client in clients:
                             has_payment_updated = False
@@ -204,11 +208,11 @@ def deposit():
                                     }}, session=session)
 
                         mongo.db.lms_store_buyed_items.update_many(
-                            {"deposited": "Pre Deposit","branch": current_user.branch.id}, 
+                            {"deposited": "Pre Deposit","branch": new_deposit.branch.id}, 
                             {'$set': {'deposited': "Yes"}},session=session)
 
                         mongo.db.lms_accommodations.update_many(
-                            {"deposited": "Pre Deposit","branch": current_user.branch.id},
+                            {"deposited": "Pre Deposit","branch": new_deposit.branch.id},
                             {'$set': {'deposited': "Yes"}},session=session)
                             
                     elif new_deposit.from_what == "Student Loan Payment":

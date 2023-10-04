@@ -14,6 +14,29 @@
                         <div class="card-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <input type="hidden" class="form-control" id="edit_client_id" name="client_id" value="">
+                            {% if current_user.role.name in ['Admin'] %}
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label for="deposit_branch" class="">Branch</label>
+                                        <select name="deposit_branch" id="deposit_branch" class="form-control" required>
+                                            <option value="">Choose...</option>
+                                            {% for branch in TABLE_OPTIONS['branches'] %}
+                                            <option value="{{ branch.id }}">
+                                                {{ branch.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Please provide a branch
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             <div class="form-row">
                                 <div class="col-md-6">
                                     <div class="position-relative form-group">
