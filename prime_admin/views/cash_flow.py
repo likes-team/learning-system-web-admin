@@ -753,9 +753,15 @@ def get_mdl_deposit():
         store_records = StoreRecords.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
         accommodations = Accommodation.objects(branch=current_user.branch).filter(deposited="Pre Deposit")
     elif current_user.role.name == "Admin":
-        clients = Registration.objects(status="registered")
-        store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
-        accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
+        branch_id = request.args.get('branch')
+        if branch_id != "all":
+            clients = Registration.objects(status="registered").filter(branch=ObjectId(branch_id))
+            store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
+            accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=ObjectId(branch_id))
+        else:
+            clients = Registration.objects(status="registered")
+            store_records = StoreRecords.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
+            accommodations = Accommodation.objects().filter(deposited="Pre Deposit").filter(branch=current_user.branch)
     elif current_user.role.name == "Partner":
         clients = Registration.objects(status="registered").filter(branch__in=current_user.branches)
         store_records = StoreRecords.objects(branch__in=current_user.branches).filter(deposited="Pre Deposit")

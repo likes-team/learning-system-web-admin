@@ -418,7 +418,7 @@
 
         var dtbl_deposit = $("#tbl_mdl_deposit").DataTable({
             "ajax": {
-                "url": "/learning-management/api/dtbl/mdl-deposit",
+                "url": `/learning-management/api/dtbl/mdl-deposit?branch=all`,
                 "dataSrc": function (json) {
                     if ($("#from_what").val() == "Sales") {
                         $("#amount").val(json.deposit_amount);
@@ -464,8 +464,9 @@
 
 
         $("#from_what").change(function () {
+            let branchId = $("#deposit_branch").val();
             if ($(this).val() == "Sales") {
-                dtbl_deposit.ajax.reload();
+                dtbl_deposit.ajax.url(`/learning-management/api/dtbl/mdl-deposit?branch=${branchId}`).load();
                 $("#amount").prop('readonly', true);
                 $("#tbl_deposit").show();
             } else {
@@ -473,6 +474,11 @@
                 $("#amount").prop('readonly', false);
                 $("#tbl_deposit").hide();
             }
+        });
+
+        $("#deposit_branch").change(function(){
+            let branchId = $("#deposit_branch").val();
+            dtbl_deposit.ajax.url(`/learning-management/api/dtbl/mdl-deposit?branch=${branchId}`).load();
         });
 
         var dtbl_partners_percent = $('#tbl_partners_percent').DataTable({
