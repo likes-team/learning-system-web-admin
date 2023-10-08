@@ -37,7 +37,7 @@ def fetch_fund_statement_dt():
     if from_what == "Fund 1":
         from_what = {'$in': ['Fund 1', 'Student Loan Payment']}
     elif from_what == "Fund 2":
-        from_what = {'$in': ['Fund 2', 'Emergency Fund']}
+        from_what = {'$in': ['Fund 2', 'Emergency Fund', 'Refund']}
     
     match = {'group': accounting['active_group'], 'from_what': from_what}
 

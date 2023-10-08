@@ -159,7 +159,7 @@ def deposit():
                                 "final_fund1": accounting["final_fund1"],
                             }}, session=session)
 
-                    elif new_deposit.from_what == "Emergency Fund":
+                    elif new_deposit.from_what == "Emergency Fund" or new_deposit.from_what == "Refund":
                         if accounting["final_fund2"]:
                             accounting["final_fund2"] = Decimal128(Decimal128(str(accounting["final_fund2"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         else:
@@ -174,7 +174,7 @@ def deposit():
                             }}, session=session)
                 else:
                     accounting = Accounting()
-                    accounting.branch = current_user.branch
+                    accounting.branch = new_deposit.branch
                     accounting.active_group = 1
                     
                     if new_deposit.from_what == "Sales":
@@ -217,7 +217,7 @@ def deposit():
                             
                     elif new_deposit.from_what == "Student Loan Payment":
                         accounting.final_fund1 = new_deposit.amount
-                    elif new_deposit.from_what == "Emergency Fund":
+                    elif new_deposit.from_what == "Emergency Fund" or new_deposit.from_what == "Refund":
                         accounting.final_fund2 = new_deposit.amount
 
                     new_deposit.balance = new_deposit.amount
