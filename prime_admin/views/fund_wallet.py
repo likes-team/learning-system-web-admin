@@ -107,7 +107,7 @@ def fetch_add_funds_transactions_dt(branch_id):
         sender = transaction.get('sender', '')
         receiver = transaction.get('receiver', '')
         amount_received = transaction.get('amount_received', 0.00)
-        remarks = transaction.get('remarks', 0.00)
+        remarks = transaction.get('remarks', '')
         
         if type(date == datetime):
             local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
@@ -128,6 +128,7 @@ def fetch_add_funds_transactions_dt(branch_id):
             sender,
             receiver,
             str(amount_received),
+            remarks
         ])
 
     response = {
