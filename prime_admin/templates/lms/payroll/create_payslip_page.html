@@ -141,7 +141,15 @@
         });
 
         $("#employee").change(function(){
-            $.getJSON(`/learning-management/employees/${$(this).val()}/get-salary-rate`, function (response) {
+            let cut_off = $("#cut_off").val();
+
+            if (cut_off == ''){
+                swal("Select cut-off first", "Info", "info");
+                $(this).val('');
+                return;
+            }
+
+            $.getJSON(`/learning-management/employees/${$(this).val()}/get-salary-rate?cut_off=${cut_off}`, function (response) {
                 if (response.status == "error") {
                     swal(response.message, "No deductions!", "info");
                 }
@@ -308,7 +316,7 @@
                 <div class="card-body">
                     <form id="frm_create_payslip" action="{{url_for('lms.create_payslip')}}" method="POST" novalidate>
                     <div class="form-row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="position-relative form-group">
                                 <label for="branch" class="">Branch</label>
                                 <select name="branch" id="branch" class="form-control" required>
@@ -322,7 +330,19 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="position-relative form-group">
+                                <label for="cut_off" class="">Cut off</label>
+                                <select name="cut_off" id="cut_off" class="form-control" required>
+                                    <option value="">Choose...</option>
+
+                                    {% for cut_off in cut_offs %}
+                                    <option value="{{cut_off['_id']}}">{{cut_off['name']}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="position-relative form-group">
                                 <label for="position" class="">Position</label>
                                 <select name="position" id="position" class="form-control" required>
@@ -335,7 +355,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="position-relative form-group">
                                 <label for="employee" class="">Employee</label>
                                 <select name="employee" id="employee" class="form-control" required>

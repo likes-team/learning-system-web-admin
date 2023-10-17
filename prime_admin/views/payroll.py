@@ -33,15 +33,18 @@ from prime_admin.utils.date import format_utc_to_local
 def payroll():
     branches = access.get_current_user_branches()
     return render_template(
-        'lms/payroll/payroll_page.html', branches=branches,
-        title="Payroll"
+        'lms/payroll/payroll_page.html', branches=branches, title="Payroll"
     )
 
 
 @bp_lms.route('/payroll/create-payslip')
 def create_payslip_page():
     branches = access.get_current_user_branches()
-    return render_template('lms/payroll/create_payslip_page.html', branches=branches)
+    cut_offs = mongo.db.lms_cut_offs.find()
+    return render_template(
+        'lms/payroll/create_payslip_page.html', 
+        branches=branches, cut_offs=cut_offs)
+    
 
     
 @bp_lms.route('/payroll/employees/<string:user_id>/edit', methods=['POST'])
@@ -85,7 +88,11 @@ def edit_payroll_employee(user_id):
 
 @bp_lms.route('/employees/<string:employee_id>/get-salary-rate', methods=['GET'])
 def get_employee_salary_rate(employee_id):
-    query = mongo.db.lms_fund_wallet_transactions.find_one({'description': employee_id, 'category': 'Bookeeper'})
+    cut_off = request.args.get('cut_off')
+    query = mongo.db.lms_fund_wallet_transactions.find_one({
+        'description': employee_id, 'category': 'Bookeeper',
+        'cut_off': cut_off
+    })
     
     response = {
         'status': '',

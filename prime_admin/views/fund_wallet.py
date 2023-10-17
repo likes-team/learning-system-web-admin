@@ -34,6 +34,8 @@ def fund_wallet():
     branches = access.get_current_user_branches()
     payment_options = mongo.db.lms_configurations.find_one({'name': 'payment_options'})['values']
     expenses_categories = mongo.db.lms_configurations.find_one({'name': "expenses_categories"})['values']
+    cut_offs = mongo.db.lms_cut_offs.find()
+
     return admin_render_template(
         FundWallet,
         "lms/fund_wallet/fund_wallet.html",
@@ -41,7 +43,8 @@ def fund_wallet():
         title="Fund Wallet",
         branches=branches,
         payment_options=payment_options,
-        expenses_categories=expenses_categories
+        expenses_categories=expenses_categories,
+        cut_offs=cut_offs
     )
 
 
@@ -268,6 +271,7 @@ def fund_wallet_add_expenses():
     sender = form.get('expenses_sender')
     contact_no = form.get('expenses_contact_no')
     address = form.get('expenses_address')
+    cut_off = form.get('cut_off')
 
     with mongo.cx.start_session() as session:
         with session.start_transaction():
@@ -344,6 +348,7 @@ def fund_wallet_add_expenses():
                 'status': status,
                 'reference_no': reference_no,
                 'employee_information': employee_information,
+                'cut_off': cut_off,
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)

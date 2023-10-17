@@ -399,6 +399,8 @@
             $("#billing_month_from").rules('add', { 'required': true });
             $("#billing_month_to").rules('add', { 'required': true });
 
+            $("#cut_off").rules('remove');
+
             $("#total_amount_due").prop('readonly', false);
 
             $("#label_description").html('Description');
@@ -419,6 +421,7 @@
             $("#expenses_contact_no").closest('.col-md-4').hide();
             $("#expenses_address").closest('.col-md-6').hide();
             $("#government_benefits").closest('.col-md-12').hide();
+            $("#cut_off").closest('.col-md-6').hide();
 
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
@@ -552,6 +555,9 @@
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
                 });
 
+                $("#cut_off").rules('add', {'required': true});
+
+                $("#cut_off").closest('.col-md-6').show();
                 $("#account_no").rules('remove');
                 $("#qty").rules('remove');
                 $("#unit_price").rules('remove');
