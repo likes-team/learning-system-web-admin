@@ -68,6 +68,7 @@ def fetch_utilities_dt():
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
             total_amount_due = transaction.get('total_amount_due', 0.00)
+            remark = transaction.get('remarks', '')
 
             billing_month = billing_month_from + " - " + billing_month_to
             total_utilities = total_utilities + total_amount_due.to_decimal()
@@ -78,6 +79,7 @@ def fetch_utilities_dt():
                 billing_month,
                 str(total_amount_due),
                 settled_by,
+                remark
             ])
     response = {
         'draw': draw,
