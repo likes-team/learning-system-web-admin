@@ -21,7 +21,7 @@ def get_employees(position, branch_id='all'):
         elif position == "Marketer":
             contact_persons = User.objects(Q(is_superuser=False) & Q(id__ne=current_user.id) & Q(role=MARKETERREFERENCE))
         else:
-            contact_persons = User.objects(Q(is_superuser=False) & Q(id__ne=current_user.id) & Q(is_employee=True))
+            contact_persons = User.objects(Q(is_superuser=False) & Q(id__ne=current_user.id) & (Q(is_employee=True) | Q(is_teacher=True)))
 
     if contact_persons is None:
         return []
