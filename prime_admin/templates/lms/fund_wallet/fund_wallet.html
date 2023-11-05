@@ -206,6 +206,8 @@
             dtbl_salary.ajax.url(`/learning-management/branches/${branchId}/salary/dt`).load();
             dtbl_refund.ajax.url(`/learning-management/branches/${branchId}/refund/dt`).load();
             dtbl_other_expenses.ajax.url(`/learning-management/branches/${branchId}/other-expenses/dt`).load();
+            dtbl_bir.ajax.url(`/learning-management/branches/${branchId}/bir/dt`).load();
+            dtbl_business_permit.ajax.url(`/learning-management/branches/${branchId}/business-permit/dt`).load();
         });
 
 
@@ -399,8 +401,6 @@
             $("#billing_month_from").rules('add', { 'required': true });
             $("#billing_month_to").rules('add', { 'required': true });
 
-            $("#cut_off").rules('remove');
-
             $("#total_amount_due").prop('readonly', false);
 
             $("#label_description").html('Description');
@@ -421,7 +421,6 @@
             $("#expenses_contact_no").closest('.col-md-4').hide();
             $("#expenses_address").closest('.col-md-6').hide();
             $("#government_benefits").closest('.col-md-12').hide();
-            $("#cut_off").closest('.col-md-6').hide();
 
             if (selectedCategory == "utilities") {
                 $("#description").append($('<option></option>').attr("value", "Building Rental").text("Building Rental"));
@@ -555,9 +554,6 @@
                     swal("Error Occured!", "Please refresh the page then try again!", "error");
                 });
 
-                $("#cut_off").rules('add', {'required': true});
-
-                $("#cut_off").closest('.col-md-6').show();
                 $("#account_no").rules('remove');
                 $("#qty").rules('remove');
                 $("#unit_price").rules('remove');
@@ -920,12 +916,46 @@
         });
 
 
-        // $("#filter_utilities_date_from").datepicker( { 
-        //    changeYear: false, 
-        //    dateFormat: 'MM-dd',
-        //}).focus(function () {
-        //    $(".ui-datepicker-year").hide();
-        //});
+        var dtbl_bir = $("#tbl_bir").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/bir/dt",
+                "data": function (d) {
+                    //d.date_from = $("#filter_tab2_date_from").val();
+                    //d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
+
+
+        var dtbl_business_permit = $("#tbl_business_permit").DataTable({
+            "dom": 'rtip',
+            "processing": true,
+            "autoWidth": false,
+            "serverSide": true,
+            "ajax": {
+                "url": "/learning-management/branches/all/business-permit/dt",
+                "data": function (d) {
+                    //d.date_from = $("#filter_tab2_date_from").val();
+                    //d.date_to = $("#filter_tab2_date_to").val();
+                }
+            },
+            "pageLength": 25,
+            "ordering": false,
+            "order": [[0, 'asc']],
+            "columnDefs": [
+            ],
+            "order": [[1, 'asc']],
+        });
 
 
         $('#filter_utilities_description').change(function () {

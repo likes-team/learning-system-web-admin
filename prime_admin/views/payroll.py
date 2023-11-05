@@ -40,10 +40,10 @@ def payroll():
 @bp_lms.route('/payroll/create-payslip')
 def create_payslip_page():
     branches = access.get_current_user_branches()
-    cut_offs = mongo.db.lms_cut_offs.find()
     return render_template(
         'lms/payroll/create_payslip_page.html', 
-        branches=branches, cut_offs=cut_offs)
+        branches=branches
+    )
     
 
     

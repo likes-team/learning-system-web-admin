@@ -1,3 +1,66 @@
 <div class="tab-pane" id="tab-eg6-4" role="tabpanel">
-    <p>Coming soon...</p>
+    <div class="main-card mb-3 card" style="margin-top: 20px;">
+        <div class="card-header"><i class="header-icon lnr-gift icon-gradient bg-grow-early">
+            </i>
+            <div class="btn-actions-pane-right">
+                <div class="nav">
+                    <a data-toggle="tab" href="#tab-bookeeper-0"
+                        class="border-0 btn-transition btn btn-outline-primary active show">
+                        BIR
+                    </a>
+                    <a data-toggle="tab" href="#tab-bookeeper-1"
+                        class="mr-1 ml-1 border-0 btn-transition btn btn-outline-primary show">
+                        BUSINESS PERMIT
+                    </a>
+                    <a data-toggle="tab" href="#tab-bookeeper-2"
+                        class="border-0 btn-transition  btn btn-outline-primary">
+                        EMPLOYEE BENEFITS
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane show active" id="tab-bookeeper-0" role="tabpanel">
+                    <div style="margin-top: 10px;" class="table-responsive">
+                        <table id="tbl_bir"
+                            class="align-middle mb-0 table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">DATE</th>
+                                    <th class="text-center">DESCRIPTION</th>
+                                    <th class="text-center">ACCOUNT NO/PARTICULAR</th>
+                                    <th class="text-center">TOTAL AMOUNT DUE</th>
+                                    <th class="text-center">SETTLED BY</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="tab-bookeeper-1" role="tabpanel">
+                    <div style="margin-top: 10px;" class="table-responsive">
+                        <table id="tbl_business_permit"
+                            class="align-middle mb-0 table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">DATE</th>
+                                    <th class="text-center">DESCRIPTION</th>
+                                    <th class="text-center">ACCOUNT NO/PARTICULAR</th>
+                                    <th class="text-center">TOTAL AMOUNT DUE</th>
+                                    <th class="text-center">SETTLED BY</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="tab-bookeeper-2" role="tabpanel">
+                    {% include 'lms/fund_wallet/components/business_expenses/components/employee_benefits.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

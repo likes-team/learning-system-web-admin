@@ -34,7 +34,6 @@ def fund_wallet():
     branches = access.get_current_user_branches()
     payment_options = mongo.db.lms_configurations.find_one({'name': 'payment_options'})['values']
     expenses_categories = mongo.db.lms_configurations.find_one({'name': "expenses_categories"})['values']
-    cut_offs = mongo.db.lms_cut_offs.find()
 
     return admin_render_template(
         FundWallet,
@@ -43,8 +42,7 @@ def fund_wallet():
         title="Fund Wallet",
         branches=branches,
         payment_options=payment_options,
-        expenses_categories=expenses_categories,
-        cut_offs=cut_offs
+        expenses_categories=expenses_categories
     )
 
 
@@ -868,6 +866,152 @@ def fetch_employee_benefits_dt(branch_id):
                 str(er.get('phil')),
                 str(total_er),
                 str(total_amount_due),
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('/branches/<string:branch_id>/bir/dt', methods=['GET'])
+def fetch_bir_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
+    total_records: int
+    filtered_records: int
+    filter: dict
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            filter = {'category': 'BIR'}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'BIR', 'branch': {"$in": current_user.branches}}
+        elif current_user.role.name == "Secretary":
+            filter = {'category': 'BIR','branch': current_user.branch.id}
+    else:
+        if current_user.role.name == "Secretary":
+            filter = {'category': 'BIR', 'branch': current_user.branch.id}
+        elif current_user.role.name == "Admin":
+            filter = {'category': 'BIR', 'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'BIR', 'branch': ObjectId(branch_id)}
+
+    # if date_from != "":
+    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    # if date_to != "":
+    #     if 'date' in filter:
+    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     else:
+    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+     
+    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    filtered_records = query.count()
+    
+    table_data = []
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_date: datetime = transaction.get('date', None)
+            description = transaction.get('description', '')
+            account_no = transaction.get('account_no', '')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', 0.00)
+        
+            if type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+            
+            table_data.append([
+                local_datetime,
+                description,
+                account_no,
+                str(total_amount_due),
+                settled_by,
+            ])
+
+    response = {
+        'draw': draw,
+        'recordsTotal': filtered_records,
+        'recordsFiltered': total_records,
+        'data': table_data,
+    }
+    return jsonify(response)
+
+
+@bp_lms.route('/branches/<string:branch_id>/business-permit/dt', methods=['GET'])
+def fetch_business_permit_dt(branch_id):
+    draw = request.args.get('draw')
+    start, length = int(request.args.get('start')), int(request.args.get('length'))
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    
+    total_records: int
+    filtered_records: int
+    filter: dict
+
+    if branch_id == 'all':
+        if current_user.role.name == "Admin":
+            filter = {'category': 'Business Permit'}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'Business Permit', 'branch': {"$in": current_user.branches}}
+        elif current_user.role.name == "Secretary":
+            filter = {'category': 'Business Permit','branch': current_user.branch.id}
+    else:
+        if current_user.role.name == "Secretary":
+            filter = {'category': 'Business Permit', 'branch': current_user.branch.id}
+        elif current_user.role.name == "Admin":
+            filter = {'category': 'Business Permit', 'branch': ObjectId(branch_id)}
+        elif current_user.role.name == "Partner":
+            filter = {'category': 'Business Permit', 'branch': ObjectId(branch_id)}
+
+    # if date_from != "":
+    #     filter['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
+    
+    # if date_to != "":
+    #     if 'date' in filter:
+    #         filter['date']['$lt'] = convert_to_utc(date_to, 'date_to')
+    #     else:
+    #         filter['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
+     
+    query = mongo.db.lms_fund_wallet_transactions.find(filter).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_fund_wallet_transactions.find(filter).count()
+    filtered_records = query.count()
+    
+    table_data = []
+    with decimal.localcontext(D128_CTX):
+        for transaction in query:
+            transaction_date: datetime = transaction.get('date', None)
+            description = transaction.get('description', '')
+            account_no = transaction.get('account_no', '')
+            settled_by = transaction.get('settled_by', '')
+            total_amount_due = transaction.get('total_amount_due', 0.00)
+        
+            if type(transaction_date == datetime):
+                local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
+            elif type(transaction_date == str):
+                to_date = datetime.strptime(transaction_date, "%Y-%m-%d")
+                local_datetime = to_date.strftime("%B %d, %Y")
+            else: 
+                local_datetime = ''
+            
+            table_data.append([
+                local_datetime,
+                description,
+                account_no,
+                str(total_amount_due),
+                settled_by,
             ])
 
     response = {

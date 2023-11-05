@@ -332,18 +332,6 @@
                         </div>
                         <div class="col-md-3">
                             <div class="position-relative form-group">
-                                <label for="cut_off" class="">Cut off</label>
-                                <select name="cut_off" id="cut_off" class="form-control" required>
-                                    <option value="">Choose...</option>
-
-                                    {% for cut_off in cut_offs %}
-                                    <option value="{{cut_off['_id']}}">{{cut_off['name']}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="position-relative form-group">
                                 <label for="position" class="">Position</label>
                                 <select name="position" id="position" class="form-control" required>
                                     <option value="">Choose...</option>
