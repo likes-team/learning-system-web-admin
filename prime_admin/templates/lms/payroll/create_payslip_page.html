@@ -123,6 +123,24 @@
         $("#total_amount_due").val(totalAmountDue);
     }
 
+    function getEmployeeSalaryRate(){
+        let employee = $("#employee").val();
+        if (employee == ""){
+            swal("Warning!", "Please select employee first!", "info");
+            return;
+        }
+
+        let billingMonthFrom = $("#billing_month_from").val();
+        $.getJSON(`/learning-management/employees/${employee}/get-salary-rate?billing_month_from=${billingMonthFrom}`, function (response) {
+            $("#salary_rate").val(response.data.salary_rate);
+            $("#government_benefits").val(response.data.government_benefits);
+            $("#sss").val(response.data.sss);
+            $("#phil_health").val(response.data.phil_health);
+            $("#pag_ibig").val(response.data.pag_ibig);
+            updateTotalSalaryAmount();
+        });
+    }
+
     $(document).ready(function () {
         $("#li_payroll").addClass('mm-active');
 
@@ -141,25 +159,7 @@
         });
 
         $("#employee").change(function(){
-            let cut_off = $("#cut_off").val();
-
-            if (cut_off == ''){
-                swal("Select cut-off first", "Info", "info");
-                $(this).val('');
-                return;
-            }
-
-            $.getJSON(`/learning-management/employees/${$(this).val()}/get-salary-rate?cut_off=${cut_off}`, function (response) {
-                if (response.status == "error") {
-                    swal(response.message, "No deductions!", "info");
-                }
-                $("#salary_rate").val(response.data.salary_rate);
-                $("#government_benefits").val(response.data.government_benefits);
-                $("#sss").val(response.data.sss);
-                $("#phil_health").val(response.data.phil_health);
-                $("#pag_ibig").val(response.data.pag_ibig);
-                updateTotalSalaryAmount();
-            });
+            getEmployeeSalaryRate();
         });
 
         $("#billing_month_from").change(function(){
@@ -169,6 +169,7 @@
             updateTotalSalaryAmount();
             updateGrossSalary();
             updateTotalAmountDue();
+            getEmployeeSalaryRate();
         });
 
         $("#billing_month_to").change(function(){

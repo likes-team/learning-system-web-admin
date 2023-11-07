@@ -88,12 +88,12 @@ def edit_payroll_employee(user_id):
 
 @bp_lms.route('/employees/<string:employee_id>/get-salary-rate', methods=['GET'])
 def get_employee_salary_rate(employee_id):
-    cut_off = request.args.get('cut_off')
+    billing_month_from = request.args['billing_month_from']
     query = mongo.db.lms_fund_wallet_transactions.find_one({
         'description': employee_id, 'category': 'Bookeeper',
-        'cut_off': cut_off
+        'billing_month_from': billing_month_from
     })
-    
+
     response = {
         'status': '',
         'data': {
@@ -108,8 +108,8 @@ def get_employee_salary_rate(employee_id):
         salary_rate = str(employee_information.get('salary_rate', 0))
 
         response['data']['salary_rate'] = salary_rate
-        response['message'] = "Bookeeper not found"
-        response['status'] = 'error'
+        response['message'] = "Retrieved Successfully!"
+        response['status'] = 'success'
         return jsonify(response)
     
     # From bookeeper data
