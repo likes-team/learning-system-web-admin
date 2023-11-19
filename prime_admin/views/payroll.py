@@ -204,7 +204,7 @@ def create_payslip():
             
             payslip_doc = mongo.db.lms_payroll_payslips.insert_one({
                 'branch': ObjectId(branch_id),
-                'employee': employee,
+                'employee': ObjectId(employee),
                 'position': position,
                 'billing_month_from': billing_month_from,
                 'billing_month_to': billing_month_to,
@@ -269,6 +269,7 @@ def fetch_payslips_dt():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     branch_id = request.args.get('branch', '')
+    search_value = request.args.get("search[value]")
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
     total_records: int
@@ -294,6 +295,9 @@ def fetch_payslips_dt():
         elif current_user.role.name == "Secretary":
             match['branch'] = current_user.branch.id
 
+    if search_value and search_value != '':
+        match['employee.lname'] = {'$regex': search_value}
+
     # if date_from != "":
     #     match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}
     
@@ -303,9 +307,25 @@ def fetch_payslips_dt():
     #     else:
     #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
 
-    query = mongo.db.lms_payroll_payslips.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_payroll_payslips.find(match).count()
-    filtered_records = query.count()
+    query = list(mongo.db.lms_payroll_payslips.aggregate([
+        {'$lookup': {
+            'from': 'auth_users',
+            'localField': 'employee',
+            'foreignField': '_id',
+            'as': 'employee'
+        }},
+        {"$unwind": {'path': '$employee'}},
+        {'$match': match},
+        {"$skip": start},
+        {"$limit": length},
+        {"$sort": {
+            'date': pymongo.DESCENDING
+        }}
+    ]))
+    
+    # query = mongo.db.lms_payroll_payslips.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+    total_records = mongo.db.lms_payroll_payslips.find().count()
+    filtered_records = len(query)
     table_data = []
     total_ofice_supply = decimal.Decimal(0)
 
@@ -313,7 +333,7 @@ def fetch_payslips_dt():
         for transaction in query:
             transaction_id = str(transaction['_id'])
             transaction_date: datetime = transaction.get('date', None)
-            employee_id = transaction.get('employee', '')
+            employee = transaction.get('employee', {})
             billing_month_from = transaction.get('billing_month_from', '')
             billing_month_to = transaction.get('billing_month_to', '')
             gross_salary = transaction.get('gross_salary', '0')
@@ -345,9 +365,8 @@ def fetch_payslips_dt():
             else: 
                 local_datetime = ''
             
-            contact_person : User = User.objects.get(id=employee_id)
-            description = contact_person.full_name
-            
+            description = employee.get('fname') + " " + employee.get('lname')
+
             cut_off_date = str(billing_month_from) + " - " + str(billing_month_to)
             # total_ofice_supply = total_ofice_supply + total_amount_due.to_decimal()
             action = """

@@ -119,6 +119,17 @@
             ],
             "order": [[1, 'asc']],
         });
+
+
+        $("#btn_search").click(function () {
+            dtbl_salary.search($("#search_input").val()).draw();
+        });
+
+
+        $("#btn_clear_entry").click(function () {
+            $("#search_input").val("")
+            dtbl_salary.search("").draw();
+        });
     }); // document.ready
 </script>
 {% endblock %}
@@ -150,6 +161,23 @@
         <div class="col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="position-relative form-group">
+                                <label for="lname" class="">Search</label>
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <input id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                        <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                            </i></button>
+                                        <button id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
+                                                class="pe-7s-close">
+                                            </i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div style="margin-top: 10px;" class="table-responsive">
                         <table id="tbl_payslips"
                             class="align-middle mb-0 table table-bordered table-striped table-hover">
