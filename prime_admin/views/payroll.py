@@ -450,4 +450,4 @@ def print_employee_payslip():
         net_amount=format_to_str_php(total_amount_due),
         net_amount_in_words=net_amount_in_words
     )
-    return render_pdf(HTML(string=html))
+    return html

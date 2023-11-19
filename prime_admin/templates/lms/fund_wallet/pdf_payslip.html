@@ -1,322 +1,466 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Payslip</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pdf_new_payslip</title>
 
-		<style>
-			.invoice-box {
-				max-width: 800px;
-				margin: auto;
-				padding-top: 30px;
-				padding-left: 30px;
-				padding-right: 30px;
-				border: 1px solid black;
-				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-				font-size: 12px;
-				line-height: 24px;
-				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-				color: #555;
-			}
+    <style>
+		@page {
+			size: letter landscape;
+			margin: 0.5cm;
+		}
 
-			.invoice-box table {
-				width: 100%;
-				line-height: inherit;
-				text-align: left;
-			}
+        .payslip-container{
+            display:grid;
+            grid-template-columns: 750px 50px 750px;
+            height: 99vh; 
+            padding: 5px, 5px, 5px, 5px;           
+        }
 
-			.invoice-box table td {
-				vertical-align: top;
-			}
+        .payslipbox-1{
+            border: 1px solid #000000;
+            padding-left: 20px;
+            padding-top: 20px;
+        }
+     
+        .payslipbox-3{
+            border: 1px solid #000000;
+            padding-left:20px;
+            padding-top: 20px;
+        }
 
-			.invoice-box table tr td:nth-child(2) {
-				text-align: right;
-			}
+        .payslipheader{
+            font-family: Arial, Helvetica, sans-serif;
+            height: 10vh;
+            display: grid;
+            grid-template-columns: 20% 80%;            
+            grid-template-rows: 1fr 1fr;   
+            padding-right: 25px;        
+        }
 
-			.invoice-box table tr.top table td {
-				padding-bottom: 20px;
-			}
+        .payslipheaderbox-logo{            
+            grid-column: 1;
+            grid-row: 1/3;         
+        }
 
-			.invoice-box table tr.top table td.title {
-				font-size: 45px;
-				line-height: 45px;
-				color: #333;
-			}
+        .payslipheaderbox-logo img{
+            height: 150px;
+            width: 150px;
+        }
 
-			.invoice-box table tr.information table td {
-				padding-bottom: 40px;
-			}
+        .payslipheaderbox-companyname{            
+            text-align: center;      
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 25px;         
+        }
 
-			.invoice-box table tr.heading td {
-				background: #eee;
-				border-bottom: 1px solid #ddd;
-				font-weight: bold;
-			}
+        .payslipheaderbox-companyaddress{         
+            text-align: center;  
+            font-size: 15px;
+            grid-row: 2/3;
+            padding: 10px;
+        }
 
-			.invoice-box table tr.details td {
-				padding-bottom: 20px;
-			}
+        .paysliptitle-line{
+            display: grid;
+            grid-template-columns: 1fr 1fr;          
+            grid-template-rows: 1fr 100%;   
+            padding: 20px;
+        }
 
-			.invoice-box table tr.total td:nth-child(2) {
-				border-top: 2px solid #eee;
-				font-weight: bold;
-			}
+        .box-line{
+            border-bottom: #000000 2px solid;
+            grid-row: 1; 
+            grid-column: 1/3;
+            padding-top: 20px;
+        }
 
-			@media only screen and (max-width: 600px) {
-				.invoice-box table tr.top table td {
-					width: 100%;
-					display: block;
-					text-align: center;
-				}
+        .box-title{          
+            grid-row: 2; 
+            grid-column: 1/3;
+            text-align: center;
+            padding-top: 10px;
+            font-size: xx-large;
+        }
+        
+        .empnopayslipperiod {
+            display:grid;
+            grid-template-columns: 1fr 30%;            
+            grid-template-rows: 1fr 1fr;  
+            text-align: left;
+            margin-right: 20px;
+        }
 
-				.invoice-box table tr.information table td {
-					width: 100%;
-					display: block;
-					text-align: center;
-				}
-			}
+        .payslipperiod-label{                       
+            grid-row: 1; 
+            grid-column: 2/3;
+            text-align: left;        
+        }
 
-			/** RTL **/
-			.invoice-box.rtl {
-				direction: rtl;
-				font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-			}
+        .payslipperiod-data{           
+            grid-row: 2; 
+            grid-column: 2/3;
+            text-align: left;
+            font-size: larger;
+            font-weight: bold;
+        }
 
-			.invoice-box.rtl table {
-				text-align: right;
-			}
+        .payslippaydate{
+            display:grid;
+            grid-template-columns: 1fr 30%;            
+            grid-template-rows: 1fr 1fr;  
+            text-align: left;
+            margin-right: 20px;
+        }
+        .payslippaydate-label{                        
+            grid-row: 1; 
+            grid-column: 2/3;
+            text-align: left;
+            padding-top: 10px;
+        }
 
-			.invoice-box.rtl table tr td:nth-child(2) {
-				text-align: left;
-			}
+        .payslippaydate-data{            
+            grid-row: 2; 
+            grid-column: 2/3;
+            text-align: left;
+            font-size: larger;
+            font-weight: bold;
+        }
 
-			#div_logo{
-				height: auto;
-				left: 0px;
-				right: 0px;
-			}
+        .payslipworkingdays{
+            display:grid;
+            grid-template-columns: 1fr 30%;            
+            grid-template-rows: 1fr 1fr;  
+            text-align: left;
+            margin-right: 20px;
+        }
 
-			#img_logo{
-				width: 10%;
-				height: auto;
-				top: 30px;
-				left: 40px;
-				right: 0px;
-				position:absolute
-			}
+        .payworkingdays-label{                     
+            grid-row: 1; 
+            grid-column: 2/3;
+            text-align: left;
+            padding-top: 10px;
+        }
 
-			#title {
-				margin-top: 30px;
-				width:300px;
-				height:35px;
-				text-align: center;
-				margin-left: auto;
-				margin-right: auto;
-				padding-top: 10px;
-				font-size: x-large;
-			}
+        .payworkingdays-data{        
+            grid-row: 2; 
+            grid-column: 2/3;
+            text-align: left;
+            font-size: larger;
+            font-weight: bold;
+        }
 
-			.row {
-				display: flex;
-				justify-content: center;
-			}
+        .employeedatails{
+            padding-left: 20px;
+        }
 
-			.information {
-				width:300px;
-				height:20px;
-				padding: 5px;
-				font-size: x-small;
-			}
+        .employeename{
+            font-size: x-large;
+            font-weight: bold;
+        }
 
-			#date {
-				width:170px;
-				height:20px;
-				padding: 5px;
-				font-size: x-small;
-				margin-top: 30px;
-				text-align: center;
-			}
+        .employeenoposition{
+            margin-bottom: 20px;
+        }
 
-			#record {
-				margin-top: 50px;
-				width:300px;
-				height:25px;
-				border:1px solid #000;
-				text-align: center;
-				margin-left: auto;
-				margin-right: auto;
-				font-size: large;
-			}
+        .earnings-table-header{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: 1fr;
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 20px;
+            margin-left: 20px;
+            margin-bottom: 5px;
+            background-color: lightgray;         
+            border: 1px solid #000000;    
+            border-radius: 5px; 
+            padding-bottom: 10px;    
+            padding-top: 10px;       
+        }
 
-			.branch {
-				width:200px;
-				height:20px;
-				border:1px solid #000;
-				padding: 5px;
-				font-size: x-small;
-				margin-right: 280px;
-				margin-bottom: 5px;
-			}
+        .eanings-table{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: 1fr;
+            text-align: left;
+            font-size: 15px;
+            margin-right: 20px;
+            margin-bottom: 5px;
+            margin-left: 20px;         
+            border: 1px solid #000000;  
+            border-radius: 5px;  
+            padding-bottom: 10px;    
+            padding-top: 10px;              
+        }
 
-			.total {
-				width: 100px;
-				height:20px;
-				border:1px solid #000;
-				padding: 5px;
-				font-size: x-small;
-				margin-top: 30px;
-				text-align: center;
-				margin-bottom: 5px;
-			}
+        .salary-header-earnings, 
+        .salary-label, 
+        .foodallowance-label, 
+        .accommodation-label,
+        .rebate-label, 
+        .totalearnings-label{
+            padding-left: 20px;
+        }  
 
-			#footer {
-				text-align: center;
-				margin-left: auto;
-				margin-right: auto;
-				padding: 0%;
-				margin-top: 30px;
-				margin-bottom: 0px;
-			}
-			
-			#footer p {
-				margin: 0;
-				padding: 0;
-			}
+        .total-eanings-row{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: 1fr 50%;
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 20px;
+            margin-right: 20px;
+            margin-bottom: 5px;
+            margin-left: 20px; 
+            border: 1px solid #000000;  
+            border-radius: 5px; 
+        }
+  
+        .totalearningsamount-label{           
+            grid-row: 1; 
+            
+        }
+ 
+        .totalearningsamount-data{           
+            grid-row: 1;
+            grid-column: 4; 
+            text-align: right;
+        }
+        .totalamount-label{            
+            grid-row: 2;
+            grid-column: 2/5; 
+            font-size: 15px;
+            text-align: right;
+        }
 
-			.prime {
-				margin: 0;
-				padding: 0;
-			}
+        .totalearningsamount-label{
+            padding-left: 10px;
+        }
 
-			table, th, td {
-				border: 1px solid black;
-				border-collapse: collapse;
-			}
+        .totalearningsamount-data, 
+        .totalamount-label{
+            padding-right: 10px;
+        }
 
-			th {
-				text-align: center;
-			}
-			
-			td {
-				padding: 10px;
-				text-align: left;
-			}
+        .employee-signature{
+            font-size: 12px;
+            text-align: center;
+            margin-top: 100px;
+            margin-left: 20px;
+            margin-right: 50%;
+            border: 1px solid #000000;  
+            border-radius: 5px;
+        }
+        .admin-signature{
+            font-size: 12px;
+            text-align: center;
+            margin-top: 100px;
+            margin-left: 50%;
+            margin-right: 20px;
+            border: 1px solid #000000;  
+            border-radius: 5px;
+        }
 
-			.Column {
-				display: table-cell;
-				font-size: 11px;
-				/*Optional*/
-			}
+    </style>
 
-			.Row {
-				display: table;
-				width: 100%;
-				/*Optional*/
-				table-layout: fixed;
-				/*Optional*/
-				border-spacing: 5px;
-				/*Optional*/
-			  }
 
-			.line{
-				width: 230px;
-				height: 30px;
-				border-bottom: 1px solid black;
-			}
-		</style>
-	</head>
+</head>
+<body>
+    <div class="payslip-container">
+        <div class="payslipbox-1">
+            <div class="payslipheader">
+               <div class="payslipheaderbox-logo"><img src="{{url_for('lms.static', filename='img/logo.png')}}" alt="" srcset=""></div>
+               <div class="payslipheaderbox-companyname">PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</div>
+               <div class="payslipheaderbox-companyaddress">ROOM 305, 3RD FLOOR, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY<br>TEL. NO. (032) 425 2165</div>
+            </div>   
 
-	<body>
-		<div class="invoice-box">
-			<div id="div_logo">
-				<img id="img_logo" src="{{url_for('lms.static', filename='img/logo.png')}}" alt="logo" width="10%" height="10%" style="float:left">
-			</div>
+            <div class="paysliptitle-line">
+                <div class="box-line"></div>
+                <div class="box-title">PAYSLIP</div>
+            </div>    
 
-			<div class="prime" style="text-align: center; font-size: larger;">
-				<strong>PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</strong>
-			</div>
+            <div class="empnopayslipperiod">
+                <div class="payslipperiod-label">Payslip for the period of</div>
+                <div class="payslipperiod-data">{{pay_period}}</div>
+            </div>
 
-			<div class="prime" style="text-align: center;">
-				<p class="prime" style="font-size:smaller;">ROOM 305, 3RD FLOOR, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY</p>
-				<p class="prime" style="font-size:smaller;">TEL. NO. (032) 425 2165</p>
-			</div>
-			<hr/>
+            <div class="payslippaydate">
+                <div class="payslippaydate-label">Pay Date</div>
+                <div class="payslippaydate-data">{{pay_date}}</div>
+            </div>
 
-			<div id="title">PAYSLIP</div>
+            <div class="payslipworkingdays">
+                <div class="payworkingdays-label">Work Day/s</div>
+                <div class="payworkingdays-data">{{work_days}}</div>
+            </div>
 
-			<div class="Row" style="margin-top: 15px;">
-				<div class="Column"><strong>EMPLOYEE NO.</strong>: {{employee.full_employee_id}}</div>
-				<div class="Column"><strong>PAY PERIOD</strong>: {{pay_period}}</div>
-			</div>
+            <div class="employeedatails">
+                <div class="employeename"> {{employee.full_name.upper()}} </div>
+                <div class="employeenoposition">{{employee.full_employee_id}} <br> {{position.upper()}} </div>
+            </div>
 
-			<div class="Row">
-				<div class="Column"><strong>FULL NAME</strong>: {{employee.full_name.upper()}}</div>
-				<div class="Column"><strong>WORK DAYS</strong>: {{work_days}}</div>
-			</div>
+            <div class="earnings-table-header">
+                <div class="salary-header-earnings">EARNINGS</div>
+                <div class="salary-header-earning-amount">AMOUNT</div>
+                <div class="salary-header-earnings-deduction">DEDUCTION</div>
+                <div class="salary-header-deduction-amount">AMOUNT</div>
+            </div>
+            
+            <div class="eanings-table">
+                <div class="salary-label">SALARY</div>
+                <div class="salary-data">₱ 4038.00</div>
+                <div class="sss-label">SSS</div>
+                <div class="sss-data">₱ 0.00</div>
+            </div>
 
-			<div class="Row">
-				<div class="Column"><strong>POSITION</strong>: {{position.upper()}}</div>
-				<div class="Column"><strong>PAY DATE</strong>: {{pay_date}}</div>
-			</div>
+            <div class="eanings-table">
+                <div class="foodallowance-label">FOOD ALLOWANCE</div>
+                <div class="foodallowance-data">₱ 0.00</div>
+                <div class="philhealth-label">PHILHEALTH</div>
+                <div class="philhealth-data">₱ 0.00</div>
+            </div>
 
-			<table style="border: 1px solid black; margin-top: 30px;">
-				<thead>
-					<tr>
-					<th>EARNINGS</th>
-					<th>AMOUNT</th>
-					<th>DEDUCTION</th>
-					<th>AMOUNT</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for row in table_data %}
-						<tr>
-							<td>{{row[0]}}</td>
-							<td>₱ {{row[1]}}</td>
-							<td>{{row[2]}}</td>
-							<td>₱ {{row[3]}}</td>
-						</tr>
-					{% endfor %}
-					<tr style="padding-top: 1em;">
-						<td><strong>TOTAL EARNINGS</strong></td>
-						<td>₱ {{total_earnings}}</td>
-						<td><strong>TOTAL DEDUCTION</strong></td>
-						<td>₱ {{total_deduction}}</td>
-					</tr>
-					<tr style="padding-top: 1em;">
-						<td><strong>NET AMOUNT</strong></td>
-						<td colspan="3"><strong>{{net_amount}}</strong></br>
-							{{net_amount_in_words|upper}}
-						</td>
-					</tr>
-				</tbody>
-				<!-- <tfoot>
-					<tr>
-						<td>TOTAL EARNINGS</td>
-						<td colspan="2">TOTAL DEDUCTION</td>
-					</tr>
-				</tfoot>
-				-->
-			</table>
-			<div class="Row">
-				<div class="Column">
-				  <div style="text-align: left; font-size: 12px; margin-top: 30px; margin-bottom: 0px;">
-					<div class="line"></div>
-					<div style="text-align: left; margin-left: 20px;">
-						EMPLOYEE NAME/SIGNATURE
-					</div>
-				  </div>
-				</div>
-			
-				<div class="Column">
-				  <div style="text-align: left; margin-left: 50px; font-size: 12px; margin-top:0px; margin-bottom: 0px;">
-					<div class="line"></div>
-					<div style="text-align: center;">
-					  ADMINISTRATOR
-					</div>
-				  </div>
-				</div>
-			</div>	
-		</div>
-	</body>
+            <div class="eanings-table">
+                <div class="accommodation-label">ACCOMMODATIONE</div>
+                <div class="accommodation-data">₱ 0.00</div>
+                <div class="pagibig-label">PAG-IBIG</div>
+                <div class="pagibig-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="rebate-label">REBATE</div>
+                <div class="rebate-data">₱ 0.00</div>
+                <div class="ca-label">C.A</div>
+                <div class="ca-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="totalearnings-label">TOTAL EARNINGS</div>
+                <div class="totalearnings-data">₱ {{total_earnings}}</div>
+                <div class="totaldeduction-label">TOTAL DEDUCTION</div>
+                <div class="totaldeduction-data">₱ {{total_deduction}}</div>
+            </div>
+
+            <div class="total-eanings-row">
+                <div class="totalearningsamount-label">NET AMOUNT</div>
+                <div class="totalearningsamount-data">₱ {{net_amount}}</div>
+                <div class="totalamount-label">{{net_amount_in_words|upper}}</div>               
+            </div>
+
+            <div class="employee-signature">                           
+                <div class="employeesignature-label">EMPLOYEE NAME/SIGNATURE</div>               
+            </div>
+
+            <div class="admin-signature">                           
+                <div class="adminsignature-label">EMPLOYEE NAME/SIGNATURE</div>               
+            </div>
+
+        </div>
+
+
+        <div class="payslipbox-2">
+
+        </div>
+
+
+        <div class="payslipbox-3">
+            <div class="payslipheader">
+                <div class="payslipheaderbox-logo"><img src="{{url_for('lms.static', filename='img/logo.png')}}" alt="" srcset=""></div>
+                <div class="payslipheaderbox-companyname">PRIME KOREAN LANGUAGE AND REVIEW CENTER INC.</div>
+                <div class="payslipheaderbox-companyaddress">ROOM 305, 3RD FLOOR, DOÑA LUISA BLDG. FUENTE OSMEÑA, CEBU CITY<br>TEL. NO. (032) 425 2165</div>
+             </div>   
+ 
+             <div class="paysliptitle-line">
+                 <div class="box-line"></div>
+                 <div class="box-title">PAYSLIP</div>
+             </div>    
+             <div class="empnopayslipperiod">
+                <div class="payslipperiod-label">Payslip for the period of</div>
+                <div class="payslipperiod-data">{{pay_period}}</div>
+            </div>
+
+            <div class="payslippaydate">
+                <div class="payslippaydate-label">Pay Date</div>
+                <div class="payslippaydate-data">{{pay_date}}</div>
+            </div>
+
+            <div class="payslipworkingdays">
+                <div class="payworkingdays-label">Work Day/s</div>
+                <div class="payworkingdays-data">{{work_days}}</div>
+            </div>
+
+            <div class="employeedatails">
+                <div class="employeename"> {{employee.full_name.upper()}} </div>
+                <div class="employeenoposition">{{employee.full_employee_id}} <br> {{position.upper()}} </div>
+            </div>
+
+            <div class="earnings-table-header">
+                <div class="salary-header-earnings">EARNINGS</div>
+                <div class="salary-header-earning-amount">AMOUNT</div>
+                <div class="salary-header-earnings-deduction">DEDUCTION</div>
+                <div class="salary-header-deduction-amount">AMOUNT</div>
+            </div>
+            
+            <div class="eanings-table">
+                <div class="salary-label">SALARY</div>
+                <div class="salary-data">₱ 4038.00</div>
+                <div class="sss-label">SSS</div>
+                <div class="sss-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="foodallowance-label">FOOD ALLOWANCE</div>
+                <div class="foodallowance-data">₱ 0.00</div>
+                <div class="philhealth-label">PHILHEALTH</div>
+                <div class="philhealth-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="accommodation-label">ACCOMMODATIONE</div>
+                <div class="accommodation-data">₱ 0.00</div>
+                <div class="pagibig-label">PAG-IBIG</div>
+                <div class="pagibig-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="rebate-label">REBATE</div>
+                <div class="rebate-data">₱ 0.00</div>
+                <div class="ca-label">C.A</div>
+                <div class="ca-data">₱ 0.00</div>
+            </div>
+
+            <div class="eanings-table">
+                <div class="totalearnings-label">TOTAL EARNINGS</div>
+                <div class="totalearnings-data">₱ {{total_earnings}}</div>
+                <div class="totaldeduction-label">TOTAL DEDUCTION</div>
+                <div class="totaldeduction-data">₱ {{total_deduction}}</div>
+            </div>
+
+            <div class="total-eanings-row">
+                <div class="totalearningsamount-label">NET AMOUNT</div>
+                <div class="totalearningsamount-data">₱ {{net_amount}}</div>
+                <div class="totalamount-label">{{net_amount_in_words|upper}}</div>               
+            </div>
+
+            <div class="employee-signature">                           
+                <div class="employeesignature-label">EMPLOYEE NAME/SIGNATURE</div>               
+            </div>
+
+            <div class="admin-signature">                           
+                <div class="adminsignature-label">ADMINISTRATOR</div>               
+            </div>
+            
+ 
+        </div>
+        
+
+    </div>
+    
+</body>
 </html>
+<!--https://www.youtube.com/watch?v=UmAhSJOWG74&t=839s-->
