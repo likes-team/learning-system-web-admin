@@ -421,33 +421,38 @@ def print_employee_payslip():
     pay_period = billing_month_from + " - " + billing_month_to
     work_days = payslip.get('total_working_days', '0')
     pay_date = format_utc_to_local(payslip.get('date'))
+    salary_rate = payslip.get('salary_rate', '0')
 
-    total_earnings = convert_decimal128_to_decimal(gross_salary) + convert_decimal128_to_decimal(food_allowance) \
-        + convert_decimal128_to_decimal(accommodation) + convert_decimal128_to_decimal(0)
+    total_earnings = convert_decimal128_to_decimal(gross_salary)
     total_deduction = convert_decimal128_to_decimal(cash_advance) + convert_decimal128_to_decimal(government_benefits) \
         + convert_decimal128_to_decimal(accommodation_deduction)
-
-    table_data = [
-        ("SALARY", format_to_str_php(gross_salary), "SSS", format_to_str_php(sss)),
-        ("FOOD ALLOWANCE", format_to_str_php(food_allowance), "PHILHEALTH", format_to_str_php(phil_health)),
-        ("ACCOMMODATION", format_to_str_php(accommodation), "PAG-IBIG", format_to_str_php(pag_ibig)),
-        ("REBATE", format_to_str_php(0), "C.A", format_to_str_php(cash_advance)),
-    ]
     position = payslip.get('position')
     net_amount_in_words = inflect.engine().number_to_words(total_amount_due)
 
+    if position == 'Teacher':
+        no_of_session = payslip.get('no_of_session', 0)
+        salary =  convert_decimal128_to_decimal(salary_rate) * no_of_session 
+    else:
+        salary =  convert_decimal128_to_decimal(salary_rate) * work_days 
+
     html = render_template(
         'lms/fund_wallet/pdf_payslip.html',
-        branches_earnings=table_data,
         employee=employee,
         position=position,
-        table_data=table_data,
         pay_period=pay_period,
         work_days=work_days,
         pay_date=pay_date,
         total_earnings=format_to_str_php(total_earnings),
         total_deduction=format_to_str_php(total_deduction),
         net_amount=format_to_str_php(total_amount_due),
-        net_amount_in_words=net_amount_in_words
+        net_amount_in_words=net_amount_in_words,
+        salary=format_to_str_php(salary),
+        sss=format_to_str_php(sss),
+        food_allowance=format_to_str_php(food_allowance),
+        accommodation=format_to_str_php(accommodation),
+        pag_ibig=format_to_str_php(pag_ibig),
+        rebate=format_to_str_php(0),
+        cash_advance=format_to_str_php(cash_advance),
+        phil_health=format_to_str_php(phil_health)
     )
     return html
