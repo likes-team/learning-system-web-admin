@@ -316,11 +316,11 @@ def fetch_payslips_dt():
         }},
         {"$unwind": {'path': '$employee'}},
         {'$match': match},
-        {"$skip": start},
-        {"$limit": length},
         {"$sort": {
             'date': pymongo.DESCENDING
-        }}
+        }},
+        {"$skip": start},
+        {"$limit": length},
     ]))
     
     # query = mongo.db.lms_payroll_payslips.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
