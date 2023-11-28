@@ -131,6 +131,10 @@
         }
 
         let billingMonthFrom = $("#billing_month_from").val();
+        $("#sss").val('0');
+        $("#phil_health").val('0');
+        $("#pag_ibig").val('0');
+
         $.getJSON(`/learning-management/employees/${employee}/get-salary-rate?billing_month_from=${billingMonthFrom}`, function (response) {
             $("#salary_rate").val(response.data.salary_rate);
             $("#government_benefits").val(response.data.government_benefits);
@@ -432,7 +436,7 @@
                                 <div class="col-sm-5"><input id="settled_by" name="settled_by" type="text" class="form-control"></div>
                             </div>
                             <input id="sss" name="sss" type="hidden" class="form-control">
-                            <input id="phil" name="phil" type="hidden" class="form-control">
+                            <input id="phil_health" name="phil_health" type="hidden" class="form-control">
                             <input id="pag_ibig" name="pag_ibig" type="hidden" class="form-control">
                         </div>
                     </div>
