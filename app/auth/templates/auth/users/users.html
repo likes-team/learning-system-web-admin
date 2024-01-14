@@ -232,6 +232,15 @@
             dtbl_user_status.search();
         });
 
+        $("#btn_search").click(function () {
+            dtbl_user_status.search($("#search_input").val()).draw();
+        });
+
+        $("#btn_clear_entry").click(function () {
+            $("#search_input").val("")
+            dtbl_user_status.search("").draw();
+        });
+
         $("#filter_roles").change(function(){
             dtbl_user_status.ajax.reload();
         });
