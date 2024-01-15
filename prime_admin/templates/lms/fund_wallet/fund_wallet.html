@@ -1027,6 +1027,15 @@
                 `/learning-management/fund-wallet/list-of-earnings?contact_person=${contactPerson}&branch=${branch}`
             ).load();
         });
+
+        $("#btn_search_salary").click(function () {
+            dtbl_salary.search($("#search_input_salary").val()).draw();
+        });
+
+        $("#btn_clear_entry_salary").click(function () {
+            $("#search_input").val("")
+            dtbl_salary.search("").draw();
+        });
     }); // document.ready
 </script>
 {% endblock %}

@@ -410,6 +410,7 @@ def fetch_salary_dt(branch_id):
     total_records: int
     filtered_records: int
     match = {'category': {'$in': ['salary', 'salary_and_rebates']}}
+    search_value = request.args.get("search[value]")
 
     if branch_id == 'all':
         if current_user.role.name == "Admin":
@@ -438,10 +439,25 @@ def fetch_salary_dt(branch_id):
     #         match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
     #     else:
     #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
-     
-    query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
-    filtered_records = query.count()
+
+    if search_value != "":
+        filter_employee = {}
+        filter_employee['employee.lname'] = {"$regex": search_value}
+
+        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+            {"$match": match},
+            {"$addFields": {"descriptionObjectId": {"$toObjectId": "$description"}}},
+            {"$lookup": {"from": "auth_users", "localField": "descriptionObjectId",
+                            "foreignField": "_id", 'as': "employee"}},
+            {"$unwind": {"path": '$employee'}},
+            {"$match": filter_employee}
+        ]))
+        filtered_records = len(query)
+        total_records = len(query)
+    else:
+        query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
+        filtered_records = query.count()
+        total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     
     table_data = []
     
@@ -463,10 +479,14 @@ def fetch_salary_dt(branch_id):
                 local_datetime = to_date.strftime("%B %d, %Y")
             else: 
                 local_datetime = ''
-            
-            contact_person : User = User.objects.get(id=description)
-            description = contact_person.full_name
-            
+        
+            if search_value != '':
+                description = \
+                    transaction['employee']['fname'] + " " + transaction['employee']['lname']
+            else:
+                contact_person : User = User.objects.get(id=description)
+                description = contact_person.full_name
+
             cut_off_date = str(billing_month_from) + " - " + str(billing_month_to)
             # total_ofice_supply = total_ofice_supply + total_amount_due.to_decimal()
 
