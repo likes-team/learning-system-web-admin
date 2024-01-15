@@ -439,29 +439,35 @@ def fetch_salary_dt(branch_id):
     #         match['date']['$lt'] = convert_to_utc(date_to, 'date_to')
     #     else:
     #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
-
+    filter_employee = {}
     if search_value != "":
-        filter_employee = {}
         filter_employee['employee.lname'] = {"$regex": search_value}
 
-        query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
-            {"$match": match},
-            {"$addFields": {"descriptionObjectId": {"$toObjectId": "$description"}}},
-            {"$lookup": {"from": "auth_users", "localField": "descriptionObjectId",
-                            "foreignField": "_id", 'as': "employee"}},
-            {"$unwind": {"path": '$employee'}},
-            {"$match": filter_employee}
-        ]))
-        filtered_records = len(query)
+    query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
+        {"$match": match},
+        {"$addFields": {"descriptionObjectId": {"$toObjectId": "$description"}}},
+        {"$lookup": {"from": "auth_users", "localField": "descriptionObjectId",
+                        "foreignField": "_id", 'as': "employee"}},
+        {"$unwind": {"path": '$employee'}},
+        {"$match": filter_employee},
+        {"$lookup": {"from": "lms_payroll_payslips", "localField": "payslip",
+                        "foreignField": "_id", 'as': "payslip"}},
+        {"$unwind": {"path": '$payslip'}},
+        {"$sort": {
+            'date': pymongo.DESCENDING
+        }},
+        {"$skip": start},
+        {"$limit": length},
+    ]))
+    filtered_records = len(query)
+
+    if search_value != "":
         total_records = len(query)
     else:
-        query = mongo.db.lms_fund_wallet_transactions.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-        filtered_records = query.count()
         total_records = mongo.db.lms_fund_wallet_transactions.find(match).count()
     
     table_data = []
-    
-    total_ofice_supply = decimal.Decimal(0)
+    total_ofice_supply = decimal.Decimal(0) 
     
     with decimal.localcontext(D128_CTX):
         for transaction in query:
@@ -471,7 +477,21 @@ def fetch_salary_dt(branch_id):
             billing_month_to = transaction.get('billing_month_to', '')
             settled_by = transaction.get('settled_by', '')
             total_amount_due = transaction.get('total_amount_due', 0.00)
-        
+            
+            cash_advance = transaction['payslip']['cash_advance']
+            government_benefits = transaction['payslip']['government_benefits']
+            accommodation_deduction = transaction['payslip']['accommodation_deduction']
+
+            if accommodation_deduction is None:
+                accommodation_deduction = 0
+            if government_benefits is None:
+                government_benefits = 0
+            if cash_advance is None:
+                cash_advance = 0
+
+            total_deduction = convert_decimal128_to_decimal(cash_advance) + convert_decimal128_to_decimal(government_benefits) \
+                + convert_decimal128_to_decimal(accommodation_deduction)
+
             if type(transaction_date == datetime):
                 local_datetime = transaction_date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
             elif type(transaction_date == str):
@@ -495,7 +515,10 @@ def fetch_salary_dt(branch_id):
                 description,
                 cut_off_date,
                 str(total_amount_due),
-                '',
+                str(cash_advance),
+                str(accommodation_deduction),
+                str(government_benefits),
+                str(total_deduction),
                 str(total_amount_due),
                 settled_by,
             ])
