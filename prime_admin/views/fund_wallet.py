@@ -481,6 +481,7 @@ def fetch_salary_dt(branch_id):
             cash_advance = transaction['payslip']['cash_advance']
             government_benefits = transaction['payslip']['government_benefits']
             accommodation_deduction = transaction['payslip']['accommodation_deduction']
+            gross_salary = transaction['payslip']['gross_salary']
 
             if accommodation_deduction is None:
                 accommodation_deduction = 0
@@ -514,7 +515,7 @@ def fetch_salary_dt(branch_id):
                 local_datetime,
                 description,
                 cut_off_date,
-                str(total_amount_due),
+                str(gross_salary),
                 str(cash_advance),
                 str(accommodation_deduction),
                 str(government_benefits),
