@@ -23,7 +23,7 @@ def get_dashboard_users():
     }
 
     if search_value != '':
-        _filter['lname'] = {"$regex": search_value}
+        _filter['lname'] = {"$regex": search_value, '$options' : 'i'}
     
     if role != 'all':
         _filter['role'] = ObjectId(role)

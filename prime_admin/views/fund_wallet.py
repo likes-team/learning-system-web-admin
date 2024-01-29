@@ -441,7 +441,7 @@ def fetch_salary_dt(branch_id):
     #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
     filter_employee = {}
     if search_value != "":
-        filter_employee['employee.lname'] = {"$regex": search_value}
+        filter_employee['employee.lname'] = {"$regex": search_value, '$options' : 'i'}
 
     query = list(mongo.db.lms_fund_wallet_transactions.aggregate([
         {"$match": match},

@@ -65,8 +65,8 @@ class StudentQueryFilter(BaseQueryFilter):
             match['schedule'] = schedule
             
         if search_value and search_value != '':
-            match['lname'] = {'$regex': search_value}
-        
+            match['lname'] = {'$regex': search_value, '$options' : 'i'}
+
         if date_from and date_from != "":
             match['registration_date'] = {'$gte': convert_date_input_to_utc(date_from, 'date_from')}
         

@@ -35,7 +35,7 @@ def fetch_partners_dt():
     filtered_records: int
 
     if search_value != '':
-        query = mongo.db.auth_users.find({'lname': {'$regex': search_value}, 'role': PARTNERREFERENCE}).skip(start).limit(length)
+        query = mongo.db.auth_users.find({'lname': {'$regex': search_value, '$options' : 'i'}, 'role': PARTNERREFERENCE}).skip(start).limit(length)
         total_records = query.count()
     else:
         query = mongo.db.auth_users.find({'role': PARTNERREFERENCE}).skip(start).limit(length)

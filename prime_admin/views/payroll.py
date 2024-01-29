@@ -296,7 +296,7 @@ def fetch_payslips_dt():
             match['branch'] = current_user.branch.id
 
     if search_value and search_value != '':
-        match['employee.lname'] = {'$regex': search_value}
+        match['employee.lname'] = {'$regex': search_value, '$options' : 'i'}
 
     # if date_from != "":
     #     match['date'] = {"$gt": convert_to_utc(date_from, 'date_from')}

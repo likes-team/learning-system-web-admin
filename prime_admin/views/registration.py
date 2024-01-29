@@ -298,8 +298,8 @@ def get_client(client_id):
     if is_check_existing_client:
         check_existing_client = list(mongo.db.lms_registrations.find({
             '_id': {"$ne": ObjectId(client.id)},
-            'fname': {'$regex': client.fname},
-            'lname': {'$regex': client.lname},
+            'fname': {'$regex': client.fname, '$options' : 'i'},
+            'lname': {'$regex': client.lname, '$options' : 'i'},
             'status': 'registered'
         }))
         

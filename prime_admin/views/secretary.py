@@ -64,7 +64,7 @@ def fetch_secretaries_dt():
 
     if search_value != '':
         query = list(mongo.db.auth_users.aggregate([
-            {"$match": {'lname': {'$regex': search_value}, 'role': SECRETARYREFERENCE}},
+            {"$match": {'lname': {'$regex': search_value, '$options' : 'i'}, 'role': SECRETARYREFERENCE}},
             {"$lookup": {
                 'from': 'lms_branches',
                 'localField': 'branch',

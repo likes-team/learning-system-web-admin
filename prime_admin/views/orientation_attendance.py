@@ -160,7 +160,7 @@ def fetch_orientation_attendance_students_dt():
 
     if search_value != "":
         registrations = registrations.filter(lname__icontains=search_value)
-        filter['lname'] = {"$regex": search_value}
+        filter['lname'] = {"$regex": search_value, '$options' : 'i'}
         
     if contact_person_id != 'all':
         registrations = registrations.filter(contact_person=contact_person_id)
