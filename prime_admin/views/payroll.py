@@ -432,6 +432,7 @@ def print_employee_payslip():
     if position == 'Teacher':
         no_of_session = payslip.get('no_of_session', 0)
         salary =  convert_decimal128_to_decimal(salary_rate) * no_of_session 
+        work_days = no_of_session
     else:
         salary =  convert_decimal128_to_decimal(salary_rate) * work_days 
 
