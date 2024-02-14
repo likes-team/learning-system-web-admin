@@ -392,7 +392,7 @@ def new_payment():
             client.balance = client.balance - amount
     
     if client.level == "first":
-        earnings_percent = decimal.Decimal(0.14)
+        earnings_percent = decimal.Decimal(0.12)
         savings_percent = decimal.Decimal(0.00286)
     elif client.level == "second":
         earnings_percent = decimal.Decimal(0.0286)

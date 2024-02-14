@@ -55,7 +55,7 @@ class RegistrationService:
         earnings = 0
         savings = 0
         if self.student.level == "first":
-            earnings_percent = decimal.Decimal(0.14)
+            earnings_percent = decimal.Decimal(0.12)
             savings_percent = decimal.Decimal(0.00286)
         elif self.student.level == "second":
             earnings_percent = decimal.Decimal(0.0286)
