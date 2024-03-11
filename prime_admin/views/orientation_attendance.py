@@ -269,6 +269,8 @@ def get_branch_contact_persons(branch_id):
 
     data = []
     for contact_person in contact_persons:
+        if contact_person.is_deleted == True: continue  # NOTE: Temp
+
         data.append({
             'id': str(contact_person.id),
             'fname': contact_person.fname,
