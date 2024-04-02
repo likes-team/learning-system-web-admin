@@ -29,7 +29,8 @@ from .settings.examination import (
     dt_batch_numbers_settings,
     dt_sessions_settings,
     dt_industries_settings,
-    dt_klts_settings
+    dt_klts_settings,
+    dt_venues_settings
 )
 from .settings import (
     dt_orientators_settings

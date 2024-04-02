@@ -35,6 +35,13 @@ def sessions_settings():
     )
 
 
+@bp_lms.route('/settings/examination/venues')
+def venues_settings():
+    return admin_render_template(
+        Settings, 'lms/settings/examination/venues_settings_page.html', 'learning_management'
+    )
+
+
 @bp_lms.route('/settings/examination/industries')
 def industries_settings():
     return admin_render_template(
@@ -143,6 +150,22 @@ def create_industry():
     }})
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.industries_settings'))
+
+
+@bp_lms.route('/settings/examination/venues/create', methods=['POST'])
+def create_venue():
+    description = request.form['description']
+    
+    if description == "":
+        return redirect(url_for('lms.venues_settings'))
+
+    mongo.db.lms_configurations.update_one({
+        'name': "exam_venues"
+    }, {"$push": {
+        'values': description
+    }})
+    flash("Added successfully!", 'success')
+    return redirect(url_for('lms.venues_settings'))
 
 
 @bp_lms.route('/settings/orientators/create', methods=['POST'])
