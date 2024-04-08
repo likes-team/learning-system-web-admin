@@ -97,7 +97,7 @@ def deposit():
                 if accounting:
                     new_deposit.group = accounting['active_group']
 
-                    if new_deposit.from_what == "Sales":
+                    if new_deposit.from_what in ["CASH ON HAND", "ONLINE PAYMENT"]:
                         new_deposit.balance = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         accounting["total_gross_sale"] = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
 
