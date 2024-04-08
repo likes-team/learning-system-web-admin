@@ -102,7 +102,7 @@ class RegistrationService:
         self.earnings = earnings
         self.savings = savings
 
-    def set_payment(self):
+    def set_payment(self, thru=None, reference_no=None):
         self.payment = {
             "_id": ObjectId(),
             "deposited": "Pre Deposit",
@@ -116,7 +116,9 @@ class RegistrationService:
             "savings": Decimal128(str(self.savings)),
             "branch": ObjectId(self.student.branch.id),
             "created_at": get_date_now(),
-            "contact_person": ObjectId(self.student.contact_person.id)
+            "contact_person": ObjectId(self.student.contact_person.id),
+            "thru": thru,
+            "reference_no": reference_no
         }
         
     def get_payment_dict(self):

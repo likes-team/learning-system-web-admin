@@ -412,3 +412,5 @@ class RegistrationForm(FlaskForm):
     civil_status = StringField()
     gender = StringField()
     session = StringField()
+    thru = StringField()
+    reference_no = StringField()

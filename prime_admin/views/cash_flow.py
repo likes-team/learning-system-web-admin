@@ -97,10 +97,11 @@ def deposit():
                 if accounting:
                     new_deposit.group = accounting['active_group']
 
-                    if new_deposit.from_what in ["CASH ON HAND", "ONLINE PAYMENT"]:
+                    if new_deposit.from_what in ["Sales"]:
                         new_deposit.balance = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
                         accounting["total_gross_sale"] = Decimal128(Decimal128(str(accounting["total_gross_sale"])).to_decimal() + Decimal128(str(new_deposit.amount)).to_decimal())
 
+                        # TODO: Refactor
                         clients = mongo.db.lms_registrations.find({
                             "status": "registered",
                             "branch": new_deposit.branch.id
@@ -883,6 +884,8 @@ def get_cash_flow_by_id(cash_flow_id):
             'payment_by': payment_by.full_name,
             'amount': str(payment.amount),
             'payment_mode': payment.payment_mode,
+            'thru': payment.thru,
+            'reference_no': payment.reference_no
         })
 
     data = {

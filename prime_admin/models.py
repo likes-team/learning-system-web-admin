@@ -29,6 +29,8 @@ class Payment(db.EmbeddedDocument):
     branch = db.ReferenceField('Branch')
     created_at = db.DateTimeField()
     contact_person = db.ReferenceField('User')
+    thru = db.StringField()
+    reference_no = db.StringField()
 
     @property
     def id(self):

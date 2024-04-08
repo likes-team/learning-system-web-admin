@@ -121,8 +121,11 @@ def register():
                 flash("Not enough REVIEWER LISTENING stocks!", 'error')
                 return redirect(url_for('lms.register'))
 
+        thru = form.thru.data
+        reference_no = form.reference_no.data
+
         registration.compute_marketer_earnings()
-        registration.set_payment()
+        registration.set_payment(thru, reference_no)
         registration.set_marketer_earning()
         
         with mongo.cx.start_session() as session:
