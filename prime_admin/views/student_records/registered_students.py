@@ -312,6 +312,8 @@ def new_payment():
     client_id = request.form['client_id']
     amount = decimal.Decimal(request.form['new_amount'])
     date = request.form['date']
+    thru = request.form['thru']
+    reference_no = request.form['reference_no']
 
     service = StudentService.find_student(client_id)
     client = service.get_student()
@@ -422,7 +424,9 @@ def new_payment():
         "savings": Decimal128(str(savings)),
         "branch": ObjectId(client.branch.id),
         "created_at": get_date_now(),
-        "contact_person": ObjectId(client.contact_person.id)
+        "contact_person": ObjectId(client.contact_person.id),
+        "thru": thru,
+        "reference_no": reference_no
     }
 
     with mongo.cx.start_session() as session:
