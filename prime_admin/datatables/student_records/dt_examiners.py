@@ -8,50 +8,42 @@ from prime_admin import bp_lms
 from prime_admin.models import Registration
 from prime_admin.models_v2 import StudentV2
 from prime_admin.utils.date import format_utc_to_local
+from prime_admin.helpers.query_filter import StudentQueryFilter
+from prime_admin.services.student import StudentService
 
 
 
 @bp_lms.route('/datatables/student-records/examiners')
 def fetch_examiners_dt():
     draw = request.args.get('draw')
-    start, length = int(request.args.get('start')), int(request.args.get('length'))
-    match = {'is_examinee': True}
-    
-    if current_user.role.name == "Admin":
-        pass
-    elif current_user.role.name == "Manager":
-        match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
-    elif current_user.role.name == "Partner":
-        match['branch'] = {"$in": [ObjectId(branch_id) for branch_id in current_user.branches]}
-    elif current_user.role.name == "Secretary":
-        match['branch'] = current_user.branch.id
-        
-    query = mongo.db.lms_registrations.find(match).sort('added_to_examinees_date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_registrations.find(match).count()
-    filtered_records = query.count()
+    query_filter = StudentQueryFilter.from_request(request)
+    query_filter.set_sort({'added_to_examinees_date': pymongo.DESCENDING})
+    service = StudentService.find_students(query_filter)
+    students = service.get_data()
+ 
     table_data = []
-    ctr = start
+    ctr = query_filter.get_start()
     
-    for doc in query:
-        student = StudentV2(doc)
+    for student in students:
         ctr = ctr + 1
         
         table_data.append([
             str(student.get_id()),
             ctr,
-            student.document.get('application_no', ''),
+            student.data.get('application_no', ''),
             student.get_full_name(),
-            student.document.get('gender', ''),
-            student.document.get('industry', ''),
-            student.document.get('room', ''),
-            format_utc_to_local(student.document.get('test_date'), with_time=True),
-            student.document.get('session', ''),
+            student.data.get('gender', ''),
+            student.data.get('industry', ''),
+            student.data.get('room', ''),
+            format_utc_to_local(student.data.get('test_date'), with_time=True),
+            student.data.get('session', ''),
             '',
         ])
+
     response = {
         'draw': draw,
-        'recordsTotal': filtered_records,
-        'recordsFiltered': total_records,
+        'recordsTotal': service.total_filtered(),
+        'recordsFiltered': service.total_filtered(),
         'data': table_data,
     }
     return jsonify(response)

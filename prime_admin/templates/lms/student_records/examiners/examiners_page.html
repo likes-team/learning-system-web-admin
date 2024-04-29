@@ -85,6 +85,11 @@
             ],
             "ajax": {
                 "url": "/learning-management/datatables/student-records/examiners",
+                "data": function(d){
+                    d.is_examinee = true;
+                    d.no_of_klt = $("#filter_no_of_klt").val();
+                    d.exam_batch_no = $("#filter_batch_no").val();
+                }
             }
         });
 
@@ -145,6 +150,24 @@
                     }, 500);
                 });
             }
+        });
+
+        $("#btn_search").click(function () {
+            dtExaminers.search($("#search_input").val()).draw();
+        });
+
+        $("#btn_clear_entry").click(function () {
+            $("#search_input").val("")
+            dtExaminers.search("").draw();
+        });
+
+
+        $('#filter_no_of_klt').change(function () {
+            dtExaminers.ajax.reload();
+        });
+
+        $('#filter_batch_no').change(function () {
+            dtExaminers.ajax.reload();
         });
     }); // document end
 
@@ -299,8 +322,8 @@
                             <select name="no_of_klt" id="no_of_klt" class="form-control" required>
                                 <option value="">Choose...</option>
                                 {% for klt in klts %}
-                                <option value="{{klt['description']}}">
-                                    {{klt['description']}}
+                                <option value="{{klt}}">
+                                    {{klt}}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -308,12 +331,12 @@
                     </div>
                     <div class="col-md-2">
                         <div class="position-relative form-group">
-                            <label for="batch_no" class="">Batch No.</label>
-                            <select name="batch_no" id="batch_no" class="form-control" required>
+                            <label for="exam_batch_no" class="">Batch No.</label>
+                            <select name="exam_batch_no" id="exam_batch_no" class="form-control" required>
                                 <option value="">Choose...</option>
                                 {% for batch_no in batch_numbers %}
-                                <option value="{{batch_no['description']}}">
-                                    {{batch_no['description']}}
+                                <option value="{{batch_no}}">
+                                    {{batch_no}}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -329,6 +352,49 @@
 
     <div class="main-card mb-3 card">
         <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="position-relative form-group">
+                        <label for="lname" class="">Search</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <input id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                    </i></button>
+                                <button id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
+                                        class="pe-7s-close">
+                                    </i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="filter_no_of_klt" class="">No of KLT</label>
+                        <select name="filter_no_of_klt" id="filter_no_of_klt" class="form-control">
+                            <option value="all">All</option>
+                            {% for klt in klts %}
+                                <option value="{{klt}}">
+                                    {{klt}}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="filter_batch_no" class="">Batch No.</label>
+                        <select name="filter_batch_no" id="filter_batch_no" class="form-control">
+                            <option value="all">All</option>
+                            {% for batch_no in batch_numbers %}
+                                <option value="{{batch_no}}">
+                                    {{batch_no}}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div class="form-row">
                 <div class="table-responsive">
                     <table id="tbl_examiners" class="align-middle mb-0 table table-bordered table-striped table-hover">

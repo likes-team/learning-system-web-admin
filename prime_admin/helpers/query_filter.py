@@ -27,12 +27,16 @@ class BaseQueryFilter(object):
     def get_sort(self):
         return self.sort
 
+    def set_sort(self, sort_dict):
+        self.sort = sort_dict
+
 
 class StudentQueryFilter(BaseQueryFilter):
     def __init__(
         self, branch=None, batch_no=None, schedule=None,
         payment_status=None, payment_mode=None, session=None,
-        date_from=None, date_to=None, search_value=None, start=None, length=None, sort=None
+        date_from=None, date_to=None, search_value=None, start=None, length=None, sort=None,
+        is_examinee=None, no_of_klt=None, exam_batch_no=None
     ):
         if sort is None:
             sort = {'registration_date': pymongo.DESCENDING}
@@ -85,6 +89,18 @@ class StudentQueryFilter(BaseQueryFilter):
             match['balance'] = {'$gt': 0}
         elif payment_status == 'REFUNDED':
             match['payment_mode'] = 'refund'
+
+        if is_examinee == 'true':
+            match['is_examinee'] = True
+        elif is_examinee == 'false':
+            match['is_examinee'] = False
+
+        if no_of_klt and no_of_klt != 'all':
+            match['no_of_klt'] = no_of_klt
+
+        if exam_batch_no and exam_batch_no != 'all':
+            match['exam_batch_no'] = exam_batch_no
+
         self.match = match
 
 
@@ -102,6 +118,9 @@ class StudentQueryFilter(BaseQueryFilter):
             session = request.args.get('session'),
             start = request.args.get('start'),
             length = request.args.get('length'),
+            is_examinee = request.args.get('is_examinee'),
+            no_of_klt = request.args.get('no_of_klt'),
+            exam_batch_no = request.args.get('exam_batch_no'),
         )
 
 
