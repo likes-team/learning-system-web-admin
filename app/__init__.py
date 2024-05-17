@@ -78,6 +78,9 @@ def create_app(config_name):
     login_manager.login_view = 'bp_auth.login'
     login_manager.login_message = "You must be logged in to access this page."
 
+    print("CURRENT ENVIRONMENT: ", app.config['ENV'])
+    print("CURRENT DATABASE: ", app.config['MONGO_URI'])
+
     with app.app_context():
 
         # DEVELOPERS-NOTE: -IMPORT HERE THE SYSTEM MODULES-

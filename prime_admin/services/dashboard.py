@@ -120,27 +120,7 @@ class ChartService:
             'labels': labels,
             'datasets': datasets
         }
-        
-        # if current_user.role.name == 'Admin':
-        #     branches = Branch.objects
-        # elif current_user.role.name == 'Partner':
-        #     branches = Branch.objects(id__in=current_user.branches)
-        # else:
-        #     raise ValueError("InceptionError: current_user role is not supported yet")
 
-        # labels = [branch.city for branch in branches]
-        # datasets = [{
-        #     'label': "Branches",
-        #     'data': [],
-        #     'backgroundColor': 'rgb(75, 192, 192)'
-        # }]
-        # for branch in branches:
-        #     sales_today = dashboard_service.get_sales_today(branch=branch.id)
-        #     datasets[0]['data'].append(sales_today)
-        # return {
-        #     'labels': labels,
-        #     'datasets': datasets
-        # }
 
 
 class SalesAndExpensesChart:

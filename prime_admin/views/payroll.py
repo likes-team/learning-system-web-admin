@@ -5,7 +5,7 @@ from datetime import datetime
 import pymongo
 import pytz
 from config import TIMEZONE
-from flask import jsonify, request, render_template
+from flask import jsonify, request, render_template, abort
 from flask_login import login_required, current_user
 from flask_weasyprint import HTML, render_pdf
 import inflect
@@ -31,6 +31,9 @@ from prime_admin.utils.date import format_utc_to_local
 @bp_lms.route('/payroll')
 @login_required
 def payroll():
+    if current_user.role.name not in ['Admin', 'Partner', 'Manager']:
+        abort(404)
+
     branches = access.get_current_user_branches()
     return render_template(
         'lms/payroll/payroll_page.html', branches=branches, title="Payroll"
