@@ -30,7 +30,7 @@ def orientation_attendance():
     elif current_user.role.name == "Manager":
         branches = Branch.objects(id__in=current_user.branches)
         contact_persons = User.objects(Q(branches__in=current_user.branches) & Q(role__ne=SECRETARYREFERENCE) & Q(is_superuser=False))
-        
+
     orientators = Orientator.objects(is_active=True)
 
     return admin_render_template(
@@ -149,8 +149,8 @@ def fetch_orientation_attendance_students_dt():
             registrations = Registration.objects(status='oriented').filter(branch=current_user.branch.id).order_by("-date_oriented").skip(start).limit(length)
             filter = {'status': 'oriented', 'branch': ObjectId(current_user.branch.id)}
         elif current_user.role.name == "Marketer":
-            registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).order_by("-date_oriented").skip(start).limit(length)
-            filter = {'status': 'oriented', 'branch': {'$in': current_user.branches}}
+            registrations = Registration.objects(status='oriented').filter(contact_person=current_user.id).order_by("-date_oriented").skip(start).limit(length)
+            filter = {'status': 'oriented', 'contact_person': current_user.id}
         elif current_user.role.name == "Manager":
             registrations = Registration.objects(status='oriented').filter(branch__in=current_user.branches).order_by("-date_oriented").skip(start).limit(length)
             filter = {'status': 'oriented', 'branch': {'$in': current_user.branches}}

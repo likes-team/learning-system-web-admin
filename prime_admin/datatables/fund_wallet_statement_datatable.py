@@ -95,7 +95,10 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         else: 
             local_datetime = ''
         
-        if category == "salary_and_rebates" or category == "salary" or category == "rebates":
+        if category == "salary_and_rebates" \
+            or category == "salary" \
+                or category == "rebates" \
+                    or category == "Bookeeper":
             contact_person : User = User.objects.get(id=description)
             description = contact_person.full_name
         
