@@ -579,6 +579,7 @@ class SalesAndExpensesChart:
             return []
         
         results = []
+        print(query)
         for document in query:
             results.append({
                 'category': document['_id']['category'],

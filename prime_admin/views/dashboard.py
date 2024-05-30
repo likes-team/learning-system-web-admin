@@ -170,7 +170,7 @@ def fetch_expenses_breakdown():
     expenses_per_category = chart.get_expenses_per_category()
     labels = [
         'UTILITIES', 'OFFICE SUPPLIES', 'SALARY', 'REBATES', 'REFUND', 'OTHER EXPENSES',
-        'BIR', 'BUSINESS PERMIT', 'EMP. BENEFITS', 'BOOK. RET. FEE',
+        'BIR', 'BUSINESS PERMIT', 'EMP. BENEFITS', 'BOOKEEPER',
         'SNPL FEE'
     ]
     expenses_breakdown = [0 for _ in range(len(labels))]

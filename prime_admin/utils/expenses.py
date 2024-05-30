@@ -4,7 +4,7 @@ CATEGORIES = {
     'salary': 'SALARY',
     'rebates': 'REBATES',
     'refund': 'REFUND',
-    'bookeeper': 'BOOKEEPER',
+    'Bookeeper': 'BOOKEEPER',
     'other_expenses': 'OTHER EXPENSES',
     'BIR': 'BIR',
     'Business Permit': 'BUSINESS PERMIT',
