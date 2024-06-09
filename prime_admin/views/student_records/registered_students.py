@@ -726,6 +726,12 @@ def refund():
                     'payments': payment
                 }}, session=session)
 
+                mongo.db.lms_registration_payments.update_many(
+                    {"payment_by": ObjectId(student_id)},
+                    {"$set": {
+                        "payment_mode": "refund",
+                    }}, session=session)
+
                 mongo.db.lms_fund_wallet_transactions.insert_one({
                     'type': 'expenses',
                     'running_balance': balance,
