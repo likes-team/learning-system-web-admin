@@ -15,13 +15,14 @@ from prime_admin.globals import D128_CTX, convert_to_utc
 
 @bp_lms.route('/datatables/fund-wallet/office-supplies', methods=['GET'])
 def fetch_office_supply_dt():
+    print("request.args", request.args)
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
     description = request.args.get('description', '')
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
-    branch_id = request.args['branch']
-    
+    branch_id = request.args.get('branch', 'all')
+
     total_records: int
     filtered_records: int
     filter: dict
