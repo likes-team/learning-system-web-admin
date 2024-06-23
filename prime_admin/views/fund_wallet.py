@@ -270,6 +270,7 @@ def fund_wallet_add_expenses():
     contact_no = form.get('expenses_contact_no')
     address = form.get('expenses_address')
     cut_off = form.get('cut_off')
+    remarks = form.get('expenses_remarks')
 
     with mongo.cx.start_session() as session:
         with session.start_transaction():
@@ -347,6 +348,7 @@ def fund_wallet_add_expenses():
                 'reference_no': reference_no,
                 'employee_information': employee_information,
                 'cut_off': cut_off,
+                'remarks': remarks,
                 'created_at': get_date_now(),
                 'created_by': current_user.fname + " " + current_user.lname
             },session=session)
