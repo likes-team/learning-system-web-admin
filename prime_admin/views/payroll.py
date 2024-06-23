@@ -278,14 +278,14 @@ def fetch_payslips_dt():
     total_records: int
     filtered_records: int
     match = {}
-
+    print(branch_id)
     if branch_id == 'all':
         if current_user.role.name == "Admin":
             pass
         elif current_user.role.name == "Manager":
-            match['branch'] = {"$in": current_user.branches}
+            match['branch'] = {"$in": [ObjectId(branch) for branch in current_user.branches]}
         elif current_user.role.name == "Partner":
-            match['branch'] = {"$in": current_user.branches}
+            match['branch'] = {"$in": [ObjectId(branch) for branch in current_user.branches]}
         elif current_user.role.name == "Secretary":
             match['branch'] = current_user.branch.id
     else:
