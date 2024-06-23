@@ -85,7 +85,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         statement_type = statement.get('type', '')
         running_balance = decimal.Decimal(str(statement.get('running_balance', 0.00)))
         created_by = statement.get('created_by', 0.00)
-        remarks = statement.get('remarks', 0.00)
+        remarks = statement.get('remarks', '')
         
         if type(date == datetime):
             local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
@@ -116,6 +116,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             str(total_amount_due) if statement_type == "expenses" else '',
             str(round(running_balance, 2)),
             created_by,
+            remarks
         ])
 
     response = {
