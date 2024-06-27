@@ -17,7 +17,7 @@ from prime_admin.models import Accommodation, Accounting, Branch, CashFlow, Regi
 from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositForm, WithdrawForm
 from prime_admin.globals import PARTNERREFERENCE, convert_to_utc, get_date_now
 from prime_admin.utils import currency
-from prime_admin.services.fund_wallet_services import add_fund
+from prime_admin.services.fund_wallet import add_fund
 
 
 D128_CTX = create_decimal128_context()

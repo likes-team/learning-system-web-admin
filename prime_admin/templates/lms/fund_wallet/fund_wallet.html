@@ -133,10 +133,25 @@
             },
             "pageLength": 25,
             "ordering": false,
-            "order": [[0, 'asc']],
-            "columnDefs": [
-            ],
             "order": [[1, 'asc']],
+            "columnDefs": [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+                {
+                    "targets": 10,
+                    'className': 'text-center',
+                    'render': function(data, type, row){
+                        if (data == false){
+                            return `<button type="button" class="btn-icon btn-icon-only btn btn-outline-danger btn-delete"><i class="pe-7s-trash btn-icon-wrapper"> </i></button>`;
+                        } else {
+                            return ''
+                        }
+
+                    }
+                }
+            ],
         });
 
 
@@ -1036,6 +1051,52 @@
             $("#search_input").val("")
             dtbl_salary.search("").draw();
         });
+
+        $('#tbl_fund_wallet_statements tbody').on('click', '.btn-delete', function () {
+            var data = dtbl_fund_wallet_statements.row( $(this).parents('tr')).data();
+            
+            console.log(data[0]);
+    
+            $.confirm({
+                title: 'Delete Record',
+                content: 'Are you sure to delete this record?',
+                buttons: {
+                    confirm: {
+                        text: 'Yes',
+                        btnClass: 'btn-red',
+                        keys: ['enter', 'shift'],
+                        action: function(){
+                            console.log(data[0]);
+    
+                            $.ajax({
+                                url: `/api/fund-wallet-transactions/${data[0]}`,
+                                type: "DELETE",
+                                dataType: "json",
+                                //data: JSON.stringify({
+                                //    "user_id": data[0]
+                                //}),
+                                contentType: "application/json; charset=utf-8",
+                                success: function(response){
+                                    if(response){
+                                        dtbl_fund_wallet_statements.ajax.reload();
+                                        toastr.success(response.message);
+                                    }else{
+                                        toastr.error("response.message");
+                                    }
+                                },
+                                error: function(xhr, textStatus, errorThrown){
+                                    toastr.error("Error Occured!");
+                                 }
+                            });
+                        }
+                    },
+                    cancel: function () {
+                        $.alert('Canceled!');
+                    },
+                }
+            });
+        });
+
     }); // document.ready
 </script>
 {% endblock %}

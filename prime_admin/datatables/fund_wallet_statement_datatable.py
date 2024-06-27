@@ -77,6 +77,7 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
     table_data = []
     
     for statement in statements_query:
+        transaction_id = statement.get('_id', None)
         date = statement.get('date', None)
         description = statement.get('description', '')
         category = statement.get('category', '')
@@ -86,7 +87,8 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         running_balance = decimal.Decimal(str(statement.get('running_balance', 0.00)))
         created_by = statement.get('created_by', 0.00)
         remarks = statement.get('remarks', '')
-        
+        is_deleted = statement.get('is_deleted', False)
+
         if type(date == datetime):
             local_datetime = date.replace(tzinfo=pytz.utc).astimezone(TIMEZONE).strftime("%B %d, %Y")
         elif type(date == str):
@@ -106,8 +108,9 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             supplier = statement.get('account_no', '')
         else:
             supplier = ""
-        
+
         table_data.append([
+            str(transaction_id),
             local_datetime,
             category.upper(),
             description,
@@ -116,7 +119,8 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
             str(total_amount_due) if statement_type == "expenses" else '',
             str(round(running_balance, 2)),
             created_by,
-            remarks
+            remarks,
+            is_deleted
         ])
 
     response = {

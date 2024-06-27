@@ -89,6 +89,7 @@ def create_app(config_name):
         from app.admin import bp_admin
         from prime_admin import bp_lms
         from prime_home import bp_prime_home
+        from api import bp_api
         #                   -END-
 
         # DEVELOPERS-NOTE: -REGISTER HERE THE MODULE BLUEPRINTS-
@@ -97,6 +98,7 @@ def create_app(config_name):
         app.register_blueprint(bp_admin, url_prefix='/admin')
         app.register_blueprint(bp_lms, url_prefix='/learning-management')
         app.register_blueprint(bp_prime_home, url_prefix='/home')
+        app.register_blueprint(bp_api, url_prefix='/api')
         #               -END-
 
         # DEVELOPERS-NOTE: -INCLUDE HERE YOUR MODULE Admin models FOR ADMIN TEMPLATE-
