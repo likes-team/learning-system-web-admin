@@ -1,6 +1,7 @@
 import decimal
 from bson import ObjectId, Decimal128
 from flask import jsonify
+from flask_login import current_user
 from app import mongo
 from api import bp_api
 from prime_admin.globals import D128_CTX, get_date_now
@@ -12,6 +13,12 @@ def fund_wallet_transaction_delete(transaction_id):
     """Deletes a fund wallet transaction
     then add new adjustment transaction
     """
+
+    if current_user.role.name != "Admin":
+        return jsonify({
+            'status': 'error',
+            'message': "You are not authorized to perform this action"
+        })
 
     document = mongo.db.lms_fund_wallet_transactions.find_one(
         {'_id': ObjectId(transaction_id)}
