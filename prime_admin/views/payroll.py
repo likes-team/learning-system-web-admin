@@ -159,6 +159,9 @@ def create_payslip():
     total_salary_amount = form.get("total_salary_amount", '0')
     food_allowance = form.get("food_allowance", '0')
     accommodation = form.get("accommodation", '0')
+    holiday_pay = form.get("holiday_pay", '0')
+    overtime_pay = form.get("overtime_pay", '0')
+    month_13_pay = form.get("month_13_pay", '0')
     gross_salary = form.get('gross_salary', '0')
     cash_advance = form.get('cash_advance', '0')
     government_benefits = form.get('government_benefits', '0')
@@ -220,6 +223,9 @@ def create_payslip():
                 'total_salary_amount': Decimal128(total_salary_amount),
                 'food_allowance': Decimal128(food_allowance),
                 'accommodation': Decimal128(accommodation),
+                'holiday_pay': Decimal128(holiday_pay),
+                'overtime_pay': Decimal128(overtime_pay),
+                'month_13_pay': Decimal128(month_13_pay),
                 'gross_salary': Decimal128(gross_salary),
                 'cash_advance': Decimal128(cash_advance),
                 'government_benefits': Decimal128(government_benefits),

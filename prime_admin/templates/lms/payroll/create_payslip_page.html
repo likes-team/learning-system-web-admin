@@ -102,7 +102,11 @@
         const totalSalaryAmount = $("#total_salary_amount").val();
         const foodAllowance = $("#food_allowance").val();
         const accommodation = $("#accommodation").val();
-        const grossSalary = parseInt(totalSalaryAmount) + parseInt(foodAllowance) + parseInt(accommodation);
+        const holiday_pay = $("#holiday_pay").val();
+        const overtime_pay = $("#overtime_pay").val();
+        const month_13_pay = $("#month_13_pay").val();
+        const grossSalary = parseInt(totalSalaryAmount) + parseInt(foodAllowance) + parseInt(accommodation) 
+            + parseInt(holiday_pay) + parseInt(overtime_pay) + parseInt(month_13_pay);
         $("#gross_salary").val(grossSalary);
     }
 
@@ -215,6 +219,21 @@
         });
 
         $("#accommodation").change(function(){
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#holiday_pay").change(function(){
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#overtime_pay").change(function(){
+            updateGrossSalary();
+            updateTotalAmountDue();
+        });
+
+        $("#month_13_pay").change(function(){
             updateGrossSalary();
             updateTotalAmountDue();
         });
@@ -410,6 +429,15 @@
                             </div>
                             <div class="position-relative row form-group"><label for="accommodation" class="col-sm-4 col-form-label">Accommodation</label>
                                 <div class="col-sm-5"><input id="accommodation" name="accommodation" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="holiday_pay" class="col-sm-4 col-form-label">Holiday Pay</label>
+                                <div class="col-sm-5"><input id="holiday_pay" name="holiday_pay" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="overtime_pay" class="col-sm-4 col-form-label">Overtime Pay</label>
+                                <div class="col-sm-5"><input id="overtime_pay" name="overtime_pay" type="number" class="form-control" value="0"></div>
+                            </div>
+                            <div class="position-relative row form-group"><label for="month_13_pay" class="col-sm-4 col-form-label">13 Month Pay</label>
+                                <div class="col-sm-5"><input id="month_13_pay" name="month_13_pay" type="number" class="form-control" value="0"></div>
                             </div>
                             <div class="position-relative row form-group"><label for="gross_salary" class="col-sm-4 col-form-label">Gross Salary</label>
                                 <div class="col-sm-5"><input readonly id="gross_salary" name="gross_salary" type="number" class="form-control"></div>
