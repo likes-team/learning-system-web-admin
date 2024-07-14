@@ -49,7 +49,6 @@ class BusinessExpensesService:
             'salary': initial.copy(),
             'rebates': initial.copy(),
             'refund': initial.copy(),
-            'bookeeper': initial.copy(),
             'other_expenses': initial.copy(),
             'BIR': initial.copy(),
             'Business Permit': initial.copy(),
@@ -65,7 +64,6 @@ class BusinessExpensesService:
             'salary': 'SALARY',
             'rebates': 'REBATES',
             'refund': 'REFUND',
-            'bookeeper': 'BOOKEEPER',
             'other_expenses': 'OTHER EXPENSES',
             'BIR': 'BIR',
             'Business Permit': 'BUSINESS PERMIT',
@@ -85,6 +83,8 @@ class BusinessExpensesService:
                'total': {'$sum': '$total_amount_due'}
            }}
         ]))
+
+        print(query)
         for group in query:
             category = group['_id']['category']
             month = group['_id']['month'] - 1
