@@ -2,6 +2,7 @@ alembic==1.4.0
 astroid==2.4.2
 autopep8==1.5.5
 blinker==1.4
+boto3==1.34.144
 cairocffi==1.2.0
 CairoSVG==2.5.2
 certifi==2019.11.28

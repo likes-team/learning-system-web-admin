@@ -1,7 +1,14 @@
+import os
 import logging
 import boto3
 from botocore.exceptions import ClientError
 from werkzeug.utils import secure_filename
+
+
+SESSION = boto3.Session(
+    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
+)
 
 
 def upload_file(file, file_name):
@@ -14,7 +21,7 @@ def upload_file(file, file_name):
 
     # If S3 object_name was not specified, use file_name
     # Upload the file
-    s3_client = boto3.resource("s3")
+    s3_client = SESSION.resource("s3")
     bucket_name = "primeklcbucket"
     bucket = s3_client.Bucket(bucket_name)
 
