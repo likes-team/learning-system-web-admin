@@ -9,6 +9,32 @@
     VIEW_MODAL_URL = "{{TABLE_OPTIONS['view_modal_url']}}";
     CURRENT_USER_ROLE = "{{current_user.role.name}}";
 </script>
+
+<style>
+    .row-not-deposit {
+        color: #806013 !important;
+        background-color: #fdebc2 !important;
+    }
+
+    .row-not-paid {
+        color: #71132a !important;
+        background-color: #f4c2ce !important;
+    }
+
+    .row-refunded {
+        color: #504648 !important;
+        background-color: #b1b1b1 !important;
+    }
+
+    .modal-dialog {
+        overflow-y: initial !important
+    }
+
+    .modal-body {
+        height: 800px;
+        overflow-y: auto;
+    }
+</style>
 {% endblock %}
 
 
@@ -251,7 +277,23 @@
             }
         });
 
-        
+        var dtPaymentHistory = $('#tbl_payment_history').DataTable({
+            "dom": 'rtip',
+            "pageLength": 50,
+            "order": [[1, 'asc']],
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                {"targets": 0, "visible": false},
+                {"targets": 1, "visible": false},
+                {
+                    "targets": 8,
+                    "render": function (data, type, row){
+                        return '<button data-toggle="modal" data-target="#mdl_upload_receipt" type="button" class="btn btn-info btn-receipt">View Receipt</button>'; 
+                    }
+                }
+            ]
+        });
 
         $("#filter_branch").change(function () {
             loadTotals();
@@ -609,27 +651,24 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
                     $("#tbl_payment_history > tbody").empty();
-                    console.log(response.data.payments.length);
+                    dtPaymentHistory.clear().draw();
+
                     if(response.data.payments.length <= 0){
-                        $('#tbl_payment_history > tbody:first').append(
-                            `<tr>
-                            <td colspan="4" class="text-center">No payments found</td>
-                            </tr>`
-                        );                        
                         return;
                     }
 
                     for (i = 0; i < response.data.payments.length; i++) {
-                        $('#tbl_payment_history > tbody:first').append(
-                            `<tr>
-                            <td class="text-center">${response.data.payments[i].date}</td>
-                            <td class="text-center">${response.data.payments[i].payment_by}</td>
-                            <td class="text-center">${response.data.payments[i].amount}</td>
-                            <td class="text-center">${response.data.payments[i].thru}</td>
-                            <td class="text-center">${response.data.payments[i].reference_no}</td>
-                            <td class="text-center">${response.data.payments[i].payment_mode}</td>
-                            </tr>`
-                        );
+                        dtPaymentHistory.row.add([
+                            response.data.payments[i].payment_id,
+                            response.data.payments[i].receipt_path,
+                            response.data.payments[i].date,
+                            response.data.payments[i].payment_by,
+                            response.data.payments[i].amount,
+                            response.data.payments[i].thru,
+                            response.data.payments[i].reference_no,
+                            response.data.payments[i].payment_mode,
+                            ''
+                        ]).draw();
                     }
                 }
             });
@@ -705,6 +744,38 @@
 
         $('#filter_transaction_type').change(function () {
             dtblSalesStatement.ajax.reload();
+        });
+
+        $('#tbl_payment_history tbody').on('click', '.btn-receipt', function(){
+            var data = dtPaymentHistory.row($(this).parents('tr')).data();
+            let paymentId = data[0];
+            let receiptPath = data[1];
+            console.log(data);
+            $("#receipt_payment_id").val(paymentId);
+            $("#img_receipt").attr("src", receiptPath);
+        });
+
+        $("#frm_upload_receipt").submit(function(e){
+            e.preventDefault();
+            let formData = new FormData($(this)[0]);
+
+            $.ajax({
+                url: '/learning-management/upload-receipt',
+                type: 'POST',
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                processData: false,
+                success: function (response) {
+                    swal("Success!", "Receipt uploaded successfully!", "success");
+                },
+                error: function (response) {
+                    swal("Error Occured!", response.responseJSON.message, "error");
+                },
+             });
+             return false;
         });
     }); // document.ready
 </script>
@@ -1129,8 +1200,9 @@
 {% endblock %}
 
 {% block modals %}
-
-{% include "lms/search_client_last_name_modal.html" %}
+    {% include "lms/cash_flow_view_modal.html" %}
+    {% include "lms/search_client_last_name_modal.html" %}
+    {% include "lms/cash_flow/modals/upload_receipt_modal.html" %}
 {% include "lms/archive_modal.html" %}
 
 {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}

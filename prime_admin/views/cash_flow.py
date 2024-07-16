@@ -18,6 +18,8 @@ from prime_admin.forms import CashFlowAdminForm, CashFlowSecretaryForm, DepositF
 from prime_admin.globals import PARTNERREFERENCE, convert_to_utc, get_date_now
 from prime_admin.utils import currency
 from prime_admin.services.fund_wallet import add_fund
+from prime_admin.utils.upload import allowed_file
+from prime_admin.services.s3 import upload_file
 
 
 D128_CTX = create_decimal128_context()
@@ -48,7 +50,6 @@ def cash_flow():
         'lms/withdraw_modal.html',
         'lms/profit_modal.html',
         'lms/pre_deposit_modal.html',
-        'lms/cash_flow_view_modal.html',
     ]
 
     return admin_table(
@@ -878,14 +879,17 @@ def get_cash_flow_by_id(cash_flow_id):
         else: 
             local_datetime = ''
         payment_by = Registration.objects(id=payment.payment_by.id).get()
+        payment_main = mongo.db.lms_registration_payments.find_one({"_id": ObjectId(payment.id)})
 
         payments.append({
+            'payment_id': str(payment.id),
             'date': local_datetime,
             'payment_by': payment_by.full_name,
             'amount': str(payment.amount),
             'payment_mode': payment.payment_mode,
             'thru': payment.thru,
-            'reference_no': payment.reference_no
+            'reference_no': payment.reference_no,
+            'receipt_path': payment_main.get('receipt_path', '') 
         })
 
     data = {
@@ -898,3 +902,45 @@ def get_cash_flow_by_id(cash_flow_id):
         }
 
     return jsonify(response)
+
+
+@bp_lms.route("/upload-receipt", methods=["POST"])
+def upload_receipt():
+    file = request.files['receipt_file']
+    payment_id = request.form['receipt_payment_id']
+    print(payment_id)
+
+    # check whether a file is selected
+    if file.filename == '':
+        response = {
+            'status': "error",
+            'message': "No selected file"
+        }
+        return jsonify(response), 400
+
+    # check whether the file extension is allowed (eg. png,jpeg,jpg,gif)
+    if not (file and allowed_file(file.filename)):
+        response = {
+            'status': "error",
+            'message': "File is not allowed"
+        }
+        return jsonify(response), 400
+
+    output = upload_file(file, file.filename)
+    print(output)
+    response = {'status': None, 'message': None}
+    if output:
+        mongo.db.lms_registration_payments.update_one(
+            {"_id": ObjectId(payment_id)},
+            {"$set": {
+                "receipt_path": output
+            }
+        })
+        response['status'] = "success"
+        response['message'] = "Receipt uploaded successfully!"
+        code = 200
+    else:
+        response['status'] = "error"
+        response['message'] = "Error occured, please contact system administrator"
+        code = 400
+    return jsonify(response), code
