@@ -10,7 +10,7 @@ from app import mongo
 from app.auth.models import User
 from prime_admin.globals import convert_to_utc
 from prime_admin import bp_lms
-
+from prime_admin.models import Registration
 
 
 @bp_lms.route('/branches/<string:branch_id>/fund-wallet-statements/dt', methods=['GET'])
@@ -106,6 +106,10 @@ def fetch_branch_fund_wallet_statements_dt(branch_id):
         
         if category == "office_supply":
             supplier = statement.get('account_no', '')
+        elif category == "refund":
+            student = Registration.objects.get(id=description)
+            description = student.full_name
+            supplier = ""
         else:
             supplier = ""
 
