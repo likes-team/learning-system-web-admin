@@ -239,6 +239,8 @@ def get_member(client_id):
             local_datetime = ''
 
         payments.append({
+            'payment_id': str(payment['_id']),
+            'receipt_path': payment.get('receipt_path'),
             'amount': str(payment['amount']),
             'current_balance': str(payment['current_balance']),
             'date': local_datetime,

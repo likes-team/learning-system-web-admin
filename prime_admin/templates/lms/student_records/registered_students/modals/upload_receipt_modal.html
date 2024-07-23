@@ -12,6 +12,15 @@
                 <div class="main-card mb-3 card">
                     <div class="card-body">
                         <img id="img_receipt" src="" class="img-fluid" alt="Responsive image">
+                        <form id="frm_upload_receipt" action="{{url_for('lms.upload_receipt')}}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input id="receipt_payment_id" name="receipt_payment_id" type="hidden">
+                            <div class="position-relative form-group"><label for="receipt_path" class="">Receipt</label>
+                                <input name="receipt_file" type="file" accept="image/*" class="form-control-file" required>
+                                <small class="form-text text-muted">Upload Receipt File. Valid file types: PNG or JPEG</small>
+                            </div>
+                            <button type="submit" class="mt-1 btn btn-primary">Submit</button>
+                        </form>
                     </div>
                 </div>
             </div>
