@@ -474,7 +474,12 @@ def get_cash_flow():
 
         if current_user.role.name == "Secretary":
             if from_what == "sales":
-                filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': 'Sales'}
+                filter = {
+                    'branch': current_user.branch.id, 
+                    'group': accounting.active_group, 
+                    'from_what': 'Sales',
+                    'type': 'deposit'
+                }
             else: # fund
                 filter = {'branch': current_user.branch.id, 'group': accounting.active_group, 'from_what': {'$ne': 'Sales'}}
         else:
