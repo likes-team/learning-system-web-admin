@@ -556,7 +556,12 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     success: function (response) {
-                        var new_amount = parseInt(response.data.balance) - 500; // installment - full payment
+                        let new_amount;
+                        if (response.data.mode_of_payment == "installment_promo") {
+                            new_amount = parseInt(response.data.balance) - 800; // installment_promo - full_payment_promo
+                        }else{
+                            new_amount = parseInt(response.data.balance) - 500; // installment - full payment
+                        }
 
                         $("#new_amount").val(new_amount);
                         $("#new_amount").prop('readonly', true);
