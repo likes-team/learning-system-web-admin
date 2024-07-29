@@ -694,10 +694,14 @@
                 },
                 'remarks': {
                     'required': true,
+                },
+                'receipt_file': {
+                    'required': true
                 }
             },
-            'submitHandler': function(form){
-                var xform = $(form);
+            'submitHandler': function(form, event){
+                event.preventDefault();
+                let xform = new FormData($(form)[0]);
 
                 swal({
                     title: `Confirm`,
@@ -711,9 +715,12 @@
                 }, function(){
                     setTimeout(function () {
                         $.ajax({
-                            type: xform.attr('method'),
-                            url: xform.attr('action'),
-                            data: xform.serialize(),
+                            type: 'POST',
+                            url: '/learning-management/deposit',
+                            data: xform,
+                            processData: false,
+                            contentType: false,
+                            enctype: 'multipart/form-data',
                             success: function (response) {
                                 event.stopPropagation();
                                 dtblSalesStatement.ajax.reload();

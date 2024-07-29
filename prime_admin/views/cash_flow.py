@@ -69,7 +69,7 @@ def cash_flow():
 
 @bp_lms.route('/deposit', methods=['POST'])
 @login_required
-def deposit():
+def deposit():    
     form = request.form
     new_deposit = CashFlow()
     new_deposit.bank_name = form.get('bank_name')
@@ -88,6 +88,25 @@ def deposit():
     new_deposit.remarks = form.get('remarks')
     new_deposit.set_created_at()
     new_deposit.date_deposit = new_deposit.created_at
+    file = request.files['receipt_file']
+
+    if not (file and allowed_file(file.filename)):
+        response = {
+            'status': "error",
+            'message': "File is not allowed"
+        }
+        return jsonify(response), 400
+
+    output = upload_file(file, file.filename)
+
+    if not output:
+        return jsonify({
+            'status': 'error',
+            'message': "Error occured, please contact system administrator"
+        }), 400
+
+    new_deposit.receipt_path = output
+
     payments = []
 
     with mongo.cx.start_session() as session:
@@ -932,7 +951,7 @@ def upload_receipt():
         return jsonify(response), 400
 
     output = upload_file(file, file.filename)
-    print(output)
+
     response = {'status': None, 'message': None}
     if output:
         mongo.db.lms_registration_payments.update_one(
