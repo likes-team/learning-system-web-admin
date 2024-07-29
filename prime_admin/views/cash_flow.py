@@ -271,6 +271,7 @@ def deposit():
                     "payments": payments,
                     "balance": Decimal128(str(new_deposit.balance)),
                     "group": new_deposit.group,
+                    "receipt_path": new_deposit.receipt_path,
                     "created_at": new_deposit.created_at,
                 }, session=session)
     response = {
@@ -558,7 +559,8 @@ def get_cash_flow():
                     by_who,
                     remarks,
                     group,
-                    ''
+                    '',
+                    statement.get('receipt_path', '')
                 ))
     else:
         with decimal.localcontext(D128_CTX):
@@ -596,7 +598,8 @@ def get_cash_flow():
                     by_who,
                     remarks,
                     group,
-                    ''
+                    '',
+                    statement.get('receipt_path', '')
                 ))
     response = {
         'draw': draw,

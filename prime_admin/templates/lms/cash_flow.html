@@ -161,7 +161,10 @@
                     "className": "text-center",
                     "render": function (data, type, row) {
                         if (!data) {
-                            return `<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_view_cash_flow" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>`
+                            return `
+                            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_view_cash_flow" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view">View Details</button>
+                            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_upload_receipt" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-sales-receipt">View Receipt</button>
+                            `
                         }
                         return `
                         <div></div>
@@ -182,7 +185,10 @@
                     "className": "text-center",
                     "render": function (data, type, row) {
                         if (!data) {
-                            return `<button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_view_cash_flow" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-look btn-icon-wrapper"> </i></button>`
+                            return `
+                            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_view_cash_flow" class="mr-2 btn btn-info btn-view">View Details</button>
+                            <button style="margin-bottom: 8px;" type="button" data-toggle="modal" data-target="#mdl_upload_receipt" class="mr-2 btn btn-primary btn-sales-receipt">View Receipt</button>
+                            `
                         }
                         return `
                         <div></div>
@@ -759,6 +765,12 @@
             let receiptPath = data[1];
             console.log(data);
             $("#receipt_payment_id").val(paymentId);
+            $("#img_receipt").attr("src", receiptPath);
+        });
+
+        $('#tbl_statement tbody').on('click', '.btn-sales-receipt', function(){
+            var data = dtblSalesStatement.row($(this).parents('tr')).data();
+            let receiptPath = data[15];
             $("#img_receipt").attr("src", receiptPath);
         });
 
