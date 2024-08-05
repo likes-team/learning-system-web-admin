@@ -185,7 +185,8 @@ def register():
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": register_description,
-                    "from_module": "Registration"
+                    "from_module": "Registration",
+                    "branch": ObjectId(client.branch.id)
                 }, session=session)
 
                 payment_description = "New payment - {id} {lname} {fname}  {branch} {batch} w/ amount of Php. {amount}".format(
@@ -202,7 +203,8 @@ def register():
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": payment_description,
-                    "from_module": "Registration"
+                    "from_module": "Registration",
+                    "branch": ObjectId(client.branch.id)
                 }, session=session)
 
                 earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
@@ -219,7 +221,8 @@ def register():
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": earning_description,
-                    "from_module": "Registration"
+                    "from_module": "Registration",
+                    "branch": ObjectId(client.branch.id)
                 }, session=session)
         flash("Registered added successfully!", 'success')
         return redirect(url_for('lms.members'))

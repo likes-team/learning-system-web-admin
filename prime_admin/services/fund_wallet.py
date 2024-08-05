@@ -218,7 +218,8 @@ def add_fund(
         "date": get_date_now(),
         "current_user": current_user.id,
         "description": "Add fund - transaction no: {}, account no: {}, amount: {}".format(transaction_no, account_no, str(amount_received)),
-        "from_module": "Fund Wallet"
+        "from_module": "Fund Wallet",
+        'branch': ObjectId(branch_id)
     }, session=session)
     return True
 
@@ -311,6 +312,7 @@ def add_expenses(
         "date": get_date_now(),
         "current_user": current_user.id,
         "description": "Add expenses - description: {}, category: {}, amount: {}".format(description, category, str(total_amount_due)),
-        "from_module": "Fund Wallet"
+        "from_module": "Fund Wallet",
+        'branch': ObjectId(branch_id)
     }, session=session)
     return True

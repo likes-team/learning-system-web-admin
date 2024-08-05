@@ -117,7 +117,8 @@ def edit_member(client_id):
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": edit_student_description,
-                    "from_module": "Orientation"
+                    "from_module": "Orientation",
+                    "branch": ObjectId(client.branch.id)
                 }, session=session)
 
         response = {
@@ -171,13 +172,13 @@ def edit_member(client_id):
                 "date": get_date_now(),
                 "current_user": current_user.id,
                 "description": edit_student_description,
-                "from_module": "Student Records"
+                "from_module": "Student Records",
+                "branch": ObjectId(client.branch.id)
             }, session=session)
 
     response = {
         'result': True
     }
-
     return jsonify(response)
 
 
@@ -475,7 +476,8 @@ def new_payment():
                 "date": get_date_now(),
                 "current_user": current_user.id,
                 "description": payment_description,
-                "from_module": "Student Records"
+                "from_module": "Student Records",
+                "branch": ObjectId(client.branch.id)
             }, session=session)
 
             earning_description = "Earnings/Savings - Php. {earnings} / {savings} of {contact_person} from {student} 's {payment_mode} w/ amount of Php. {amount}".format(
@@ -492,7 +494,8 @@ def new_payment():
                 "date": get_date_now(),
                 "current_user": current_user.id,
                 "description": earning_description,
-                "from_module": "Student Records"
+                "from_module": "Student Records",
+                "branch": ObjectId(client.branch.id)
             }, session=session)
 
     if is_premium == 'on':

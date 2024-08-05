@@ -111,7 +111,8 @@ def orient():
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": orient_description,
-                    "from_module": "Orientation Attendance"
+                    "from_module": "Orientation Attendance",
+                    "branch": ObjectId(new_client.branch.id)
                 }, session=session)
 
         response = {

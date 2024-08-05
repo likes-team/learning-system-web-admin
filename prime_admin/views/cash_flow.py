@@ -390,7 +390,8 @@ def withdraw():
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": "Withdrawal - account_no: {}, by_who: {}, amount: {}".format(new_withdraw.account_no, new_withdraw.by_who, str(new_withdraw.amount)),
-                    "from_module": "Cash Flow"
+                    "from_module": "Cash Flow",
+                    "branch_id": ObjectId(new_withdraw.branch.id)
                 }, session=session)
 
         flash('Withdraw Successfully!','success')

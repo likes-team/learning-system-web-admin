@@ -32,28 +32,31 @@
     </div>
     <div class="app-header__content">
         <div class="app-header-right">
-            {% if current_user.role.name == "Admin" %}
             <ul class="header-menu nav">
-                <li class="btn-group nav-item">
-                    <a href="{{url_for('bp_auth.users')}}" class="nav-link">
-                        <i class="nav-link-icon fa fa-users" style="color: white;"></i>
-                        Users
-                    </a>
-                </li>
-                <li class="dropdown nav-item">
-                    <a href="{{url_for('lms.settings')}}" class="nav-link">
-                        <i class="nav-link-icon fa fa-cog" style="color: white;"></i>
-                        Settings
-                    </a>
-                </li>
-                <li class="btn-group nav-item">
-                    <a href="{{url_for('bp_admin.system_logs')}}" class="nav-link">
-                        <i class="nav-link-icon fa fa-clock" style="color: white;"></i>
-                        Logs
-                    </a>
-                </li>
+                {% if current_user.role.name in ["Admin"] %}
+                    <li class="btn-group nav-item">
+                        <a href="{{url_for('bp_auth.users')}}" class="nav-link">
+                            <i class="nav-link-icon fa fa-users" style="color: white;"></i>
+                            Users
+                        </a>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a href="{{url_for('lms.settings')}}" class="nav-link">
+                            <i class="nav-link-icon fa fa-cog" style="color: white;"></i>
+                            Settings
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if current_user.role.name in ["Admin", "Partner"] %}
+                    <li class="btn-group nav-item">
+                        <a href="{{url_for('bp_admin.system_logs')}}" class="nav-link">
+                            <i class="nav-link-icon fa fa-clock" style="color: white;"></i>
+                            Logs
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
-            {% endif %}
             <div class="header-btn-lg pr-0">
                 <div class="widget-content p-0">
                     <div class="widget-content-wrapper">

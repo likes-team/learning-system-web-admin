@@ -1,14 +1,16 @@
-from flask_pymongo import ASCENDING
+from flask import jsonify, request
+from flask_login import current_user
+from bson import ObjectId
 import pymongo
 from app.admin.models import SystemLogs
 from flask_mongoengine import json
 from werkzeug.exceptions import abort
 from flask_login import login_required
 from app.admin.templating import admin_table
-from flask import jsonify, request
 from mongoengine.queryset.visitor import Q
 from app.admin import bp_admin
 from app import mongo
+
 
 @bp_admin.route('/system-logs')
 @login_required
@@ -39,8 +41,11 @@ def get_dtbl_system_logs():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-
-    logs = mongo.db.lms_system_transactions.find().skip(start).sort([("date", pymongo.DESCENDING)]).limit(length)
+    if current_user.role.name in ["Partner"]:
+        match = {"branch":{"$in": [ObjectId(branch) for branch in current_user.branches]}}
+        logs = mongo.db.lms_system_transactions.find(match).skip(start).sort([("date", pymongo.DESCENDING)]).limit(length)
+    else:
+        logs = mongo.db.lms_system_transactions.find().skip(start).sort([("date", pymongo.DESCENDING)]).limit(length)
 
     _table_data = []
 

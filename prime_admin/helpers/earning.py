@@ -19,15 +19,18 @@ class Earning:
                     {"$set": {
                         "status": "for_approval"
                     }}, session=session)
-
+                
                 current_user_details =  mongo.db.auth_users.find_one({"_id": current_user.id})
+                payment_details = mongo.db.lms_registration_payments.find_one({"_id": ObjectId(payment_id)})
+                branch = ObjectId(payment_details['branch']) if payment_details.get('branch') is not None else None 
 
                 mongo.db.lms_system_transactions.insert_one({
                     "_id": ObjectId(),
                     "date": get_date_now(),
                     "current_user": current_user.id,
                     "description": current_user_details['fname'] + "- Request for claim",
-                    "from_module": "Earnings"
+                    "from_module": "Earnings",
+                    "branch": branch
                 }, session=session)
 
     
@@ -55,5 +58,6 @@ class Earning:
                         "date": get_date_now(),
                         "current_user": current_user.id,
                         "description": "Approve claim -" + marketer.fname,
-                        "from_module": "Earnings"
+                        "from_module": "Earnings",
+                        "branch": ObjectId(branch_id)
                     }, session=session)
