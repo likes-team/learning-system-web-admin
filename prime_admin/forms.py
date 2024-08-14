@@ -385,7 +385,7 @@ class RegistrationForm(FlaskForm):
     batch_number = AdminField(label='Batch Number', validators=[DataRequired()], model=Batch)
 
     schedule = SelectField('Schedule',choices=[
-        ('WDC','WDC'), ('SDC', 'SDC')
+        ('WDC','WDC'), ('SDC', 'SDC'), ('SAT', 'SAT')
     ])
 
     branch = SelectField('Branch', choices=[
