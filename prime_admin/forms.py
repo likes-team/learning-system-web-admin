@@ -414,3 +414,4 @@ class RegistrationForm(FlaskForm):
     session = StringField()
     thru = StringField()
     reference_no = StringField()
+    payment_method = StringField()

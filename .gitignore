@@ -66,3 +66,6 @@ target/
 migrations/
 instance/
 .env
+env_prime/
+config.py
+prime_admin/static/pdf/generated/*

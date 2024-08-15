@@ -317,6 +317,7 @@ def new_payment():
     date = request.form['date']
     thru = request.form['thru']
     reference_no = request.form['reference_no']
+    payment_method = request.form['payment_method']
 
     service = StudentService.find_student(client_id)
     client = service.get_student()
@@ -432,7 +433,8 @@ def new_payment():
         "created_at": get_date_now(),
         "contact_person": ObjectId(client.contact_person.id),
         "thru": thru,
-        "reference_no": reference_no
+        "reference_no": reference_no,
+        "payment_method": payment_method
     }
 
     with mongo.cx.start_session() as session:

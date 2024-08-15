@@ -674,7 +674,23 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="position-relative form-group">
+                            <label for="payment_method" class="">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-control" required>
+                                <option value="">Choose...</option>
+                                <option value="ONLINE">ONLINE</option>
+                                <option value="OTC">OTC</option>
+                            </select>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a payment method
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <div class="position-relative form-group">

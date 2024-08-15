@@ -123,9 +123,10 @@ def register():
 
         thru = form.thru.data
         reference_no = form.reference_no.data
+        payment_method = form.payment_method.data
 
         registration.compute_marketer_earnings()
-        registration.set_payment(thru, reference_no)
+        registration.set_payment(thru, reference_no, payment_method=payment_method)
         registration.set_marketer_earning()
         
         with mongo.cx.start_session() as session:
