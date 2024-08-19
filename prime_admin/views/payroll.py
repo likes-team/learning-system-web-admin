@@ -324,6 +324,18 @@ def fetch_payslips_dt():
             'as': 'employee'
         }},
         {"$unwind": {'path': '$employee'}},
+        {
+            '$lookup': {
+                'from': 'lms_branches',
+                'localField': 'branch',
+                'foreignField': '_id',
+                'as': 'branch'
+            }
+        }, {
+            '$unwind': {
+                'path': '$branch'
+            }
+        },
         {'$match': match},
         {"$sort": {
             'date': pymongo.DESCENDING
@@ -353,6 +365,7 @@ def fetch_payslips_dt():
             cash_advance = transaction.get('cash_advance', '0')
             government_benefits = transaction.get('government_benefits', '0')
             accommodation_deduction = transaction.get('accommodation_deduction', '0')
+            branch = transaction.get('branch', {}).get('name', '')
 
             if accommodation_deduction is None:
                 accommodation_deduction = 0
@@ -390,6 +403,7 @@ def fetch_payslips_dt():
 
             table_data.append([
                 local_datetime,
+                branch,
                 description,
                 cut_off_date,
                 str(gross_salary),
