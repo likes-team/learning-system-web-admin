@@ -322,22 +322,25 @@ def new_payment():
     file = request.files['receipt_file']
 
     # check whether a file is selected
-    if file.filename == '':
+    if payment_method == 'ONLINE' and file.filename == '':
         response = {
             'status': "error",
             'message': "No selected file"
         }
         return jsonify(response), 400
-
+    print(file.filename)
     # check whether the file extension is allowed (eg. png,jpeg,jpg,gif)
-    if not (file and allowed_file(file.filename)):
+    if file.filename != '' and not (file and allowed_file(file.filename)):
         response = {
             'status': "error",
             'message': "File is not allowed"
         }
         return jsonify(response), 400
 
-    output = upload_file(file, file.filename)
+    if file != '':
+        output = upload_file(file, file.filename)
+    else:
+        output = None
 
     service = StudentService.find_student(client_id)
     client = service.get_student()
