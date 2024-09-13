@@ -1,0 +1,74 @@
+{% extends 'prime_home/base.html' %}
+
+
+{% block header %}
+    {% include "prime_home/navigation_header_2.html" %}
+    <link href="{{ url_for('bp_admin.static', filename='DataTables/datatables.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<section class="primary-color pt-5 text-white">
+    <div class="container mb-4 py-5">
+        <h1 class="display-5 fw-bold">Passers</h1>
+    </div>
+    <svg viewBox="0 0 1440 185" preserveAspectRatio="none" fill="rgb(0, 97, 168)" version="1.1" xmlns="http://www.w3.org/2000/svg" class="bg-white d-block text-primary" width="100%" height="160">
+        <path d="M 0 0 H 1440 V 60 C 1114 355 700 35 516 35 C 333 35 246 199 0 60 V 0 Z"/>
+    </svg>
+</section>
+
+<section data-aos="fade-right" class="pb-5 pt-2"> 
+    <div class="container pb-5 pt-4"> 
+        <div class="gy-5 row">
+            <div class="col-xl-10 mx-auto">
+                <table id="tbl_passers" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">NAME</th>
+                            <th class="text-center">SCORE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- load with json -->
+                    </tbody>
+                </table>
+            </div>
+        </div>                     
+    </div>                 
+</section>
+
+
+<!-- Talk Section -->
+{% include "prime_home/index/talk_section.html" %}
+<!--End Of Talk Section-->
+
+{% include "prime_home/footer.html" %}
+
+{% endblock %}
+
+
+{% block extra_script %}
+<script type="text/javascript" src="{{ url_for('bp_admin.static', filename='DataTables/datatables.js') }}"></script>
+<script>
+    $(document).ready(function (){
+        var dtPassers = $('#tbl_passers').DataTable({
+            "dom": 'rtip',
+            "pageLength": 100,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "className": "text-center", "visible": false, "targets": 0},
+                { "className": "text-center", "targets": 1},
+                { "className": "text-center", "targets": 2},
+            ],
+            "ajax": {
+                "url": "/home/datatables/passers",
+            }
+        });
+    });
+</script>
+
+{% endblock %}

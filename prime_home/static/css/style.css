@@ -7,9 +7,18 @@
   background-position: 10% 70%;
   background-size:cover;
   background-repeat: no-repeat;
-  background-image: url(/admin/admin/static/img/welcome_background.jpg), linear-gradient(to bottom, rgba(0, 97, 168, 1), rgba(41, 120, 181,1), rgba(138, 182, 214,1));
+  background-image: url(/admin/admin/static/img/welcome_background.jpg);
   background-blend-mode: screen;
   padding: 4em 3em;
+  position: relative;
+}
+
+.header-background:before {
+    content: "";
+    inset: 0;
+    position: absolute;
+    display: block;
+    background: rgb(0 97 168 / 50%);
 }
 
 .title{

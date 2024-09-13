@@ -35,3 +35,27 @@
     {% include "prime_home/footer.html" %}
 
 {% endblock %}
+
+{% block extra_script %}
+
+<script>
+    $(document).ready(function (){
+        $.ajax({
+            url: '/home/latest-passers',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                let html = '';
+                data.forEach(function(item){
+                    html += '<li class="pb-1 pt-1">' + item['name'] + ' - ' + item['score'] + '</li>';
+                });
+                $('.js-latest-passers').html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+</script>
+
+{% endblock %}
