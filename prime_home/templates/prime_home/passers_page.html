@@ -52,13 +52,8 @@
 <script>
     $(document).ready(function (){
         var dtPassers = $('#tbl_passers').DataTable({
-            "dom": 'rtip',
             "pageLength": 100,
-            "order": [[1, 'asc']],
-            "processing": true,
             "serverSide": true,
-            "autoWidth": false,
-            "ordering": false,
             "columnDefs": [
                 { "className": "text-center", "visible": false, "targets": 0},
                 { "className": "text-center", "targets": 1},

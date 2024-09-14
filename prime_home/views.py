@@ -42,13 +42,75 @@ def fetch_latest_passers():
 def fetch_datatables_passers():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
-    match = {'is_passer': True}
-        
-    query = mongo.db.lms_registrations.find(match).sort('added_to_passers_date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_registrations.find(match).count()
-    filtered_records = query.count()
+
+    base_match = {'is_passer': True}
+    full_name_field = {
+            "$addFields": {
+                "full_name": {
+                    "$concat": [
+                        {"$ifNull": ["$lname", ""]}, " ",
+                        {"$ifNull": ["$mname", ""]}, " ",
+                        {"$ifNull": ["$fname", ""]}
+                    ]
+                }
+            }
+        }
+    pipeline = []
+
+    search_value = request.args.get("search[value]")
+    if search_value:
+        pipeline.append(full_name_field)
+        pipeline.append({
+            "$match": {
+                "is_passer": True,
+                "full_name": {"$regex": search_value, "$options": "i"}
+            }
+        })
+    else:
+        pipeline.append({
+            "$match": base_match
+        })
+
+    total_records_result = list(mongo.db.lms_registrations.aggregate(pipeline + [{"$count": "count"}]))
+    total_records = total_records_result[0]["count"] if total_records_result else 0
+
+    sort_column = 'added_to_passers_date'
+    sort_direction = pymongo.DESCENDING
+    if (request.args.get('order[0][dir]') == 'asc'):
+        sort_direction = pymongo.ASCENDING
+
+    if (int(request.args.get('order[0][column]')) == 0):
+        sort_column = 'lname'
+    elif (int(request.args.get('order[0][column]')) == 1):
+        sort_column = 'score'
+    
+    pipeline.append({
+        "$sort": {sort_column: sort_direction}
+    })
+    
+    pipeline.append({
+        "$skip": start
+    })
+    
+    pipeline.append({
+        "$limit": length
+    })
+
+    query = mongo.db.lms_registrations.aggregate(pipeline)
     table_data = []
     ctr = start
+
+    base_count_pipeline = [{ "$match": base_match }]
+    if search_value:
+        base_count_pipeline.append(full_name_field)
+        base_count_pipeline.append({
+            "$match": {
+                "full_name": {"$regex": search_value, "$options": "i"}
+            }
+        })
+    
+    filtered_records_result = list(mongo.db.lms_registrations.aggregate(base_count_pipeline + [{"$count": "count"}]))
+    filtered_records = filtered_records_result[0]["count"] if filtered_records_result else 0
     
     for doc in query:
         student = StudentV2(doc)
@@ -61,8 +123,8 @@ def fetch_datatables_passers():
         ])
     response = {
         'draw': draw,
-        'recordsTotal': filtered_records,
-        'recordsFiltered': total_records,
+        'recordsTotal': total_records,
+        'recordsFiltered': filtered_records,
         'data': table_data,
     }
     return jsonify(response)
