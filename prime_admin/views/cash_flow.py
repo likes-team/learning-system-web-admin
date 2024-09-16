@@ -917,7 +917,7 @@ def get_cash_flow_by_id(cash_flow_id):
             'payment_mode': payment.payment_mode,
             'thru': payment.thru,
             'reference_no': payment.reference_no,
-            'receipt_path': payment_main.get('receipt_path', '') 
+            'receipt_path': payment_main.get('receipt_path', '') if payment_main is not None else '' 
         })
 
     data = {
