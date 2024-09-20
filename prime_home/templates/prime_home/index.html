@@ -46,10 +46,15 @@
             dataType: 'json',
             success: function(data) {
                 let html = '';
-                data.forEach(function(item){
-                    html += '<li class="pb-1 pt-1">' + item['name'] + ' - ' + item['score'] + '</li>';
-                });
-                $('.js-latest-passers').html(html);
+                if (data.length > 0) {
+                    data.forEach(function(item){
+                        html += '<li class="pb-1 pt-1">' + item['name'] + ' - ' + item['score'] + '</li>';
+                    });
+                    $('.js-latest-passers').html(html);
+                    $('.js-latest-passers-section').show();
+                } else {
+                    $('.js-latest-passers-section').hide();
+                }
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);

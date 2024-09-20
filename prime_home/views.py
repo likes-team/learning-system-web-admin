@@ -19,7 +19,33 @@ def index():
 
 @bp_prime_home.route('/passers')
 def passers():
-    return render_template('prime_home/passers_page.html')
+    
+    pipeline = [
+        {
+            '$match': {
+                'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
+            }
+        },
+        {
+            '$group': {
+                '_id': '$no_of_klt',  # Group by no_of_klt
+                'count': {'$sum': 1}  # Count occurrences
+            }
+        },
+        {
+            '$sort': {
+                '_id': -1  # Sort by no_of_klt in descending order
+            }
+        }
+    ]
+    
+    results = list(mongo.db.lms_registrations.aggregate(pipeline))
+
+    return render_template('prime_home/passers_page.html', results=results)
+
+@bp_prime_home.route('/passers/<string:klt_number>')
+def passers_by_klt_number(klt_number):
+    return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number)
 
 @bp_prime_home.route('/latest-passers')
 def fetch_latest_passers():
@@ -43,7 +69,7 @@ def fetch_datatables_passers():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-    base_match = {'is_passer': True}
+    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number')}
     full_name_field = {
             "$addFields": {
                 "full_name": {
