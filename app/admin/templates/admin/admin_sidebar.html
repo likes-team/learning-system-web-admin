@@ -77,7 +77,7 @@
                                 Registered Students
                             </a>
                         </li>
-                        {% if current_user.role.name in ['Admin', 'Secretary', 'Manager'] %}
+                        {% if current_user.role.name in ['Admin', 'Secretary', 'Manager', 'Partner'] %}
                         <li>
                             <a href="{{url_for('bp_admin.under_construction')}}?message=Student Records > Sales">
                                 <i class="metismenu-icon"></i>

@@ -23,7 +23,8 @@ from prime_admin.services.student import StudentService
 from prime_admin.services.inventory import InventoryService
 from prime_admin.services.branch import BranchService
 from prime_admin.services.batch import BatchService
-
+from prime_admin.utils.upload import allowed_file
+from prime_admin.services.s3 import upload_file
 
 
 D128_CTX = create_decimal128_context()
@@ -318,6 +319,28 @@ def new_payment():
     thru = request.form['thru']
     reference_no = request.form['reference_no']
     payment_method = request.form['payment_method']
+    file = request.files['receipt_file']
+
+    # check whether a file is selected
+    if payment_method == 'ONLINE' and file.filename == '':
+        response = {
+            'status': "error",
+            'message': "No selected file"
+        }
+        return jsonify(response), 400
+    print(file.filename)
+    # check whether the file extension is allowed (eg. png,jpeg,jpg,gif)
+    if file.filename != '' and not (file and allowed_file(file.filename)):
+        response = {
+            'status': "error",
+            'message': "File is not allowed"
+        }
+        return jsonify(response), 400
+
+    if file != '':
+        output = upload_file(file, file.filename)
+    else:
+        output = None
 
     service = StudentService.find_student(client_id)
     client = service.get_student()
@@ -434,7 +457,8 @@ def new_payment():
         "contact_person": ObjectId(client.contact_person.id),
         "thru": thru,
         "reference_no": reference_no,
-        "payment_method": payment_method
+        "payment_method": payment_method,
+        "receipt_path": output
     }
 
     with mongo.cx.start_session() as session:
@@ -504,7 +528,12 @@ def new_payment():
         flash("Client's payment upgraded successfully!", 'success')
     else:
         flash("Update client's payment successfully!", 'success')
-    return redirect(url_for('lms.members'))
+
+    response = {
+        'status': "success",
+        'message': "Update client's payment successfully!"
+    }
+    return jsonify(response), 200
 
 
 @bp_lms.route('/students.pdf')

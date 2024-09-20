@@ -61,13 +61,13 @@ def fetch_passers_dt():
 @bp_lms.route('/datatables/student-records/passers/mdl-students', methods=['GET'])
 def fetch_passers_mdl_students_dt():
     if current_user.role.name == "Secretary":
-        clients = Registration.objects(Q(status="registered") & Q(is_passer=True)).filter(branch=current_user.branch)
+        clients = Registration.objects(Q(status="registered") & Q(is_examinee=True)).filter(branch=current_user.branch)
     elif current_user.role.name == "Admin":
-        clients = Registration.objects(Q(status="registered") & Q(is_passer=True))
+        clients = Registration.objects(Q(status="registered") & Q(is_examinee=True))
     elif current_user.role.name == "Partner":
-        clients = Registration.objects(Q(status="registered") & Q(is_passer=True)).filter(branch__in=current_user.branches)
+        clients = Registration.objects(Q(status="registered") & Q(is_examinee=True)).filter(branch__in=current_user.branches)
     elif current_user.role.name == "Manager":
-        clients = Registration.objects(Q(status="registered") & Q(is_passer=True)).filter(branch__in=current_user.branches)
+        clients = Registration.objects(Q(status="registered") & Q(is_examinee=True)).filter(branch__in=current_user.branches)
     else:
         return abort(404)
 

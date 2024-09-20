@@ -913,6 +913,30 @@
         });
 
 
+        $("#frm_new_payment").submit(function(e){
+            e.preventDefault();
+            let formData = new FormData($(this)[0]);
+
+            $.ajax({
+                url: '/learning-management/clients/new-payment',
+                type: 'POST',
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                processData: false,
+                success: function (response) {
+                    swal("Success!", "Receipt uploaded successfully!", "success");
+                    window.location.reload();
+                },
+                error: function (response) {
+                    swal("Error Occured!", response.responseJSON.message, "error");
+                },
+             });
+             return false;
+        });
+
         // call this before showing SweetAlert:
         function fixBootstrapModal() {
             var modalNode = document.querySelector('.modal[tabindex="-1"]');
