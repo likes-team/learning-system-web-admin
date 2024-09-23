@@ -46,7 +46,6 @@ def fetch_passers_dt():
             student.document.get('industry', ''),
             student.document.get('sub_industry', ''),
             student.document.get('score', ''),
-            student.document.get('remark', ''),
             '',
         ])
     response = {

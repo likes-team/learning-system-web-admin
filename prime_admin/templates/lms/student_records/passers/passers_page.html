@@ -91,9 +91,6 @@
         
         $('#frm_passer').validate({
             'rules': {
-                'remark': {
-                    'required': true,
-                },
                 'score': {
                     'required': true,
                 },
@@ -167,7 +164,7 @@
     </div>
     <div class="main-card mb-3 card">
         <div class="card-body">
-            <h5 class="card-title">Registered Students</h5>
+            <h5 class="card-title">Examinee move to Passers</h5>
             <form id="frm_passer" action="{{url_for('lms.add_to_passers')}}" method="POST" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input id="student_id" name="student_id" type="hidden" class="form-control">
@@ -215,20 +212,6 @@
                     </div>
                     <div class="col-md-2">
                         <div class="position-relative form-group">
-                            <label for="remark" class="">Remark</label>
-                            <select name="remark" id="remark" class="form-control" required>
-                                <option value="">Choose...</option>
-                                <option value="PASSED">
-                                    PASSED
-                                </option>
-                                <option value="FAILED">
-                                    FAILED
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="position-relative form-group">
                             <label for="score" class="">Score</label>
                             <input required id="score" step="0.1" type="number" name="score" class="form-control">
                         </div>
@@ -243,7 +226,7 @@
             </form>
         </div>
         <div class="d-block text-right card-footer">
-            <input form="frm_passer" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="ADD">
+            <input form="frm_passer" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="Move to Passers">
         </div>
     </div>
 
@@ -263,7 +246,6 @@
                                 <th class="text-center">INDUSTRY</th>
                                 <th class="text-center">SUB CATEGORY</th>
                                 <th class="text-center">SCORE</th>
-                                <th class="text-center">REMARK</th>
                                 <th class="text-center">ACTION</th>
                             </tr>
                         </thead>

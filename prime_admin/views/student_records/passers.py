@@ -28,7 +28,6 @@ def add_to_passers():
     form = request.form
     
     student_id = ObjectId(form.get('student_id'))
-    remark = form.get('remark')
     score = float(form.get('score'))
     primary_key = form.get('primary_key')
 
@@ -36,7 +35,7 @@ def add_to_passers():
         '_id': student_id
     },{'$set':
        {
-           'remark': remark,
+           'remark': "PASSED",
            'score': score,
            'primary_key': primary_key,
            'is_examinee': False,
