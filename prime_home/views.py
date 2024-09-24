@@ -23,6 +23,7 @@ def passers():
     pipeline = [
         {
             '$match': {
+                'is_passer': True,
                 'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
             }
         },
@@ -45,7 +46,10 @@ def passers():
 
 @bp_prime_home.route('/passers/<string:klt_number>')
 def passers_by_klt_number(klt_number):
-    return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number)
+
+    branches = Branch.objects
+
+    return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number, branches=branches)
 
 @bp_prime_home.route('/latest-passers')
 def fetch_latest_passers():
@@ -62,7 +66,11 @@ def fetch_latest_passers():
             'name' : student.get_full_name(),
             'score' : student.document.get('score', ''),
         })
-    return jsonify(data)
+
+    # Sort the result by score in descending order after fetching
+    data_sorted_by_score = sorted(data, key=lambda x: x['score'], reverse=True)
+
+    return jsonify(data_sorted_by_score)
 
 @bp_prime_home.route('/datatables/passers')
 def fetch_datatables_passers():
@@ -89,6 +97,7 @@ def fetch_datatables_passers():
         pipeline.append({
             "$match": {
                 "is_passer": True,
+                'no_of_klt': request.args.get('klt_number'),
                 "full_name": {"$regex": search_value, "$options": "i"}
             }
         })
