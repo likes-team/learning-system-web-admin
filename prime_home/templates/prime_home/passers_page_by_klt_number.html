@@ -33,8 +33,10 @@
 
                     {% if branch.teachers %}
                         <h5 class="text-dark">
-                            Teacher{% if branch.teachers|length > 1 %}(s){% endif %}:
-                            {{ branch.teachers | map(attribute='fname') | join(', ') }}
+                            Teacher{% if branch.teachers|length > 1 %}s{% endif %}:
+                            {% for teacher in branch.teachers %}
+                                {{ teacher.fname }} {{ teacher.lname }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
                         </h5>
                     {% endif %}
                     <br>
