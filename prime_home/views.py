@@ -74,7 +74,7 @@ def passers_by_klt_number(klt_number):
     branches_with_teacher = []
 
     for branch in branches:
-            teachers = list(mongo.db.auth_users.find({'branches': str(branch['_id'])}))
+            teachers = list(mongo.db.auth_users.find({'branches': str(branch['_id']), 'is_teacher': True}))
             branches_with_teacher.append({
                 'id': branch['_id'],
                 'name': branch['name'],
