@@ -8,8 +8,8 @@ from flask import request, jsonify
 from app import mongo
 import pymongo
 from prime_admin.models_v2 import StudentV2
-from bson import ObjectId
 from prime_admin.utils.date import format_utc_to_local
+from bson.objectid import ObjectId
 
 
 @bp_prime_home.route('/')
@@ -23,6 +23,7 @@ def passers():
     pipeline = [
         {
             '$match': {
+                'is_passer': True,
                 'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
             }
         },
@@ -45,12 +46,47 @@ def passers():
 
 @bp_prime_home.route('/passers/<string:klt_number>')
 def passers_by_klt_number(klt_number):
-    return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number)
+
+    pipeline = [
+        {
+            '$match': {
+                'is_passer': True,
+                'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
+            }
+        },
+        {
+            '$group': {
+                '_id': '$branch',  # Group by branch
+                'count': {'$sum': 1}  # Count occurrences
+            }
+        },
+        {
+            '$sort': {
+                '_id': -1  # Sort by branch in descending order
+            }
+        }
+    ]
+    
+    query = mongo.db.lms_registrations.aggregate(pipeline)
+    data = [doc['_id'] for doc in query]
+
+    branches = list(mongo.db.lms_branches.find({'_id': {"$in": data}}))
+    branches_with_teacher = []
+
+    for branch in branches:
+            teachers = list(mongo.db.auth_users.find({'branches': str(branch['_id'])}))
+            branches_with_teacher.append({
+                'id': branch['_id'],
+                'name': branch['name'],
+                'teachers': teachers
+            })
+
+    return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number, branches=branches_with_teacher)
 
 @bp_prime_home.route('/latest-passers')
 def fetch_latest_passers():
     length = 10
-    match = {'is_passer': True}
+    match = {'is_passer': True, 'no_of_klt': {'$regex': '^KLT-'}}
         
     query = mongo.db.lms_registrations.find(match).sort('added_to_passers_date', pymongo.DESCENDING).limit(length)
     data = []
@@ -62,14 +98,18 @@ def fetch_latest_passers():
             'name' : student.get_full_name(),
             'score' : student.document.get('score', ''),
         })
-    return jsonify(data)
+
+    # Sort the result by score in descending order after fetching
+    data_sorted_by_score = sorted(data, key=lambda x: x['score'], reverse=True)
+
+    return jsonify(data_sorted_by_score)
 
 @bp_prime_home.route('/datatables/passers')
 def fetch_datatables_passers():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number')}
+    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number'), 'branch': ObjectId(request.args.get('branch'))}
     full_name_field = {
             "$addFields": {
                 "full_name": {
@@ -89,6 +129,8 @@ def fetch_datatables_passers():
         pipeline.append({
             "$match": {
                 "is_passer": True,
+                'no_of_klt': request.args.get('klt_number'),
+                'branch': ObjectId(request.args.get('branch')),
                 "full_name": {"$regex": search_value, "$options": "i"}
             }
         })
