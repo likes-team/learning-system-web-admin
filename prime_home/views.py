@@ -74,7 +74,12 @@ def passers_by_klt_number(klt_number):
     branches_with_teacher = []
 
     for branch in branches:
-            teacher = mongo.db.auth_users.find_one({'_id': branch['teacher']})
+            teacher_id = branch.get('teacher', None)
+            if teacher_id:
+                teacher = mongo.db.auth_users.find_one({'_id': teacher_id})
+            else:
+                teacher = None
+
             branches_with_teacher.append({
                 'id': branch['_id'],
                 'name': branch['name'],
