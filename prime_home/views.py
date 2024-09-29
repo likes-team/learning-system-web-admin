@@ -74,11 +74,11 @@ def passers_by_klt_number(klt_number):
     branches_with_teacher = []
 
     for branch in branches:
-            teachers = list(mongo.db.auth_users.find({'branches': str(branch['_id']), 'is_teacher': True}))
+            teacher = mongo.db.auth_users.find_one({'_id': branch['teacher']})
             branches_with_teacher.append({
                 'id': branch['_id'],
                 'name': branch['name'],
-                'teachers': teachers
+                'teacher': teacher
             })
 
     return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number, branches=branches_with_teacher)

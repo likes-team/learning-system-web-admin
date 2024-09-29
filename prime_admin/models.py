@@ -381,6 +381,24 @@ class Registration(Base, Admin):
             'listening': True if 'listening' in reviewers else False,
         }
 
+class Teacher(Base, Admin):
+    meta = {
+        'collection': 'auth_users',
+        'strict': False,
+    }
+
+    __tablename__ = 'auth_users'
+    __amname__ = 'teacher'
+    __amdescription__ = 'Teacher'
+    __amicon__ = 'pe-7s-user'
+    __view_url__ = 'lms.teachers'
+
+    fname = db.StringField()
+    lname = db.StringField()
+
+    @property
+    def name(self):
+        return f"{self.fname} {self.lname}"
 
 class Branch(Base, Admin):
     meta = {
@@ -396,6 +414,7 @@ class Branch(Base, Admin):
 
     name = db.StringField()
     address = db.StringField()
+    teacher = db.ReferenceField('Teacher')
     maintaining_balance = db.DecimalField()
     email_address = db.StringField()
     landline = db.StringField()

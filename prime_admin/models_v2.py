@@ -46,13 +46,36 @@ class PaymentV2(Document):
     def get_date(self):
         return format_utc_to_local(self.document['date'], date_format="%B %d, %Y %H:%M %p")
 
-            
+         
+class TeacherV2(Document):
+    def __init__(self, document):
+        super().__init__(document)
+         
 class BranchV2(Document):
     def __init__(self, document):
         super().__init__(document)
         
+        self.teacher: TeacherV2 = None
+        if 'teacher' in document and not isinstance(document['teacher'], ObjectId):
+            self.teacher = TeacherV2(document['teacher'])
+        
     def get_name(self):
         return self.document.get('name')
+        
+    def get_address(self):
+        return self.document.get('address')
+    
+    def get_created_at(self):
+        return convert_utc_to_local(self.document.get('created_at'))
+    
+    def get_updated_at(self):
+        return convert_utc_to_local(self.document.get('updated_at'))
+        
+    def get_created_by(self):
+        return self.document.get('created_by')
+        
+    def get_updated_by(self):
+        return self.document.get('updated_by')
 
 
 class BatchV2(Document):

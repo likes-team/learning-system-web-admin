@@ -31,12 +31,10 @@
                 {% for branch in branches %}
                     <h5 class="text-dark">{{ branch.name }}</h5>
 
-                    {% if branch.teachers %}
+                    {% if branch.teacher %}
                         <h5 class="text-dark">
-                            Teacher{% if branch.teachers|length > 1 %}s{% endif %}:
-                            {% for teacher in branch.teachers %}
-                                {{ teacher.fname }} {{ teacher.lname }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
+                            Teacher:
+                            {{ branch.teacher.fname }} {{ branch.teacher.lname }}
                         </h5>
                     {% endif %}
                     <br>

@@ -226,15 +226,21 @@ class SecretaryEditForm(AdminEditForm):
 
 
 class BranchForm(AdminTableForm):
+    from prime_admin.models import Teacher
+
     __table_columns__ = ['Name', 'created by','Created at', 'updated by','updated at']
     __heading__ = "Branches"
 
     name = AdminField(label="Name", validators=[DataRequired()])
     address = AdminField(label="Address", validators=[DataRequired()])
+    teacher = AdminField(label="Teacher", model=Teacher)
 
     @property
     def fields(self):
-        return [[self.name, self.address]]
+        return [
+            [self.name, self.address],
+            [self.teacher]
+        ]
 
 
 class ContactPersonForm(AdminTableForm):
@@ -250,14 +256,20 @@ class ContactPersonForm(AdminTableForm):
 
 
 class BranchEditForm(AdminEditForm):
+    from prime_admin.models import Teacher
+    
     __heading__ = "Edit Branch"
 
     name = AdminField(label="Name", validators=[DataRequired()])
     address = AdminField(label="Address", validators=[DataRequired()])
+    teacher = AdminField(label="Teacher", model=Teacher)
 
     @property
     def fields(self):
-        return [[self.name, self.address]]
+        return [
+            [self.name, self.address],
+            [self.teacher]
+        ]
 
 
 class BranchesInlineForm(AdminInlineForm):
