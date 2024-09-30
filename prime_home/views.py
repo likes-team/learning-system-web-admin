@@ -46,31 +46,7 @@ def passers():
 
 @bp_prime_home.route('/passers/<string:klt_number>')
 def passers_by_klt_number(klt_number):
-
-    pipeline = [
-        {
-            '$match': {
-                'is_passer': True,
-                'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
-            }
-        },
-        {
-            '$group': {
-                '_id': '$branch',  # Group by branch
-                'count': {'$sum': 1}  # Count occurrences
-            }
-        },
-        {
-            '$sort': {
-                '_id': -1  # Sort by branch in descending order
-            }
-        }
-    ]
-    
-    query = mongo.db.lms_registrations.aggregate(pipeline)
-    data = [doc['_id'] for doc in query]
-
-    branches = list(mongo.db.lms_branches.find({'_id': {"$in": data}}))
+    branches = list(mongo.db.lms_branches.find())
     branches_with_teacher = []
 
     for branch in branches:
@@ -114,7 +90,12 @@ def fetch_datatables_passers():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number'), 'branch': ObjectId(request.args.get('branch'))}
+    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number')}
+
+    branch_value = request.args.get('branch')
+    if branch_value and branch_value != 'all':
+        base_match['branch'] = ObjectId(branch_value)
+
     full_name_field = {
             "$addFields": {
                 "full_name": {
@@ -133,9 +114,7 @@ def fetch_datatables_passers():
         pipeline.append(full_name_field)
         pipeline.append({
             "$match": {
-                "is_passer": True,
-                'no_of_klt': request.args.get('klt_number'),
-                'branch': ObjectId(request.args.get('branch')),
+                **base_match,  # Merge with base_match here
                 "full_name": {"$regex": search_value, "$options": "i"}
             }
         })
