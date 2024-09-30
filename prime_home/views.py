@@ -44,8 +44,12 @@ def passers():
 
     return render_template('prime_home/passers_page.html', results=results)
 
+@bp_prime_home.route('/passers/', defaults={'klt_number': None})
 @bp_prime_home.route('/passers/<string:klt_number>')
 def passers_by_klt_number(klt_number):
+    if not klt_number:
+        return redirect(url_for('prime_home.passers'))
+    
     branches = list(mongo.db.lms_branches.find())
     branches_with_teacher = []
 
