@@ -44,41 +44,26 @@ def passers():
 
     return render_template('prime_home/passers_page.html', results=results)
 
+@bp_prime_home.route('/passers/', defaults={'klt_number': None})
 @bp_prime_home.route('/passers/<string:klt_number>')
 def passers_by_klt_number(klt_number):
-
-    pipeline = [
-        {
-            '$match': {
-                'is_passer': True,
-                'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
-            }
-        },
-        {
-            '$group': {
-                '_id': '$branch',  # Group by branch
-                'count': {'$sum': 1}  # Count occurrences
-            }
-        },
-        {
-            '$sort': {
-                '_id': -1  # Sort by branch in descending order
-            }
-        }
-    ]
+    if not klt_number:
+        return redirect(url_for('prime_home.passers'))
     
-    query = mongo.db.lms_registrations.aggregate(pipeline)
-    data = [doc['_id'] for doc in query]
-
-    branches = list(mongo.db.lms_branches.find({'_id': {"$in": data}}))
+    branches = list(mongo.db.lms_branches.find())
     branches_with_teacher = []
 
     for branch in branches:
-            teachers = list(mongo.db.auth_users.find({'branches': str(branch['_id']), 'is_teacher': True}))
+            teacher_id = branch.get('teacher', None)
+            if teacher_id:
+                teacher = mongo.db.auth_users.find_one({'_id': teacher_id})
+            else:
+                teacher = None
+
             branches_with_teacher.append({
                 'id': branch['_id'],
                 'name': branch['name'],
-                'teachers': teachers
+                'teacher': teacher
             })
 
     return render_template('prime_home/passers_page_by_klt_number.html', klt_number=klt_number, branches=branches_with_teacher)
@@ -109,7 +94,12 @@ def fetch_datatables_passers():
     draw = request.args.get('draw')
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
-    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number'), 'branch': ObjectId(request.args.get('branch'))}
+    base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number')}
+
+    branch_value = request.args.get('branch')
+    if branch_value and branch_value != 'all':
+        base_match['branch'] = ObjectId(branch_value)
+
     full_name_field = {
             "$addFields": {
                 "full_name": {
@@ -128,9 +118,7 @@ def fetch_datatables_passers():
         pipeline.append(full_name_field)
         pipeline.append({
             "$match": {
-                "is_passer": True,
-                'no_of_klt': request.args.get('klt_number'),
-                'branch': ObjectId(request.args.get('branch')),
+                **base_match,  # Merge with base_match here
                 "full_name": {"$regex": search_value, "$options": "i"}
             }
         })
