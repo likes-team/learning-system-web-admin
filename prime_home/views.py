@@ -50,7 +50,29 @@ def passers_by_klt_number(klt_number):
     if not klt_number:
         return redirect(url_for('prime_home.passers'))
     
-    branches = list(mongo.db.lms_branches.find())
+    pipeline = [
+        {
+            '$match': {
+                'is_passer': True,
+                'no_of_klt': {'$regex': '^KLT-'}  # Filter for no_of_klt that starts with "KLT-"
+            }
+        },
+        {
+            '$group': {
+                '_id': '$branch',  # Group by branch
+                'count': {'$sum': 1}  # Count occurrences
+            }
+        },
+        {
+            '$sort': {
+                '_id': -1  # Sort by branch in descending order
+            }
+        }
+    ]
+    
+    query = mongo.db.lms_registrations.aggregate(pipeline)
+    data = [doc['_id'] for doc in query]
+    branches = list(mongo.db.lms_branches.find({'_id': {"$in": data}}))
     branches_with_teacher = []
 
     for branch in branches:
@@ -97,7 +119,7 @@ def fetch_datatables_passers():
     base_match = {'is_passer': True, 'no_of_klt': request.args.get('klt_number')}
 
     branch_value = request.args.get('branch')
-    if branch_value and branch_value != 'all':
+    if branch_value:
         base_match['branch'] = ObjectId(branch_value)
 
     full_name_field = {
