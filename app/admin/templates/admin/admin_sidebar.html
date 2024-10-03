@@ -79,6 +79,12 @@
                         </li>
                         {% if current_user.role.name in ['Admin', 'Secretary', 'Manager', 'Partner'] %}
                         <li>
+                            <a id="li_payments" href="{{url_for('lms.payments')}}">
+                                <i class="metismenu-icon"></i>
+                                Payments
+                            </a>
+                        </li>
+                        <li>
                             <a href="{{url_for('bp_admin.under_construction')}}?message=Student Records > Sales">
                                 <i class="metismenu-icon"></i>
                                 Sales

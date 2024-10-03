@@ -6,6 +6,7 @@ from .student_records import (
     passers,
     hired,
     printing,
+    payments
 )
 from .earning import earnings
 from .expenses import expenses
