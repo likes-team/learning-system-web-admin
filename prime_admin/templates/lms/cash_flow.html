@@ -737,7 +737,8 @@
                                 swal("Success!", response.message, "success");
                             },
                             error: function (data) {
-                                swal("Error Occured!", "Please refresh the page then try again!", "error");
+                                let message = data.responseJSON.message;
+                                swal("Error Occured!", message, "error");
                             },
                         });
                     }, 500);

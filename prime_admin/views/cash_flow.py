@@ -79,15 +79,22 @@ def deposit():
     new_deposit.from_what = form.get('from_what')
     new_deposit.by_who = form.get('by_who')
     new_deposit.created_by = "{} {}".format(current_user.fname,current_user.lname)
-    
-    if form.get('deposit_branch'):
-        new_deposit.branch = Branch.objects.get(id=form.get('deposit_branch'))
-    else:    
-        new_deposit.branch = current_user.branch
     new_deposit.type = "deposit"
     new_deposit.remarks = form.get('remarks')
     new_deposit.set_created_at()
     new_deposit.date_deposit = new_deposit.created_at
+
+    if new_deposit.remarks.isspace():
+        return jsonify({
+            'status': 'error',
+            'message': "Please provide a valid remarks"
+        }), 400
+
+    if form.get('deposit_branch'):
+        new_deposit.branch = Branch.objects.get(id=form.get('deposit_branch'))
+    else:    
+        new_deposit.branch = current_user.branch
+
     file = request.files['receipt_file']
 
     if not (file and allowed_file(file.filename)):
