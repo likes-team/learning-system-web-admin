@@ -33,6 +33,7 @@ class Payment(db.EmbeddedDocument):
     reference_no = db.StringField()
     receipt_path = db.StringField()
     payment_method = db.StringField()
+    is_expenses = db.BooleanField(default=False)
 
     @property
     def id(self):
