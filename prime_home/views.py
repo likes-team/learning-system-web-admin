@@ -152,15 +152,19 @@ def fetch_datatables_passers():
     total_records_result = list(mongo.db.lms_registrations.aggregate(pipeline + [{"$count": "count"}]))
     total_records = total_records_result[0]["count"] if total_records_result else 0
 
-    sort_column = 'added_to_passers_date'
+    sort_column = 'score'
     sort_direction = pymongo.DESCENDING
+
     if (request.args.get('order[0][dir]') == 'asc'):
         sort_direction = pymongo.ASCENDING
 
-    if (int(request.args.get('order[0][column]')) == 0):
+    if (int(request.args.get('order[0][column]')) == 1):
         sort_column = 'lname'
-    elif (int(request.args.get('order[0][column]')) == 1):
+    elif (int(request.args.get('order[0][column]')) == 2):
         sort_column = 'score'
+    else:
+        sort_column = 'score'
+        sort_direction = pymongo.DESCENDING
     
     pipeline.append({
         "$sort": {sort_column: sort_direction}
