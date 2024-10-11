@@ -99,7 +99,7 @@ def fetch_latest_passers():
     length = 10
     match = {'is_passer': True, 'no_of_klt': {'$regex': '^KLT-'}}
         
-    query = mongo.db.lms_registrations.find(match).sort('added_to_passers_date', pymongo.DESCENDING).limit(length)
+    query = mongo.db.lms_registrations.find(match).sort('score', pymongo.DESCENDING).limit(length)
     data = []
     
     for doc in query:
@@ -110,10 +110,7 @@ def fetch_latest_passers():
             'score' : student.document.get('score', ''),
         })
 
-    # Sort the result by score in descending order after fetching
-    data_sorted_by_score = sorted(data, key=lambda x: x['score'], reverse=True)
-
-    return jsonify(data_sorted_by_score)
+    return jsonify(data)
 
 @bp_prime_home.route('/datatables/passers')
 def fetch_datatables_passers():
