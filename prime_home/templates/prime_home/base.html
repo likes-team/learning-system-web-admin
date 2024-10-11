@@ -55,6 +55,16 @@
     <script src="{{ url_for('prime_home.static', filename='js/owl.carousel.min.js') }}"></script>
     <script src="{{ url_for('prime_home.static', filename='js/carousel.js') }}"></script>
 
+
+    <script type='text/javascript'>
+        var onWebChat={ar:[], set: function(a,b){if (typeof onWebChat_==='undefined'){this.ar.
+        push([a,b]);}else{onWebChat_.set(a,b);}},get:function(a){return(onWebChat_.get(a));},
+        w:(function(){ var ga=document.createElement('script'); ga.type = 'text/javascript';
+        ga.async=1;ga.src=('https:'==document.location.protocol?'https:':'http:') + 
+        '//www.onwebchat.com/clientchat/6aed2cb2a946ac7830a025a809ab2215';var s=
+        document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);})()}
+    </script>
+
     <script>
         $(document).ready(function (){
             $("#nav_contact_us").click(function (){
@@ -136,6 +146,6 @@
     </script>
     <!-- Block Extra Script -->
     {% block extra_script %}{% endblock %}
-
+    
 </body>
 </html>
