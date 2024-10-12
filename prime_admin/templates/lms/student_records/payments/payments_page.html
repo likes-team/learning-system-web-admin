@@ -7,6 +7,9 @@
         $("#li_student_records").addClass('mm-active');
         $("#li_payments").addClass('mm-active');
 
+        var dateFrom = $("#filter_date").data('daterangepicker').startDate.format('YYYY-MM-DD');
+        var dateTo = $("#filter_date").data('daterangepicker').endDate.format('YYYY-MM-DD');
+
         var dtPassers = $('#tbl_passers').DataTable({
             "dom": 'rtip',
             "pageLength": 20,
@@ -17,9 +20,13 @@
             "ordering": false,
             "ajax": {
                 "url": "/learning-management/datatables/student-records/payments",
+                "data": function (d) {
+                    d.branch = $("#branch").val();
+                    d.date_from = dateFrom;
+                    d.date_to = dateTo;
+                }
             }
         });
-
         
         $('#frm_passer').validate({
             'rules': {
@@ -63,6 +70,25 @@
                 });
             }
         });
+
+        $("#btn_search").click(function () {
+            dtPassers.search($("#search_input").val()).draw();
+        });
+
+        $("#btn_clear_entry").click(function () {
+            $("#search_input").val("")
+            dtPassers.search("").draw();
+        });
+
+        $("#branch").change(function () {
+            dtPassers.ajax.reload();
+        });
+
+        $("#filter_date").on('apply.daterangepicker', function(ev, picker){
+            dateFrom = picker.startDate.format('YYYY-MM-DD');
+            dateTo = picker.endDate.format('YYYY-MM-DD');
+            dtPassers.ajax.reload();
+        });
     }); // document end
 
     
@@ -96,6 +122,53 @@
     </div>
     <div class="main-card mb-3 card">
         <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="lname" class="">Search</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <input id="search_input" placeholder="Last Name" type="text" class="form-control">
+                                <button id="btn_search" class="btn btn-primary"><i class="pe-7s-search">
+                                    </i></button>
+                                <button id="btn_clear_entry" class="border-0 btn-transition btn btn-outline-danger"><i
+                                        class="pe-7s-close">
+                                    </i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="branch" class="">Branch</label>
+                        <select name="branch" id="branch" class="form-control" required>
+
+                            {% if current_user.role.name == "Secretary" %}
+                            <!-- Pass -->
+                            {% else %}
+                            <option value="all">All</option>
+                            {% endif %}
+
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}">
+                                {{ branch.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="position-relative form-group">
+                        <label for="filter_date" class="">Date</label>
+
+                        <div id="filter_date" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="form-row">
                 <div class="table-responsive">
                     <table id="tbl_passers" class="align-middle mb-0 table table-bordered table-striped table-hover">
