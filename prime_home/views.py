@@ -4,15 +4,25 @@ from flask_login import current_user
 from werkzeug.utils import redirect
 from prime_home import bp_prime_home
 from prime_admin.models import Branch, Registration
-from flask import request, jsonify, flash
-from app import mongo
+from flask import request, jsonify, flash, current_app
+from app import mongo, create_app
 import pymongo
 from prime_admin.models_v2 import StudentV2
 from prime_admin.utils.date import format_utc_to_local
 from bson.objectid import ObjectId
 from app.auth.forms import SendUsAMessageForm
 from flask_mail import Mail, Message
+from dotenv import load_dotenv
+import os
 
+# pip install google-auth google-auth-oauthlib gspread
+import gspread
+from google.oauth2.service_account import Credentials
+
+
+load_dotenv()
+config_name = os.getenv('FLASK_ENV')
+app = create_app(config_name)
 
 @bp_prime_home.route('/')
 def index():
@@ -276,10 +286,27 @@ def send_us_a_message():
 
         # Send the email
         try:
-            Mail.send(msg)
+            mail = Mail(app)
+            mail.send(msg)
             flash("Successfully sent the message!", 'success')
         except Exception as e:
             flash(f"Failed to send the message. Error: {e}", 'error')
+
+        # Save data to Google Sheets
+        try:
+            # Define the scope
+            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+            # Load the service account credentials
+            creds = Credentials.from_service_account_file(os.path.join(current_app.root_path, '../primeklc-de737eb8a3b0.json'), scopes=scope)
+            client = gspread.authorize(creds)
+            # Open the Google Sheet
+            sheet = client.open("Send us a message Form").sheet1
+            # Append the data as a new row
+            sheet.append_row([
+                first_name, last_name, age, address, email, contact_number, message, 'Yes' if subscribe else 'No'
+            ])
+        except Exception as e:
+            flash(f"Failed to save data to Google Sheets. Error: {e}", 'error')
 
         return redirect(request.referrer)
     
