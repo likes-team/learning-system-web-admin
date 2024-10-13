@@ -14,6 +14,7 @@ from app.auth.forms import SendUsAMessageForm
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 # pip install google-auth google-auth-oauthlib gspread
 import gspread
@@ -301,9 +302,12 @@ def send_us_a_message():
             client = gspread.authorize(creds)
             # Open the Google Sheet
             sheet = client.open("Send us a message Form").sheet1
+
+            current_date = datetime.now().strftime("%m-%d-%Y")
+
             # Append the data as a new row
             sheet.append_row([
-                first_name, last_name, age, address, email, contact_number, message, 'Yes' if subscribe else 'No'
+                current_date, first_name, last_name, age, address, email, contact_number, message, 'Yes' if subscribe else 'No'
             ])
         except Exception as e:
             flash(f"Failed to save data to Google Sheets. Error: {e}", 'error')
