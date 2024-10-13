@@ -301,7 +301,7 @@ def send_us_a_message():
             creds = Credentials.from_service_account_file(os.path.join(current_app.root_path, '../primeklc-de737eb8a3b0.json'), scopes=scope)
             client = gspread.authorize(creds)
             # Open the Google Sheet
-            sheet = client.open("Send us a message Form").sheet1
+            sheet = client.open("PrimeKLC - Send us a message Form").sheet1
 
             current_date = datetime.now().strftime("%m-%d-%Y")
 
