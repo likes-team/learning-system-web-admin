@@ -1,0 +1,95 @@
+{% extends "admin/admin_base.html" %}
+
+{% block sidebar %}
+{% include 'lms/settings_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-file icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Home
+                    <div class="page-title-subheading">
+                        Settings > Pages > Home
+                    </div>
+                </div>
+            </div>
+            {% block actions %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">Our Testimonies</h5>
+
+                    <div class="table-responsive">
+                    <table id="tbl_our_testimonies" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">TITLE</th>
+                            <th class="text-center">ACTION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var dtbl_table;
+
+    $(document).ready(function(){
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+    
+        dtbl_table = $('#tbl_our_testimonies').DataTable({
+            "dom": 'rtip',
+            "pageLength": 25,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+                {
+                    "targets": 2,
+                    'className': 'text-center',
+                    'render': function(data, type, row){
+                        return `<button style="margin-bottom: 8px;" type="button" class="mr-2 btn-icon btn-icon-only btn btn-outline-info btn-view"><i class="pe-7s-pen btn-icon-wrapper"> </i></button>`;
+                    }
+                }
+            ],
+            "ajax": {
+                "url": "/learning-management/datatables/pages/our_testimonies",
+            }
+        });
+    
+        $("#tbl_our_testimonies tbody").on('click', '.btn-view',function(){
+            let data = dtbl_table.row($(this).parents('tr')).data();
+
+            window.location.href = `/learning-management/settings/pages/home/our_testimonies/${data[0]}/edit`;
+        });
+    }); //document.ready
+</script>
+{% endblock %}
