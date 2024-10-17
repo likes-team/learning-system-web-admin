@@ -149,11 +149,9 @@
                                     {% if field.required %}required{% endif %} 
                                     {% if field.readonly %}readonly{% endif %}
                                 >
-                                {% if not field.data == None %}
-                                    <div class="text-center mt-3" style="height: 300px;">
-                                        <img src="{{field.data}}" style="height: 100%;" class="js-image-preview" accept="image/*">
-                                    </div>
-                                {% endif %}
+                                <div class="text-center mt-3" style="height: 200px;">
+                                    <img src="{% if not field.data == None %}{{field.data}}{% endif %}" style="height: 100%;" class="js-image-preview" accept="image/*">
+                                </div>
 
                                 <div id="{{field.name}}-valid-feedback" class="valid-feedback">
                                     Looks good!

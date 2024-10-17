@@ -13,11 +13,56 @@ import time
 @bp_lms.route('/settings/pages/home')
 @login_required
 def pages_home():
+    our_testimonies_form = OurTestimoniesEditForm()
+    our_testimonies_modal_data = {
+        'title': 'Add new Our Testimony',
+        'fields_sizes': [12,12,12]
+    }
     return admin_render_template(
-        Settings, 'lms/pages/home.html', 'learning_management'
+        Settings, 'lms/pages/home.html', 'learning_management',\
+        OUR_TESTIMONIES_FORM=our_testimonies_form, OUR_TESTIMONIES_MODAL_DATA=our_testimonies_modal_data
     )
 
 
+@bp_lms.route('/settings/pages/home/our_testimonies/create',methods=['GET','POST'])
+@login_required
+def create_our_testimony():
+    form = OurTestimoniesEditForm()
+
+    if not form.validate_on_submit():
+        for key, value in form.errors.items():
+            flash(str(key) + str(value), 'error')
+        return redirect(url_for('lms.pages_home'))
+
+    try:
+        our_testimony = OurTestimony()
+
+        our_testimony.title = form.title.data
+        our_testimony.description = form.description.data
+
+        file = request.files['image']
+        if not (file and allowed_file(file.filename)):
+            flash('File is not allowed','error')
+            return redirect('/learning-management/settings/pages/home')
+
+        output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
+
+        if not output:
+            flash('Error occured, please contact system administrator','error')
+            return redirect('/learning-management/settings/pages/home')
+            
+        our_testimony.image = output
+        
+        our_testimony.save()
+
+        flash('Added Successfully!','success')
+
+        return redirect(url_for('lms.pages_home'))
+
+    except Exception as e:
+        flash(str(e),'error')
+        return redirect(url_for('lms.pages_home'))
+    
 @bp_lms.route('/settings/pages/home/our_testimonies/<string:oid>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_our_testimony(oid,**kwargs):

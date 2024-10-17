@@ -14,7 +14,7 @@ id="testimonies" style="background-color: rgb(0 97 168 / 20%);">
 
                         <div class="col-lg-8 pb-3 pt-3">
                             <h3 class="text-dark">{{ our_testimony['title'] }}</h3>
-                            <p class="font-weight-light mb-0">{{ our_testimony['description'] }}</p>
+                            <p class="font-weight-light mb-0">{{ our_testimony['description'].replace('\n', '<br>') | safe }}</p>
                         </div>
                     </div>
                 </div>
