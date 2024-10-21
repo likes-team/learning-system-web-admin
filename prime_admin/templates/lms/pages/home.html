@@ -125,7 +125,7 @@
                                         </div>
                                     </div>
                                 {% elif field.type == 'hidden' %}
-                                    <div class="col-md-{{ OUR_TESTIMONIES_MODAL_DATA['fields_sizes'][row_counter.index-1] }} mb-3 js-image-container" style="display: none;">
+                                    <div class="col-md-{{ OUR_TESTIMONIES_MODAL_DATA['fields_sizes'][row_counter.index-1] }} mb-3" style="display: none;">
                                         <input
                                             type="hidden"
                                             id="{{ field.name }}"
@@ -133,7 +133,7 @@
                                             value="{% if not field.data == None %}{{field.data}}{% endif %}"
                                         >
                                     </div>
-                                {% else %}
+                                {% elif field.type != 'gallery_with_preview' %}
                                 <div class="col-md-{{ OUR_TESTIMONIES_MODAL_DATA['fields_sizes'][row_counter.index-1] }} mb-3">
                                     <label for="{{ field.name }}">{{ field.label }}</label>
                                     

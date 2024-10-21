@@ -4,6 +4,25 @@
 <script type="text/javascript">
     OID = "{{OID}}";
 </script>
+<style>
+    .js-gallery-preview {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .js-gallery-preview .img {
+        height: 200px;
+        border: 10px solid #fff;
+        position: relative;
+    }
+    .js-gallery-preview .img img{
+        height: 100%;
+    }
+    .js-gallery-preview .img a{
+        position: absolute;
+        right: 0;
+        color: #fff !important;
+    }
+</style>
 {% endblock %}
 
 
@@ -160,8 +179,38 @@
                                     Please provide a valid {{ field.label }}
                                 </div>
                             </div>
+                        {% elif field.type == 'gallery_with_preview' %}
+                            <div class="col-md-{{ EDIT_OPTIONS['fields_sizes'][row_counter.index-1] }} mb-3 js-gallery-container">
+                                <label for="{{ field.name }}">{{ field.label }}</label>
+                                
+                                <input
+                                    style="font-weight: bold;" 
+                                    type="file"
+                                    class="form-control js-gallery-file" 
+                                    id="{{ field.name }}"
+                                    name="{{ field.name }}"
+                                    placeholder="{{ field.placeholder }}"
+                                >
+                                <div class="text-center mt-3 js-gallery-preview">
+                                    {% if EDIT_OPTIONS['gallery'] %}
+                                        {% for item in EDIT_OPTIONS['gallery'] %}
+                                            <div class="img">
+                                                <img src="{{ item }}">
+                                                <a class="btn btn-danger js-gallery-delete" data-file_url="{{ item }}"><i class="pe-7s-trash js-gallery-delete"></i></a>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <div id="{{field.name}}-valid-feedback" class="valid-feedback">
+                                    Looks good!
+                                </div>
+                                <div id="{{field.name}}-invalid-feedback" class="invalid-feedback">
+                                    Please provide a valid {{ field.label }}
+                                </div>
+                            </div>
                         {% elif field.type == 'hidden' %}
-                            <div class="col-md-{{ EDIT_OPTIONS['fields_sizes'][row_counter.index-1] }} mb-3 js-image-container" style="display: none;">
+                            <div class="col-md-{{ EDIT_OPTIONS['fields_sizes'][row_counter.index-1] }} mb-3" style="display: none;">
                                 <input
                                     type="hidden"
                                     id="{{ field.name }}"
@@ -247,8 +296,133 @@
                                 reader.readAsDataURL(file);
                             }
                         });
-                    });
 
+
+                        var fileInput = document.querySelector('.js-gallery-file');
+
+                        fileInput.addEventListener('change', function () {
+                            var container = this.closest('.js-gallery-container');
+                            var preview = container.querySelector('.js-gallery-preview');
+
+                            // Get the selected files
+                            var files = this.files;
+
+                            // Loop through each file
+                            for (var file of files) {
+                                // Check if the file is an image
+                                if (!file.type.startsWith('image/')) {
+                                    continue;
+                                }
+
+                                // Create a FileReader to read the file
+                                var reader = new FileReader();
+
+                                // Define what happens when the reader loads the file
+                                reader.onload = (e) => {
+                                    var imgDiv = document.createElement('div');
+                                    imgDiv.classList.add('img');
+
+                                    var img = document.createElement('img');
+                                    img.src = e.target.result;
+                                    imgDiv.appendChild(img);
+
+                                    var a = document.createElement('a');
+                                    a.classList.add('btn');
+                                    a.classList.add('btn-danger');
+                                    a.classList.add('disabled');
+                                    a.classList.add('js-gallery-delete');
+                                    var i = document.createElement('i');
+                                    i.classList.add('pe-7s-trash');
+                                    i.classList.add('js-gallery-delete');
+                                    a.appendChild(i);
+                                    imgDiv.appendChild(a);
+
+                                    preview.appendChild(imgDiv);
+
+                                    // Submit the file via AJAX using POST method
+                                    var formData = new FormData();
+                                    formData.append('csrf_token', CSRF_TOKEN);
+                                    formData.append('image', file);
+
+                                    fileInput.setAttribute('disabled', 'disabled');
+                                    // Disable all delete buttons
+                                    var deleteButtons = container.querySelectorAll('.js-gallery-delete');
+                                    deleteButtons.forEach(function (btn) {
+                                        btn.classList.add('disabled');
+                                    });
+                                    
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', '/learning-management/settings/pages/home/our_testimonies/' + OID + '/upload-gallery', true);
+                                    xhr.onload = function () {
+                                        var response = JSON.parse(xhr.response);
+                                        if (response.success) {
+                                            alert('File uploaded successfully');
+                                            a.classList.remove('disabled');
+                                            a.setAttribute('data-file_url', response.file_url);
+                                        } else {
+                                            alert(response.message);
+                                            imgDiv.remove();
+                                        }
+
+                                        fileInput.removeAttribute('disabled');
+                                        // Re-enable all delete buttons after the AJAX call
+                                        deleteButtons.forEach(function (btn) {
+                                            btn.classList.remove('disabled');
+                                        });
+                                    };
+                                    xhr.send(formData);
+                                };
+
+                                // Read the file as a data URL
+                                reader.readAsDataURL(file);
+                            }
+
+                            this.value = '';
+                        });
+
+                        var galleryContainer = document.querySelector('.js-gallery-preview');
+
+                        // Add click event listener to the delete button
+                        galleryContainer.addEventListener('click', function (e) {
+                            if (e.target.classList.contains('js-gallery-delete')) {
+                                e.preventDefault(); // Prevent the default action
+
+                                if (confirm('Are you sure you want to delete image?')) {
+                                    var imgDiv = e.target.closest('.img');
+                                    var a = imgDiv.querySelector('a.js-gallery-delete');
+
+                                    imgDiv.remove(); // Remove the image div
+
+                                    // Submit the file via AJAX using POST method
+                                    var formData = new FormData();
+                                    formData.append('csrf_token', CSRF_TOKEN);
+                                    formData.append('file_url', a.getAttribute('data-file_url'));
+
+                                    fileInput.setAttribute('disabled', 'disabled');
+                                    // Disable all delete buttons
+                                    var deleteButtons = galleryContainer.querySelectorAll('.js-gallery-delete');
+                                    deleteButtons.forEach(function (btn) {
+                                        btn.classList.add('disabled');
+                                    });
+
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', '/learning-management/settings/pages/home/our_testimonies/' + OID + '/delete-gallery', true);
+                                    xhr.onload = function () {
+                                        if (xhr.success) {
+                                            alert('File deleted successfully');
+                                        }
+
+                                        fileInput.removeAttribute('disabled');
+                                        // Re-enable all delete buttons after the AJAX call
+                                        deleteButtons.forEach(function (btn) {
+                                            btn.classList.remove('disabled');
+                                        });
+                                    };
+                                    xhr.send(formData);
+                                }
+                            }
+                        });
+                    });
                 </script>
             </div>
         </div>

@@ -9,6 +9,7 @@ from app.admin.templating import admin_render_template, admin_edit
 from prime_admin.utils.upload import allowed_file
 from prime_admin.services.s3 import upload_file, delete_file
 import time
+import json
 
 @bp_lms.route('/settings/pages/home')
 @login_required
@@ -70,6 +71,23 @@ def edit_our_testimony(oid,**kwargs):
     form = OurTestimoniesEditForm(obj=our_testimony)
 
     if request.method == "GET":
+        gallery = []    
+        if our_testimony.gallery is not None and our_testimony.gallery.strip():
+            try:
+                # Attempt to load the gallery as a JSON array
+                gallery = json.loads(our_testimony.gallery)
+
+                # Check if gallery is a list and has elements
+                if isinstance(gallery, list) and gallery:
+                    print("Gallery has values:", gallery)
+                else:
+                    gallery = []
+                    print("Gallery is empty or not a valid list.")
+
+            except json.JSONDecodeError:
+                print("Error decoding gallery data.")
+            except Exception as e:
+                print("An unexpected error occurred:", str(e))
 
         return admin_edit(
             OurTestimony,
@@ -78,7 +96,8 @@ def edit_our_testimony(oid,**kwargs):
             oid,
             'lms.pages_home',
             action_template="lms/our_testimony_edit_action.html",
-            fields_sizes=[12, 12]
+            fields_sizes=[12, 12, 12, 12, 12],
+            gallery=gallery
         )
     
     if not form.validate_on_submit():
@@ -87,7 +106,6 @@ def edit_our_testimony(oid,**kwargs):
         return redirect(url_for('lms.pages_home'))
         
     try:
-        
         our_testimony.title = form.title.data
         our_testimony.description = form.description.data
 
@@ -105,7 +123,9 @@ def edit_our_testimony(oid,**kwargs):
         our_testimony.image = output
 
         if form.oldimage.data:
-            delete_file(form.oldimage.data, 'our_testimonies/')
+            file_url = form.oldimage.data
+            file_name = file_url.split('/')[-1]
+            delete_file(file_name, 'our_testimonies/')
         
         our_testimony.save()
         flash('Updated Successfully!','success')
@@ -114,3 +134,95 @@ def edit_our_testimony(oid,**kwargs):
         flash(str(e),'error')
     
     return redirect(url_for('lms.pages_home'))
+
+    
+@bp_lms.route('/settings/pages/home/our_testimonies/<string:oid>/upload-gallery', methods=['POST'])
+@login_required
+def upload_gallery_our_testimony(oid,**kwargs):
+    our_testimony = OurTestimony.objects.get_or_404(id=oid)
+    
+    new_outputs = []    
+    if our_testimony.gallery is not None and our_testimony.gallery.strip():
+        try:
+            # Attempt to load the gallery as a JSON array
+            new_outputs = json.loads(our_testimony.gallery)
+
+            # Check if new_outputs is a list and has elements
+            if isinstance(new_outputs, list) and new_outputs:
+                print("Gallery has values:", new_outputs)
+            else:
+                new_outputs = []
+                print("Gallery is empty or not a valid list.")
+
+        except json.JSONDecodeError:
+            print("Error decoding gallery data.")
+        except Exception as e:
+            print("An unexpected error occurred:", str(e))
+    else:
+        print("our_testimony.gallery is empty or None.")
+
+    try:
+        file = request.files['image']
+
+        if not (file and allowed_file(file.filename)):
+            return jsonify({'success': False, 'message': 'File is not allowed'})
+
+        output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
+
+        if not output:
+            return jsonify({'success': False, 'message': 'Error occured, please contact system administrator'})
+            
+        new_outputs.append(output)
+
+        our_testimony.gallery = json.dumps(new_outputs)
+        
+        our_testimony.save()
+
+        return jsonify({'success': True, 'file_url': output, 'message': 'Updated Successfully!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+    
+@bp_lms.route('/settings/pages/home/our_testimonies/<string:oid>/delete-gallery', methods=['POST'])
+@login_required
+def delete_gallery_our_testimony(oid,**kwargs):
+    our_testimony = OurTestimony.objects.get_or_404(id=oid)
+
+    new_outputs = []    
+    if our_testimony.gallery is not None and our_testimony.gallery.strip():
+        try:
+            # Attempt to load the gallery as a JSON array
+            new_outputs = json.loads(our_testimony.gallery)
+
+            # Check if new_outputs is a list and has elements
+            if isinstance(new_outputs, list) and new_outputs:
+                print("Gallery has values:", new_outputs)
+            else:
+                new_outputs = []
+                print("Gallery is empty or not a valid list.")
+
+        except json.JSONDecodeError:
+            print("Error decoding gallery data.")
+        except Exception as e:
+            print("An unexpected error occurred:", str(e))
+    else:
+        print("our_testimony.gallery is empty or None.")
+
+    try:
+        file_url = request.form.get('file_url')
+
+        if file_url:
+            file_name = file_url.split('/')[-1]
+            delete_file(file_name, 'our_testimonies/')
+
+            # Remove the file_url from new_outputs
+            new_outputs = [url for url in new_outputs if url.split('/')[-1] != file_name]
+
+            our_testimony.gallery = json.dumps(new_outputs)
+            
+            our_testimony.save()
+
+        return jsonify({'success': True, 'message': 'Deleted Successfully!'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
