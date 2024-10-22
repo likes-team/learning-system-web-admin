@@ -29,7 +29,7 @@
 			size: A4 portrait;
 			margin-right: 1cm;
 			margin-left: 1cm;
-			margin-top: .5cm;
+			margin-top: .1cm;
 			margin-bottom: 0cm;
 		}
 
@@ -138,21 +138,21 @@
 
 	<div style="text-align: left; margin-top:20px;">
 		<h4 style="font-weight:bold;margin:0%;">1. PAYMENT RULES</h4>
-		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+		<ul class="payment-rules-bullets" style="font-size: 11px; margin:0px;">
 		{{payment_rules|safe}}
 		</ul>
 	</div>
 
 	<div style="text-align: left; margin-top:10px;">
 		<h4 style="font-weight:bold;margin:0%;">2. MODE OF PAYMENTS</h4>
-		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+		<ul class="payment-rules-bullets" style="font-size: 11px; margin:0px;">
 			{{mode_of_payment|safe}}
 		</ul>
 	</div>
 
 	<div style="text-align: left; margin-top:10px;">
 		<h4 style="font-weight:bold;margin:0;">3. REFUNDS AND WITHDRAWALS</h4>
-		<ul class="payment-rules-bullets" style="font-size: 14px; margin:0px;">
+		<ul class="payment-rules-bullets" style="font-size: 11px; margin:0px;">
 			{{refunds_and_withdrawals|safe}}
 		</ul>
 	</div>
@@ -175,7 +175,6 @@
 
 	<div id="div_full_signature" style="text-align: left; margin-top:0px; margin-bottom:0px;">
 		<img id="img_full_signature" src="{{url_for('lms.static', filename='img/full_signature.jpg')}}" alt="logo" width="10%;" height="10%;">
-
 		<div id="div_sequence_no" style="text-align: left; font-size: 10px;">
 			{{sequence_no}}
 		</div>
