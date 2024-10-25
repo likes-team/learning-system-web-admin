@@ -15,8 +15,6 @@ from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import os
 from datetime import datetime
-
-# pip install google-auth google-auth-oauthlib gspread
 import gspread
 from google.oauth2.service_account import Credentials
 
