@@ -17,7 +17,7 @@ def pages_home():
     our_testimonies_form = OurTestimoniesEditForm()
     our_testimonies_modal_data = {
         'title': 'Add new Our Testimony',
-        'fields_sizes': [12,12,12]
+        'fields_sizes': [12,12,12,12]
     }
     return admin_render_template(
         Settings, 'lms/pages/home.html', 'learning_management',\
@@ -40,19 +40,17 @@ def create_our_testimony():
 
         our_testimony.title = form.title.data
         our_testimony.description = form.description.data
+        our_testimony.gallerydescription = form.gallerydescription.data
 
         file = request.files['image']
-        if not (file and allowed_file(file.filename)):
-            flash('File is not allowed','error')
-            return redirect('/learning-management/settings/pages/home')
+        if (file and allowed_file(file.filename)):
+            output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
 
-        output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
-
-        if not output:
-            flash('Error occured, please contact system administrator','error')
-            return redirect('/learning-management/settings/pages/home')
+            if not output:
+                flash('Error occured, please contact system administrator','error')
+                return redirect('/learning-management/settings/pages/home')
             
-        our_testimony.image = output
+            our_testimony.image = output
         
         our_testimony.save()
 
@@ -108,24 +106,22 @@ def edit_our_testimony(oid,**kwargs):
     try:
         our_testimony.title = form.title.data
         our_testimony.description = form.description.data
+        our_testimony.gallerydescription = form.gallerydescription.data
 
         file = request.files['image']
-        if not (file and allowed_file(file.filename)):
-            flash('File is not allowed','error')
-            return redirect('/learning-management/settings/pages/home/our_testimonies/' + oid + '/edit')
+        if (file and allowed_file(file.filename)):
+            output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
 
-        output = upload_file(file, f"{int(time.time())}_{file.filename}", 'our_testimonies/')
+            if not output:
+                flash('Error occured, please contact system administrator','error')
+                return redirect('/learning-management/settings/pages/home/our_testimonies/' + oid + '/edit')
+                
+            our_testimony.image = output
 
-        if not output:
-            flash('Error occured, please contact system administrator','error')
-            return redirect('/learning-management/settings/pages/home/our_testimonies/' + oid + '/edit')
-            
-        our_testimony.image = output
-
-        if form.oldimage.data:
-            file_url = form.oldimage.data
-            file_name = file_url.split('/')[-1]
-            delete_file(file_name, 'our_testimonies/')
+            if form.oldimage.data:
+                file_url = form.oldimage.data
+                file_name = file_url.split('/')[-1]
+                delete_file(file_name, 'our_testimonies/')
         
         our_testimony.save()
         flash('Updated Successfully!','success')

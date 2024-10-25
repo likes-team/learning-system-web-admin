@@ -6,20 +6,20 @@
 </script>
 <style>
     .js-gallery-preview {
-        display: flex;
-        flex-wrap: wrap;
+        max-height: 500px;
+        overflow-y: auto;
     }
     .js-gallery-preview .img {
-        height: 200px;
+        height: 100px;
         border: 10px solid #fff;
-        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .js-gallery-preview .img img{
         height: 100%;
     }
     .js-gallery-preview .img a{
-        position: absolute;
-        right: 0;
         color: #fff !important;
     }
 </style>

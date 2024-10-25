@@ -434,9 +434,10 @@ class OurTestimoniesEditForm(AdminEditForm):
 
     title = AdminField(label="Title", validators=[DataRequired()])
     description = AdminField(label="Description", type="textarea", validators=[DataRequired()])
-    image = AdminField(label="Image", type="image_with_preview", validators=[DataRequired()])
-    oldimage = AdminField(label="Old Image", type="hidden")
-    gallery = AdminField(label="Gallery", type="gallery_with_preview")
+    image = AdminField(label="Image", type="image_with_preview", required=False)
+    oldimage = AdminField(label="Old Image", type="hidden", required=False)
+    gallerydescription = AdminField(label="Gallery Description", type="textarea", required=False)
+    gallery = AdminField(label="Gallery", type="gallery_with_preview", required=False)
 
     @property
     def fields(self):
@@ -444,5 +445,6 @@ class OurTestimoniesEditForm(AdminEditForm):
             [self.title, self.description],
             [self.image],
             [self.oldimage],
+            [self.gallerydescription],
             [self.gallery],
         ]
