@@ -15,10 +15,9 @@ from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import os
 from datetime import datetime
-
-# pip install google-auth google-auth-oauthlib gspread
 import gspread
 from google.oauth2.service_account import Credentials
+import json
 
 
 load_dotenv()
@@ -233,7 +232,15 @@ def branches():
 
 @bp_prime_home.route('/testimonies')
 def testimonies():
-    return render_template('prime_home/testimonies_page.html')
+
+    our_testimonies = list(mongo.db.lms_our_testimonies.find())
+
+    galleries = {}
+    for our_testimony in our_testimonies:
+        if 'gallery' in our_testimony:
+            galleries[our_testimony['_id']] = json.loads(our_testimony['gallery'])
+
+    return render_template('prime_home/testimonies_page.html', our_testimonies=our_testimonies, galleries=galleries)
 
 
 @bp_prime_home.route('/about')
