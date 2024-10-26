@@ -9,6 +9,7 @@ def fetch_our_testimonies():
     start, length = int(request.args.get('start')), int(request.args.get('length'))
 
     query = list(mongo.db.lms_our_testimonies.aggregate([
+        {"$sort": {"sort": 1}},
         {"$skip": start},
         {"$limit": length},
     ]))

@@ -28,7 +28,7 @@ app = create_app(config_name)
 def index():
     form = SendUsAMessageForm()
 
-    our_testimonies = list(mongo.db.lms_our_testimonies.find())
+    our_testimonies = list(mongo.db.lms_our_testimonies.find().sort('sort', 1))
 
     return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies)
 
@@ -233,7 +233,7 @@ def branches():
 @bp_prime_home.route('/testimonies')
 def testimonies():
 
-    our_testimonies = list(mongo.db.lms_our_testimonies.find())
+    our_testimonies = list(mongo.db.lms_our_testimonies.find().sort('sort', 1))
 
     galleries = {}
     for our_testimony in our_testimonies:
