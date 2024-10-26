@@ -238,7 +238,8 @@ def testimonies():
     galleries = {}
     for our_testimony in our_testimonies:
         if 'gallery' in our_testimony:
-            galleries[our_testimony['_id']] = json.loads(our_testimony['gallery'])
+            gallery_clean = our_testimony['gallery'].replace("\\", '')
+            galleries[our_testimony['_id']] = json.loads(gallery_clean)
 
     return render_template('prime_home/testimonies_page.html', our_testimonies=our_testimonies, galleries=galleries)
 
