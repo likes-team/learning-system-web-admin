@@ -886,6 +886,7 @@ class OurTestimony(Base, Admin):
     image = db.StringField()
     gallerydescription = db.StringField()
     gallery = db.StringField()
+    sort = db.IntField()
 
     @property
     def oldimage(self):

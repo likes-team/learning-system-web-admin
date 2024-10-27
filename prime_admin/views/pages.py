@@ -10,6 +10,7 @@ from prime_admin.utils.upload import allowed_file
 from prime_admin.services.s3 import upload_file, delete_file
 import time
 import json
+from app import mongo
 
 @bp_lms.route('/settings/pages/home')
 @login_required
@@ -37,6 +38,10 @@ def create_our_testimony():
 
     try:
         our_testimony = OurTestimony()
+
+        # Calculate the sort value as the total number of items + 1
+        total_items = mongo.db.lms_our_testimonies.count_documents({})
+        our_testimony.sort = total_items + 1
 
         our_testimony.title = form.title.data
         our_testimony.description = form.description.data
