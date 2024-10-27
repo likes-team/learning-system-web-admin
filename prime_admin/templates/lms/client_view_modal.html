@@ -38,12 +38,15 @@
                         </div>
                         
                         <div class="form-row">
-                            <div class="col-md-3 mb-3">
-                                <label for="view_batch_no">Batch No.</label>
-                                <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_batch_no" name="view_batch_no"
-                                    value="">
+                            <div class="col-md-4 mb-3">
+                                <div class="position-relative form-group">
+                                    <label for="view_batch_no" class="">Batch No.</label>
+                                    <select style="font-weight: bold;" name="view_batch_no" id="view_batch_no" class="form-control" disabled>
+                                        <option value="">No Branch Selected...</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-2 mb-3">
                                 <label for="view_schedule">Schedule</label>
                                 <input style="font-weight: bold;" disabled type="text" class="form-control" id="view_schedule" name="view_schedule"
                                     value="">

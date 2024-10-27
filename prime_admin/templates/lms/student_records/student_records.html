@@ -264,7 +264,6 @@
                     $("#view_first_name").val(response.data.fname);
                     $("#view_middle_name").val(response.data.mname);
                     $("#view_suffix").val(response.data.suffix);
-                    $("#view_batch_no").val(response.data.batch_no);
                     $("#view_schedule").val(response.data.schedule);
                     $("#view_branch").val(response.data.branch);
                     $("#view_contact_person").val(response.data.contact_person);
@@ -285,6 +284,21 @@
                     $("#view_gender").val(response.data.gender);
                     $("#view_registration_no").val(response.data.registration_no);
                     $("#view_reviewers").val(response.data.reviewers);
+
+                    $('#view_batch_no').find('option').remove();
+                    if(response.data.batch_numbers.length > 0){
+                        var newOption = $('<option value="">Choose...</option>');
+                        $('#view_batch_no').append(newOption);
+                        
+                        for(i=0; i < response.data.batch_numbers.length; i++){
+                            var newOption = $(`<option value="${response.data.batch_numbers[i].id}">${response.data.batch_numbers[i].number}</option>`);
+                            $('#view_batch_no').append(newOption);
+                        }
+                    } else {
+                        var newOption = $('<option value="">No Batch Numbers yet</option>');
+                        $('#view_batch_no').append(newOption);
+                    }
+                    $("#view_batch_no").val(response.data.batch_no);
 
                     dtPaymentHistory.clear().draw();
 
@@ -336,6 +350,7 @@
                 $("#view_password").prop('disabled', false);
                 $("#view_civil_status").prop('disabled', false);
                 $("#view_gender").prop('disabled', false);
+                $("#view_batch_no").prop('disabled', false);
             } else if ($(this).html() == "Save") {
                 $(this).html("Edit");
                 $("#view_last_name").prop('disabled', true);
@@ -352,6 +367,7 @@
                 $("#view_password").prop('disabled', true);
                 $("#view_civil_status").prop('disabled', true);
                 $("#view_gender").prop('disabled', true);
+                $("#view_batch_no").prop('disabled', true);
 
                 var lname = $("#view_last_name").val();
                 var fname = $("#view_first_name").val();
@@ -366,6 +382,7 @@
                 var e_reg_password = $("#view_password").val();
                 var civil_status = $("#view_civil_status").val();
                 var gender = $("#view_gender").val();
+                let batchNo = $("#view_batch_no").val();
 
                 $.ajax({
                     url: "/learning-management/api/members/" + $("#client_id").val() + "/edit",
@@ -384,7 +401,8 @@
                         "e_registration": e_registration,
                         'e_reg_password': e_reg_password,
                         'civil_status': civil_status,
-                        'gender': gender
+                        'gender': gender,
+                        'batch_no': batchNo
                     }),
                     contentType: "application/json; charset=utf-8",
                     success: function (response) {

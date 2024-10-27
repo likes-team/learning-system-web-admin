@@ -141,6 +141,7 @@ def edit_member(client_id):
     e_reg_password = request.json['e_reg_password']
     civil_status = request.json['civil_status']
     gender = request.json['gender']
+    batch_no = request.json['batch_no']
 
     client = Registration.objects.get_or_404(id=client_id)
     client.lname = lname
@@ -156,7 +157,7 @@ def edit_member(client_id):
     client.e_reg_password = e_reg_password
     client.civil_status = civil_status
     client.gender = gender
-
+    client.batch_number = Batch.objects.get(id=batch_no)
     client.save()
 
     with mongo.cx.start_session() as session:
@@ -272,7 +273,7 @@ def get_member(client_id):
         'lname': client.lname,
         'mname': client.mname,
         'suffix': client.suffix,
-        'batch_no': client.batch_number.number if client.batch_number is not None else '',
+        'batch_no': str(client.batch_number.id) if client.batch_number is not None else '',
         'schedule': client.schedule,
         'branch': client.branch.name,
         'contact_person': client.contact_person.fname,
@@ -304,6 +305,17 @@ def get_member(client_id):
         'hired_information': hired_information,
         'employer_information': employer_information
     }
+
+    batch_numbers = Batch.objects(branch=client.branch.id).filter(active=True)
+    batch_no_data = []
+
+    for batch_number in batch_numbers:
+        batch_no_data.append({
+            'id': str(batch_number.id),
+            'number': batch_number.number
+        })
+    data['batch_numbers'] = batch_no_data
+
     response = {
         'data': data
     }
