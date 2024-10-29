@@ -235,3 +235,16 @@ def toggle_orientators_status():
             "$eq": [False,"$is_active"]
         }}}])
     return jsonify({'result': True})
+
+
+@bp_lms.route('/settings/class-schedule/toggle-status', methods=['POST'])
+def toggle_class_schedules_status():
+    class_schedule_id = request.json['class_schedule']
+
+    mongo.db.lms_class_schedules.update_one({
+        '_id': ObjectId(class_schedule_id)
+    }, [{'$set': {
+        "is_active": {
+            "$eq": [False,"$is_active"]
+        }}}])
+    return jsonify({'result': True})
