@@ -37,7 +37,8 @@ from .settings.examination import (
     dt_venues_settings
 )
 from .settings import (
-    dt_orientators_settings
+    dt_orientators_settings,
+    dt_class_schedules_settings
 )
 from .pages import (
     dt_our_testimonies

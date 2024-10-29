@@ -63,6 +63,16 @@ def klts_settings():
     )
 
 
+@bp_lms.route('/settings/class-schedule')
+def class_schedule_settings():
+    branches = Branch.objects()
+
+    return admin_render_template(
+        Settings, 'lms/settings/class_schedule_settings_page.html', 'learning_management',
+        branches=branches
+    )
+
+
 # @bp_lms.route('/settings/branches')
 # def branch_settings():
 #     form = BranchForm()
@@ -194,7 +204,25 @@ def create_klt():
     })
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.klts_settings'))
-    
+
+
+@bp_lms.route('/settings/class-schedule/create', methods=['POST'])
+def create_class_schedule():
+    branch_id = request.form['branch']
+    schedule = request.form['schedule']
+    start_date = request.form['start_date']
+    end_date = request.form['end_date']
+
+    mongo.db.lms_class_schedules.insert_one({
+        'branch': ObjectId(branch_id),
+        'schedule': schedule,
+        'start_date': start_date,
+        'end_date': end_date       
+    })
+    flash("Added successfully!", 'success')
+    return redirect(url_for('lms.class_schedule_settings'))
+
+
 
 @bp_lms.route('/settings/orientators/toggle-status', methods=['POST'])
 def toggle_orientators_status():

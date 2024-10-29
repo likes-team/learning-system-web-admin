@@ -1,0 +1,198 @@
+{% extends "admin/admin_base.html" %}
+
+
+{% block modals %}
+{% endblock %}
+
+
+{% block head %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+            }
+        }
+    });
+
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+    $(document).ready(function(){
+        $("#li_class_schedule").addClass("mm-active");
+        
+        var dtOrientators = $('#tbl_class_schedules').DataTable({
+            'searching': false,
+            "pageLength": 25,
+            "processing": true,
+            "serverSide": false,
+            "ordering": false,
+            "responsive": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "/learning-management/datatables/settings/class-schedules",
+            },
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+                {
+                    "targets": 5,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if(data){
+                            return `<div class="badge badge-success">ACTIVE</div>`
+                        }
+                        return `<div class="badge badge-secondary">INACTIVE</div>`
+                    }
+                },
+                {
+                    "targets": 6,
+                    "className": "text-center",
+                    "render": function (data, type, row) {
+                        return `
+                        <button type="button" class="btn btn-info btn-sm btn-toggle"><i class="fa fa-toggle-on"></i></button>
+                        `;
+                    }
+                },
+            ],
+        });
+    }); // document.ready
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+{% include 'lms/settings_sidebar.html' %}
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-settings icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Class Schedules Settings
+                    <div class="page-title-subheading">
+                        Create, read, update and archive items
+                    </div>
+                </div>
+            </div>
+            {% block actions %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">New Record</h5>
+                    <form id="frm_create_class_schedule" action="{{url_for('lms.create_class_schedule')}}" method="POST" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input id="client_id" name="client_id" type="hidden" class="form-control">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label for="branch" class="">Branch</label>
+                                    <select name="branch" id="branch" class="form-control" required>
+                                        <option value="">Choose...</option>
+                                        {% for branch in branches %}
+                                        <option value="{{ branch.id }}">
+                                            {{ branch.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Please provide a branch
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label for="schedule" class="">Schedule</label>
+                                    <select name="schedule" id="schedule" class="form-control" required="">
+                                        <option value="">Choose...</option>
+                                        <option value="WDC">
+                                            WDC
+                                        </option>
+                                        <option value="SDC">
+                                            SDC
+                                        </option>
+                                        <option value="SAT">
+                                            SAT
+                                        </option>
+                                    </select>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Please provide a schedule
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="position-relative form-group"><label id="lbl_start_date" for="start_date" class="">Start Date</label>
+                                    <input name="start_date" id="start_date" type="date" class="form-control" required="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="position-relative form-group"><label id="lbl_end_date" for="end_date" class="">End Date</label>
+                                    <input name="end_date" id="end_date" type="date" class="form-control" required="">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <input form="frm_create_class_schedule" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="SUBMIT">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                    <table id="tbl_class_schedules" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">BRANCH</th>
+                            <th class="text-center">SCHEDULE</th>
+                            <th class="text-center">START DATE</th>
+                            <th class="text-center">END DATE</th>
+                            <th class="text-center">STATUS</th>
+                            <th class="text-center">ACTION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
