@@ -217,7 +217,8 @@ def create_class_schedule():
         'branch': ObjectId(branch_id),
         'schedule': schedule,
         'start_date': start_date,
-        'end_date': end_date       
+        'end_date': end_date,
+        'is_active': True
     })
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.class_schedule_settings'))
