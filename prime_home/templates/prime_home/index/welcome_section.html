@@ -24,11 +24,75 @@
                     <a id="btn_contact_now" class="btn btn-light ml-2 pl-4 pr-4 rounded-pill" href="#">Contact Now</a>
                 </div>
     
-                <div class="col-lg-6 pb-3 pt-3 text-right">
-                    <h2 class="display-5 font-weight-bold">TOP-10 Latest Passers</h2>
-                    <ul class="lead list-unstyled js-latest-passers">
-                    </ul>
-                    <a class="btn btn-light ml-2 pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.passers')}}">View More</a>
+                <div class="col-lg-6 pb-3 pt-3 d-flex flex-wrap justify-content-end ">
+                    {% if weekdays_class and saturday_class and sunday_class %}
+                        <div class="mb-3 w-75" style="max-height: 250px;overflow: hidden;overflow-y: scroll;">
+                            <h2 class="display-5 font-weight-bold text-center">Start of Class</h2>
+                            {% if weekdays_class %}
+                                <h4 class="font-weight-bold">Weekdays Class</h4>
+                                <table class="align-middle mb-0 table table-bordered table-info mb-2 table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">BRANCH</th>
+                                            <th class="text-center">START OF CLASS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in weekdays_class %}
+                                            <tr>
+                                                <td class="text-center">{{item['branch_name']}}</td>
+                                                <td class="text-center">item['start_date']</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                            {% if saturday_class %}
+                                <h4 class="font-weight-bold">Saturday Class</h4>
+                                <table class="align-middle mb-0 table table-bordered table-info mb-2 table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">BRANCH</th>
+                                            <th class="text-center">START OF CLASS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in saturday_class %}
+                                            <tr>
+                                                <td class="text-center">{{item['branch_name']}}</td>
+                                                <td class="text-center">item['start_date']</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                            {% if sunday_class %}
+                                <h4 class="font-weight-bold">Sunday Class</h4>
+                                <table class="align-middle mb-0 table table-bordered table-info mb-2 table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">BRANCH</th>
+                                            <th class="text-center">START OF CLASS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in sunday_class %}
+                                            <tr>
+                                                <td class="text-center">{{item['branch_name']}}</td>
+                                                <td class="text-center">item['start_date']</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    <div class="text-right">
+                        <h2 class="display-5 font-weight-bold">TOP-10 Latest Passers</h2>
+                        <ul class="lead list-unstyled js-latest-passers">
+                        </ul>
+                        <a class="btn btn-light ml-2 pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.passers')}}">View More</a>
+                    </div>
                 </div>
                 </div>
             </div>
