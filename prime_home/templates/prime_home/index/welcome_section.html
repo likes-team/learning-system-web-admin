@@ -25,8 +25,8 @@
                 </div>
     
                 <div class="col-lg-6 pb-3 pt-3 d-flex flex-wrap justify-content-end ">
-                    {% if weekdays_class and saturday_class and sunday_class %}
-                        <div class="mb-3 w-75" style="max-height: 250px;overflow: hidden;overflow-y: scroll;">
+                    {% if weekdays_class or saturday_class or sunday_class %}
+                        <div class="mb-3 w-75" style="max-height: 250px;overflow: hidden;overflow-y: scroll;scrollbar-color: #0061a8 #ffffff00;scrollbar-width: thin;padding-right: 5px;">
                             <h2 class="display-5 font-weight-bold text-center">Start of Class</h2>
                             {% if weekdays_class %}
                                 <h4 class="font-weight-bold">Weekdays Class</h4>
@@ -41,7 +41,7 @@
                                         {% for item in weekdays_class %}
                                             <tr>
                                                 <td class="text-center">{{item['branch_name']}}</td>
-                                                <td class="text-center">item['start_date']</td>
+                                                <td class="text-center">{{item['start_date']}}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -60,7 +60,7 @@
                                         {% for item in saturday_class %}
                                             <tr>
                                                 <td class="text-center">{{item['branch_name']}}</td>
-                                                <td class="text-center">item['start_date']</td>
+                                                <td class="text-center">{{item['start_date']}}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -79,7 +79,7 @@
                                         {% for item in sunday_class %}
                                             <tr>
                                                 <td class="text-center">{{item['branch_name']}}</td>
-                                                <td class="text-center">item['start_date']</td>
+                                                <td class="text-center">{{item['start_date']}}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>

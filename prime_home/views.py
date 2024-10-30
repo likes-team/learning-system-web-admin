@@ -30,7 +30,7 @@ def index():
 
     our_testimonies = list(mongo.db.lms_our_testimonies.find().sort('sort', 1))
 
-    class_schedules = mongo.db.lms_class_schedules.find({"status": True}).sort("start_date", 1)
+    class_schedules = mongo.db.lms_class_schedules.find({"is_active": True}).sort("start_date", 1)
     weekdays_class = []
     saturday_class = []
     sunday_class = []
@@ -45,7 +45,7 @@ def index():
                 'schedule': class_schedule['schedule'],
                 'start_date': class_schedule['start_date'],
                 'end_date': class_schedule['end_date'],
-                'status': class_schedule.get('status', False),
+                'is_active': class_schedule.get('is_active', False),
             })
         elif (class_schedule['schedule'] == 'SAT'):
             saturday_class.append({
@@ -54,7 +54,7 @@ def index():
                 'schedule': class_schedule['schedule'],
                 'start_date': class_schedule['start_date'],
                 'end_date': class_schedule['end_date'],
-                'status': class_schedule.get('status', False),
+                'is_active': class_schedule.get('is_active', False),
             })
         elif (class_schedule['schedule'] == 'SDC'):
             sunday_class.append({
@@ -63,7 +63,7 @@ def index():
                 'schedule': class_schedule['schedule'],
                 'start_date': class_schedule['start_date'],
                 'end_date': class_schedule['end_date'],
-                'status': class_schedule.get('status', False),
+                'is_active': class_schedule.get('is_active', False),
             })
 
     return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies, weekdays_class=weekdays_class, saturday_class=saturday_class, sunday_class=sunday_class)
