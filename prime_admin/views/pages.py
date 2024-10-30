@@ -2,9 +2,11 @@ from prime_admin import bp_lms
 from app.admin.templating import admin_render_template
 from prime_admin.models import Settings
 from prime_admin.models import OurTestimony
+from prime_admin.models import PageSettings
 from flask_login import login_required
 from flask import redirect, url_for, jsonify, request, flash
 from prime_admin.forms import OurTestimoniesEditForm
+from prime_admin.forms import PageSettingsEditForm
 from app.admin.templating import admin_render_template, admin_edit
 from prime_admin.utils.upload import allowed_file
 from prime_admin.services.s3 import upload_file, delete_file
@@ -12,9 +14,33 @@ import time
 import json
 from app import mongo
 
-@bp_lms.route('/settings/pages/home')
+@bp_lms.route('/settings/pages/home', methods=['GET','POST'])
 @login_required
 def pages_home():
+    page_settings_form = PageSettingsEditForm()
+    home_background_image = PageSettings.objects.filter(key="home_background_image").first()
+    if not home_background_image:
+        home_background_image = PageSettings()
+
+    if request.method == "POST":
+        file = request.files['home_background_image']
+        if (file and allowed_file(file.filename)):
+            output = upload_file(file, f"{int(time.time())}_{file.filename}", 'landing_page/')
+
+            if not output:
+                flash('Error occured, please contact system administrator','error')
+                return redirect('/learning-management/settings/pages/home')
+                
+            home_background_image.key = "home_background_image"
+            home_background_image.value = output
+
+            if request.form.get('old_home_background_image'):
+                file_url = request.form.get('old_home_background_image')
+                file_name = file_url.split('/')[-1]
+                delete_file(file_name, 'landing_page/')
+
+        home_background_image.save()
+
     our_testimonies_form = OurTestimoniesEditForm()
     our_testimonies_modal_data = {
         'title': 'Add new Our Testimony',
@@ -22,7 +48,7 @@ def pages_home():
     }
     return admin_render_template(
         Settings, 'lms/pages/home.html', 'learning_management',\
-        OUR_TESTIMONIES_FORM=our_testimonies_form, OUR_TESTIMONIES_MODAL_DATA=our_testimonies_modal_data
+        OUR_TESTIMONIES_FORM=our_testimonies_form, OUR_TESTIMONIES_MODAL_DATA=our_testimonies_modal_data, PAGE_SETTINGS_FORM=page_settings_form, home_background_image=home_background_image
     )
 
 

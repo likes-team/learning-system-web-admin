@@ -1,7 +1,7 @@
-<section data-aos="zoom-in" class="border border-left-0 border-right-0 border-top-0 pb-5 pt-5"
-id="testimonies" style="background-color: rgb(0 97 168 / 20%);">
+<section class="border border-left-0 border-right-0 border-top-0 pb-5 pt-5 dark-transparent-bg text-white"
+id="testimonies">
 <div class="testimony container pb-5 pt-5">
-    <h2 class="h1 mb-4 text-center">Our Testimonies</h2>
+    <h2 class="h1 mb-4 text-center text-favorite2">Our Testimonies</h2>
     
     <div data-aos="fade-right" id="carousel8" class="carousel slide" data-ride="carousel" data-interval="3000">
         <div class="carousel-inner">
@@ -13,7 +13,7 @@ id="testimonies" style="background-color: rgb(0 97 168 / 20%);">
                         </div>
 
                         <div class="col-lg-8 pb-3 pt-3">
-                            <h3 class="text-dark">{{ our_testimony['title'] }}</h3>
+                            <h3>{{ our_testimony['title'] }}</h3>
                             <p class="font-weight-light mb-0">{{ our_testimony['description'].replace('\n', '<br>') | safe }}</p>
                         </div>
                     </div>
@@ -22,12 +22,12 @@ id="testimonies" style="background-color: rgb(0 97 168 / 20%);">
         </div>
         <ol class="carousel-indicators position-relative">
             {% for our_testimony in our_testimonies %}
-                <li data-target="#carousel8" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %} primary-color"></li>
+                <li data-target="#carousel8" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %} primary-color2"></li>
             {% endfor %}
         </ol>
     </div>
     <div class="pb-4 pt-4 text-center">
-        <a style="color: white;" class="btn primary-color pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.testimonies')}}">View More</a>
+        <a style="color: white;" class="btn btn-primary pl-4 pr-4 rounded-pill" href="{{url_for('prime_home.testimonies')}}">View More</a>
     </div>
 </div>
 </section>

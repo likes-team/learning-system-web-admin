@@ -14,7 +14,6 @@
         integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/blocks.css') }}">
     <!-- Custom styles for this template -->
-    <link href="{{ url_for('prime_home.static', filename='css/style.css', v='10102024') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
@@ -23,7 +22,7 @@
     <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/owl.theme.default.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css">
     <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/carousel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/org_chart.css') }}">
+    <link rel="stylesheet" href="{{ url_for('prime_home.static', filename='css/org_chart.css', v='10292024') }}">
     <link href="{{ url_for('bp_auth.static', filename='css/main_pro.css') }}" rel="stylesheet">
     <style>
         .branch {
@@ -32,9 +31,10 @@
     </style>
     <!-- Block Head -->
     {% block head %} {% endblock %}
+    <link href="{{ url_for('prime_home.static', filename='css/style.css', v='10292024') }}" rel="stylesheet">
 </head>
 
-<body class="text-secondary">
+<body class="text-secondary" style="background-image: url('{{home_background_image.value}}');">
     <!-- HEADER -->
     {% block header %}
         {% include "prime_home/navigation_header.html" %}

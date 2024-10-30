@@ -891,3 +891,18 @@ class OurTestimony(Base, Admin):
     @property
     def oldimage(self):
         return self.image
+
+class PageSettings(Base, Admin):
+    meta = {
+        'collection': 'lms_page_settings',
+        'strict': False,
+    }
+
+    __tablename__ = 'lms_page_settings'
+    __amname__ = 'page_settings'
+    __amdescription__ = 'Page Settings'
+    __amicon__ = 'pe-7s-file'
+    __view_url__ = 'lms.pages_home'
+
+    key = db.StringField()
+    value = db.StringField()
