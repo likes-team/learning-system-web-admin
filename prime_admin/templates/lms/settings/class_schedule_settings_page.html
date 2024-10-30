@@ -35,7 +35,7 @@
     $(document).ready(function(){
         $("#li_class_schedule").addClass("mm-active");
         
-        var dtOrientators = $('#tbl_class_schedules').DataTable({
+        var dtClassSchedules = $('#tbl_class_schedules').DataTable({
             'searching': false,
             "pageLength": 25,
             "processing": true,
@@ -68,6 +68,45 @@
                     }
                 },
             ],
+        });
+
+        $("#tbl_class_schedules tbody").on('click', '.btn-toggle', function(){
+            let data = dtClassSchedules.row( $(this).parents('tr')).data();
+            let status;
+
+            $.confirm({
+                title: 'Toggle status',
+                content: "Switch Class Schedule's status?",
+                buttons: {
+                    confirm: {
+                        text: 'Switch',
+                        btnClass: 'btn-blue',
+                        keys: ['enter', 'shift'],
+                        action: function(){
+                            $.ajax({
+                                url: "/learning-management/settings/class-schedule/toggle-status",
+                                type: "POST",
+                                dataType: "json",
+                                data: JSON.stringify({
+                                    "class_schedule": data[0]
+                                }),
+                                contentType: "application/json; charset=utf-8",
+                                success: function(response){
+                                    if(response){
+                                        dtClassSchedules.ajax.reload();
+                                        toastr.success("Toggled Successfully!");
+                                    }else{
+                                        toastr.error("Error Occured!, Switching Failed");
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: function () {
+                        $.alert('Canceled!');
+                    },
+                }
+            });
         });
     }); // document.ready
 </script>
