@@ -17,7 +17,7 @@ def datatables_settings_class_schedules():
             class_schedule['schedule'],
             class_schedule['start_date'],
             class_schedule['end_date'],
-            class_schedule.get('status', False),
+            class_schedule.get('is_active', False),
             ''
         ])
 
