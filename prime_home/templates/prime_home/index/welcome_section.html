@@ -27,8 +27,8 @@
                 <div class="col-lg-6 pb-3 pt-3 d-flex flex-wrap justify-content-end ">
                     {% if weekdays_class or saturday_class or sunday_class %}
                         <div class="mb-3 w-75" style="max-height: 250px;overflow: hidden;overflow-y: scroll;scrollbar-color: #0061a8 #ffffff00;scrollbar-width: thin;padding-right: 5px;">
-                            <h2 class="display-5 font-weight-bold text-center">CLASS SCHEDULE</h2>
-                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <h3 class="display-5 font-weight-bold text-center">CLASS SCHEDULE</h3>
+                            <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
                                 {% if weekdays_class %}
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active" id="weekdaysclass-tab" data-toggle="tab" data-target="#weekdaysclass" type="button" role="tab" aria-controls="weekdaysclass" aria-selected="true">Weekdays Class</button>
@@ -36,7 +36,7 @@
                                 {% endif %}
                                 {% if saturday_class %}
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link {%if not weekdays_class %}active{% endif %}" id="saturdayclass-tab" data-toggle="tab" data-target="#saturdayclass" type="button" role="tab" aria-controls="saturdayclass" aria-selected="false">Saturday Class</button>
+                                        <button class="nav-link {%if not weekdays_class %}active{% endif %}" id="saturdayclass-tab" data-toggle="tab" data-target="#saturdayclass" type="button" role="tab" aria-controls="saturdayclass" aria-selected="false">Orientation</button>
                                     </li>
                                 {% endif %}
                                 {% if sunday_class %}
