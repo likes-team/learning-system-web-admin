@@ -16,18 +16,15 @@
             {% endif %}
         {% endfor %}
     </div>
-    <svg viewBox="0 0 1440 185" preserveAspectRatio="none" fill="rgb(0, 97, 168)" version="1.1" xmlns="http://www.w3.org/2000/svg" class="bg-white d-block text-primary" width="100%" height="160">
-        <path d="M 0 0 H 1440 V 60 C 1114 355 700 35 516 35 C 333 35 246 199 0 60 V 0 Z"/>
-    </svg>
 </section>
 
 {% for our_testimony in our_testimonies %}
     {% if our_testimony['title'] != 'Proof of Success' %}
-        <section data-aos="zoom-in" data-aos-duration="20000" class="pb-5 pt-5"> 
+        <section class="pb-5 pt-5 dark-transparent-bg text-white"> 
             <div class="container pb-5 pt-5"> 
-                <h2 class="h5 text-primary">Proof of Gallery
+                <h2 class="h5 text-white">Proof of Gallery
                 </h2>
-                <h3 class="h1 text-dark">{{ our_testimony['title'] }}</h3>
+                <h3 class="h1 text-favorite2">{{ our_testimony['title'] }}</h3>
                 {% if 'gallerydescription' in our_testimony %}
                     <p class="lead">{{ our_testimony['gallerydescription'].replace('\n', '<br>') | safe }}</p>
                 {% endif %}

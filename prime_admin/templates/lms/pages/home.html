@@ -23,6 +23,39 @@
     </div>
     <div class="row">
         <div class="col-md-12">
+            <form action="/learning-management/settings/pages/home" class="needs-validation" method="POST" novalidate enctype="multipart/form-data">
+                {{ PAGE_SETTINGS_FORM.csrf_token }}
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        <a class="btn btn-link text-decoration-none" data-toggle="collapse" href="#collapseBackgroundImage" role="button" aria-expanded="false" aria-controls="collapseBackgroundImage">
+                            <h5 class="card-title mb-0">Background Image</h5>
+                        </a>
+                        <button type="submit" class="btn-shadow mr-3 btn btn-primary" style="margin-left: auto;">
+                            Save
+                        </button>
+                    </div>
+                    <div class="card-body collapse show" id="collapseBackgroundImage">
+                        <div class="col-md-12 mb-3 js-image-container">
+                            <input style="font-weight: bold;" type="file" class="form-control input_required js-image-file" name="home_background_image" placeholder="IMAGE" required>
+                            <div class="text-center mt-3" style="height: 200px;">
+                                <img src="{{home_background_image.value}}" style="height: 100%;" class="js-image-preview" accept="image/*">
+                            </div>
+
+                            <div id="image-valid-feedback" class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div id="image-invalid-feedback" class="invalid-feedback">
+                                Please provide a valid Image
+                            </div>
+                            <input type="hidden" name="old_home_background_image" value="{{home_background_image.value}}">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-header">
                     <a class="btn btn-link text-decoration-none" data-toggle="collapse" href="#collapseOurTestimonies" role="button" aria-expanded="false" aria-controls="collapseOurTestimonies">
@@ -279,20 +312,22 @@
     })();
 
     document.addEventListener('DOMContentLoaded', function () {
-        var imageFileInput = document.querySelector('.js-image-file');
+        var imageFileInputs = document.querySelectorAll('.js-image-file');
         
-        imageFileInput.addEventListener('change', function () {
-            var file = this.files[0];
-            var container = this.closest('.js-image-container');
-            
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    var imagePreview = container.querySelector('.js-image-preview');
-                    imagePreview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        imageFileInputs.forEach(function (imageFileInput) {
+            imageFileInput.addEventListener('change', function () {
+                var file = this.files[0];
+                var container = this.closest('.js-image-container');
+                
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var imagePreview = container.querySelector('.js-image-preview');
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         });
     });
 </script>

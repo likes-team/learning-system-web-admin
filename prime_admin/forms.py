@@ -448,3 +448,10 @@ class OurTestimoniesEditForm(AdminEditForm):
             [self.gallerydescription],
             [self.gallery],
         ]
+
+class PageSettingsEditForm(AdminEditForm):
+    
+    __heading__ = "Edit Page Settings"
+
+    key = AdminField(label="Key", required=False)
+    value = AdminField(label="Value", type="textarea", required=False)
