@@ -906,3 +906,30 @@ class PageSettings(Base, Admin):
 
     key = db.StringField()
     value = db.StringField()
+
+class OrganizationChart(Base, Admin):
+    meta = {
+        'collection': 'lms_organization_chart',
+        'strict': False,
+    }
+
+    __tablename__ = 'lms_organization_chart'
+    __amname__ = 'organization_chart'
+    __amdescription__ = 'Organization Chart'
+    __amicon__ = 'pe-7s-file'
+    __view_url__ = 'lms.pages_about'
+
+    name = db.StringField()
+    is_active = db.BooleanField()
+    position = db.StringField()
+    branch = db.StringField()
+    description = db.StringField()
+    image = db.StringField()
+
+    @property
+    def oldimage(self):
+        return self.image
+
+    @property
+    def status(self):
+        return self.is_active

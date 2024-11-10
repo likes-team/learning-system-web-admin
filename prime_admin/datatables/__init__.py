@@ -41,5 +41,6 @@ from .settings import (
     dt_class_schedules_settings
 )
 from .pages import (
-    dt_our_testimonies
+    dt_our_testimonies,
+    dt_organization_chart
 )

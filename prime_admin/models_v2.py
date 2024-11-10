@@ -260,3 +260,25 @@ class OurTestimoniesV2(Document):
         
     def get_image(self):
         return self.document.get('image')
+
+class OrganizationChartV2(Document):
+    def __init__(self, document):
+        super().__init__(document)
+        
+    def get_name(self):
+        return self.document.get('name')
+        
+    def get_is_active(self):
+        return self.document.get('is_active', False)
+        
+    def get_position(self):
+        return self.document.get('position')
+        
+    def get_branch(self):
+        return self.document.get('branch')
+        
+    def get_description(self):
+        return self.document.get('description')
+        
+    def get_image(self):
+        return self.document.get('image')

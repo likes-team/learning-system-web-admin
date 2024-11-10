@@ -455,3 +455,47 @@ class PageSettingsEditForm(AdminEditForm):
 
     key = AdminField(label="Key", required=False)
     value = AdminField(label="Value", type="textarea", required=False)
+
+class OrganizationChartEditForm(AdminEditForm):
+    from prime_admin.models import Branch
+    
+    __heading__ = "Edit"
+
+    name = AdminField(label="Name", validators=[DataRequired()])
+    status = AdminField(label="Status", type="select", validators=[DataRequired()])
+    description = AdminField(label="Description", required=False)
+    image = AdminField(label="Image", type="image_with_preview", required=False)
+    oldimage = AdminField(label="Old Image", type="hidden", required=False)
+
+    branch = SelectField(label='Branch', choices=[
+        ('cebu', 'CEBU MAIN'),
+        ('iloilo', 'ILOILO'),
+        ('bohol', 'BOHOL'),
+        ('butuan', 'BUTUAN'),
+        ('palawan', 'PALAWAN'),
+        ('calbayog', 'CALBAYOG'),
+        ('tacloban', 'TACLOBAN')
+    ])
+
+    position = SelectField(label='Position', choices=[
+        ('ceo', 'CEO'),
+        ('vice_president', 'VICE PRESIDENT'),
+        ('accounting', 'ACCOUNTING'),
+        ('executive_director', 'EXECUTIVE DIRECTOR'),
+        ('sales_support_assistant', 'SALES SUPPORT ASSISTANT'),
+        ('operations_support_assistant', 'OPERATIONS SUPPORT ASSISTANT'),
+        ('branch_manager', 'BRANCH MANAGER'),
+        ('teacher', 'TEACHER')
+    ])
+
+    @property
+    def fields(self):
+        return [
+            [self.name],
+            [self.status],
+            [self.position],
+            [self.branch],
+            [self.description],
+            [self.image],
+            [self.oldimage],
+        ]

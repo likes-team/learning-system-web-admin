@@ -118,11 +118,17 @@
                         Pages
                         <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                     </a>
-                    <ul>
+                    <ul id="li_pages_ul">
                         <li>
-                            <a id="li_batch_numbers" href="{{url_for('lms.pages_home')}}">
+                            <a id="li_pages_home" href="{{url_for('lms.pages_home')}}">
                                 <i class="metismenu-icon"></i>
                                 Home
+                            </a>
+                        </li>
+                        <li>
+                            <a id="li_pages_about" href="{{url_for('lms.pages_about')}}">
+                                <i class="metismenu-icon"></i>
+                                About
                             </a>
                         </li>
                     </ul>
