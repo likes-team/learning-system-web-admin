@@ -22,6 +22,7 @@ def fetch_organization_chart():
             str(organization_chart.get_id()),
             organization_chart.get_name(),
             organization_chart.get_position(),
+            organization_chart.get_branch(),
             organization_chart.get_is_active(),
             'actions'
         ])

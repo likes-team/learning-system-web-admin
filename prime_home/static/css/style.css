@@ -120,3 +120,150 @@ div.dataTables_wrapper div.dataTables_filter input {
     border: 1px solid #ced4da;
     border-radius: .25rem;
 }
+
+.organization-chart-container {
+    border: 15px solid #715312;
+    background-image: linear-gradient(#0004ae, #0002e0, #0004ae);
+}
+
+.organization-chart-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.organization-chart-header img {
+    height: 150px;
+}
+
+.organization-chart-tree ul {
+    list-style: none;
+}
+
+.organization-chart-tree-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+.organization-chart-tree-item::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 30px;
+    background: var(--white);
+    z-index: 0;
+    bottom: -35px;
+}
+
+.organization-chart-tree-item-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    border: 10px solid #715312;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+.organization-chart-tree-item-content {
+    text-align: center;
+}
+
+.organization-chart-tree-item-image img {
+    height: 100%;
+}
+
+.organization-chart-tree-level3 {
+    display: flex;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    position: relative;
+    padding-top: 20px;
+}
+
+.organization-chart-tree-level3::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    width: 800px;
+    height: 8px;
+    background: var(--white);
+    z-index: 0;
+    transform: translateX(18%);
+}
+
+.organization-chart-tree-level3 li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 25%;
+}
+
+.organization-chart-tree-level4 li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.organization-chart-tree-teacher {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    width: 40%;
+    padding-right: 50px;
+    z-index: 1;
+}
+
+.organization-chart-tree-manager {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 40%;
+    padding-left: 50px;
+    z-index: 1;
+}
+
+.organization-chart-tree-branch {
+    width: 20%;
+    text-align: center;
+    background-color: #0004ae;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid #fff;
+    position: relative;
+}
+
+.organization-chart-tree-branch h3 {
+    font-weight: bold;
+}
+
+.organization-chart-tree-branch::before {
+    content: "";
+    position: absolute;
+    left: -55px;
+    transform: rotate(90deg);
+    width: 8px;
+    height: 100px;
+    background: var(--white);
+    z-index: 0;
+}.organization-chart-tree-branch::after {
+    content: "";
+    position: absolute;
+    right: -55px;
+    transform: rotate(90deg);
+    width: 8px;
+    height: 100px;
+    background: var(--white);
+    z-index: 0;
+}

@@ -40,6 +40,7 @@
                                 <th class="text-center"></th>
                                 <th class="text-center">NAME</th>
                                 <th class="text-center">POSITION</th>
+                                <th class="text-center">BRANCH</th>
                                 <th class="text-center">STATUS</th>
                                 <th class="text-center">ACTION</th>
                             </tr>
@@ -288,12 +289,21 @@
                 {
                     "targets": 2,
                     "render": function(data, type, row){
-                        let label = $('select[name=position]').find('option[value='+data+']').text();
-                        return label
+                        let value = $('select[name="position"]').find('option[value="'+data+'"]').attr('value');
+                        let label = $('select[name="position"]').find('option[value="'+data+'"]').text();
+                        return value ? label : ''
                     }
                 },
                 {
                     "targets": 3,
+                    "render": function(data, type, row){
+                        let value = $('select[name="branch"]').find('option[value="'+data+'"]').attr('value');
+                        let label = $('select[name="branch"]').find('option[value="'+data+'"]').text();
+                        return value ? label : ''
+                    }
+                },
+                {
+                    "targets": 4,
                     "className": "text-center",
                     "render": function(data, type, row){
                         if(data){
@@ -303,7 +313,7 @@
                     }
                 },
                 {
-                    "targets": 4,
+                    "targets": 5,
                     "className": "text-center",
                     "render": function (data, type, row) {
                         return `

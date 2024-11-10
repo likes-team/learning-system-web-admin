@@ -3,7 +3,7 @@ from flask.templating import render_template
 from flask_login import current_user
 from werkzeug.utils import redirect
 from prime_home import bp_prime_home
-from prime_admin.models import Branch, Registration
+from prime_admin.models import Branch, Registration, OrganizationChart
 from flask import request, jsonify, flash, current_app
 from app import mongo, create_app
 import pymongo
@@ -282,7 +282,29 @@ def testimonies():
 
 @bp_prime_home.route('/about')
 def about():
-    return render_template('prime_home/about_page.html')
+    
+    ceo = OrganizationChart.objects.get(position='ceo', is_active=True)
+    vice_president = OrganizationChart.objects.get(position='vice_president', is_active=True)
+    accounting = OrganizationChart.objects.get(position='accounting', is_active=True)
+    executive_director = OrganizationChart.objects.get(position='executive_director', is_active=True)
+    sales_support_assistant = OrganizationChart.objects.get(position='sales_support_assistant', is_active=True)
+    operations_support_assistant = OrganizationChart.objects.get(position='operations_support_assistant', is_active=True)
+    branch_manager_cebu = OrganizationChart.objects.get(position='branch_manager', branch='cebu', is_active=True)
+    branch_manager_iloilo = OrganizationChart.objects.get(position='branch_manager', branch='iloilo', is_active=True)
+    branch_manager_bohol = OrganizationChart.objects.get(position='branch_manager', branch='bohol', is_active=True)
+    branch_manager_butuan = OrganizationChart.objects.get(position='branch_manager', branch='butuan', is_active=True)
+    branch_manager_palawan = OrganizationChart.objects.get(position='branch_manager', branch='palawan', is_active=True)
+    branch_manager_calbayog = OrganizationChart.objects.get(position='branch_manager', branch='calbayog', is_active=True)
+    branch_manager_tacloban = OrganizationChart.objects.get(position='branch_manager', branch='tacloban', is_active=True)
+    teacher_cebu = OrganizationChart.objects.get(position='teacher', branch='cebu', is_active=True)
+    teacher_iloilo = OrganizationChart.objects.get(position='teacher', branch='iloilo', is_active=True)
+    teacher_bohol = OrganizationChart.objects.get(position='teacher', branch='bohol', is_active=True)
+    teacher_butuan = OrganizationChart.objects.get(position='teacher', branch='butuan', is_active=True)
+    teacher_palawan = OrganizationChart.objects.get(position='teacher', branch='palawan', is_active=True)
+    teacher_calbayog = OrganizationChart.objects.get(position='teacher', branch='calbayog', is_active=True)
+    teacher_tacloban = OrganizationChart.objects.get(position='teacher', branch='tacloban', is_active=True)
+
+    return render_template('prime_home/about_page.html', ceo=ceo, vice_president=vice_president, accounting=accounting, executive_director=executive_director, sales_support_assistant=sales_support_assistant, operations_support_assistant=operations_support_assistant, branch_manager_cebu=branch_manager_cebu, branch_manager_iloilo=branch_manager_iloilo, branch_manager_bohol=branch_manager_bohol, branch_manager_butuan=branch_manager_butuan, branch_manager_palawan=branch_manager_palawan, branch_manager_calbayog=branch_manager_calbayog, branch_manager_tacloban=branch_manager_tacloban, teacher_cebu=teacher_cebu, teacher_iloilo=teacher_iloilo, teacher_bohol=teacher_bohol, teacher_butuan=teacher_butuan, teacher_palawan=teacher_palawan, teacher_calbayog=teacher_calbayog, teacher_tacloban=teacher_tacloban, image_placeholder='/home/prime_home/static/img/logo.png')
 
 
 @bp_prime_home.route('/contact-us')

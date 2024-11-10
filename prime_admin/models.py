@@ -933,3 +933,38 @@ class OrganizationChart(Base, Admin):
     @property
     def status(self):
         return self.is_active
+
+    @property
+    def position_label(self):
+        choices=[
+            ('ceo', 'CEO'),
+            ('vice_president', 'VICE PRESIDENT'),
+            ('accounting', 'ACCOUNTING'),
+            ('executive_director', 'EXECUTIVE DIRECTOR'),
+            ('sales_support_assistant', 'SALES SUPPORT ASSISTANT'),
+            ('operations_support_assistant', 'OPERATIONS SUPPORT ASSISTANT'),
+            ('branch_manager', 'BRANCH MANAGER'),
+            ('teacher', 'TEACHER')
+        ]
+
+        for value, label in choices:
+            if self.position == value:
+                return label
+        return ''
+
+    @property
+    def branch_label(self):
+        choices=[
+            ('cebu', 'CEBU MAIN'),
+            ('iloilo', 'ILOILO'),
+            ('bohol', 'BOHOL'),
+            ('butuan', 'BUTUAN'),
+            ('palawan', 'PALAWAN'),
+            ('calbayog', 'CALBAYOG'),
+            ('tacloban', 'TACLOBAN')
+        ]
+        
+        for value, label in choices:
+            if self.position == value:
+                return label
+        return ''
