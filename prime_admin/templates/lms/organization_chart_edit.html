@@ -88,7 +88,7 @@
                             <div class="col-md-{{ EDIT_OPTIONS['fields_sizes'][row_counter.index-1] }} mb-3">
                                 <div class="position-relative form-group">
                                     <label for="{{ field.name }}" class="">{{ field.label }}</label>
-                                    <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+                                    <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" data-original="{{field.data}}">
                                         <option value="">Choose...</option>
                                         {% for odata in field.choices %}
                                         <option value="{{ odata[0] }}" {% if field.data==odata[0] %}selected{% endif %}>{{ odata[1] }}</option>
@@ -536,6 +536,30 @@
 </div>
 {% endblock %}
 
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        function validateDisplay() {
+            if($('select[name="position"]').val() == 'branch_manager' || $('select[name="position"]').val() == 'teacher') {
+                $('select[name="branch"]').addClass('input_required');
+                $('select[name="branch"]').attr('required', 'required');
+                $('select[name="branch"]').closest('div.form-row').show();
+
+                let originalData = $('select[name="branch"]').data('original');
+                $('select[name="branch"]').val(originalData ? originalData :'');
+            } else {
+                $('select[name="branch"]').removeClass('input_required');
+                $('select[name="branch"]').removeAttr('required');
+                $('select[name="branch"]').closest('div.form-row').hide();
+            }
+        }
+        validateDisplay();
+        $('select[name="position"]').change(function(e){
+            validateDisplay();
+        });
+    });
+</script>
+{% endblock %}
 
 {% block inner_footer %}
 <!-- <div class="app-footer-left">
