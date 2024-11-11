@@ -1,0 +1,332 @@
+{% extends "admin/admin_base.html" %}
+
+{% block modals %}
+    {% include 'lms/search_client_last_name_modal.html' %}
+    {% include 'lms/student_records/hired/modals/hired_edit_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $("#li_student_records").addClass('mm-active');
+        $("#li_deployed").addClass('mm-active');
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);
+                }
+            }
+        });
+
+        $.validator.setDefaults({
+            errorElement: 'span',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+
+        var dtSearchStudents = $("#tbl_mdl_clients").DataTable({
+            pageLength: 10,
+            columnDefs: [
+                {
+                    "targets": 0,
+                    "visible": false,
+                },
+            ],
+            ajax: {
+                url: "/learning-management/datatables/student-records/deployed/mdl-students",
+            }
+        });
+
+        $('#tbl_mdl_clients tbody').on('click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                dtSearchStudents.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+
+        $('#btn_confirm').click( function () {
+            let selectedStudent = dtSearchStudents.row('.selected').data();
+            
+            $.ajax({
+                url: '/learning-management/api/clients/' + selectedStudent[0],
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    $("#student_id").val(response.data.id);
+                    $("#lname").val(response.data.lname);
+                    $("#fname").val(response.data.fname);
+                    $("#mname").val(response.data.mname);
+                }
+            });
+        });
+
+        
+        var dtDeployed = $('#tbl_deployed').DataTable({
+            "dom": 'rtip',
+            "pageLength": 20,
+            "order": [[1, 'asc']],
+            "processing": true,
+            "serverSide": true,
+            "autoWidth": false,
+            "ordering": false,
+            "columnDefs": [
+                { "visible": false, "targets": 0},
+                {
+                    "targets": 4,
+                    "className": "text-center",
+                    "render": function(data, type, row){
+                        if(data){
+                            return `<div class="badge badge-success">ACTIVE</div>`
+                        }
+                        return `<div class="badge badge-secondary">INACTIVE</div>`
+                    }
+                },
+                {
+                    "targets": 5,
+                    "className": "text-center",
+                    "render": function (data, type, row) {
+                        return `
+                        <button type="button" class="btn btn-info btn-sm btn-toggle"><i class="fa fa-toggle-on"></i></button>
+                        `;
+                    }
+                },
+            ],
+            "ajax": {
+                "url": "/learning-management/datatables/student-records/deployed",
+            }
+        });
+
+        $("#frm_deployed").submit(function(e){
+            e.preventDefault();
+            let formData = new FormData($(this)[0]);
+            swal({
+                title: `Confirm`,
+                text: "Deploy student?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Confirm!",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            }, function(){
+                $.ajax({
+                    type: 'POST',
+                    url: '/learning-management/deployed/add',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    enctype: 'multipart/form-data',
+                    success: function (response) {
+                        event.stopPropagation();
+                        dtSearchStudents.ajax.reload();
+                        dtDeployed.ajax.reload();
+                        clearForm();
+                        swal("Success!", response.message, "success");
+                    },
+                    error: function (data) {
+                        let message = data.responseJSON.message;
+                        swal("Error Occured!", message, "error");
+                    },
+                });
+            });
+            return false;
+        });
+
+        $("#tbl_deployed tbody").on('click', '.btn-toggle', function(){
+            let data = dtDeployed.row( $(this).parents('tr')).data();
+            let status;
+
+            $.confirm({
+                title: 'Toggle status',
+                content: "Switch deployment's status?",
+                buttons: {
+                    confirm: {
+                        text: 'Switch',
+                        btnClass: 'btn-blue',
+                        keys: ['enter', 'shift'],
+                        action: function(){
+                            $.ajax({
+                                url: "/learning-management/deployed/toggle-status",
+                                type: "POST",
+                                dataType: "json",
+                                data: JSON.stringify({
+                                    "student_id": data[0]
+                                }),
+                                contentType: "application/json; charset=utf-8",
+                                success: function(response){
+                                    if(response){
+                                        dtDeployed.ajax.reload();
+                                        toastr.success("Toggled Successfully!");
+                                    }else{
+                                        toastr.error("Error Occured!, Switching Failed");
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: function () {
+                        $.alert('Canceled!');
+                    },
+                }
+            });
+        });
+    }); // document end
+
+    
+    function clearForm(name="frm_deployed"){
+        let form = "#" + name;
+        $(':input', form)
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+    }
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="app-main__inner">
+    <div class="app-page-title" style="background-color: skyblue">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-users icon-gradient bg-happy-itmeo"></i>
+                </div>
+                <div>
+                    Deployed
+                    <div class="page-title-subheading">
+                        Enrollment > Student Records > Deployed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 col-lg-6">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header-tab-animation card-header">
+                    <div class="card-header-title">
+                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
+                        Deploy student
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label for="lname" class="">Last Name</label>
+                                <div class="input-group"><input id="lname" name="lname" type="text"
+                                        class="form-control" required readonly>
+                                    <div class="input-group-append">
+                                        <button
+                                            type="button" 
+                                            data-toggle="modal"
+                                            data-target="#mdl_search_client_last_name"
+                                            data-placement="bottom"
+                                            class="btn btn-primary pe-7s-search">
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label for="fname" class="">First Name</label>
+                                <input readonly name="fname" id="fname" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="position-relative form-group">
+                                <label for="mname" class="">Middle Name</label>
+                                <input readonly name="mname" id="mname" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div class="position-relative form-group">
+                                <label for="suffix" class="">Suffix</label>
+                                <input readonly name="suffix" id="suffix" type="text" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <form id="frm_deployed" action="{{url_for('lms.add_to_hired')}}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input id="student_id" name="student_id" type="hidden" class="form-control">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label for="student_message" class="">What Our Students Say
+                                    </label>
+                                    <textarea name="student_message" id="student_message" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="position-relative form-group"><label for="receipt_file" class="">Upload photo with holding tarp. in South Korea</label>
+                                    <input name="tarp_photo" type="file" accept="image/*" class="form-control-file">
+                                    <small class="form-text text-muted">Upload Receipt File. Valid file types: PNG or JPEG</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="position-relative form-group"><label for="receipt_file" class="">Upload writing message picture with signature</label>
+                                    <input name="message_photo" type="file" accept="image/*" class="form-control-file">
+                                    <small class="form-text text-muted">Upload Receipt File. Valid file types: PNG or JPEG</small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <input form="frm_deployed" class="btn-wide btn btn-success" type="submit" class="btn btn-primary" value="ADD">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-lg-6">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header-tab-animation card-header">
+                    <div class="card-header-title">
+                        <i class="header-icon lnr-apartment icon-gradient bg-love-kiss"> </i>
+                        Testimonials
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="table-responsive">
+                            <table id="tbl_deployed" class="align-middle mb-0 table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">ID</th>
+                                        <th class="text-center">FULL NAME</th>
+                                        <th class="text-center">DEPLOYMENT DATE</th>
+                                        <th class="text-center">BRANCH</th>
+                                        <th class="text-center">STATUS</th>
+                                        <th class="text-center">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- load with json -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

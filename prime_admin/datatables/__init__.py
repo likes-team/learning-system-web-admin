@@ -3,7 +3,8 @@ from .student_records import (
     dt_examiners,
     dt_passers,
     dt_hired,
-    dt_payments
+    dt_payments,
+    dt_deployed
 )
 from . import supplies_datatable
 from . import fund_wallet_statement_datatable
