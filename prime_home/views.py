@@ -66,7 +66,12 @@ def index():
                 'is_active': class_schedule.get('is_active', False),
             })
 
-    return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies, weekdays_class=weekdays_class, saturday_class=saturday_class, sunday_class=sunday_class)
+    testimonials = list(mongo.db.lms_registrations.aggregate([
+        {'$match': {'is_deployed': True, 'deployment_information.is_active': True}},
+        {'$sort': {'added_to_hired_date': pymongo.DESCENDING}}
+    ]))
+
+    return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies, weekdays_class=weekdays_class, saturday_class=saturday_class, sunday_class=sunday_class,testimonials=testimonials)
 
 
 @bp_prime_home.route('/passers')
