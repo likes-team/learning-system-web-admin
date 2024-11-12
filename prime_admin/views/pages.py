@@ -1,11 +1,11 @@
 from prime_admin import bp_lms
 from app.admin.templating import admin_render_template
 from prime_admin.models import Settings
-from prime_admin.models import OurTestimony
+from prime_admin.models import OurTestimony, OrganizationChart
 from prime_admin.models import PageSettings
 from flask_login import login_required
 from flask import redirect, url_for, jsonify, request, flash
-from prime_admin.forms import OurTestimoniesEditForm
+from prime_admin.forms import OurTestimoniesEditForm, OrganizationChartEditForm
 from prime_admin.forms import PageSettingsEditForm
 from app.admin.templating import admin_render_template, admin_edit
 from prime_admin.utils.upload import allowed_file
@@ -13,6 +13,7 @@ from prime_admin.services.s3 import upload_file, delete_file
 import time
 import json
 from app import mongo
+from bson import ObjectId
 
 @bp_lms.route('/settings/pages/home', methods=['GET','POST'])
 @login_required
@@ -253,3 +254,153 @@ def delete_gallery_our_testimony(oid,**kwargs):
 
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
+
+@bp_lms.route('/settings/pages/about', methods=['GET','POST'])
+@login_required
+def pages_about():
+    organization_chart_form = OrganizationChartEditForm()
+    organization_chart_modal_data = {
+        'title': 'Add new',
+        'fields_sizes': [12,12,12,12,12,12,12]
+    }
+    return admin_render_template(
+        Settings, 'lms/pages/about.html', 'learning_management',\
+        ORGANIZATION_CHART_FORM=organization_chart_form, ORGANIZATION_CHART_MODAL_DATA=organization_chart_modal_data
+    )
+
+@bp_lms.route('/settings/pages/about/organization_chart/create',methods=['GET','POST'])
+@login_required
+def create_organization_chart():
+    form = OrganizationChartEditForm()
+
+    try:
+        organization_chart = OrganizationChart()
+
+        organization_chart.name = form.name.data
+        organization_chart.is_active = form.status.data == 'active'
+        organization_chart.position = form.position.data
+        organization_chart.branch = form.branch.data
+        organization_chart.description = form.description.data
+
+        file = request.files['image']
+        if (file and allowed_file(file.filename)):
+            output = upload_file(file, f"{int(time.time())}_{file.filename}", 'organization_chart/')
+
+            if not output:
+                flash('Error occured, please contact system administrator','error')
+                return redirect('/learning-management/settings/pages/about')
+            
+            organization_chart.image = output
+
+        # If the new organization chart is active, deactivate others with the same position
+        if organization_chart.is_active:
+            OrganizationChart.objects(position=organization_chart.position, branch=organization_chart.branch, is_active=True).update(is_active=False)
+        
+        organization_chart.save()
+
+
+        flash('Added Successfully!','success')
+
+        return redirect(url_for('lms.pages_about'))
+
+    except Exception as e:
+        flash(str(e),'error')
+        return redirect(url_for('lms.pages_about'))
+    
+
+@bp_lms.route('/settings/pages/about/organization_chart/toggle-status', methods=['POST'])
+def toggle_organization_chart_status():
+    organization_chart_id = request.json['organization_chart']
+
+    # Retrieve the specific organization chart item to get its position and branch
+    organization_chart = mongo.db.lms_organization_chart.find_one({'_id': ObjectId(organization_chart_id)})
+    
+    if not organization_chart:
+        return jsonify({'result': False, 'error': 'Organization chart item not found'}), 404
+
+    # Toggle the current organization's active status
+    new_status = not organization_chart['is_active']
+    
+    # Update the selected organization chart item's status
+    mongo.db.lms_organization_chart.update_one(
+        {'_id': ObjectId(organization_chart_id)},
+        {'$set': {'is_active': new_status}}
+    )
+    
+    # If the new status is active, set all other items with the same position and branch to inactive
+    if new_status:
+        mongo.db.lms_organization_chart.update_many(
+            {
+                '_id': {'$ne': ObjectId(organization_chart_id)},  # Exclude the current item
+                'position': organization_chart['position'],
+                'branch': organization_chart['branch'],
+                'is_active': True
+            },
+            {'$set': {'is_active': False}}
+        )
+        
+    return jsonify({'result': True})
+
+
+@bp_lms.route('/settings/pages/about/organization_chart/<string:oid>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_organization_chart(oid,**kwargs):
+    organization_chart = OrganizationChart.objects.get_or_404(id=oid)
+    form = OrganizationChartEditForm(obj=organization_chart)
+
+    if request.method == "GET":
+        return admin_edit(
+            OrganizationChart,
+            form,
+            'lms.edit_organization_chart',
+            oid,
+            'lms.pages_about',
+            edit_template="lms/organization_chart_edit.html",
+            action_template="lms/organization_chart_edit_action.html",
+            fields_sizes=[12,12,12,12,12,12,12]
+        )
+        
+    try:
+        organization_chart.name = form.name.data
+        organization_chart.is_active = form.status.data == 'active'
+        organization_chart.position = form.position.data
+        organization_chart.branch = form.branch.data
+        organization_chart.description = form.description.data
+
+        file = request.files['image']
+        if (file and allowed_file(file.filename)):
+            output = upload_file(file, f"{int(time.time())}_{file.filename}", 'organization_chart/')
+
+            if not output:
+                flash('Error occured, please contact system administrator','error')
+                return redirect('/learning-management/settings/pages/about/organization_chart/' + oid + '/edit')
+                
+            organization_chart.image = output
+
+            if form.oldimage.data:
+                file_url = form.oldimage.data
+                file_name = file_url.split('/')[-1]
+                delete_file(file_name, 'organization_chart/')
+        
+        organization_chart.save()
+
+
+        # If the new status is active, set all other items with the same position and branch to inactive
+        if organization_chart.is_active:
+            mongo.db.lms_organization_chart.update_many(
+                {
+                    '_id': {'$ne': ObjectId(oid)},  # Exclude the current item
+                    'position': organization_chart.position,
+                    'branch': organization_chart.branch,
+                    'is_active': True
+                },
+                {'$set': {'is_active': False}}
+            )
+            
+        flash('Updated Successfully!','success')
+
+    except Exception as e:
+        flash(str(e),'error')
+    
+    return redirect(url_for('lms.pages_about'))
+

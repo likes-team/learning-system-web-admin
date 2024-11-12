@@ -226,6 +226,11 @@
     var dtbl_table;
 
     $(document).ready(function(){
+
+        $("#li_pages").closest('li').addClass("mm-active");
+        $("#li_pages_ul").addClass("mm-show");
+        $("#li_pages_home").addClass("mm-active");
+
         $.ajaxSetup({
             beforeSend: function(xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
