@@ -297,6 +297,10 @@ def about():
     except Exception as e:
         vice_president = None
     try:
+        certified_legal_interpreter = OrganizationChart.objects.get(position='certified_legal_interpreter', is_active=True)
+    except Exception as e:
+        certified_legal_interpreter = None
+    try:
         accounting = OrganizationChart.objects.get(position='accounting', is_active=True)
     except Exception as e:
         accounting = None
@@ -369,7 +373,7 @@ def about():
     except Exception as e:
         teacher_tacloban = None
 
-    return render_template('prime_home/about_page.html', ceo=ceo, vice_president=vice_president, accounting=accounting, executive_director=executive_director, sales_support_assistant=sales_support_assistant, operations_support_assistant=operations_support_assistant, branch_manager_cebu=branch_manager_cebu, branch_manager_iloilo=branch_manager_iloilo, branch_manager_bohol=branch_manager_bohol, branch_manager_butuan=branch_manager_butuan, branch_manager_palawan=branch_manager_palawan, branch_manager_calbayog=branch_manager_calbayog, branch_manager_tacloban=branch_manager_tacloban, teacher_cebu=teacher_cebu, teacher_iloilo=teacher_iloilo, teacher_bohol=teacher_bohol, teacher_butuan=teacher_butuan, teacher_palawan=teacher_palawan, teacher_calbayog=teacher_calbayog, teacher_tacloban=teacher_tacloban, image_placeholder='/home/prime_home/static/img/logo.png')
+    return render_template('prime_home/about_page.html', ceo=ceo, vice_president=vice_president, certified_legal_interpreter=certified_legal_interpreter, accounting=accounting, executive_director=executive_director, sales_support_assistant=sales_support_assistant, operations_support_assistant=operations_support_assistant, branch_manager_cebu=branch_manager_cebu, branch_manager_iloilo=branch_manager_iloilo, branch_manager_bohol=branch_manager_bohol, branch_manager_butuan=branch_manager_butuan, branch_manager_palawan=branch_manager_palawan, branch_manager_calbayog=branch_manager_calbayog, branch_manager_tacloban=branch_manager_tacloban, teacher_cebu=teacher_cebu, teacher_iloilo=teacher_iloilo, teacher_bohol=teacher_bohol, teacher_butuan=teacher_butuan, teacher_palawan=teacher_palawan, teacher_calbayog=teacher_calbayog, teacher_tacloban=teacher_tacloban, image_placeholder='/home/prime_home/static/img/logo.png')
 
 
 @bp_prime_home.route('/contact-us')

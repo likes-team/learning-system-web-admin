@@ -195,7 +195,7 @@ div.dataTables_wrapper div.dataTables_filter input {
     margin-top: 50px;
     margin-bottom: 30px;
     position: relative;
-    padding-top: 20px;
+    padding-top: 30px;
 }
 
 .organization-chart-tree-level3::before {
@@ -211,7 +211,7 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 .organization-chart-tree-level3 li {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
     width: 25%;
@@ -310,6 +310,10 @@ div.dataTables_wrapper div.dataTables_filter input {
     z-index: 0;
 }
 
+.organization-chart-tree-item-name {
+    font-weight: bold;
+}
+
 @media (min-width: 1px) {
     .organization-chart-tree-level3::before {
         content: unset;
@@ -379,8 +383,8 @@ div.dataTables_wrapper div.dataTables_filter input {
     }
 
     .organization-chart-tree-level3::before {
-        width: 500px;
-        transform: translateX(16%);
+        width: 532px;
+        transform: translateX(12%);
     }
     .organization-chart-tree-item-image {
         width: 100px;
@@ -391,6 +395,9 @@ div.dataTables_wrapper div.dataTables_filter input {
     }
     .organization-chart-tree-branch h3 {
         font-size: 1rem;
+    }
+    .organization-chart-tree-item-name {
+        font-size: 14px !important;
     }
     .organization-chart-tree span {
         font-size: 10px;
@@ -407,8 +414,8 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 @media (min-width: 992px) {
     .organization-chart-tree-level3::before {
-        width: 672px;
-        transform: translateX(17%);
+        width: 719px;
+        transform: translateX(13%);
     }
     .organization-chart-tree-item-image {
         width: 150px;
@@ -419,6 +426,9 @@ div.dataTables_wrapper div.dataTables_filter input {
     }
     .organization-chart-tree-branch h3 {
         font-size: 1.5rem;
+    }
+    .organization-chart-tree-item-name {
+        font-size: 18px !important;
     }
     .organization-chart-tree span {
         font-size: 14px;
@@ -434,8 +444,8 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 @media (min-width: 1200px) {
     .organization-chart-tree-level3::before {
-        width: 811px;
-        transform: translateX(17%);
+        width: 871px;
+        transform: translateX(12%);
     }
     .organization-chart-tree-branch h3 {
         font-size: 1.75rem;
