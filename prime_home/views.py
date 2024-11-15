@@ -382,6 +382,12 @@ def contact_us():
 
     return render_template('prime_home/contact_us_page.html', form=form)
 
+@bp_prime_home.route('/privacy-policy')
+def privacy_policy():
+    form = SendUsAMessageForm()
+
+    return render_template('prime_home/privacy_policy_page.html', form=form)
+
 @bp_prime_home.route('/send-us-a-message', methods=['GET', 'POST'])
 def send_us_a_message():
     form = SendUsAMessageForm()
