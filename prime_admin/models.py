@@ -941,6 +941,7 @@ class OrganizationChart(Base, Admin):
         choices=[
             ('ceo', 'CEO'),
             ('vice_president', 'VICE PRESIDENT'),
+            ('certified_legal_interpreter', 'CERTIFIED LEGAL INTERPRETER'),
             ('accounting', 'ACCOUNTING'),
             ('executive_director', 'EXECUTIVE DIRECTOR'),
             ('sales_support_assistant', 'SALES SUPPORT ASSISTANT'),

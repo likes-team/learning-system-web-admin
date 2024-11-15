@@ -1,0 +1,27 @@
+{% extends 'prime_home/base.html' %}
+
+{% block header %}
+    {% include "prime_home/navigation_header_2.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="primary-color pt-5 text-white">
+    <div class="container mb-4 py-5">
+        <h1 class="display-5 fw-bold">EPS Support</h1>
+    </div>
+</section>
+
+<section class="pb-5 pt-5 dark-transparent-bg"> 
+    <div class="container">
+        <img src="https://primeklcbucket.s3.ap-southeast-1.amazonaws.com/landing_page/b17bfeb9-8d85-4abc-9ee9-d63515a1fcde.jpeg" alt="EPS Support" style="width: 100%;">
+    </div>
+</section>
+
+
+<!-- Talk Section -->
+{% include "prime_home/index/talk_section.html" %}
+<!--End Of Talk Section-->
+
+{% include "prime_home/footer.html" %}
+
+{% endblock %}

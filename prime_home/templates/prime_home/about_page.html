@@ -139,11 +139,13 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                     <img src="{{ceo.image if ceo.image else image_placeholder}}">
                 </div>
                 <div class="organization-chart-tree-item-content">
-                    <span>{{ceo.name}}</span>
+                    <span class="organization-chart-tree-item-name">{{ceo.name}}</span>
                     <br>
                     <span>{{ceo.position_label}}</span>
-                    <br>
-                    <span>{{ceo.description}}</span>
+                    {% if ceo.description %}
+                        <br>
+                        <span>{{ceo.description}}</span>
+                    {% endif %}
                 </div>
             </div>
 
@@ -152,23 +154,43 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                     <img src="{{vice_president.image if vice_president.image else image_placeholder}}">
                 </div>
                 <div class="organization-chart-tree-item-content">
-                    <span>{{vice_president.name}}</span>
+                    <span class="organization-chart-tree-item-name">{{vice_president.name}}</span>
                     <br>
                     <span>{{vice_president.position_label}}</span>
-                    <br>
-                    <span>{{vice_president.description}}</span>
+                    {% if vice_president.description %}
+                        <br>
+                        <span>{{vice_president.description}}</span>
+                    {% endif %}
                 </div>
             </div>
 
             <ul class="organization-chart-tree-level3">
                 <li>
                     <div class="organization-chart-tree-item-image">
+                        <img src="{{certified_legal_interpreter.image if certified_legal_interpreter.image else image_placeholder}}">
+                    </div>
+                    <div class="organization-chart-tree-item-content">
+                        <span class="organization-chart-tree-item-name">{{certified_legal_interpreter.name}}</span>
+                        <br>
+                        <span>{{certified_legal_interpreter.position_label}}</span>
+                        {% if certified_legal_interpreter.description %}
+                            <br>
+                            <span>{{certified_legal_interpreter.description}}</span>
+                        {% endif %}
+                    </div>
+                </li>
+                <li>
+                    <div class="organization-chart-tree-item-image">
                         <img src="{{accounting.image if accounting.image else image_placeholder}}">
                     </div>
                     <div class="organization-chart-tree-item-content">
-                        <span>{{accounting.name}}</span>
+                        <span class="organization-chart-tree-item-name">{{accounting.name}}</span>
                         <br>
                         <span>{{accounting.position_label}}</span>
+                        {% if accounting.description %}
+                            <br>
+                            <span>{{accounting.description}}</span>
+                        {% endif %}
                     </div>
                 </li>
                 <li>
@@ -176,9 +198,13 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                         <img src="{{executive_director.image if executive_director.image else image_placeholder}}">
                     </div>
                     <div class="organization-chart-tree-item-content">
-                        <span>{{executive_director.name}}</span>
+                        <span class="organization-chart-tree-item-name">{{executive_director.name}}</span>
                         <br>
                         <span>{{executive_director.position_label}}</span>
+                        {% if executive_director.description %}
+                            <br>
+                            <span>{{executive_director.description}}</span>
+                        {% endif %}
                     </div>
                 </li>
                 <li>
@@ -186,9 +212,13 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                         <img src="{{sales_support_assistant.image if sales_support_assistant.image else image_placeholder}}">
                     </div>
                     <div class="organization-chart-tree-item-content">
-                        <span>{{sales_support_assistant.name}}</span>
+                        <span class="organization-chart-tree-item-name">{{sales_support_assistant.name}}</span>
                         <br>
                         <span>{{sales_support_assistant.position_label}}</span>
+                        {% if sales_support_assistant.description %}
+                            <br>
+                            <span>{{sales_support_assistant.description}}</span>
+                        {% endif %}
                     </div>
                 </li>
                 <li>
@@ -196,9 +226,13 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                         <img src="{{operations_support_assistant.image if operations_support_assistant.image else image_placeholder}}">
                     </div>
                     <div class="organization-chart-tree-item-content">
-                        <span>{{operations_support_assistant.name}}</span>
+                        <span class="organization-chart-tree-item-name">{{operations_support_assistant.name}}</span>
                         <br>
                         <span>{{operations_support_assistant.position_label}}</span>
+                        {% if operations_support_assistant.description %}
+                            <br>
+                            <span>{{operations_support_assistant.description}}</span>
+                        {% endif %}
                     </div>
                 </li>
             </ul>
@@ -211,7 +245,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_cebu.image if teacher_cebu.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_cebu.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_cebu.name}}</span>
                                 <br>
                                 <span>{{teacher_cebu.position_label}}</span>
                             </div>
@@ -226,7 +260,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_cebu.image if branch_manager_cebu.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_cebu.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_cebu.name}}</span>
                                 <br>
                                 <span>{{branch_manager_cebu.position_label}}</span>
                             </div>
@@ -240,7 +274,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_iloilo.image if teacher_iloilo.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_iloilo.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_iloilo.name}}</span>
                                 <br>
                                 <span>{{teacher_iloilo.position_label}}</span>
                             </div>
@@ -255,7 +289,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_iloilo.image if branch_manager_iloilo.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_iloilo.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_iloilo.name}}</span>
                                 <br>
                                 <span>{{branch_manager_iloilo.position_label}}</span>
                             </div>
@@ -269,7 +303,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_bohol.image if teacher_bohol.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_bohol.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_bohol.name}}</span>
                                 <br>
                                 <span>{{teacher_bohol.position_label}}</span>
                             </div>
@@ -284,7 +318,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_bohol.image if branch_manager_bohol.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_bohol.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_bohol.name}}</span>
                                 <br>
                                 <span>{{branch_manager_bohol.position_label}}</span>
                             </div>
@@ -298,7 +332,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_butuan.image if teacher_butuan.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_butuan.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_butuan.name}}</span>
                                 <br>
                                 <span>{{teacher_butuan.position_label}}</span>
                             </div>
@@ -313,7 +347,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_butuan.image if branch_manager_butuan.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_butuan.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_butuan.name}}</span>
                                 <br>
                                 <span>{{branch_manager_butuan.position_label}}</span>
                             </div>
@@ -327,7 +361,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_palawan.image if teacher_palawan.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_palawan.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_palawan.name}}</span>
                                 <br>
                                 <span>{{teacher_palawan.position_label}}</span>
                             </div>
@@ -342,7 +376,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_palawan.image if branch_manager_palawan.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_palawan.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_palawan.name}}</span>
                                 <br>
                                 <span>{{branch_manager_palawan.position_label}}</span>
                             </div>
@@ -356,7 +390,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_calbayog.image if teacher_calbayog.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_calbayog.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_calbayog.name}}</span>
                                 <br>
                                 <span>{{teacher_calbayog.position_label}}</span>
                             </div>
@@ -371,7 +405,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_calbayog.image if branch_manager_calbayog.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_calbayog.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_calbayog.name}}</span>
                                 <br>
                                 <span>{{branch_manager_calbayog.position_label}}</span>
                             </div>
@@ -385,7 +419,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{teacher_tacloban.image if teacher_tacloban.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{teacher_tacloban.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{teacher_tacloban.name}}</span>
                                 <br>
                                 <span>{{teacher_tacloban.position_label}}</span>
                             </div>
@@ -400,7 +434,7 @@ We are committed to assisting Filipinos in passing the Korean language proficien
                                 <img src="{{branch_manager_tacloban.image if branch_manager_tacloban.image else image_placeholder}}">
                             </div>
                             <div class="organization-chart-tree-item-content">
-                                <span>{{branch_manager_tacloban.name}}</span>
+                                <span class="organization-chart-tree-item-name">{{branch_manager_tacloban.name}}</span>
                                 <br>
                                 <span>{{branch_manager_tacloban.position_label}}</span>
                             </div>

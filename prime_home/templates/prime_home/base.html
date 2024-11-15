@@ -31,7 +31,7 @@
     </style>
     <!-- Block Head -->
     {% block head %} {% endblock %}
-    <link href="{{ url_for('prime_home.static', filename='css/style.css', v='11102024') }}" rel="stylesheet">
+    <link href="{{ url_for('prime_home.static', filename='css/style.css', v='11152024') }}" rel="stylesheet">
 </head>
 
 <body class="text-secondary" style="background-image: url('{{home_background_image.value}}');">
@@ -68,7 +68,14 @@
 
     <script>
         $(document).ready(function (){
+            $('.dropdown-toggle').dropdown();
+
             $("#nav_services").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#services_section").offset().top
+                }, 2000);
+            });
+            $(".nav_services_item").click(function (){
                 $('html, body').animate({
                     scrollTop: $("#services_section").offset().top
                 }, 2000);

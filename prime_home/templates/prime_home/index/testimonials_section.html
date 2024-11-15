@@ -8,8 +8,9 @@
                     <div class="carousel-item {% if loop.first %}active{% endif %}">
                         <div class="align-items-center row">
                             <div class="col-lg-4 pb-3 pt-3 text-center">
-                                <img src="{{testimonial.deployment_information.tarp_photo}}"
-                                    class="img-fluid rounded-circle">
+                                <video controls autoplay muted style="max-width: 100%;height: auto;">
+                                    <source src="{{testimonial.deployment_information.tarp_photo}}" type="video/mp4">
+                                </video>
                             </div>
                             <div class="col-lg-8 pb-3 pt-3">
                                 <svg viewBox="0 0 24 24" fill="currentColor" height="64" width="64"
