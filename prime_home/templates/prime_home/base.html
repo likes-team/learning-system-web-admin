@@ -68,7 +68,14 @@
 
     <script>
         $(document).ready(function (){
+            $('.dropdown-toggle').dropdown();
+
             $("#nav_services").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#services_section").offset().top
+                }, 2000);
+            });
+            $(".nav_services_item").click(function (){
                 $('html, body').animate({
                     scrollTop: $("#services_section").offset().top
                 }, 2000);
