@@ -51,7 +51,7 @@ def add_to_deployed():
         return jsonify(response), 400
 
     # check whether the file extension is allowed (eg. png,jpeg,jpg,gif)
-    if not allowed_file(tarp_photo.filename) or not allowed_file(message_photo.filename):
+    if not allowed_file(tarp_photo.filename, file_type="video") or not allowed_file(message_photo.filename):
         response = {
             'status': "error",
             'message': "File is not allowed"
