@@ -34,6 +34,8 @@ def index():
     weekdays_class = []
     saturday_class = []
     sunday_class = []
+    online_class = []
+    review = []
 
     for class_schedule in class_schedules:
         branch = Branch.objects.get(id=class_schedule['branch'])
@@ -65,13 +67,31 @@ def index():
                 'end_date': class_schedule['end_date'],
                 'is_active': class_schedule.get('is_active', False),
             })
+        elif (class_schedule['schedule'] == 'ONLINE_CLASS'):
+            online_class.append({
+                'id': str(class_schedule['_id']),
+                'branch_name': branch.name,
+                'schedule': class_schedule['schedule'],
+                'start_date': class_schedule['start_date'],
+                'end_date': class_schedule['end_date'],
+                'is_active': class_schedule.get('is_active', False),
+            })
+        elif (class_schedule['schedule'] == 'REVIEW'):
+            review.append({
+                'id': str(class_schedule['_id']),
+                'branch_name': branch.name,
+                'schedule': class_schedule['schedule'],
+                'start_date': class_schedule['start_date'],
+                'end_date': class_schedule['end_date'],
+                'is_active': class_schedule.get('is_active', False),
+            })
 
     testimonials = list(mongo.db.lms_registrations.aggregate([
         {'$match': {'is_deployed': True, 'deployment_information.is_active': True}},
         {'$sort': {'added_to_hired_date': pymongo.DESCENDING}}
     ]))
 
-    return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies, weekdays_class=weekdays_class, saturday_class=saturday_class, sunday_class=sunday_class,testimonials=testimonials)
+    return render_template('prime_home/index.html', form=form,our_testimonies=our_testimonies, weekdays_class=weekdays_class, saturday_class=saturday_class, sunday_class=sunday_class, online_class=online_class,review=review,testimonials=testimonials)
 
 
 @bp_prime_home.route('/passers')

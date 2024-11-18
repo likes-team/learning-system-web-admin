@@ -72,7 +72,7 @@ def members():
         table_template="lms/student_records/student_records.html",
         branches=branches,
         batch_numbers=batch_numbers,
-        schedules=['WDC', 'SDC', 'SAT'],
+        schedules=['WDC', 'SDC', 'SAT', 'ONLINE_CLASS', 'REVIEW'],
         payment_rules=payment_rules,
         mode_of_payment=mode_of_payment,
         refunds_and_withdrawals=refunds_and_withdrawals,
