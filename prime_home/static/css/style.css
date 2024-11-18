@@ -85,6 +85,24 @@
     background-blend-mode: color;
 }
 
+.background-korea-spring2 {
+    background-image: url(https://primeklcbucket.s3.ap-southeast-1.amazonaws.com/landing_page/korea-spring2.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #00000085;
+    background-blend-mode: color;
+}
+
+.background-korea-spring3 {
+    background-image: url(https://primeklcbucket.s3.ap-southeast-1.amazonaws.com/landing_page/korea-spring-3.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #00000085;
+    background-blend-mode: color;
+}
+
 .background-korea-autumn {
     background-image: url(https://primeklcbucket.s3.ap-southeast-1.amazonaws.com/landing_page/korea-autum.jpg);
     background-position: center;
@@ -93,6 +111,15 @@
     background-color: #00000085;
     background-blend-mode: color;
 }
+
+.text-decoration-underline {
+    text-decoration: underline !important;
+}
+
+.text-decoration-underline:hover {
+    text-decoration: underline !important;
+}
+
 body {
     background-position: center center;
     background-repeat: no-repeat;
