@@ -25,23 +25,33 @@
                 </div>
     
                 <div class="col-lg-6 pb-3 pt-3 d-flex flex-wrap justify-content-end ">
-                    {% if weekdays_class or saturday_class or sunday_class %}
+                    {% if weekdays_class or saturday_class or sunday_class or online_class or review %}
                         <div class="mb-3 w-75" style="max-height: 250px;overflow: hidden;overflow-y: scroll;scrollbar-color: #0061a8 #ffffff00;scrollbar-width: thin;padding-right: 5px;">
                             <h2 class="display-5 font-weight-bold text-center">CLASS SCHEDULE</h2>
                             <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
                                 {% if weekdays_class %}
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="weekdaysclass-tab" data-toggle="tab" data-target="#weekdaysclass" type="button" role="tab" aria-controls="weekdaysclass" aria-selected="true">Weekdays Class</button>
+                                        <button class="nav-link active" id="weekdaysclass-tab" data-toggle="tab" data-target="#weekdaysclass" type="button" role="tab" aria-controls="weekdaysclass" aria-selected="true" style="padding: 5px;">Weekdays Class</button>
                                     </li>
                                 {% endif %}
                                 {% if saturday_class %}
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link {%if not weekdays_class %}active{% endif %}" id="saturdayclass-tab" data-toggle="tab" data-target="#saturdayclass" type="button" role="tab" aria-controls="saturdayclass" aria-selected="false">Saturday Class</button>
+                                        <button class="nav-link {%if not weekdays_class %}active{% endif %}" id="saturdayclass-tab" data-toggle="tab" data-target="#saturdayclass" type="button" role="tab" aria-controls="saturdayclass" aria-selected="false" style="padding: 5px;">Saturday Class</button>
                                     </li>
                                 {% endif %}
                                 {% if sunday_class %}
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link {%if not weekdays_class and not saturday_class %}active{% endif %}" id="sundayclass-tab" data-toggle="tab" data-target="#sundayclass" type="button" role="tab" aria-controls="sundayclass" aria-selected="false">Sunday Class</button>
+                                        <button class="nav-link {%if not weekdays_class and not saturday_class %}active{% endif %}" id="sundayclass-tab" data-toggle="tab" data-target="#sundayclass" type="button" role="tab" aria-controls="sundayclass" aria-selected="false" style="padding: 5px;">Sunday Class</button>
+                                    </li>
+                                {% endif %}
+                                {% if online_class %}
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link {%if not weekdays_class and not saturday_class and not sunday_class %}active{% endif %}" id="onlineclass-tab" data-toggle="tab" data-target="#onlineclass" type="button" role="tab" aria-controls="onlineclass" aria-selected="false" style="padding: 5px;">Online Class</button>
+                                    </li>
+                                {% endif %}
+                                {% if review %}
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link {%if not weekdays_class and not saturday_class and not sunday_class and not online_class %}active{% endif %}" id="review-tab" data-toggle="tab" data-target="#review" type="button" role="tab" aria-controls="review" aria-selected="false" style="padding: 5px;">Review</button>
                                     </li>
                                 {% endif %}
                             </ul>
@@ -97,6 +107,46 @@
                                             </thead>
                                             <tbody>
                                                 {% for item in sunday_class %}
+                                                    <tr>
+                                                        <td class="text-center">{{item['branch_name']}}</td>
+                                                        <td class="text-center">{{item['start_date']}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
+                                {% if online_class %}
+                                    <div class="tab-pane fade {%if not weekdays_class and not saturday_class and not sunday_class %}show active{% endif %}" id="onlineclass" role="tabpanel" aria-labelledby="onlineclass-tab">
+                                        <table class="align-middle mb-0 table table-bordered table-info mb-2 table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">BRANCH</th>
+                                                    <th class="text-center">START OF CLASS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in online_class %}
+                                                    <tr>
+                                                        <td class="text-center">{{item['branch_name']}}</td>
+                                                        <td class="text-center">{{item['start_date']}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
+                                {% if review %}
+                                    <div class="tab-pane fade {%if not weekdays_class and not saturday_class and not sunday_class and not online_class %}show active{% endif %}" id="review" role="tabpanel" aria-labelledby="review-tab">
+                                        <table class="align-middle mb-0 table table-bordered table-info mb-2 table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">BRANCH</th>
+                                                    <th class="text-center">START OF CLASS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in review %}
                                                     <tr>
                                                         <td class="text-center">{{item['branch_name']}}</td>
                                                         <td class="text-center">{{item['start_date']}}</td>
