@@ -971,3 +971,22 @@ class OrganizationChart(Base, Admin):
             if self.position == value:
                 return label
         return ''
+    
+
+class ClassSchedule(Base, Admin):
+    meta = {
+        'collection': 'lms_class_schedules',
+        'strict': False,
+    }
+
+    __tablename__ = 'lms_class_schedules'
+    __amname__ = 'class_schedules'
+    __amdescription__ = 'Class Schedules'
+    __amicon__ = 'pe-7s-file'
+    __view_url__ = 'lms.class_schedule_settings'
+
+    branch = db.ReferenceField('Branch')
+    schedule = db.StringField()
+    start_date = db.StringField()
+    end_date = db.StringField()
+    is_active = db.BooleanField()

@@ -3,8 +3,9 @@ from flask import request, redirect, url_for, flash, jsonify
 from app.admin.templating import admin_render_template
 from app import mongo
 from prime_admin import bp_lms
-from prime_admin.models import Settings, Branch
-from prime_admin.forms import BranchForm
+from prime_admin.models import Settings, Branch, ClassSchedule
+from prime_admin.forms import BranchForm,ClassScheduleEditForm
+from app.admin.templating import admin_render_template, admin_edit
 
 
 @bp_lms.route('/settings')
@@ -223,7 +224,40 @@ def create_class_schedule():
     flash("Added successfully!", 'success')
     return redirect(url_for('lms.class_schedule_settings'))
 
+@bp_lms.route('/settings/class-schedule/<string:oid>/edit', methods=['GET', 'POST'])
+def edit_class_schedule(oid,**kwargs):
+    our_testimony = ClassSchedule.objects.get_or_404(id=oid)
+    form = ClassScheduleEditForm(obj=our_testimony)
 
+    if request.method == "GET":
+        return admin_edit(
+            ClassSchedule,
+            form,
+            'lms.edit_class_schedule',
+            oid,
+            'lms.class_schedule_settings',
+            edit_template="lms/class_schedules_edit.html",
+            action_template="lms/class_schedules_edit_action.html",
+            fields_sizes=[12, 12, 12, 12, 12],
+        )
+    
+    branch_id = request.form['branch']
+    schedule = request.form['schedule']
+    start_date = request.form['start_date']
+    end_date = request.form['end_date']
+    is_active = request.form['is_active'] == 'active'
+
+    mongo.db.lms_class_schedules.update_one({
+        '_id': ObjectId(oid)
+    },{'$set': {
+        'branch': ObjectId(branch_id),
+        'schedule': schedule,
+        'start_date': start_date,
+        'end_date': end_date,
+        'is_active': is_active
+    }})
+    flash("Updated successfully!", 'success')
+    return redirect(url_for('lms.class_schedule_settings'))
 
 @bp_lms.route('/settings/orientators/toggle-status', methods=['POST'])
 def toggle_orientators_status():

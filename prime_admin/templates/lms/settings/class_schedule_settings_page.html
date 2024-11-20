@@ -64,10 +64,19 @@
                     "render": function (data, type, row) {
                         return `
                         <button type="button" class="btn btn-info btn-sm btn-toggle"><i class="fa fa-toggle-on"></i></button>
+                        <button style="padding: 4px 10px; margin-left: 5px;" type="button" class="btn-icon btn-icon-only btn btn-outline-info js-edit">
+                            <i class="pe-7s-pen btn-icon-wrapper"> </i>
+                        </button>
                         `;
                     }
                 },
             ],
+        });
+
+        $("#tbl_class_schedules tbody").on('click', '.js-edit',function(){
+            let data = dtClassSchedules.row($(this).parents('tr')).data();
+
+            window.location.href = `/learning-management/settings/class-schedule/${data[0]}/edit`;
         });
 
         $("#tbl_class_schedules tbody").on('click', '.btn-toggle', function(){
