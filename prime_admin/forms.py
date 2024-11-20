@@ -500,3 +500,27 @@ class OrganizationChartEditForm(AdminEditForm):
             [self.image],
             [self.oldimage],
         ]
+
+
+class ClassScheduleEditForm(AdminEditForm):
+    from prime_admin.models import Branch
+    
+    __heading__ = "Edit Class Schedule"
+
+    branch = AdminField(label="Branch", validators=[DataRequired()], model=Branch)
+    schedule = SelectField('Schedule',choices=[
+        ('WDC','WDC'), ('SDC', 'SDC'), ('SAT', 'SAT'), ('ONLINE_CLASS', 'ONLINE_CLASS'), ('REVIEW', 'REVIEW')
+    ])
+    start_date = AdminField(label="Start Date", type="date", validators=[DataRequired()])
+    end_date = AdminField(label="End Date", type="date", validators=[DataRequired()])
+    is_active = AdminField(label="Status", type="select", validators=[DataRequired()])
+
+    @property
+    def fields(self):
+        return [
+            [self.branch],
+            [self.schedule],
+            [self.start_date],
+            [self.end_date],
+            [self.is_active]
+        ]

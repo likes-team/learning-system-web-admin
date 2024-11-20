@@ -43,26 +43,29 @@ def add_to_deployed():
 
     student_id = ObjectId(student_id)
 
-    if tarp_photo.filename == '' or message_photo.filename == '':
+    if tarp_photo.filename == '' and message_photo.filename == '':
         response = {
             'status': "error",
-            'message': "Please upload the 2 photos"
+            'message': "Please upload a video or photo"
         }
         return jsonify(response), 400
 
     # check whether the file extension is allowed (eg. png,jpeg,jpg,gif)
-    if not allowed_file(tarp_photo.filename, file_type="video") or not allowed_file(message_photo.filename):
+    if (tarp_photo.filename and not allowed_file(tarp_photo.filename, file_type="video")) or (message_photo.filename and not allowed_file(message_photo.filename)):
         response = {
             'status': "error",
             'message': "File is not allowed"
         }
         return jsonify(response), 400
     
-    if tarp_photo != '' and message_photo != '':
+    if tarp_photo.filename != '':
         tarp_photo_output = upload_file(tarp_photo, tarp_photo.filename, folder_name="landing_page/student_testimonies_img/")
-        message_photo_output = upload_file(message_photo, message_photo.filename, folder_name="landing_page/student_testimonies_img/")
     else:
         tarp_photo_output = None
+
+    if message_photo.filename != '':
+        message_photo_output = upload_file(message_photo, message_photo.filename, folder_name="landing_page/student_testimonies_img/")
+    else:
         message_photo_output = None
 
     mongo.db.lms_registrations.update_one({
