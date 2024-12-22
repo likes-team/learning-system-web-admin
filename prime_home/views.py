@@ -170,7 +170,7 @@ def passers_by_klt_number(klt_number):
 @bp_prime_home.route('/latest-passers')
 def fetch_latest_passers():
     length = 10
-    match = {'is_passer': True, 'no_of_klt': {'$regex': '^KLT-'}}
+    match = {'is_passer': True, 'no_of_klt': 'KLT-21'}
         
     query = mongo.db.lms_registrations.find(match).sort('score', pymongo.DESCENDING).limit(length)
     data = []
