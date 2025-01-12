@@ -284,7 +284,7 @@ def fetch_payslips_dt():
     total_records: int
     filtered_records: int
     match = {}
-    print(branch_id)
+
     if branch_id == 'all':
         if current_user.role.name == "Admin":
             pass
@@ -317,6 +317,7 @@ def fetch_payslips_dt():
     #         match['date'] = {'$lt': convert_to_utc(date_to, 'date_to')}
 
     query = list(mongo.db.lms_payroll_payslips.aggregate([
+        {'$match': match},
         {'$lookup': {
             'from': 'auth_users',
             'localField': 'employee',
@@ -336,7 +337,6 @@ def fetch_payslips_dt():
                 'path': '$branch'
             }
         },
-        {'$match': match},
         {"$sort": {
             'date': pymongo.DESCENDING
         }},
@@ -344,8 +344,7 @@ def fetch_payslips_dt():
         {"$limit": length},
     ]))
     
-    # query = mongo.db.lms_payroll_payslips.find(match).sort('date', pymongo.DESCENDING).skip(start).limit(length)
-    total_records = mongo.db.lms_payroll_payslips.find().count()
+    total_records = mongo.db.lms_payroll_payslips.find(match).count()
     filtered_records = len(query)
     table_data = []
     total_ofice_supply = decimal.Decimal(0)
