@@ -441,6 +441,12 @@
                     'targets': 1,
                     'visible': false
                 },
+                {
+                    "targets": 9,
+                    "render": function (data, type, row){
+                        return '<button data-toggle="modal" data-target="#mdl_upload_receipt" type="button" class="btn btn-info btn-receipt">View Receipt</button>'; 
+                    }
+                }
             ],
             "select": {
                 'style': 'multi'
@@ -454,7 +460,7 @@
                 api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
                     if (last !== group) {
                         $(rows).eq(i).before(
-                            '<tr style="background-color: lightcyan !important"><td colspan="7">REGISTRATION NO.: ' + group + '</td></tr>'
+                            '<tr style="background-color: lightcyan !important"><td colspan="10">REGISTRATION NO.: ' + group + '</td></tr>'
                         );
 
                         last = group;
@@ -566,7 +572,14 @@
 
         });
 
-    });
+        
+        $('#tbl_student_payments tbody').on('click', '.btn-receipt', function(){
+            var data = dtbl_student_payments.row($(this).parents('tr')).data();
+            let receiptPath = data[10];
+            $("#img_receipt").attr("src", receiptPath);
+        });
+
+    }); // document.ready
 
     function updateDataTableSelectAllCtrl(table) {
         var $table = table.table().node();
@@ -826,7 +839,10 @@
                                             <th class="text-center">BATCH NO</th>
                                             <th class="text-center">SCHEDULE</th>
                                             <th class="text-center">PAYMENT MODE</th>
+                                            <th class="text-center">THRU</th>
+                                            <th class="text-center">REFERENCE NO.</th>
                                             <th class="text-center">AMOUNT</th>
+                                            <th class="text-center">ACTIONS</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -922,17 +938,16 @@
 </div>
 {% endblock %}
 
-{% block outer_footer %}
-{% endblock %}
+{% block outer_footer %} {% endblock %}
 
 {% block modals %}
+    {% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
+        {% include TABLE_OPTIONS['create_modal_template'] %}
+    {% endif %}
 
-{% if TABLE_OPTIONS['create_modal'] and TABLE_OPTIONS['create_url'] %}
-{% include TABLE_OPTIONS['create_modal_template'] %}
-{% endif %}
+    {% if TABLE_OPTIONS['view_modal'] %}
+        {% include TABLE_OPTIONS['view_modal_template'] %}
+    {% endif %}
 
-{% if TABLE_OPTIONS['view_modal'] %}
-{% include TABLE_OPTIONS['view_modal_template'] %}
-{% endif %}
-
+    {% include "lms/cash_flow/modals/upload_receipt_modal.html" %}
 {% endblock %}

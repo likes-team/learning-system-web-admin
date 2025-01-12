@@ -60,7 +60,11 @@ def fetch_cash_on_hand_student_payments_dt():
                     client.batch_number.number,
                     client.schedule,
                     client.payment_mode,
+                    payment.get('thru', ''),
+                    payment.get('reference_no', ''),
                     str(payment['amount']),
+                    '',
+                    payment.get('receipt_path', '')
                 ])
 
     total_items_sold : decimal.Decimal = 0
